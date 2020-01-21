@@ -48,6 +48,11 @@ public class ForgeEventSubscriber {
         updateSoulWeapon(event);
     }
 
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        updateSoulWeapon(event);
+    }
+
     private static <T extends PlayerEvent> void updateSoulWeapon(T event) {
         ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
         player.getCapability(CAPABILITY).ifPresent((ISoulWeapon instance) ->
@@ -69,11 +74,6 @@ public class ForgeEventSubscriber {
                     instance.setAttributes(originalInstance.getBigswordAttributes(),
                             originalInstance.getSwordAttributes(),
                             originalInstance.getDaggerAttributes());
-                    Main.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-                            new ClientWeaponData(originalInstance.getCurrentTypeIndex(),
-                            originalInstance.getBigswordAttributes(),
-                            originalInstance.getSwordAttributes(),
-                            originalInstance.getDaggerAttributes()));
                 });
             });
         }
@@ -89,10 +89,7 @@ public class ForgeEventSubscriber {
                     Item weapon = instance.getCurrentTypeIndex() == -1 ? null : instance.getItem();
                     return getItems().contains(itemStack.getItem())
                            && !itemStack.getItem().equals(weapon);
-                },
-                event.player.inventory.getSizeInventory()
-                )
-            );
+                }, event.player.inventory.getSizeInventory()));
         }
     }
 
