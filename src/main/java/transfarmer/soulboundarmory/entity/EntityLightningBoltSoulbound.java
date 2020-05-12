@@ -5,11 +5,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -20,8 +20,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.ForgeEventFactory;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 import transfarmer.soulboundarmory.entity.damage.SoulboundDamageSource;
 
 import java.util.UUID;
@@ -85,7 +85,7 @@ public class EntityLightningBoltSoulbound extends EntityLightningBolt {
                 for (final Entity entity : this.world.getEntitiesWithinAABBExcludingEntity(this,
                         new AxisAlignedBB(this.posX - radius, this.posY - radius, this.posZ - radius, this.posX + radius, this.posY + 6 + radius, this.posZ + radius))) {
                     final EntityLivingBase caster = this.getCaster();
-                    final float attackDamage = caster instanceof EntityPlayer
+                    final float attackDamage = caster instanceof PlayerEntity
                             ? (float) WeaponProvider.get(caster).getAttributeTotal(SWORD, ATTACK_DAMAGE)
                             : 5;
 
@@ -97,9 +97,9 @@ public class EntityLightningBoltSoulbound extends EntityLightningBolt {
                             this.setFire(8);
                         }
 
-                        if (caster instanceof EntityPlayer) {
+                        if (caster instanceof PlayerEntity) {
                             final EntityLivingBase target = (EntityLivingBase) entity;
-                            final ItemStack itemStack = caster.getHeldItemMainhand();
+                            final ItemStack itemStack = caster.getMainHandStack();
                             final IWeaponCapability capability = WeaponProvider.get(caster);
                             final DamageSource damageSource = SoulboundDamageSource.causeIndirectDamage(this, caster);
                             final float attackDamageModifier = EnchantmentHelper.getModifierForCreature(itemStack, target.getCreatureAttribute());
@@ -124,7 +124,7 @@ public class EntityLightningBoltSoulbound extends EntityLightningBolt {
                                 }
 
                                 if (entity.attackEntityFrom(damageSource, attackDamage)) {
-                                    final EntityPlayer player = (EntityPlayer) caster;
+                                    final PlayerEntity player = (PlayerEntity) caster;
 
                                     if (knockbackModifier > 0) {
                                         target.knockBack(caster, knockbackModifier * 0.5F, MathHelper.sin(caster.rotationYaw * 0.017453292F), -MathHelper.cos(caster.rotationYaw * 0.017453292F));
@@ -166,7 +166,7 @@ public class EntityLightningBoltSoulbound extends EntityLightningBolt {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+    public CompoundTag writeToNBT(CompoundTag compound) {
         compound = super.writeToNBT(compound);
         compound.setUniqueId("casterUUID", this.casterUUID);
 
@@ -174,7 +174,7 @@ public class EntityLightningBoltSoulbound extends EntityLightningBolt {
     }
 
     @Override
-    public void readFromNBT(final NBTTagCompound compound) {
+    public void readFromNBT(final CompoundTag compound) {
         super.readFromNBT(compound);
 
         this.casterUUID = compound.getUniqueId("casterUUID");

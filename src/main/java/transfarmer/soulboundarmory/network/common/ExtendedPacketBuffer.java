@@ -3,17 +3,15 @@ package transfarmer.soulboundarmory.network.common;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
-import org.jetbrains.annotations.NotNull;
-import transfarmer.soulboundarmory.util.EntityUtil;
+import net.minecraft.util.PacketByteBuf;
+import transfarmer.farmerlib.util.EntityUtil;
 
-import java.io.IOException;
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class ExtendedPacketBuffer extends PacketBuffer {
+public class ExtendedPacketBuffer extends PacketByteBuf {
     public ExtendedPacketBuffer(final ByteBuf wrapped) {
         super(wrapped);
     }
@@ -27,28 +25,19 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     @Override
-    public NBTTagCompound readCompoundTag() {
-        try {
-            return super.readCompoundTag();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    @Override
-    @NotNull
-    public ExtendedPacketBuffer writeItemStack(@NotNull final ItemStack itemStack) {
+    @Nonnull
+    public ExtendedPacketBuffer writeItemStack(@Nonnull final ItemStack itemStack) {
         return (ExtendedPacketBuffer) super.writeItemStack(itemStack);
     }
 
     @Override
-    @NotNull
-    public ExtendedPacketBuffer writeUniqueId(@NotNull final UUID id) {
-        return (ExtendedPacketBuffer) super.writeUniqueId(id);
+    @Nonnull
+    public ExtendedPacketBuffer writeUuid(@Nonnull final UUID id) {
+        return (ExtendedPacketBuffer) super.writeUuid(id);
     }
 
     @Override
-    @NotNull
+    @Nonnull
     public ExtendedPacketBuffer writeInt(final int value) {
         super.writeInt(value);
 
@@ -56,18 +45,18 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     public ExtendedPacketBuffer writeEntity(final Entity entity) {
-        return this.writeUniqueId(entity.getUniqueID());
+        return this.writeUuid(entity.getUuid());
     }
 
     public Entity readEntity() {
-        return EntityUtil.getEntity(this.readUniqueId());
+        return EntityUtil.getEntity(this.readUuid());
     }
 
     public ExtendedPacketBuffer writePlayer(final Entity player) {
         return this.writeEntity(player);
     }
 
-    public EntityPlayer readPlayer() {
-        return (EntityPlayer) this.readEntity();
+    public PlayerEntity readPlayer() {
+        return (PlayerEntity) this.readEntity();
     }
 }

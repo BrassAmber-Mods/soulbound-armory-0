@@ -1,6 +1,6 @@
 package transfarmer.soulboundarmory.statistics;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.skill.Skill;
@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Skills implements Iterable<IItem>, INBTSerializable<NBTTagCompound> {
+public class Skills implements Iterable<IItem>, INBTSerializable<CompoundTag> {
     private final Map<IItem, Map<String, Skill>> skills;
 
     public Skills(final List<IItem> items, final Skill[]... skills) {
@@ -88,24 +88,24 @@ public class Skills implements Iterable<IItem>, INBTSerializable<NBTTagCompound>
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        final CompoundTag tag = new CompoundTag();
 
         for (final IItem item : this.get().keySet()) {
             if (item != null) {
-                tag.setTag(item.toString(), this.serializeNBT(item));
+                tag.put(item.toString(), this.serializeNBT(item));
             }
         }
 
         return tag;
     }
 
-    public NBTTagCompound serializeNBT(final IItem item) {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT(final IItem item) {
+        final CompoundTag tag = new CompoundTag();
 
         for (final Skill skill : this.get(item).values()) {
             if (skill != null) {
-                tag.setTag(skill.getRegistryName(), skill.serializeNBT());
+                tag.put(skill.getRegistryName(), skill.serializeNBT());
             }
         }
 
@@ -113,22 +113,22 @@ public class Skills implements Iterable<IItem>, INBTSerializable<NBTTagCompound>
     }
 
     @Override
-    public void deserializeNBT(final NBTTagCompound tag) {
-        for (final String itemName : tag.getKeySet()) {
+    public void deserializeNBT(final CompoundTag tag) {
+        for (final String itemName : tag.getKeys()) {
             final IItem item = IItem.get(itemName);
 
             if (item != null) {
-                this.deserializeNBT(tag.getCompoundTag(itemName), item);
+                this.deserializeNBT(tag.getCompound(itemName), item);
             }
         }
     }
 
-    public void deserializeNBT(final NBTTagCompound tag, final IItem item) {
-        for (final String skillName : tag.getKeySet()) {
+    public void deserializeNBT(final CompoundTag tag, final IItem item) {
+        for (final String skillName : tag.getKeys()) {
             final Skill skill = this.get(item, skillName);
 
             if (skill != null) {
-                skill.deserializeNBT(tag.getCompoundTag(skillName));
+                skill.deserializeNBT(tag.getCompound(skillName));
             }
         }
     }

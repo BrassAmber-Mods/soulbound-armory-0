@@ -1,12 +1,12 @@
 package transfarmer.soulboundarmory.client.gui.screen.common.skill;
 
 import net.minecraft.item.ItemStack;
-import transfarmer.soulboundarmory.client.gui.screen.common.GuiScreenExtended;
+import transfarmer.soulboundarmory.client.gui.screen.common.ExtendedScreen;
 import transfarmer.soulboundarmory.skill.Skill;
 
 import javax.annotation.Nullable;
 
-public class GuiSkill extends GuiScreenExtended {
+public class GuiSkill extends ExtendedScreen {
     protected final Skill skill;
     protected final ItemStack itemStack;
 
@@ -16,9 +16,9 @@ public class GuiSkill extends GuiScreenExtended {
     }
 
     public void render(final int x, final int y, final int color, final float zLevel) {
-        final float prev = this.zLevel;
+        final float prev = this.blitOffset;
 
-        this.zLevel = zLevel;
+        this.blitOffset = zLevel;
 
         if (this.itemStack == null) {
             this.renderCustom(x, y);
@@ -26,7 +26,7 @@ public class GuiSkill extends GuiScreenExtended {
             this.renderItem(x, y, color);
         }
 
-        this.zLevel = prev;
+        this.blitOffset = prev;
     }
 
     public void renderCustom(final int x, final int y) {
@@ -36,7 +36,7 @@ public class GuiSkill extends GuiScreenExtended {
 
     @SuppressWarnings("ConstantConditions")
     public void renderItem(final int x, final int y, final int color) {
-        this.renderItemModelIntoGUI(this.itemStack, x, y, RENDER_ITEM.getItemModelWithOverrides(this.itemStack, null, null), color);
+        this.renderItemModelIntoGUI(this.itemStack, x, y, ITEM_RENDERER.getItemModelWithOverrides(this.itemStack, null, null), color);
     }
 
     public ItemStack getItemStack() {

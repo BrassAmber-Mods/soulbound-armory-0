@@ -1,10 +1,9 @@
 package transfarmer.soulboundarmory.network.S2C;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
 import transfarmer.soulboundarmory.network.common.IExtendedMessage;
 import transfarmer.soulboundarmory.network.common.IExtendedMessageHandler;
@@ -14,16 +13,16 @@ import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
 public class S2CSync implements IExtendedMessage {
     private String capability;
-    private NBTTagCompound tag;
+    private CompoundTag tag;
 
     public S2CSync() {}
 
-    public S2CSync(final ICapabilityType capability, final NBTTagCompound tag) {
+    public S2CSync(final ICapabilityType capability, final CompoundTag tag) {
         this.capability = capability.toString();
         this.tag = tag;
     }
 
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     public void fromBytes(final ExtendedPacketBuffer buffer) {
         this.capability = buffer.readString();
         this.tag = buffer.readCompoundTag();
@@ -35,13 +34,13 @@ public class S2CSync implements IExtendedMessage {
     }
 
     public static final class Handler implements IExtendedMessageHandler<S2CSync> {
-        @SideOnly(CLIENT)
+        @Environment(CLIENT)
         @Override
         public IExtendedMessage onMessage(final S2CSync message, final MessageContext context) {
-            final Minecraft minecraft = Minecraft.getMinecraft();
+            final Minecraft minecraft = CLIENT;
 
             minecraft.addScheduledTask(() -> {
-                final SoulboundCapability capability = minecraft.player.getCapability(ICapabilityType.get(message.capability).getCapability(), null);
+                final ISoulboundComponent capability = minecraft.player.getCapability(ICapabilityType.get(message.capability).getCapability(), null);
 
                 capability.deserializeNBT(message.tag);
                 capability.sync();

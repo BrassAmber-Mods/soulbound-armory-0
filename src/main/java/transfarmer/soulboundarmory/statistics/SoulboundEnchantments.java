@@ -3,11 +3,11 @@ package transfarmer.soulboundarmory.statistics;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import transfarmer.soulboundarmory.statistics.base.iface.IItem;
-import transfarmer.soulboundarmory.util.IndexedLinkedHashMap;
-import transfarmer.soulboundarmory.util.IndexedMap;
+import transfarmer.farmerlib.util.IndexedLinkedHashMap;
+import transfarmer.farmerlib.util.IndexedMap;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 
-public class SoulboundEnchantments implements Iterable<IItem>, INBTSerializable<NBTTagCompound> {
+public class SoulboundEnchantments implements Iterable<IItem>, INBTSerializable<CompoundTag> {
     private final Map<IItem, IndexedMap<Enchantment, Integer>> enchantments;
 
     public SoulboundEnchantments(final List<IItem> types, final List<Item> items, final BiPredicate<Enchantment, IItem> condition) {
@@ -73,36 +73,36 @@ public class SoulboundEnchantments implements Iterable<IItem>, INBTSerializable<
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        final CompoundTag tag = new CompoundTag();
 
         for (final IItem item : this) {
-            tag.setTag(item.toString(), this.serializeNBT(item));
+            tag.put(item.toString(), this.serializeNBT(item));
         }
 
         return tag;
     }
 
-    public NBTTagCompound serializeNBT(final IItem item) {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT(final IItem item) {
+        final CompoundTag tag = new CompoundTag();
         final IndexedMap<Enchantment, Integer> enchantments = this.get(item);
 
         for (final Enchantment enchantment : enchantments.keySet()) {
-            tag.setInteger(enchantment.getRegistryName().toString(), enchantments.get(enchantment));
+            tag.putInt(enchantment.getRegistryName().toString(), enchantments.get(enchantment));
         }
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(final NBTTagCompound tag) {
-        for (final String key : tag.getKeySet()) {
-            this.deserializeNBT(tag.getCompoundTag(key), IItem.get(key));
+    public void deserializeNBT(final CompoundTag tag) {
+        for (final String key : tag.getKeys()) {
+            this.deserializeNBT(tag.getCompound(key), IItem.get(key));
         }
     }
 
-    public void deserializeNBT(final NBTTagCompound tag, final IItem item) {
-        for (final String key : tag.getKeySet()) {
+    public void deserializeNBT(final CompoundTag tag, final IItem item) {
+        for (final String key : tag.getKeys()) {
             final Enchantment enchantment = Enchantment.getEnchantmentByLocation(key);
             final IndexedMap<Enchantment, Integer> enchantments = this.enchantments.get(item);
 

@@ -1,13 +1,13 @@
 package transfarmer.soulboundarmory.statistics;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import transfarmer.soulboundarmory.statistics.base.iface.ICategory;
 import transfarmer.soulboundarmory.statistics.base.iface.IStatistic;
 
 import java.math.BigDecimal;
 
-public class Statistic extends BigDecimal implements INBTSerializable<NBTTagCompound> {
+public class Statistic extends BigDecimal implements INBTSerializable<CompoundTag> {
     private final ICategory category;
     private final IStatistic type;
     private double min;
@@ -128,18 +128,18 @@ public class Statistic extends BigDecimal implements INBTSerializable<NBTTagComp
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        final CompoundTag tag = new CompoundTag();
 
         tag.setDouble("min", this.min);
         tag.setString("value", this.value.toString());
-        tag.setInteger("points", this.points);
+        tag.putInt("points", this.points);
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(final NBTTagCompound tag) {
+    public void deserializeNBT(final CompoundTag tag) {
         this.min = tag.getDouble("min");
         this.value = new BigDecimal(tag.getString("value"));
         this.points = tag.getInteger("points");

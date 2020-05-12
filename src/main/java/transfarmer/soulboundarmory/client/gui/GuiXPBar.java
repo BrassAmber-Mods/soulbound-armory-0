@@ -2,24 +2,23 @@ package transfarmer.soulboundarmory.client.gui;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderSystem;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.Identifier;
+import transfarmer.farmerlib.util.ImageUtil;
 import transfarmer.soulboundarmory.Main;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundItemUtil;
-import transfarmer.soulboundarmory.capability.soulbound.tool.ToolProvider;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
-import transfarmer.soulboundarmory.client.gui.screen.common.GuiScreenExtended;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
+import transfarmer.soulboundarmory.component.soulbound.common.SoulboundItemUtil;
+import transfarmer.soulboundarmory.component.soulbound.tool.ToolProvider;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.client.gui.screen.common.ExtendedScreen;
 import transfarmer.soulboundarmory.client.renderer.texture.ExperienceBarTexture;
 import transfarmer.soulboundarmory.config.ClientConfig;
 import transfarmer.soulboundarmory.item.ItemSoulbound;
 import transfarmer.soulboundarmory.statistics.base.enumeration.StatisticType;
 import transfarmer.soulboundarmory.statistics.base.iface.IItem;
-import transfarmer.soulboundarmory.util.ImageUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -31,12 +30,12 @@ import java.util.List;
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 import static transfarmer.soulboundarmory.statistics.base.enumeration.StatisticType.LEVEL;
 
-@SideOnly(CLIENT)
-public class GuiXPBar extends GuiScreenExtended {
-    protected static final ResourceLocation ICONS = new ResourceLocation(Main.MOD_ID, "textures/gui/icons");
+@Environment(CLIENT)
+public class GuiXPBar extends ExtendedScreen {
+    protected static final Identifier ICONS = new Identifier(Main.MOD_ID, "textures/gui/icons");
 
     protected ItemStack itemStack;
-    protected SoulboundCapability capability;
+    protected ISoulboundComponent capability;
     protected IItem itemType;
     protected int row;
     protected int length;
@@ -54,7 +53,7 @@ public class GuiXPBar extends GuiScreenExtended {
         this.update(itemStack);
     }
 
-    public GuiXPBar(final SoulboundCapability capability) {
+    public GuiXPBar(final ISoulboundComponent capability) {
         this();
 
         this.update(capability);
@@ -68,15 +67,15 @@ public class GuiXPBar extends GuiScreenExtended {
     }
 
     public boolean drawXPBar(final ScaledResolution resolution) {
-        final EntityPlayer player = MINECRAFT.player;
-        final ItemStack itemStack = player.getHeldItemMainhand();
+        final PlayerEntity player = MINECRAFT.player;
+        final ItemStack itemStack = player.getMainHandStack();
 
         if (this.update(SoulboundItemUtil.getFirstCapability(player, itemStack))) {
             this.itemType = this.capability.getItemType(itemStack);
 
             if (this.itemType == null) {
                 final int slot = player.inventory.currentItem;
-                SoulboundCapability capability;
+                ISoulboundComponent capability;
 
                 if ((capability = WeaponProvider.get(player)).getBoundSlot() == slot
                         || (capability = ToolProvider.get(player)).getBoundSlot() == slot) {
@@ -117,7 +116,7 @@ public class GuiXPBar extends GuiScreenExtended {
         return false;
     }
 
-    public boolean update(final SoulboundCapability capability) {
+    public boolean update(final ISoulboundComponent capability) {
         if (capability != null) {
             this.capability = capability;
         } else {
@@ -137,7 +136,7 @@ public class GuiXPBar extends GuiScreenExtended {
             final int middleU = (int) Math.min(4, effectiveWidth);
 
             TEXTURE_MANAGER.bindTexture(ICONS);
-            GlStateManager.color(components[0], components[1], components[2], components[3]);
+            RenderSystem.color(components[0], components[1], components[2], components[3]);
 
             this.drawHorizontalInterpolatedTexturedRect(x, y, 0, style.v, 4, 177, 182, width, 5);
             this.drawHorizontalInterpolatedTexturedRect(x, y, 0, style.v + 5, middleU, effectiveWidth < 4 ? middleU : (int) (ratio * 177), (int) (ratio * 182), this.capability.canLevelUp(this.itemType)
@@ -148,17 +147,17 @@ public class GuiXPBar extends GuiScreenExtended {
 
             if (level > 0) {
                 final String levelString = String.format("%d", level);
-                final int levelX = x + (width - FONT_RENDERER.getStringWidth(levelString)) / 2;
+                final int levelX = x + (width - TEXT_RENDERER.getStringWidth(levelString)) / 2;
                 final int levelY = y - 6;
 
-                FONT_RENDERER.drawString(levelString, levelX + 1, levelY, 0);
-                FONT_RENDERER.drawString(levelString, levelX - 1, levelY, 0);
-                FONT_RENDERER.drawString(levelString, levelX, levelY + 1, 0);
-                FONT_RENDERER.drawString(levelString, levelX, levelY - 1, 0);
-                FONT_RENDERER.drawString(levelString, levelX, levelY, color.getRGB());
+                TEXT_RENDERER.drawString(levelString, levelX + 1, levelY, 0);
+                TEXT_RENDERER.drawString(levelString, levelX - 1, levelY, 0);
+                TEXT_RENDERER.drawString(levelString, levelX, levelY + 1, 0);
+                TEXT_RENDERER.drawString(levelString, levelX, levelY - 1, 0);
+                TEXT_RENDERER.drawString(levelString, levelX, levelY, color.getRGB());
             }
 
-            GlStateManager.disableLighting();
+            RenderSystem.disableLighting();
         }
     }
 
@@ -213,7 +212,7 @@ public class GuiXPBar extends GuiScreenExtended {
         return new BufferedImage(image.getColorModel(), raster, image.isAlphaPremultiplied(), null);
     }
 
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     public enum Style {
         EXPERIENCE(64, "gui.soulboundarmory.experience"),
         BOSS(74, "gui.soulboundarmory.boss"),

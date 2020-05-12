@@ -1,6 +1,6 @@
 package transfarmer.soulboundarmory.statistics;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import transfarmer.soulboundarmory.statistics.base.iface.ICategory;
 import transfarmer.soulboundarmory.statistics.base.iface.IItem;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Statistics implements INBTSerializable<NBTTagCompound> {
+public class Statistics implements INBTSerializable<CompoundTag> {
     private final Map<IItem, Map<ICategory, Map<IStatistic, Statistic>>> statistics;
 
     public Statistics(final List<IItem> items, final ICategory[] categories, final IStatistic[][] statisticNames,
@@ -119,59 +119,59 @@ public class Statistics implements INBTSerializable<NBTTagCompound> {
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        final CompoundTag tag = new CompoundTag();
 
         for (final IItem item : this.get().keySet()) {
-            tag.setTag(item.toString(), this.serializeNBT(item));
+            tag.put(item.toString(), this.serializeNBT(item));
         }
 
         return tag;
     }
 
-    public NBTTagCompound serializeNBT(final IItem item) {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT(final IItem item) {
+        final CompoundTag tag = new CompoundTag();
         final Map<ICategory, Map<IStatistic, Statistic>> categories = this.get(item);
 
         for (final ICategory category : categories.keySet()) {
-            tag.setTag(category.toString(), this.serializeNBT(item, category));
+            tag.put(category.toString(), this.serializeNBT(item, category));
         }
 
         return tag;
     }
 
-    public NBTTagCompound serializeNBT(final IItem item, final ICategory category) {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT(final IItem item, final ICategory category) {
+        final CompoundTag tag = new CompoundTag();
         final Map<IStatistic, Statistic> statistics = this.get(item, category);
 
         for (final Statistic statistic : statistics.values()) {
-            tag.setTag(statistic.getType().toString(), statistic.serializeNBT());
+            tag.put(statistic.getType().toString(), statistic.serializeNBT());
         }
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(final NBTTagCompound tag) {
+    public void deserializeNBT(final CompoundTag tag) {
         if (tag != null) {
-            for (final String key : tag.getKeySet()) {
-                this.deserializeNBT(tag.getCompoundTag(key), IItem.get(key));
+            for (final String key : tag.getKeys()) {
+                this.deserializeNBT(tag.getCompound(key), IItem.get(key));
             }
         }
     }
 
-    public void deserializeNBT(@Nullable final NBTTagCompound tag, final IItem item) {
+    public void deserializeNBT(@Nullable final CompoundTag tag, final IItem item) {
         if (tag != null) {
-            for (final String key : tag.getKeySet()) {
-                this.deserializeNBT(tag.getCompoundTag(key), item, ICategory.get(key));
+            for (final String key : tag.getKeys()) {
+                this.deserializeNBT(tag.getCompound(key), item, ICategory.get(key));
             }
         }
     }
 
-    public void deserializeNBT(@Nullable final NBTTagCompound tag, final IItem item, final ICategory category) {
+    public void deserializeNBT(@Nullable final CompoundTag tag, final IItem item, final ICategory category) {
         if (tag != null) {
-            for (final String key : tag.getKeySet()) {
-                final NBTTagCompound statisticNBT = tag.getCompoundTag(key);
+            for (final String key : tag.getKeys()) {
+                final CompoundTag statisticNBT = tag.getCompound(key);
                 final IStatistic type = IStatistic.get(key);
 
                 if (type != null) {

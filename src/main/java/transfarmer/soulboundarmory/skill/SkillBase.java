@@ -2,16 +2,15 @@ package transfarmer.soulboundarmory.skill;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.Main;
 import transfarmer.soulboundarmory.client.gui.screen.common.skill.GuiSkill;
 import transfarmer.soulboundarmory.statistics.Skills;
 import transfarmer.soulboundarmory.statistics.base.iface.IItem;
-import transfarmer.soulboundarmory.util.StringUtil;
+import transfarmer.farmerlib.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -39,7 +38,7 @@ public abstract class SkillBase implements Skill, Cloneable {
     }
 
     @Override
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     public String getName() {
         final String name = I18n.format(String.format("skill.%s.%s", this.getModID(), StringUtil.macroCaseToCamelCase(this.name)));
 
@@ -47,7 +46,7 @@ public abstract class SkillBase implements Skill, Cloneable {
     }
 
     @Override
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     public List<String> getTooltip() {
         return Arrays.asList(I18n.format(String.format("skill.%s.%s.desc", this.getModID(), StringUtil.macroCaseToCamelCase(this.name))).split("\\\\n"));
     }
@@ -98,8 +97,8 @@ public abstract class SkillBase implements Skill, Cloneable {
         this.learned = true;
     }
 
-    public ResourceLocation getTexture() {
-        return new ResourceLocation(this.getModID(), String.format("textures/skill/%s.png", this.getRegistryName()));
+    public Identifier getTexture() {
+        return new Identifier(this.getModID(), String.format("textures/skill/%s.png", this.getRegistryName()));
     }
 
     @Override
@@ -119,16 +118,16 @@ public abstract class SkillBase implements Skill, Cloneable {
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        final CompoundTag tag = new CompoundTag();
 
-        tag.setBoolean("learned", this.learned);
+        tag.putBoolean("learned", this.learned);
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(final NBTTagCompound tag) {
+    public void deserializeNBT(final CompoundTag tag) {
         this.learned = tag.getBoolean("learned");
     }
 

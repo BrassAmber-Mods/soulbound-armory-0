@@ -3,7 +3,7 @@ package transfarmer.soulboundarmory.skill.dagger;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.skill.Skill;
 import transfarmer.soulboundarmory.skill.SkillBaseLevelable;
-import transfarmer.soulboundarmory.util.CollectionUtil;
+import transfarmer.farmerlib.util.CollectionUtil;
 
 import java.util.List;
 

@@ -2,8 +2,7 @@ package transfarmer.soulboundarmory.network.S2C;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import transfarmer.soulboundarmory.client.gui.screen.common.GuiTabSoulbound;
+import transfarmer.soulboundarmory.client.gui.screen.common.SoulboundTab;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
 import transfarmer.soulboundarmory.network.common.IExtendedMessage;
 import transfarmer.soulboundarmory.network.common.IExtendedMessageHandler;
@@ -37,12 +36,12 @@ public class S2COpenGUI implements IExtendedMessage {
 
     public static final class Handler implements IExtendedMessageHandler<S2COpenGUI> {
         @Override
-        @SideOnly(CLIENT)
+        @Environment(CLIENT)
         public IExtendedMessage onMessage(final S2COpenGUI message, final MessageContext context) {
-            final Minecraft minecraft = Minecraft.getMinecraft();
+            final Minecraft minecraft = CLIENT;
 
             minecraft.addScheduledTask(() -> {
-                if (minecraft.currentScreen instanceof GuiTabSoulbound) {
+                if (minecraft.currentScreen instanceof SoulboundTab) {
                     minecraft.player.getCapability(ICapabilityType.get(message.capability).getCapability(), null).openGUI(message.tab);
                 }
             });

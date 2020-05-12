@@ -8,11 +8,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerEntityMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
@@ -27,12 +27,12 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.jetbrains.annotations.NotNull;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundItemUtil;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.soulbound.common.SoulboundItemUtil;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 import transfarmer.soulboundarmory.entity.damage.ISoulboundDamageSource;
 import transfarmer.soulboundarmory.entity.damage.SoulboundDamageSource;
-import transfarmer.soulboundarmory.util.EntityUtil;
+import transfarmer.farmerlib.util.EntityUtil;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
@@ -76,7 +76,7 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
 
         this.ticksToSeek = -1;
 
-        if (shooter instanceof EntityPlayer) {
+        if (shooter instanceof PlayerEntity) {
             this.pickupStatus = EntityArrow.PickupStatus.ALLOWED;
         }
 
@@ -110,7 +110,7 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
     protected @NotNull ItemStack getArrowStack() {
         return this.itemStack != null
                 ? this.itemStack
-                : this.shootingEntity instanceof EntityPlayer
+                : this.shootingEntity instanceof PlayerEntity
                 ? this.capability.getItemStack(DAGGER)
                 : ItemStack.EMPTY;
     }
@@ -167,7 +167,7 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
             --this.arrowShake;
         }
 
-        if (this.shootingEntity instanceof EntityPlayer) {
+        if (this.shootingEntity instanceof PlayerEntity) {
             final double attackSpeed = this.capability.getAttribute(DAGGER, ATTACK_SPEED);
 
             if (this.capability.hasSkill(DAGGER, SNEAK_RETURN) && this.shootingEntity.isSneaking()
@@ -264,9 +264,9 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
                 rayTraceResult = new RayTraceResult(entity);
             }
 
-            if (rayTraceResult != null && rayTraceResult.entityHit instanceof EntityPlayer
-                    && this.shootingEntity instanceof EntityPlayer
-                    && !((EntityPlayer) this.shootingEntity).canAttackPlayer((EntityPlayer) rayTraceResult.entityHit)) {
+            if (rayTraceResult != null && rayTraceResult.entityHit instanceof PlayerEntity
+                    && this.shootingEntity instanceof PlayerEntity
+                    && !((PlayerEntity) this.shootingEntity).canAttackPlayer((PlayerEntity) rayTraceResult.entityHit)) {
                 rayTraceResult = null;
             }
 
@@ -335,7 +335,7 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
                 }
 
                 if (this.passedX && this.passedZ) {
-                    this.onCollideWithPlayer((EntityPlayer) this.shootingEntity);
+                    this.onCollideWithPlayer((PlayerEntity) this.shootingEntity);
                 }
             }
         }
@@ -358,8 +358,8 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
                 this.prevRotationYaw += 180;
             }
 
-            if (this.shootingEntity instanceof EntityPlayer) {
-                final EntityPlayer player = (EntityPlayer) this.shootingEntity;
+            if (this.shootingEntity instanceof PlayerEntity) {
+                final PlayerEntity player = (PlayerEntity) this.shootingEntity;
                 final DamageSource damageSource = SoulboundDamageSource.causeThrownDamage(this, this.shootingEntity);
 
                 ((ISoulboundDamageSource) damageSource).setItemStack(this.getArrowStack());
@@ -405,8 +405,8 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
                             }
                         }
 
-                        if (entity instanceof EntityPlayerMP && entity.velocityChanged) {
-                            ((EntityPlayerMP) entity).connection.sendPacket(new SPacketEntityVelocity(entity));
+                        if (entity instanceof PlayerEntityMP && entity.velocityChanged) {
+                            ((PlayerEntityMP) entity).connection.sendPacket(new SPacketEntityVelocity(entity));
                             entity.velocityChanged = false;
                             entity.motionX = motionX;
                             entity.motionY = motionY;
@@ -474,7 +474,7 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
     }
 
     @Override
-    public void onCollideWithPlayer(@Nonnull final EntityPlayer player) {
+    public void onCollideWithPlayer(@Nonnull final PlayerEntity player) {
         if (!this.world.isRemote && player.getUniqueID().equals(this.shooterUUID)
                 && this.capability != null
                 && this.ticksExisted >= Math.max(1, 20 / this.capability.getAttribute(DAGGER, ATTACK_SPEED))
@@ -494,23 +494,23 @@ public class EntitySoulboundDagger extends EntityArrowExtended {
     }
 
     @Override
-    public void writeEntityToNBT(@NotNull final NBTTagCompound compound) {
+    public void writeEntityToNBT(@NotNull final CompoundTag compound) {
         super.writeEntityToNBT(compound);
 
         compound.setUniqueId("shooterUUID", this.shooterUUID);
-        compound.setInteger("dimensionID", this.world.provider.getDimension());
-        compound.setTag("itemStack", this.itemStack.serializeNBT());
+        compound.putInt("dimensionID", this.world.provider.getDimension());
+        compound.put("itemStack", this.itemStack.serializeNBT());
 
         this.updateShooter();
     }
 
     @Override
-    public void readEntityFromNBT(@NotNull final NBTTagCompound compound) {
+    public void readEntityFromNBT(@NotNull final CompoundTag compound) {
         super.readEntityFromNBT(compound);
 
         this.shooterUUID = compound.getUniqueId("shooterUUID");
         this.world = this.getServer().getWorld(compound.getInteger("dimensionID"));
-        this.itemStack = new ItemStack(compound.getCompoundTag("itemStack"));
+        this.itemStack = new ItemStack(compound.getCompound("itemStack"));
 
         this.updateShooter();
     }

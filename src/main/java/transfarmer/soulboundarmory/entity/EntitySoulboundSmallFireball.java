@@ -2,14 +2,14 @@ package transfarmer.soulboundarmory.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerEntityMP;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -22,10 +22,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
-import transfarmer.soulboundarmory.capability.entity.EntityDatumProvider;
-import transfarmer.soulboundarmory.capability.entity.IEntityData;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.entity.IEntityData;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 import transfarmer.soulboundarmory.skill.SkillLevelable;
 
 import java.util.UUID;
@@ -39,7 +38,7 @@ import static transfarmer.soulboundarmory.statistics.base.enumeration.StatisticT
 public class EntitySoulboundSmallFireball extends EntitySmallFireball {
     protected static final DataParameter<Integer> SPELL = EntityDataManager.createKey(EntitySoulboundSmallFireball.class, DataSerializers.VARINT);
 
-    public EntityPlayer player;
+    public PlayerEntity player;
     protected UUID shooterUUID;
     protected IWeaponCapability capability;
     protected int ticksSincePacket;
@@ -52,7 +51,7 @@ public class EntitySoulboundSmallFireball extends EntitySmallFireball {
         this.dataManager.register(SPELL, 0);
     }
 
-    public EntitySoulboundSmallFireball(final World world, final EntityPlayer shooter, final int spell) {
+    public EntitySoulboundSmallFireball(final World world, final PlayerEntity shooter, final int spell) {
         this(world);
 
         this.updatePlayer(shooter, null);
@@ -67,7 +66,7 @@ public class EntitySoulboundSmallFireball extends EntitySmallFireball {
         this.dataManager.set(SPELL, spell);
     }
 
-    protected void updatePlayer(final EntityPlayer player, final UUID uuid) {
+    protected void updatePlayer(final PlayerEntity player, final UUID uuid) {
         if (player != null) {
             this.player = player;
             this.shooterUUID = player.getUniqueID();
@@ -137,7 +136,7 @@ public class EntitySoulboundSmallFireball extends EntitySmallFireball {
         this.updatePlayer(this.player, this.shooterUUID);
 
         if (this.player != null && !this.world.isRemote && ++this.ticksSincePacket == 1) {
-            ((EntityPlayerMP) this.player).connection.netManager.sendPacket(new SPacketEntityVelocity(this));
+            ((PlayerEntityMP) this.player).connection.netManager.sendPacket(new SPacketEntityVelocity(this));
             this.ticksSincePacket = 0;
         }
     }
@@ -211,15 +210,15 @@ public class EntitySoulboundSmallFireball extends EntitySmallFireball {
     }
 
     @Override
-    public void writeEntityToNBT(@NotNull final NBTTagCompound tag) {
+    public void writeEntityToNBT(@NotNull final CompoundTag tag) {
         super.writeEntityToNBT(tag);
 
         tag.setUniqueId("shooterUUID", this.shooterUUID);
-        tag.setInteger("spell", this.dataManager.get(SPELL));
+        tag.putInt("spell", this.dataManager.get(SPELL));
     }
 
     @Override
-    public void readEntityFromNBT(@NotNull final NBTTagCompound tag) {
+    public void readEntityFromNBT(@NotNull final CompoundTag tag) {
         super.readEntityFromNBT(tag);
 
         this.shooterUUID = tag.getUniqueId("shooterUUID");

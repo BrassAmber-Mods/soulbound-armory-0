@@ -5,8 +5,8 @@ import com.google.common.collect.Multimap;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.ai.attributes.EntityAttributeModifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -14,12 +14,12 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.Main;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 import transfarmer.soulboundarmory.entity.EntitySoulboundSmallFireball;
 
 import static net.minecraft.inventory.EntityEquipmentSlot.MAINHAND;
-import static net.minecraftforge.common.util.Constants.AttributeModifierOperation.ADD;
+import static net.minecraftforge.common.util.Constants.EntityAttributeModifierOperation.ADD;
 
 public class ItemSoulboundStaff extends ItemStaff implements SoulboundWeapon {
     public ItemSoulboundStaff(final String name) {
@@ -31,13 +31,13 @@ public class ItemSoulboundStaff extends ItemStaff implements SoulboundWeapon {
     }
 
     @Override
-    public boolean onLeftClickEntity(@NotNull final ItemStack stack, @NotNull final EntityPlayer player, @NotNull final Entity entity) {
+    public boolean onLeftClickEntity(@NotNull final ItemStack stack, @NotNull final PlayerEntity player, @NotNull final Entity entity) {
         return true;
     }
 
     @Override
     @NotNull
-    public ActionResult<ItemStack> onItemRightClick(@NotNull final World world, @NotNull final EntityPlayer player,
+    public ActionResult<ItemStack> onItemRightClick(@NotNull final World world, @NotNull final PlayerEntity player,
                                                     @NotNull final EnumHand hand) {
         if (!world.isRemote) {
             final IWeaponCapability capability = WeaponProvider.get(player);
@@ -56,13 +56,13 @@ public class ItemSoulboundStaff extends ItemStaff implements SoulboundWeapon {
 
     @Override
     @NotNull
-    public Multimap<String, AttributeModifier> getAttributeModifiers(@NotNull final EntityEquipmentSlot slot,
+    public Multimap<String, EntityAttributeModifier> getEntityAttributeModifiers(@NotNull final EntityEquipmentSlot slot,
                                                                      @NotNull final ItemStack itemStack) {
-        final Multimap<String, AttributeModifier> modifiers = HashMultimap.create();
+        final Multimap<String, EntityAttributeModifier> modifiers = HashMultimap.create();
 
         if (slot == MAINHAND) {
-            modifiers.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ItemSoulbound.ATTACK_SPEED_MODIFIER, "generic.attackSpeed", 0, ADD));
-            modifiers.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ItemSoulbound.ATTACK_DAMAGE_MODIFIER, "generic.attackDamage", 0, ADD));
+            modifiers.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new EntityAttributeModifier(ItemSoulbound.ATTACK_SPEED_MODIFIER, "generic.attackSpeed", 0, ADD));
+            modifiers.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new EntityAttributeModifier(ItemSoulbound.ATTACK_DAMAGE_MODIFIER, "generic.attackDamage", 0, ADD));
         }
 
         return modifiers;

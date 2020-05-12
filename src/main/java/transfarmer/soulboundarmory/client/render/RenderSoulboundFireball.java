@@ -2,15 +2,15 @@ package transfarmer.soulboundarmory.client.render;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderSystem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderFireball;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.SpriteAtlasTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.entity.EntitySoulboundSmallFireball;
@@ -27,14 +27,14 @@ public class RenderSoulboundFireball extends RenderFireball {
     @Override
     public void doRender(@NotNull final EntityFireball entity, final double x, final double y, final double z,
                          final float entityYaw, final float partialTicks) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.bindEntityTexture(entity);
-        GlStateManager.translate((float) x, (float) y, (float) z);
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scale(this.scale, this.scale, this.scale);
+        RenderSystem.translate((float) x, (float) y, (float) z);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scale(this.scale, this.scale, this.scale);
 
         final EntitySoulboundSmallFireball fireball = (EntitySoulboundSmallFireball) entity;
-        final TextureAtlasSprite sprite = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(fireball.getTextureItem());
+        final SpriteAtlasTexture sprite = CLIENT.getRenderItem().getItemModelMesher().getParticleIcon(fireball.getTextureItem());
         final Tessellator tessellator = Tessellator.getInstance();
         final BufferBuilder builder = tessellator.getBuffer();
 
@@ -43,12 +43,12 @@ public class RenderSoulboundFireball extends RenderFireball {
         final float minV = sprite.getMinV();
         final float maxV = sprite.getMaxV();
 
-        GlStateManager.rotate(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate((float) (this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * -this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+        RenderSystem.rotate(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotate((float) (this.renderManager.options.thirdPersonView == 2 ? -1 : 1) * -this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
 
         if (this.renderOutlines) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.enableOutlineMode(this.getTeamColor(entity));
         }
 
         builder.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
@@ -59,12 +59,12 @@ public class RenderSoulboundFireball extends RenderFireball {
         tessellator.draw();
 
         if (this.renderOutlines) {
-            GlStateManager.disableOutlineMode();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.disableOutlineMode();
+            RenderSystem.disableColorMaterial();
         }
 
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.popMatrix();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.popMatrix();
 
         if (!this.renderOutlines) {
             this.renderName(entity, x, y, z);
@@ -72,7 +72,7 @@ public class RenderSoulboundFireball extends RenderFireball {
     }
 
     @Override
-    protected ResourceLocation getEntityTexture(@NotNull final EntityFireball entity) {
+    protected Identifier getEntityTexture(@NotNull final EntityFireball entity) {
         return super.getEntityTexture(entity);
     }
 

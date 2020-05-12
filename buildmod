@@ -1,8 +1,0 @@
-./version
-./gradlew clean
-./gradlew build
-
-if [ -n "$(command -v sba)"  ]
-then
-    sba
-fi

@@ -1,16 +1,15 @@
 package transfarmer.soulboundarmory.config;
 
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.ButtonWidget;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.GuiConfig;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import transfarmer.soulboundarmory.Main;
 import transfarmer.soulboundarmory.network.C2S.C2SConfig;
 
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
-@SideOnly(CLIENT)
+@Environment(CLIENT)
 public class GuiModConfig extends GuiConfig {
     private boolean main;
 
@@ -28,14 +27,14 @@ public class GuiModConfig extends GuiConfig {
     public void initGui() {
         super.initGui();
 
-        this.addButton(new GuiButton(0, width / 2 - 100, height / 2 - 45, MainConfig.CATEGORY_GENERAL));
-        this.addButton(new GuiButton(1, width / 2 - 100, height / 2 - 15, MainConfig.CATEGORY_MULTIPLIERS));
-        this.addButton(new GuiButton(2, width / 2 - 100, height / 2 + 15, ClientConfig.CATEGORY_COLOR));
-        this.addButton(new GuiButton(3, width / 2 - 100, height / 2 + 45, ClientConfig.CATEGORY_OTHER));
+        this.addButton(new ButtonWidget(0, width / 2 - 100, height / 2 - 45, MainConfig.CATEGORY_GENERAL));
+        this.addButton(new ButtonWidget(1, width / 2 - 100, height / 2 - 15, MainConfig.CATEGORY_MULTIPLIERS));
+        this.addButton(new ButtonWidget(2, width / 2 - 100, height / 2 + 15, ClientConfig.CATEGORY_COLOR));
+        this.addButton(new ButtonWidget(3, width / 2 - 100, height / 2 + 45, ClientConfig.CATEGORY_OTHER));
     }
 
     @Override
-    public void actionPerformed(final GuiButton button) {
+    public void actionPerformed(final ButtonWidget button) {
         super.actionPerformed(button);
 
         switch (button.id) {

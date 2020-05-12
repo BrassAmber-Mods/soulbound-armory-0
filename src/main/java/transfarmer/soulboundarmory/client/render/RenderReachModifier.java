@@ -4,9 +4,8 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -14,9 +13,9 @@ import javax.annotation.Nullable;
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 import static transfarmer.soulboundarmory.Main.MOD_ID;
 
-@SideOnly(CLIENT)
+@Environment(CLIENT)
 public class RenderReachModifier<T extends Entity> extends Render<T> {
-    public static final ResourceLocation REACH_MODIFIER = new ResourceLocation(MOD_ID, "textures/entity/reach_modifier.png");
+    public static final Identifier REACH_MODIFIER = new Identifier(MOD_ID, "textures/entity/reach_modifier.png");
 
     protected RenderReachModifier(final RenderManager renderManager) {
         super(renderManager);
@@ -24,7 +23,7 @@ public class RenderReachModifier<T extends Entity> extends Render<T> {
 
     @Nullable
     @Override
-    protected ResourceLocation getEntityTexture(@NotNull final T entity) {
+    protected Identifier getEntityTexture(@NotNull final T entity) {
         return REACH_MODIFIER;
     }
 

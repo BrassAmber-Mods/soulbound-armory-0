@@ -2,7 +2,7 @@ package transfarmer.soulboundarmory.network.C2S;
 
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
 import transfarmer.soulboundarmory.network.common.IExtendedMessage;
 import transfarmer.soulboundarmory.network.common.IExtendedMessageHandler;
@@ -36,7 +36,7 @@ public class C2SBindSlot implements IExtendedMessage {
         @Override
         public IExtendedMessage onMessage(final C2SBindSlot message, final MessageContext context) {
             FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
-                final SoulboundCapability capability = context.getServerHandler().player.getCapability(ICapabilityType.get(message.capability).getCapability(), null);
+                final ISoulboundComponent capability = context.getServerHandler().player.getCapability(ICapabilityType.get(message.capability).getCapability(), null);
 
                 if (capability.getBoundSlot() == message.slot) {
                     capability.unbindSlot();

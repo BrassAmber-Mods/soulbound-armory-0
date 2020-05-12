@@ -1,8 +1,8 @@
 package transfarmer.soulboundarmory.statistics.base.enumeration;
 
 import transfarmer.soulboundarmory.statistics.base.iface.IStatistic;
-import transfarmer.soulboundarmory.util.CollectionUtil;
-import transfarmer.soulboundarmory.util.StringUtil;
+import transfarmer.farmerlib.util.CollectionUtil;
+import transfarmer.farmerlib.util.StringUtil;
 
 public enum StatisticType implements IStatistic {
     XP,

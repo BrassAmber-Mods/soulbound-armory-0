@@ -2,8 +2,8 @@ package transfarmer.soulboundarmory.command;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerEntityMP;
 import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -12,10 +12,10 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.NotNull;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundItemUtil;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
+import transfarmer.soulboundarmory.component.soulbound.common.SoulboundItemUtil;
 import transfarmer.soulboundarmory.statistics.base.iface.IStatistic;
-import transfarmer.soulboundarmory.util.CollectionUtil;
+import transfarmer.farmerlib.util.CollectionUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,12 +57,12 @@ public class CommandSoulboundArmory extends CommandBase {
             final String commandType = args[0];
 
             if (COMMAND_TYPES.contains(commandType)) {
-                final EntityPlayerMP player = args.length == 2 || args.length == 4
+                final PlayerEntityMP player = args.length == 2 || args.length == 4
                         ? server.getPlayerList().getPlayerByUsername(args[3])
-                        : (EntityPlayerMP) sender;
+                        : (PlayerEntityMP) sender;
 
                 if (player != null) {
-                    final SoulboundCapability capability = SoulboundItemUtil.getFirstCapability(player, (Item) null);
+                    final ISoulboundComponent capability = SoulboundItemUtil.getFirstCapability(player, (Item) null);
 
                     if (capability == null) {
                         this.sendUsage(sender, true);
@@ -105,7 +105,7 @@ public class CommandSoulboundArmory extends CommandBase {
         if (noItem) {
             this.sendError(sender, "command.soulboundarmory.noItem", false);
         } else {
-            if (sender instanceof EntityPlayer) {
+            if (sender instanceof PlayerEntity) {
                 this.sendError(sender, "command.soulboundarmory.clientUsage0", true);
                 this.sendError(sender, "command.soulboundarmory.clientUsage1", true);
             } else {

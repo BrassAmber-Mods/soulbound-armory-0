@@ -2,10 +2,9 @@ package transfarmer.soulboundarmory.network.S2C;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
 import transfarmer.soulboundarmory.network.common.IExtendedMessage;
 import transfarmer.soulboundarmory.network.common.IExtendedMessageHandler;
@@ -17,7 +16,7 @@ import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 public class S2CEnchant implements IExtendedMessage {
     private String capability;
     private String item;
-    private ResourceLocation enchantment;
+    private Identifier enchantment;
     private int amount;
 
     public S2CEnchant() {}
@@ -34,7 +33,7 @@ public class S2CEnchant implements IExtendedMessage {
     public void fromBytes(final ExtendedPacketBuffer buffer) {
         this.capability = buffer.readString();
         this.item = buffer.readString();
-        this.enchantment = buffer.readResourceLocation();
+        this.enchantment = buffer.readIdentifier();
         this.amount = buffer.readInt();
     }
 
@@ -42,18 +41,18 @@ public class S2CEnchant implements IExtendedMessage {
     public void toBytes(final ExtendedPacketBuffer buffer) {
         buffer.writeString(this.capability);
         buffer.writeString(this.item);
-        buffer.writeResourceLocation(this.enchantment);
+        buffer.writeIdentifier(this.enchantment);
         buffer.writeInt(this.amount);
     }
 
     public static final class Handler implements IExtendedMessageHandler<S2CEnchant> {
-        @SideOnly(CLIENT)
+        @Environment(CLIENT)
         @Override
         public IExtendedMessage onMessage(final S2CEnchant message, final MessageContext context) {
-            final Minecraft minecraft = Minecraft.getMinecraft();
+            final Minecraft minecraft = CLIENT;
             final Enchantment enchantment = Enchantment.getEnchantmentByLocation(message.enchantment.toString());
             final IItem item = IItem.get(message.item);
-            final SoulboundCapability capability = minecraft.player.getCapability(ICapabilityType.get(message.capability).getCapability(), null);
+            final ISoulboundComponent capability = minecraft.player.getCapability(ICapabilityType.get(message.capability).getCapability(), null);
 
             minecraft.addScheduledTask(() -> {
                 capability.addEnchantment(item, enchantment, message.amount);

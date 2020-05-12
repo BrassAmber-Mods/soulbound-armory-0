@@ -3,7 +3,7 @@ package transfarmer.soulboundarmory.event;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -16,10 +16,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import org.lwjgl.input.Keyboard;
 import transfarmer.soulboundarmory.Main;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundItemUtil;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
+import transfarmer.soulboundarmory.component.soulbound.common.SoulboundItemUtil;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 import transfarmer.soulboundarmory.client.gui.GuiXPBar;
 import transfarmer.soulboundarmory.config.ClientConfig;
 import transfarmer.soulboundarmory.item.ItemSoulbound;
@@ -33,7 +33,7 @@ import static net.minecraftforge.fml.common.gameevent.TickEvent.Phase.END;
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 import static transfarmer.soulboundarmory.client.KeyBindings.MENU_KEY;
 import static transfarmer.soulboundarmory.client.KeyBindings.TOGGLE_XP_BAR_KEY;
-import static transfarmer.soulboundarmory.client.gui.screen.common.GuiScreenExtended.FONT_RENDERER;
+import static transfarmer.soulboundarmory.client.gui.screen.common.ExtendedScreen.TEXT_RENDERER;
 import static transfarmer.soulboundarmory.statistics.base.enumeration.Item.STAFF;
 
 @EventBusSubscriber(value = CLIENT, modid = Main.MOD_ID)
@@ -44,7 +44,7 @@ public class ClientEventListeners {
     @SubscribeEvent
     public static void onMouseInput(final MouseEvent event) {
         if (Keyboard.isKeyDown(Keyboard.KEY_LMENU) || Keyboard.isKeyDown(Keyboard.KEY_RMENU)) {
-            final Minecraft minecraft = Minecraft.getMinecraft();
+            final Minecraft minecraft = CLIENT;
             final IWeaponCapability capability = WeaponProvider.get(minecraft.player);
 
             if (capability.getItemType() == STAFF) {
@@ -63,7 +63,7 @@ public class ClientEventListeners {
     public static void onClientTick(final ClientTickEvent event) {
         if (event.phase == END) {
             if (MENU_KEY.isPressed()) {
-                final SoulboundCapability capability = SoulboundItemUtil.getFirstHeldCapability(Minecraft.getMinecraft().player);
+                final ISoulboundComponent capability = SoulboundItemUtil.getFirstHeldCapability(CLIENT.player);
 
                 if (capability != null) {
                     capability.openGUI();
@@ -88,14 +88,14 @@ public class ClientEventListeners {
 
     @SubscribeEvent(priority = LOW)
     public static void onItemTooltip(final ItemTooltipEvent event) {
-        final EntityPlayer player = event.getEntityPlayer();
+        final PlayerEntity player = event.getPlayerEntity();
 
         if (player != null) {
             final ItemStack itemStack = event.getItemStack();
             final Item item = itemStack.getItem();
 
             if (item instanceof ItemSoulbound) {
-                final SoulboundCapability capability = SoulboundItemUtil.getFirstCapability(player, item);
+                final ISoulboundComponent capability = SoulboundItemUtil.getFirstCapability(player, item);
                 final List<String> tooltip = event.getToolTip();
                 final int startIndex = tooltip.indexOf(I18n.format("item.modifiers.mainhand")) + 1;
                 final int toIndex = tooltip.size();
@@ -112,7 +112,7 @@ public class ClientEventListeners {
 
                 final int row = insertion.lastIndexOf("") + prior.size();
 
-                TOOLTIP_XP_BAR.setData(row, FONT_RENDERER.getStringWidth(tooltip.get(row - 2)) - 4);
+                TOOLTIP_XP_BAR.setData(row, TEXT_RENDERER.getStringWidth(tooltip.get(row - 2)) - 4);
             }
         }
     }

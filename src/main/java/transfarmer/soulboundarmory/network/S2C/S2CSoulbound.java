@@ -1,9 +1,8 @@
 package transfarmer.soulboundarmory.network.S2C;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
+import net.minecraft.entity.player.PlayerEntity;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
 import transfarmer.soulboundarmory.network.common.IExtendedMessage;
 import transfarmer.soulboundarmory.statistics.base.iface.ICapabilityType;
@@ -12,21 +11,21 @@ import transfarmer.soulboundarmory.statistics.base.iface.IItem;
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
 public abstract class S2CSoulbound implements IExtendedMessage {
-    protected SoulboundCapability capability;
+    protected ISoulboundComponent capability;
     protected IItem item;
-    protected EntityPlayer player;
+    protected PlayerEntity player;
 
     public S2CSoulbound() {}
 
-    public S2CSoulbound(final SoulboundCapability capability, final IItem item) {
+    public S2CSoulbound(final ISoulboundComponent capability, final IItem item) {
         this.capability = capability;
         this.item = item;
     }
 
     @Override
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     public void fromBytes(final ExtendedPacketBuffer buffer) {
-        this.capability = Minecraft.getMinecraft().player.getCapability(ICapabilityType.get(buffer.readString()).getCapability(), null);
+        this.capability = CLIENT.player.getCapability(ICapabilityType.get(buffer.readString()).getCapability(), null);
         this.item = IItem.get(buffer.readString());
         this.player = this.capability.getPlayer();
     }

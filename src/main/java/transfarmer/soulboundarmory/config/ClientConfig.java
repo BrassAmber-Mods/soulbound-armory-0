@@ -1,24 +1,25 @@
 package transfarmer.soulboundarmory.config;
 
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.common.Loader;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import transfarmer.farmerlib.util.CollectionUtil;
 import transfarmer.soulboundarmory.client.gui.GuiXPBar.Style;
+import transfarmer.soulboundarmory.client.i18n.Mappings;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+@Environment(EnvType.CLIENT)
 public class ClientConfig extends Config {
     private static final ClientConfig INSTANCE = new ClientConfig(new ClientConfiguration(new File(String.format("%s/soulboundarmory", Loader.instance().getConfigDir()), "xp_bar.cfg")));
     public static final String CATEGORY_COLOR = "color";
     public static final String CATEGORY_OTHER = "other";
 
     private final ClientConfiguration configFile;
-    private int red;
-    private int green;
-    private int blue;
-    private int alpha;
+    private final Map<String, Integer> rgba;
+
     private String style;
     private boolean displayOptions;
     private boolean overlayXPBar;
@@ -27,10 +28,24 @@ public class ClientConfig extends Config {
         super(configFile);
 
         this.configFile = configFile;
+        this.rgba = CollectionUtil.hashMap(new String[]{
+                Mappings.RED.getKey(),
+                Mappings.GREEN.getKey(),
+                Mappings.BLUE.getKey(),
+                Mappings.ALPHA.getKey()
+        });
     }
 
     public static ClientConfig instance() {
         return INSTANCE;
+    }
+
+    public static void setColor(final String translationKey, final int value) {
+        INSTANCE.rgba.put(translationKey, value);
+    }
+
+    public static int getRGBA(final String color) {
+        return INSTANCE.rgba.get(color);
     }
 
     public void load() {

@@ -1,7 +1,7 @@
 package transfarmer.soulboundarmory.skill;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class SkillBaseLevelable extends SkillBase implements SkillLevelable {
@@ -50,17 +50,17 @@ public abstract class SkillBaseLevelable extends SkillBase implements SkillLevel
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        final NBTTagCompound tag = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        final CompoundTag tag = super.serializeNBT();
 
-        tag.setInteger("level", this.level);
-        tag.setInteger("maxLevel", this.maxLevel);
+        tag.putInt("level", this.level);
+        tag.putInt("maxLevel", this.maxLevel);
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(final NBTTagCompound tag) {
+    public void deserializeNBT(final CompoundTag tag) {
         super.deserializeNBT(tag);
 
         this.level = tag.getInteger("level");

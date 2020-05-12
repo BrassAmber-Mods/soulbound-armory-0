@@ -2,15 +2,15 @@ package transfarmer.soulboundarmory.statistics.base.enumeration;
 
 import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.NotNull;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
 import transfarmer.soulboundarmory.statistics.base.iface.ICapabilityType;
-import transfarmer.soulboundarmory.util.CollectionUtil;
-import transfarmer.soulboundarmory.util.StringUtil;
+import transfarmer.farmerlib.util.CollectionUtil;
+import transfarmer.farmerlib.util.StringUtil;
 
 import javax.annotation.Nonnull;
 
-import static transfarmer.soulboundarmory.capability.soulbound.tool.ToolProvider.TOOLS;
-import static transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider.WEAPONS;
+import static transfarmer.soulboundarmory.component.soulbound.tool.ToolProvider.TOOLS;
+import static transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider.WEAPONS;
 
 public enum CapabilityType implements ICapabilityType {
     TOOL(TOOLS),
@@ -20,15 +20,15 @@ public enum CapabilityType implements ICapabilityType {
         CollectionUtil.addAll(CAPABILITIES, TOOL, WEAPON);
     }
 
-    private final Capability<? extends SoulboundCapability> capability;
+    private final Capability<? extends ISoulboundComponent> capability;
 
-    CapabilityType(final @NotNull Capability<? extends SoulboundCapability> capability) {
+    CapabilityType(final @NotNull Capability<? extends ISoulboundComponent> capability) {
         this.capability = capability;
     }
 
     @Override
     @Nonnull
-    public Capability<? extends SoulboundCapability> getCapability() {
+    public Capability<? extends ISoulboundComponent> getCapability() {
         return this.capability;
     }
 

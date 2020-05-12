@@ -3,7 +3,6 @@ package transfarmer.soulboundarmory.client.renderer.texture;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.client.gui.GuiXPBar;
 
@@ -11,7 +10,7 @@ import java.awt.image.BufferedImage;
 
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
-@SideOnly(CLIENT)
+@Environment(CLIENT)
 public class ExperienceBarTexture extends AbstractTexture {
     protected int[] dynamicTextureData;
     protected int width;

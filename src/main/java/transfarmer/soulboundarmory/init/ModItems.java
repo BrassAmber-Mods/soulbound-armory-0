@@ -1,17 +1,16 @@
 package transfarmer.soulboundarmory.init;
 
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.ModelIdentifier;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import transfarmer.soulboundarmory.item.ItemSoulboundDagger;
 import transfarmer.soulboundarmory.item.ItemSoulboundGreatsword;
 import transfarmer.soulboundarmory.item.ItemSoulboundStaff;
 import transfarmer.soulboundarmory.item.ItemSoulboundSword;
-import transfarmer.soulboundarmory.item.ItemSoulboundPick;
+import transfarmer.soulboundarmory.item.SoulboundPickItem;
 
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
@@ -22,7 +21,7 @@ public class ModItems {
     public static final ItemSoulboundSword SOULBOUND_SWORD = new ItemSoulboundSword("soulbound_sword");
     public static final ItemSoulboundGreatsword SOULBOUND_GREATSWORD = new ItemSoulboundGreatsword("soulbound_greatsword");
     public static final ItemSoulboundStaff SOULBOUND_STAFF = new ItemSoulboundStaff("soulbound_staff");
-    public static final ItemSoulboundPick SOULBOUND_PICK = new ItemSoulboundPick("soulbound_pick");
+    public static final SoulboundPickItem SOULBOUND_PICK = new SoulboundPickItem("soulbound_pick");
 
     @EventBusSubscriber(modid = MOD_ID)
     public static class RegistrationHandler {
@@ -32,11 +31,11 @@ public class ModItems {
         }
 
         @SuppressWarnings("ConstantConditions")
-        @SideOnly(CLIENT)
+        @Environment(CLIENT)
         @SubscribeEvent
         public static void registerModels(final ModelRegistryEvent event) {
             for (final Item item : new Item[]{SOULBOUND_GREATSWORD, SOULBOUND_SWORD, SOULBOUND_DAGGER, SOULBOUND_PICK, SOULBOUND_STAFF}) {
-                ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+                ModelLoader.setCustomModelIdentifier(item, 0, new ModelIdentifier(item.getRegistryName(), "inventory"));
             }
         }
     }

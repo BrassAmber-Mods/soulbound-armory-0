@@ -2,7 +2,7 @@ package transfarmer.soulboundarmory.config;
 
 import net.minecraftforge.common.config.Property;
 import transfarmer.soulboundarmory.Main;
-import transfarmer.soulboundarmory.util.CollectionUtil;
+import transfarmer.farmerlib.util.CollectionUtil;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

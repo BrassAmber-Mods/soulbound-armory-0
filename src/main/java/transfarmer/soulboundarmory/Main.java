@@ -1,86 +1,100 @@
 package transfarmer.soulboundarmory;
 
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import com.sun.tools.javac.tree.JCTree.JCLambda.ParameterKind;
+import nerdhub.cardinal.components.api.ComponentRegistry;
+import nerdhub.cardinal.components.api.ComponentType;
+import nerdhub.cardinal.components.api.event.EntityComponentCallback;
+import nerdhub.cardinal.components.api.util.EntityComponents;
+import nerdhub.cardinal.components.api.util.RespawnCopyStrategy;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.Projectile;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import transfarmer.soulboundarmory.client.render.RenderReachModifier;
-import transfarmer.soulboundarmory.client.render.RenderSoulDagger;
-import transfarmer.soulboundarmory.client.render.RenderSoulboundFireball;
-import transfarmer.soulboundarmory.command.CommandSoulboundArmory;
+import transfarmer.soulboundarmory.component.config.ConfigComponent;
+import transfarmer.soulboundarmory.component.config.IConfigComponent;
+import transfarmer.soulboundarmory.component.entity.EntityData;
+import transfarmer.soulboundarmory.component.entity.IEntityData;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
+import transfarmer.soulboundarmory.component.soulbound.tool.IToolComponent;
+import transfarmer.soulboundarmory.component.soulbound.tool.ToolComponent;
 import transfarmer.soulboundarmory.config.ClientConfig;
 import transfarmer.soulboundarmory.config.MainConfig;
 import transfarmer.soulboundarmory.entity.EntityReachModifier;
 import transfarmer.soulboundarmory.entity.EntitySoulboundDagger;
-import transfarmer.soulboundarmory.entity.EntitySoulboundSmallFireball;
-import transfarmer.soulboundarmory.network.C2S.C2SAttribute;
-import transfarmer.soulboundarmory.network.C2S.C2SBindSlot;
+import transfarmer.soulboundarmory.init.ModItems;
 import transfarmer.soulboundarmory.network.C2S.C2SConfig;
-import transfarmer.soulboundarmory.network.C2S.C2SEnchant;
-import transfarmer.soulboundarmory.network.C2S.C2SItemType;
-import transfarmer.soulboundarmory.network.C2S.C2SReset;
-import transfarmer.soulboundarmory.network.C2S.C2SSkill;
-import transfarmer.soulboundarmory.network.C2S.C2SSync;
-import transfarmer.soulboundarmory.network.S2C.S2CConfig;
-import transfarmer.soulboundarmory.network.S2C.S2CEnchant;
-import transfarmer.soulboundarmory.network.S2C.S2CItemType;
-import transfarmer.soulboundarmory.network.S2C.S2COpenGUI;
-import transfarmer.soulboundarmory.network.S2C.S2CRefresh;
-import transfarmer.soulboundarmory.network.S2C.S2CSync;
 
-import java.lang.management.ManagementFactory;
+import static transfarmer.soulboundarmory.network.Packets.C2S_CONFIG;
 
-import static net.minecraftforge.fml.relauncher.Side.CLIENT;
-import static net.minecraftforge.fml.relauncher.Side.SERVER;
-import static transfarmer.soulboundarmory.client.KeyBindings.MENU_KEY;
-import static transfarmer.soulboundarmory.client.KeyBindings.TOGGLE_XP_BAR_KEY;
-
-@Mod(modid = Main.MOD_ID, name = Main.NAME, version = Main.VERSION, guiFactory = "transfarmer.soulboundarmory.config.ConfigGuiFactory")
-public class Main {
+public class Main implements ModInitializer {
     public static final String MOD_ID = "soulboundarmory";
     public static final String NAME = "soulbound armory";
-    public static final String VERSION = "2.10.11";
+    public static final String VERSION = "3.0.0";
+
+    public static final ComponentType<IConfigComponent> CONFIG = ComponentRegistry.INSTANCE
+            .registerIfAbsent(new Identifier(MOD_ID, "config_component"), IConfigComponent.class)
+            .attach(EntityComponentCallback.event(PlayerEntity.class), ConfigComponent::new);
+    public static final ComponentType<IEntityData> ENTITY_DATA = ComponentRegistry.INSTANCE
+            .registerIfAbsent(new Identifier(MOD_ID, "entity_data"), IEntityData.class)
+            .attach(EntityComponentCallback.event(Entity.class), (final Entity entity) -> {
+                        if ((entity instanceof LivingEntity || entity instanceof Projectile)
+                                && !(entity instanceof EntityReachModifier || entity instanceof EntitySoulboundDagger)) {
+                            return new EntityData(entity);
+                        }
+
+                        return null;
+                    }
+            );
+    public static final ComponentType<ISoulboundComponent> TOOLS = ComponentRegistry.INSTANCE
+            .registerIfAbsent(new Identifier(MOD_ID, "tools"), IToolComponent.class)
+            .attach(EntityComponentCallback.event(PlayerEntity.class), (final PlayerEntity player) -> ToolComponent::new);
+
+    public static final ServerSidePacketRegistry PACKET_REGISTRY = ServerSidePacketRegistry.INSTANCE;
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-    public static final SimpleNetworkWrapper CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(MOD_ID);
-    public static int id;
+    public void onInitialize() {
+        EntityComponents.setRespawnCopyStrategy(CONFIG, RespawnCopyStrategy.ALWAYS_COPY);
+        EntityComponents.setRespawnCopyStrategy(TOOLS, RespawnCopyStrategy.ALWAYS_COPY);
 
-    public static final boolean IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
+        PACKET_REGISTRY.register(C2S_CONFIG, new C2SConfig());
 
-    @EventHandler
-    public static void onPreinit(final FMLPreInitializationEvent event) {
-        CHANNEL.registerMessage(S2CConfig.Handler.class, S2CConfig.class, id++, CLIENT);
-        CHANNEL.registerMessage(S2CEnchant.Handler.class, S2CEnchant.class, id++, CLIENT);
-        CHANNEL.registerMessage(S2COpenGUI.Handler.class, S2COpenGUI.class, id++, CLIENT);
-        CHANNEL.registerMessage(S2CSync.Handler.class, S2CSync.class, id++, CLIENT);
-        CHANNEL.registerMessage(S2CItemType.Handler.class, S2CItemType.class, id++, CLIENT);
-        CHANNEL.registerMessage(S2CRefresh.Handler.class, S2CRefresh.class, id++, CLIENT);
-
-        CHANNEL.registerMessage(C2SAttribute.Handler.class, C2SAttribute.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SBindSlot.Handler.class, C2SBindSlot.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SConfig.Handler.class, C2SConfig.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SEnchant.Handler.class, C2SEnchant.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SItemType.Handler.class, C2SItemType.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SReset.Handler.class, C2SReset.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SSync.Handler.class, C2SSync.class, id++, SERVER);
-        CHANNEL.registerMessage(C2SSkill.Handler.class, C2SSkill.class, id++, SERVER);
-
-        if (FMLCommonHandler.instance().getSide() == CLIENT) {
-            ClientRegistry.registerKeyBinding(MENU_KEY);
-            ClientRegistry.registerKeyBinding(TOGGLE_XP_BAR_KEY);
-
-            RenderingRegistry.registerEntityRenderingHandler(EntitySoulboundDagger.class, new RenderSoulDagger.RenderFactory());
-            RenderingRegistry.registerEntityRenderingHandler(EntityReachModifier.class, new RenderReachModifier.RenderFactory());
-            RenderingRegistry.registerEntityRenderingHandler(EntitySoulboundSmallFireball.class, new RenderSoulboundFireball.RenderFactory());
-        }
+        Registry.register(Registry.ITEM, new Identifier(MOD_ID, "soulbound_pick"), ModItems.SOULBOUND_PICK);
+        Registry.register(Registry.ITEM, new Identifier(MOD_ID, "soulbound_dagger"), ModItems.SOULBOUND_DAGGER);
+        Registry.register(Registry.ITEM, new Identifier(MOD_ID, "soulbound_sword"), ModItems.SOULBOUND_SWORD);
+        Registry.register(Registry.ITEM, new Identifier(MOD_ID, "soulbound_greatsword"), ModItems.SOULBOUND_GREATSWORD);
+        Registry.register(Registry.ITEM, new Identifier(MOD_ID, "soulbound_staff"), ModItems.SOULBOUND_STAFF);
+//        CHANNEL.registerMessage(S2CConfig.Handler.class, S2CConfig.class, id++, CLIENT);
+//        CHANNEL.registerMessage(S2CEnchant.Handler.class, S2CEnchant.class, id++, CLIENT);
+//        CHANNEL.registerMessage(S2COpenGUI.Handler.class, S2COpenGUI.class, id++, CLIENT);
+//        CHANNEL.registerMessage(S2CSync.Handler.class, S2CSync.class, id++, CLIENT);
+//        CHANNEL.registerMessage(S2CItemType.Handler.class, S2CItemType.class, id++, CLIENT);
+//        CHANNEL.registerMessage(S2CRefresh.Handler.class, S2CRefresh.class, id++, CLIENT);
+//
+//        CHANNEL.registerMessage(C2SAttribute.Handler.class, C2SAttribute.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SBindSlot.Handler.class, C2SBindSlot.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SConfig.Handler.class, C2SConfig.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SEnchant.Handler.class, C2SEnchant.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SItemType.Handler.class, C2SItemType.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SReset.Handler.class, C2SReset.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SSync.Handler.class, C2SSync.class, id++, SERVER);
+//        CHANNEL.registerMessage(C2SSkill.Handler.class, C2SSkill.class, id++, SERVER);
+//
+//        if (FMLCommonHandler.instance().getSide() == CLIENT) {
+//            ClientRegistry.registerKeyBinding(MENU_KEY);
+//            ClientRegistry.registerKeyBinding(TOGGLE_XP_BAR_KEY);
+//
+//            RenderingRegistry.registerEntityRenderingHandler(EntitySoulboundDagger.class, new RenderSoulDagger.RenderFactory());
+//            RenderingRegistry.registerEntityRenderingHandler(EntityReachModifier.class, new RenderReachModifier.RenderFactory());
+//            RenderingRegistry.registerEntityRenderingHandler(EntitySoulboundSmallFireball.class, new RenderSoulboundFireball.RenderFactory());
+//        }
 
         MainConfig.instance().load();
         MainConfig.instance().update();
@@ -88,10 +102,7 @@ public class Main {
         ClientConfig.instance().load();
         ClientConfig.instance().update();
         ClientConfig.instance().save();
-    }
 
-    @EventHandler
-    public static void onFMLServerStarting(final FMLServerStartingEvent event) {
-        event.registerServerCommand(new CommandSoulboundArmory());
+//        CommandRegistrationCallback.EVENT.invoker().register();
     }
 }

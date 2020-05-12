@@ -1,6 +1,6 @@
 package transfarmer.soulboundarmory.config;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
@@ -97,15 +97,15 @@ public class MainConfig extends Config {
         this.load();
     }
 
-    public NBTTagCompound writeToNBT() {
-        final NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag writeToNBT() {
+        final CompoundTag tag = new CompoundTag();
 
         for (final Property property : this.configFile.getIntegers()) {
-            tag.setInteger(property.getName(), property.getInt());
+            tag.putInt(property.getName(), property.getInt());
         }
 
         for (final Property property : this.configFile.getBooleans()) {
-            tag.setBoolean(property.getName(), property.getBoolean());
+            tag.putBoolean(property.getName(), property.getBoolean());
         }
 
         for (final Property property : this.configFile.getFloats()) {
@@ -115,7 +115,7 @@ public class MainConfig extends Config {
         return tag;
     }
 
-    public void readFromNBT(final NBTTagCompound tag) {
+    public void readFromNBT(final CompoundTag tag) {
         this.initialToolXP = tag.getInteger(this.configFile.getInitialToolXP().getName());
         this.initialWeaponXP = tag.getInteger(this.configFile.getInitialWeaponXP().getName());
         this.levelsPerEnchantment = tag.getInteger(this.configFile.getLevelsPerEnchantment().getName());

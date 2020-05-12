@@ -1,39 +1,54 @@
 package transfarmer.soulboundarmory.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import transfarmer.soulboundarmory.util.MathUtil;
+import transfarmer.farmerlib.reflect.FieldWrapper;
+import transfarmer.farmerlib.util.MathUtil;
 
-public abstract class EntityArrowExtended extends EntityArrow {
-    public EntityArrowExtended(final World worldIn) {
-        super(worldIn);
+public abstract class EntityArrowExtended extends ProjectileEntity {
+    protected final FieldWrapper<Vec3d, EntityArrowExtended> velocityVector;
+
+    public EntityArrowExtended(final World world) {
+        super(EntityType.ARROW, world);
+
+        this.velocityVector = new FieldWrapper<>(this, "velocity");
     }
 
-    public EntityArrowExtended(final World world, final double x, final double y, final double z) {
-        super(world, x, y, z);
+    public double displacementTo(final Entity entity) {
+        return this.displacementTo(entity.getX(), entity.getY(), entity.getZ());
     }
 
-    public double getDisplacement(final Entity entity) {
-        return this.getDisplacement(entity.posX, entity.posY, entity.posZ);
+    public double displacementTo(final double x, final double y, final double z) {
+        return this.distanceTo(x, y, z) * MathUtil.signum(x - this.getX(), y - this.getY(), z - this.getZ());
     }
 
-    public double getDisplacement(final double x, final double y, final double z) {
-        return this.getDistance(x, y, z) * this.getDirection(this.posX - x, this.posY - y, this.posZ - z);
+    public double distanceTo(final double x, final double y, final double z) {
+        return Math.sqrt(this.squaredDistanceTo(x, y, z));
     }
 
     public double getSpeed() {
-        return Math.sqrt(this.motionX * this.motionX
-                + this.motionY * this.motionY
-                + this.motionZ * this.motionZ
+        return Math.sqrt(this.velocityX() * this.velocityX()
+                + this.velocityY() * this.velocityY()
+                + this.velocityZ() * this.velocityZ()
         );
     }
 
-    public double getVelocity() {
-        return this.getSpeed() * MathUtil.signum(this.motionX, this.motionY, this.motionZ);
+    public double velocityX() {
+        return this.velocityVector.get().x;
     }
 
-    public double getDirection(final double x, final double y, final double z) {
-        return MathUtil.signum(x, y, z);
+    public double velocityY() {
+        return this.velocityVector.get().y;
+    }
+
+    public double velocityZ() {
+        return this.velocityVector.get().z;
+    }
+
+    public double getVelocityD() {
+        return this.getSpeed() * MathUtil.signum(this.velocityX(), this.velocityY(), this.velocityZ());
     }
 }

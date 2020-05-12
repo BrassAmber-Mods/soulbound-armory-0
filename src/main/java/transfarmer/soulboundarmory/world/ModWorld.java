@@ -4,7 +4,7 @@ import com.google.common.base.Predicates;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -15,14 +15,12 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import java.util.List;
 
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
 public class ModWorld {
-    public static RayTraceResult rayTraceAll(final World world, final EntityPlayer player) {
+    public static RayTraceResult rayTraceAll(final World world, final PlayerEntity player) {
         final float partialTicks = 1;
 
         if (player != null && world != null) {
@@ -56,7 +54,7 @@ public class ModWorld {
         return null;
     }
 
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     public static class ModWorldClient extends WorldClient {
         public ModWorldClient(final NetHandlerPlayClient netHandler, final WorldSettings settings, final int dimension, final EnumDifficulty difficulty, final Profiler profilerIn) {
             super(netHandler, settings, dimension, difficulty, profilerIn);

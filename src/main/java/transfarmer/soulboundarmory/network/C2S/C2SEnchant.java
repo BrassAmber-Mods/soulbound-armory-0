@@ -1,9 +1,9 @@
 package transfarmer.soulboundarmory.network.C2S;
 
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import transfarmer.soulboundarmory.capability.soulbound.common.SoulboundCapability;
+import transfarmer.soulboundarmory.component.soulbound.common.ISoulboundComponent;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
 import transfarmer.soulboundarmory.network.common.IExtendedMessage;
 import transfarmer.soulboundarmory.network.common.IExtendedMessageHandler;
@@ -12,7 +12,7 @@ import transfarmer.soulboundarmory.statistics.base.iface.IItem;
 
 public class C2SEnchant extends C2SSoulbound {
     private String item;
-    private ResourceLocation enchantment;
+    private Identifier enchantment;
     private int amount;
 
     public C2SEnchant() {
@@ -31,7 +31,7 @@ public class C2SEnchant extends C2SSoulbound {
         super.fromBytes(buffer);
 
         this.item = buffer.readString();
-        this.enchantment = buffer.readResourceLocation();
+        this.enchantment = buffer.readIdentifier();
         this.amount = buffer.readInt();
     }
 
@@ -40,14 +40,14 @@ public class C2SEnchant extends C2SSoulbound {
         super.toBytes(buffer);
 
         buffer.writeString(this.item);
-        buffer.writeResourceLocation(this.enchantment);
+        buffer.writeIdentifier(this.enchantment);
         buffer.writeInt(this.amount);
     }
 
     public static final class Handler implements IExtendedMessageHandler<C2SEnchant> {
         @Override
         public IExtendedMessage onMessage(final C2SEnchant message, final MessageContext context) {
-            final SoulboundCapability capability = context.getServerHandler().player.getCapability(message.capability, null);
+            final ISoulboundComponent capability = context.getServerHandler().player.getCapability(message.capability, null);
             final Enchantment enchantment = Enchantment.getEnchantmentByLocation(message.enchantment.toString());
             final IItem weaponType = capability.getItemType(message.item);
 

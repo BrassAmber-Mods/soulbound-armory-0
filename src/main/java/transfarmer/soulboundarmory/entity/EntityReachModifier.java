@@ -4,9 +4,11 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerEntityMP;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
@@ -17,18 +19,20 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 
-public class EntityReachModifier extends EntityArrow {
+public class EntityReachModifier extends EntityArrowExtended {
     private float reachDistance;
 
     public EntityReachModifier(final World worldIn) {
@@ -39,23 +43,25 @@ public class EntityReachModifier extends EntityArrow {
         super(world, x, y, z);
     }
 
-    public EntityReachModifier(final World world, final EntityLivingBase shooter, final float reachDistance) {
-        this(world, shooter.posX, shooter.posY + shooter.getEyeHeight() - 0.1, shooter.posZ);
+    public EntityReachModifier(final World world, final LivingEntity shooter, final float reachDistance) {
+        this(world, shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ());
+
         this.world = world;
-        this.shootingEntity = shooter;
+        this.ownerUuid = shooter.getUuid();
         this.reachDistance = reachDistance;
-        this.setSize(0, 0);
+        this.setBoundingBox(new Box(0, 0, 0, 0, 0, 0));
     }
 
     @Override
-    protected ItemStack getArrowStack() {
+    protected ItemStack asItemStack() {
         return null;
     }
 
-    public void onUpdate() {
-        final Vec3d pos = new Vec3d(this.posX, this.posY, this.posZ);
-        Vec3d newPos = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-        RayTraceResult rayTraceResult = this.world.rayTraceBlocks(pos, newPos, false, true, false);
+    public void tick() {
+        final Vec3d pos = this.getPos();
+
+        Vec3d newPos = new Vec3d(this.getX() + this.motionX, this.getY() + this.motionY, this.getZ() + this.motionZ);
+        RayTraceContext rayTraceResult = this.world.rayTraceBlocks(pos, newPos, false, true, false);
 
         if (rayTraceResult != null) {
             newPos = new Vec3d(rayTraceResult.hitVec.x, rayTraceResult.hitVec.y, rayTraceResult.hitVec.z);
@@ -67,10 +73,10 @@ public class EntityReachModifier extends EntityArrow {
             rayTraceResult = new RayTraceResult(entity);
         }
 
-        if (rayTraceResult != null && rayTraceResult.entityHit instanceof EntityPlayer) {
+        if (rayTraceResult != null && rayTraceResult.entityHit instanceof PlayerEntity) {
 
-            if (this.shootingEntity instanceof EntityPlayer
-                    && !((EntityPlayer) this.shootingEntity).canAttackPlayer((EntityPlayer) rayTraceResult.entityHit)) {
+            if (this.shootingEntity instanceof PlayerEntity
+                    && !((PlayerEntity) this.shootingEntity).canAttackPlayer((PlayerEntity) rayTraceResult.entityHit)) {
                 rayTraceResult = null;
             }
         }
@@ -85,9 +91,9 @@ public class EntityReachModifier extends EntityArrow {
 
     @Override
     protected void onHit(final RayTraceResult result) {
-        if (!this.world.isRemote && result.entityHit != this.shootingEntity && this.shootingEntity instanceof EntityPlayer) {
+        if (!this.world.isRemote && result.entityHit != this.shootingEntity && this.shootingEntity instanceof PlayerEntity) {
             final Entity target = result.entityHit;
-            final EntityPlayer player = (EntityPlayer) this.shootingEntity;
+            final PlayerEntity player = (PlayerEntity) this.shootingEntity;
             final IWeaponCapability capability = WeaponProvider.get(player);
 
             if (target != null) {
@@ -96,8 +102,8 @@ public class EntityReachModifier extends EntityArrow {
 
                     float attackDamageModifier = (float) player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
                     float attackDamageRatio = target instanceof EntityLivingBase
-                        ? EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), ((EntityLivingBase) target).getCreatureAttribute())
-                        : EnchantmentHelper.getModifierForCreature(player.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
+                        ? EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), ((EntityLivingBase) target).getCreatureAttribute())
+                        : EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), EnumCreatureAttribute.UNDEFINED);
 
                     final double cooldownRatio = capability.getAttackRatio(capability.getItemType());
                     attackDamageModifier *= 0.2 + cooldownRatio * cooldownRatio * 0.8;
@@ -171,8 +177,8 @@ public class EntityReachModifier extends EntityArrow {
                                 player.spawnSweepParticles();
                             }
 
-                            if (target instanceof EntityPlayerMP && target.velocityChanged) {
-                                ((EntityPlayerMP) target).connection.sendPacket(new SPacketEntityVelocity(target));
+                            if (target instanceof PlayerEntityMP && target.velocityChanged) {
+                                ((PlayerEntityMP) target).connection.sendPacket(new SPacketEntityVelocity(target));
                                 target.velocityChanged = false;
                                 target.motionX = motionX;
                                 target.motionY = motionY;

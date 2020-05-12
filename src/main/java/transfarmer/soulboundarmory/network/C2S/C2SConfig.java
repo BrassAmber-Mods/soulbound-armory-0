@@ -1,39 +1,12 @@
 package transfarmer.soulboundarmory.network.C2S;
 
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import transfarmer.soulboundarmory.capability.config.PlayerConfigProvider;
-import transfarmer.soulboundarmory.config.MainConfig;
+import net.fabricmc.fabric.api.network.PacketContext;
+import transfarmer.soulboundarmory.component.config.IConfigComponent;
 import transfarmer.soulboundarmory.network.common.ExtendedPacketBuffer;
-import transfarmer.soulboundarmory.network.common.IExtendedMessage;
-import transfarmer.soulboundarmory.network.common.IExtendedMessageHandler;
 
-public class C2SConfig implements IExtendedMessage {
-    private boolean addToOffhand;
-
-    public C2SConfig() {
-        this.addToOffhand = MainConfig.instance().getAddToOffhand();
-    }
-
-    public void fromBytes(final ExtendedPacketBuffer buffer) {
-        this.addToOffhand = buffer.readBoolean();
-    }
-
-    public void toBytes(final ExtendedPacketBuffer buffer) {
-        buffer.writeBoolean(this.addToOffhand);
-    }
-
-    public static final class Handler implements IExtendedMessageHandler<C2SConfig> {
-        @Override
-        public IExtendedMessage onMessage(final C2SConfig message, final MessageContext context) {
-            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(new Runnable() {
-                @Override
-                public void run() {
-                    PlayerConfigProvider.get(context.getServerHandler().player).setAddToOffhand(message.addToOffhand);
-                }
-            });
-
-            return null;
-        }
+public class C2SConfig extends C2SPacket {
+    @Override
+    protected void accept(final PacketContext context, final ExtendedPacketBuffer buffer) {
+        IConfigComponent.get(context.getPlayer()).setAddToOffhand(buffer.readBoolean());
     }
 }

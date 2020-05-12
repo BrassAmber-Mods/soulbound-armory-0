@@ -1,6 +1,6 @@
 package transfarmer.soulboundarmory.item;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -8,8 +8,8 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.IWeaponCapability;
-import transfarmer.soulboundarmory.capability.soulbound.weapon.WeaponProvider;
+import transfarmer.soulboundarmory.component.soulbound.weapon.IWeaponCapability;
+import transfarmer.soulboundarmory.component.soulbound.weapon.WeaponProvider;
 import transfarmer.soulboundarmory.entity.EntityLightningBoltSoulbound;
 import transfarmer.soulboundarmory.world.ModWorld;
 
@@ -31,7 +31,7 @@ public class ItemSoulboundSword extends ItemSoulboundMeleeWeapon {
 
     @Override
     @Nonnull
-    public ActionResult<ItemStack> onItemRightClick(final World world, @Nonnull final EntityPlayer player, @Nonnull final EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(final World world, @Nonnull final PlayerEntity player, @Nonnull final EnumHand hand) {
         final IWeaponCapability capability = WeaponProvider.get(player);
 
         if (!world.isRemote && capability.hasSkill(SWORD, SUMMON_LIGHTNING) && capability.getLightningCooldown() <= 0) {

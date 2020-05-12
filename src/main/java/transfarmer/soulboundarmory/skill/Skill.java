@@ -1,9 +1,8 @@
 package transfarmer.soulboundarmory.skill;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import transfarmer.soulboundarmory.client.gui.screen.common.skill.GuiSkill;
 import transfarmer.soulboundarmory.statistics.Skills;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import static net.minecraftforge.fml.relauncher.Side.CLIENT;
 
-public interface Skill extends INBTSerializable<NBTTagCompound> {
+public interface Skill extends INBTSerializable<CompoundTag> {
     @Nonnull
     List<Skill> getDependencies();
 
@@ -32,7 +31,7 @@ public interface Skill extends INBTSerializable<NBTTagCompound> {
 
     void learn();
 
-    ResourceLocation getTexture();
+    Identifier getTexture();
 
     GuiSkill getGUI();
 
@@ -43,9 +42,9 @@ public interface Skill extends INBTSerializable<NBTTagCompound> {
 
     void setStorage(Skills storage, IItem item);
 
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     String getName();
 
-    @SideOnly(CLIENT)
+    @Environment(CLIENT)
     List<String> getTooltip();
 }
