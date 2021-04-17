@@ -11,26 +11,26 @@ import user11681.soulboundarmory.item.StaffItem;
 
 public class ImpactEnchantment extends Enchantment {
     public ImpactEnchantment() {
-        super(Weight.COMMON, EnchantmentTarget.WEAPON, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
+        super(Rarity.COMMON, EnchantmentTarget.WEAPON, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
     }
 
     @Override
-    public int getMaximumLevel() {
+    public int getMaxLevel() {
         return 5;
     }
 
     @Override
-    public int getMinimumPower(final int level) {
+    public int getMinPower(final int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public int getMaximumPower(final int level) {
+    public int getMaxPower(final int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public float getAttackDamage(final int level, @Nonnull final EntityGroup group) {
+    public float getAttackDamage(final int level, final EntityGroup group) {
         return 1 + Math.max(0, level - 1) / 2F;
     }
 

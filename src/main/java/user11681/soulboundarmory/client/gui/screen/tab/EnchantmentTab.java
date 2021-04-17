@@ -1,79 +1,73 @@
 package user11681.soulboundarmory.client.gui.screen.tab;
 
 import java.util.List;
+import java.util.Map;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget.PressAction;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.registry.Registry;
-import user11681.soulboundarmory.MainClient;
-import user11681.soulboundarmory.client.i18n.Mappings;
+import user11681.cell.client.gui.screen.ScreenTab;
+import user11681.cell.client.gui.widget.scalable.ScalableWidget;
+import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundComponentBase;
+import user11681.soulboundarmory.component.soulbound.player.SoulboundComponent;
+import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.registry.Packets;
-import user11681.soulboundarmory.network.common.ExtendedPacketBuffer;
-import user11681.usersmanual.client.gui.screen.ScreenTab;
-import user11681.usersmanual.collections.ArrayMap;
 
-import static user11681.soulboundarmory.component.statistics.Category.ENCHANTMENT;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ENCHANTMENT_POINTS;
-import static user11681.soulboundarmory.component.statistics.StatisticType.SPENT_ENCHANTMENT_POINTS;
+import static user11681.soulboundarmory.component.statistics.Category.enchantment;
+import static user11681.soulboundarmory.component.statistics.StatisticType.enchantmentPoints;
+import static user11681.soulboundarmory.component.statistics.StatisticType.spentEnchantmentPoints;
 
 public class EnchantmentTab extends SoulboundTab {
-    public EnchantmentTab(final SoulboundComponentBase component, final List<ScreenTab> tabs) {
-        super(Mappings.MENU_BUTTON_ENCHANTMENTS, component, tabs);
+    public EnchantmentTab(SoulboundComponent<?> component, List<ScreenTab> tabs) {
+        super(Translations.menuButtonEnchantments, component, tabs);
     }
 
     @Override
-    public void init() {
-        super.init();
+    public void init(MinecraftClient client, int width, int height) {
+        super.init(client, width, height);
 
-        final ItemStorage<?> storage = this.storage;
-        final ArrayMap<Enchantment, Integer> enchantments = storage.getEnchantments();
-        final int size = enchantments.size();
-        final ButtonWidget resetButton = this.addButton(this.resetButton(this.resetAction(ENCHANTMENT)));
-        resetButton.active = storage.getDatum(SPENT_ENCHANTMENT_POINTS) > 0;
+        ItemStorage<?> storage = this.storage;
+        Map<Enchantment, Integer> enchantments = storage.getEnchantments();
+        int size = enchantments.size();
+        ScalableWidget resetButton = this.add(this.resetButton(this.resetAction(enchantment)));
+        resetButton.active = storage.getDatum(spentEnchantmentPoints) > 0;
 
         for (int row = 0; row < size; row++) {
-            final ButtonWidget addButton = this.addButton(this.squareButton((width + 162) / 2 - 20, this.getHeight(size, row), "-", this.enchantAction(enchantments.getKey(row))));
-            final ButtonWidget removeButton = this.addButton(this.squareButton((width + 162) / 2, this.getHeight(size, row), "+", this.disenchantAction(enchantments.getKey(row))));
-            addButton.active = enchantments.get(row) > 0;
-            removeButton.active = storage.getDatum(ENCHANTMENT_POINTS) > 0;
+            ButtonWidget disenchant = this.add(this.squareButton((width + 162) / 2 - 20, this.getHeight(size, row), new LiteralText("-"), this.disenchantAction(enchantments.getKey(row))));
+            ButtonWidget enchant = this.add(this.squareButton((width + 162) / 2, this.getHeight(size, row), new LiteralText("+"), this.enchantAction(enchantments.getKey(row))));
+            disenchant.active = enchantments.get(row) > 0;
+            enchant.active = storage.getDatum(enchantmentPoints) > 0;
         }
     }
 
     @Override
-    public void render(final int mouseX, final int mouseY, final float partialTicks) {
-        super.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
+        super.render(matrices, mouseX, mouseY, partialTicks);
 
-        final ArrayMap<Enchantment, Integer> enchantments = this.storage.getEnchantments();
-        final int points = this.storage.getDatum(ENCHANTMENT_POINTS);
+        Map<Enchantment, Integer> enchantments = this.storage.getEnchantments();
+        int points = this.storage.getDatum(enchantmentPoints);
 
         if (points > 0) {
-            TEXT_RENDERER.draw(String.format("%s: %d", Mappings.MENU_UNSPENT_POINTS.asFormattedString(), points), Math.round(width / 2F), 4, 0xFFFFFF);
+            drawCenteredString(matrices, this.textRenderer, String.format("%s: %d", Translations.menuUnspentPoints, points), Math.round(width / 2F), 4, 0xFFFFFF);
         }
 
         for (int row = 0, size = enchantments.size(); row < size; row++) {
-            TEXT_RENDERER.draw(enchantments.getKey(row).getName(enchantments.get(row)).asFormattedString(), (this.width - 182) / 2F, this.getHeight(size, row) - TEXT_RENDERER.fontHeight / 2F, 0xFFFFFF);
+            textRenderer.draw(matrices, enchantments.getKey(row).getName(enchantments.get(row)), (this.width - 182) / 2F, this.getHeight(size, row) - textRenderer.fontHeight / 2F, 0xFFFFFF);
         }
     }
 
-    protected PressAction enchantAction(final Enchantment enchantment) {
-        return (final ButtonWidget button) -> {
-            final int amount = hasShiftDown() ?
-                    this.storage.getDatum(ENCHANTMENT_POINTS)
-                    : 1;
-
-            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_ENCHANT, new ExtendedPacketBuffer(this.storage).writeIdentifier(Registry.ENCHANTMENT.getId(enchantment)).writeInt(amount));
-        };
+    protected PressAction enchantAction(Enchantment enchantment) {
+        return (ButtonWidget button) ->
+            ClientPlayNetworking.send(Packets.serverEnchant, new ExtendedPacketBuffer(this.storage).writeIdentifier(Registry.ENCHANTMENT.getId(enchantment)).writeBoolean(true).writeBoolean(hasShiftDown()));
     }
 
-    protected PressAction disenchantAction(final Enchantment enchantment) {
-        return (final ButtonWidget button) -> {
-            final int amount = hasShiftDown()
-                    ? this.storage.getDatum(SPENT_ENCHANTMENT_POINTS)
-                    : 1;
-
-            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_ENCHANT, new ExtendedPacketBuffer(this.storage).writeIdentifier(Registry.ENCHANTMENT.getId(enchantment)).writeInt(-amount));
-        };
+    protected PressAction disenchantAction(Enchantment enchantment) {
+        return (ButtonWidget button) ->
+            ClientPlayNetworking.send(Packets.serverEnchant, new ExtendedPacketBuffer(this.storage).writeIdentifier(Registry.ENCHANTMENT.getId(enchantment)).writeBoolean(false).writeBoolean(hasShiftDown()));
     }
 }

@@ -1,144 +1,155 @@
 package user11681.soulboundarmory.client.gui.screen.tab;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ButtonWidget.PressAction;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.math.MathHelper;
-import user11681.soulboundarmory.MainClient;
+import user11681.cell.client.gui.screen.ScreenTab;
+import user11681.cell.client.gui.widget.callback.PressCallback;
+import user11681.cell.client.gui.widget.scalable.ScalableWidget;
+import user11681.cell.client.gui.widget.scalable.ScalableWidgets;
+import user11681.soulboundarmory.SoulboundArmoryClient;
 import user11681.soulboundarmory.client.gui.ExperienceBarOverlay;
 import user11681.soulboundarmory.client.gui.ExperienceBarOverlay.Style;
 import user11681.soulboundarmory.client.gui.RGBASlider;
-import user11681.soulboundarmory.client.i18n.Mappings;
+import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundComponentBase;
+import user11681.soulboundarmory.component.soulbound.player.SoulboundComponent;
 import user11681.soulboundarmory.component.statistics.Category;
 import user11681.soulboundarmory.config.Configuration;
-import user11681.soulboundarmory.config.Configuration.Client.Colors;
+import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.registry.Packets;
-import user11681.soulboundarmory.network.common.ExtendedPacketBuffer;
-import user11681.usersmanual.client.gui.screen.ScreenTab;
-import user11681.usersmanual.client.gui.widget.ExtendedButtonWidget;
+import user11681.soulboundarmory.text.StringableText;
 
-import static user11681.soulboundarmory.component.statistics.StatisticType.EXPERIENCE;
-import static user11681.soulboundarmory.component.statistics.StatisticType.LEVEL;
+import static user11681.soulboundarmory.component.statistics.StatisticType.experience;
+import static user11681.soulboundarmory.component.statistics.StatisticType.level;
 
 @Environment(EnvType.CLIENT)
 public abstract class SoulboundTab extends ScreenTab {
-    protected static final NumberFormat FORMAT = DecimalFormat.getInstance();
+    protected static final NumberFormat format = DecimalFormat.getInstance();
 
     protected final PlayerEntity player;
-    protected final List<AbstractButtonWidget> options;
+    protected final List<Element> options;
     protected final List<RGBASlider> sliders;
-    protected final SoulboundComponentBase component;
+    protected final SoulboundComponent<?> component;
 
     protected ItemStorage<?> storage;
-
+    protected ItemStack itemStack;
     protected ExperienceBarOverlay xpBar;
     protected int slot;
 
-    public SoulboundTab(final Text title, final SoulboundComponentBase component, final List<ScreenTab> tabs) {
+    public SoulboundTab(Text title, SoulboundComponent<?> component, List<ScreenTab> tabs) {
         super(title, tabs);
 
-        this.player = MainClient.getPlayer();
+        this.player = SoulboundArmoryClient.getPlayer();
         this.component = component;
         this.options = new ArrayList<>(5);
-
-        final List<RGBASlider> sliders = this.sliders = new ArrayList<>();
-        final Configuration.Client configuration = Configuration.instance().client;
-
-        sliders.add(this.addButton(this.colorSlider(0, configuration.colors.red, Mappings.RED)));
-        sliders.add(this.addButton(this.colorSlider(1, configuration.colors.green, Mappings.GREEN)));
-        sliders.add(this.addButton(this.colorSlider(2, configuration.colors.blue, Mappings.BLUE)));
-        sliders.add(this.addButton(this.colorSlider(3, configuration.colors.alpha, Mappings.ALPHA)));
-        this.options.addAll(sliders);
-        this.options.add(this.addButton(this.optionButton(4, String.format("%s: %s", Mappings.XP_BAR_STYLE, configuration.style), this.cycleStyleAction(1), this.cycleStyleAction(-1))));
+        this.sliders = new ArrayList<>(4);
     }
 
     @Override
     public void init() {
-        this.storage = this.component.getHeldItemStorage();
+        this.storage = this.component.menuStorage();
+        this.itemStack = this.component.menuStorage().getItemStack();
+
+        for (ItemStack itemStack : this.player.getItemsHand()) {
+            if (itemStack.equals(this.itemStack)) {
+                this.itemStack = itemStack;
+
+                break;
+            }
+        }
 
         super.init();
 
         if (this.displayTabs()) {
-            this.initOptions();
-
             this.storage.setCurrentTab(this.index);
-            this.slot = this.player.inventory.getSlotWithStack(this.component.getAnyHeldItemStorage().getItemStack());
 
-            final String text = (this.slot != storage.getBoundSlot() ? Mappings.MENU_BUTTON_BIND : Mappings.MENU_BUTTON_UNBIND).toString();
-            final int width = Math.max(this.tab.getWidth(), TEXT_RENDERER.getStringWidth(text) + 8);
-            final int x = this.tab.endX - width;
+            Text text = this.slot != storage.getBoundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
+            int buttonWidth = Math.max(this.tab.width, this.textRenderer.getWidth(text) + 8);
 
-            this.addButton(new ButtonWidget(x, this.height - this.height / 16 - 20, width, 20, text, this.bindSlotAction()));
+            this.addButton(new ButtonWidget(this.tab.endX() - buttonWidth, this.height - this.height / 16 - 20, buttonWidth, 20, text, this.bindSlotAction()));
 
             if (this.displayXPBar()) {
                 this.xpBar = new ExperienceBarOverlay(this.storage);
+
+                this.initSettings();
             }
         }
     }
 
-    @Override
-    protected boolean displayTabs() {
-        return this.storage != null;
-    }
+    protected boolean initSettings() {
+        if (Configuration.instance().client.displayOptions) {
+            if (this.options.isEmpty()) {
+                Configuration.Client configuration = Configuration.instance().client;
+                Configuration.Client.Colors colors = configuration.colors;
 
-    protected boolean initOptions() {
-        if (Configuration.instance().client.displayOptions && this.displayXPBar()) {
-            this.buttons.addAll(this.options);
+                this.sliders.add(this.addButton(this.colorSlider(colors.red, Translations.red, 0)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.green, Translations.green, 1)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.blue, Translations.blue, 2)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.alpha, Translations.alpha, 3)));
+                this.options.add(this.add(this.optionButton(4, new StringableText("%s: %s", Translations.xpBarStyle, configuration.style), this.cycleStyleAction(1), this.cycleStyleAction(-1))));
+                this.options.addAll(sliders);
 
-            return true;
+                return true;
+            }
+
+            this.add(this.options);
         }
-
-        this.buttons.removeAll(this.options);
 
         return false;
     }
 
     @Override
-    public void render(final int mouseX, final int mouseY, final float partialTicks) {
-        this.withZ(-500, this::renderBackground);
+    protected boolean displayTabs() {
+        return this.slot > -1 && this.storage.isUnlocked();
+    }
 
-        super.render(mouseX, mouseY, partialTicks);
+    @Override
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
+        this.withZ(-500, () -> this.renderBackground(matrices));
+
+        super.render(matrices, mouseX, mouseY, partialTicks);
 
         if (this.displayXPBar()) {
-            this.drawXPBar(mouseX, mouseY);
+            this.drawXPBar(matrices, mouseX, mouseY);
         }
     }
 
-    protected void drawXPBar(final int mouseX, final int mouseY) {
-        final int xp = this.storage.getDatum(EXPERIENCE);
+    protected void drawXPBar(MatrixStack matrices, int mouseX, int mouseY) {
+        int xp = this.storage.getDatum(experience);
+        int maxLevel = Configuration.instance().maxLevel;
 
-        this.xpBar.draw();
+        this.xpBar.render();
 
-        if (this.isMouseOverLevel(mouseX, mouseY) && Configuration.instance().maxLevel >= 0) {
-            this.renderTooltip(String.format("%d/%d", this.storage.getDatum(LEVEL), Configuration.instance().maxLevel), mouseX, mouseY);
+        if (this.isMouseOverLevel(mouseX, mouseY) && maxLevel >= 0) {
+            this.renderTooltip(matrices, new StringableText("%s/%s", this.storage.getDatum(level), maxLevel), mouseX, mouseY);
         } else if (this.isMouseOverXPBar(mouseX, mouseY)) {
-            this.renderTooltip(this.storage.canLevelUp()
-                    ? String.format("%d/%d", xp, this.storage.getNextLevelXP())
-                    : String.format("%d", xp), mouseX, mouseY);
+            this.renderTooltip(matrices, this.storage.canLevelUp()
+                    ? new StringableText("%s/%s", xp, this.storage.getNextLevelXP())
+                    : new StringableText("%s", xp), mouseX, mouseY);
         }
 
-        RenderSystem.disableLighting();
+//        RenderSystem.disableLighting();
     }
 
     protected boolean displayXPBar() {
-        return this.component != null;
+        return this.displayTabs();
     }
 
-    protected boolean isMouseOverXPBar(final double mouseX, final double mouseY) {
-        final double barX = this.getXPBarX();
-        final double barY = this.getXPBarY();
+    protected boolean isMouseOverXPBar(double mouseX, double mouseY) {
+        double barX = this.getXPBarX();
+        double barY = this.getXPBarY();
 
         return this.displayXPBar() && mouseX >= barX && mouseX <= barX + 182 && mouseY >= barY && mouseY <= barY + 4;
     }
@@ -151,21 +162,21 @@ public abstract class SoulboundTab extends ScreenTab {
         return (this.width - 182) / 2;
     }
 
-    protected boolean isMouseOverLevel(final int mouseX, final int mouseY) {
-        final String levelString = "" + this.storage.getDatum(LEVEL);
+    protected boolean isMouseOverLevel(int mouseX, int mouseY) {
+        String levelString = "" + this.storage.getDatum(level);
 
-        final int levelLeftX = (this.width - TEXT_RENDERER.getStringWidth(levelString)) / 2;
-        final int levelTopY = height - 35;
+        int levelLeftX = (this.width - this.textRenderer.getWidth(levelString)) / 2;
+        int levelTopY = height - 35;
 
-        return mouseX >= levelLeftX && mouseX <= levelLeftX + TEXT_RENDERER.getStringWidth(levelString)
-                && mouseY >= levelTopY && mouseY <= levelTopY + TEXT_RENDERER.fontHeight;
+        return mouseX >= levelLeftX && mouseX <= levelLeftX + this.textRenderer.getWidth(levelString)
+                && mouseY >= levelTopY && mouseY <= levelTopY + this.textRenderer.fontHeight;
     }
 
-    protected RGBASlider sliderMousedOver(final double mouseX, final double mouseY) {
+    protected RGBASlider sliderMousedOver(double mouseX, double mouseY) {
         for (int slider = 0; slider < 4; slider++) {
-            if (mouseX >= this.getOptionX() && mouseX <= this.getOptionX() + 100
-                    && mouseY >= this.getOptionY(slider) && mouseY <= this.getOptionY(slider) + 20) {
-                return this.sliders.get(0);
+            if (mouseX >= this.optionX() && mouseX <= this.optionX() + 100
+                    && mouseY >= this.optionY(slider) && mouseY <= this.optionY(slider) + 20) {
+                return this.sliders.get(slider);
             }
         }
 
@@ -173,16 +184,16 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         super.mouseClicked(mouseX, mouseY, button);
 
         if (this.isMouseOverXPBar(mouseX, mouseY)) {
-            if (!Configuration.instance().client.displayOptions) {
-                this.buttons.addAll(this.options);
-                Configuration.instance().client.displayOptions = true;
-            } else {
-                this.buttons.removeAll(this.options);
+            if (Configuration.instance().client.displayOptions) {
+                this.removeButtons(this.options);
                 Configuration.instance().client.displayOptions = false;
+            } else {
+                this.add(this.options);
+                Configuration.instance().client.displayOptions = true;
             }
 
             this.refresh();
@@ -194,8 +205,8 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     @Override
-    public boolean keyPressed(final int keyCode, final int scanCode, final int modifiers) {
-        if (keyCode == MainClient.GUI_KEY_BINDING.getBoundKey().getKeyCode()) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (SoulboundArmoryClient.guiKeyBinding.matchesKey(keyCode, scanCode)) {
             this.onClose();
         }
 
@@ -203,22 +214,19 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     @Override
-    public boolean mouseScrolled(final double x, final double y, final double dWheel) {
-        final RGBASlider slider = this.sliderMousedOver(x, y);
+    public boolean mouseScrolled(double x, double y, double dWheel) {
+        RGBASlider slider = this.sliderMousedOver(x, y);
 
         if (slider != null) {
-            final Colors colors = Configuration.instance().client.colors;
-            final String key = slider.getText().getKey();
-            final int value = MathHelper.clamp(colors.get(key), 0, 255);
+            slider.scroll(dWheel);
 
-            colors.set(key, value);
-            slider.setValue(value);
+            return true;
         }
 
         return super.mouseScrolled(x, y, dWheel);
     }
 
-    protected void cycleStyle(final int change) {
+    protected void cycleStyle(int change) {
         int index = (Style.STYLES.indexOf(Configuration.instance().client.style) + change) % Style.AMOUNT;
 
         if (index < 0) {
@@ -229,74 +237,73 @@ public abstract class SoulboundTab extends ScreenTab {
         }
     }
 
-    @Override
-    public boolean isPauseScreen() {
-        return true;
+    public ScalableWidget centeredButton(int y, int buttonWidth, Text text, PressCallback<ScalableWidget> action) {
+        return ScalableWidgets.button().x((this.width - buttonWidth) / 2).y(y).width(buttonWidth).height(20).text(text).primaryAction(action);
     }
 
-    public ButtonWidget centeredButton(final int y, final int buttonWidth, final String text,
-                                       final PressAction action) {
-        return new ButtonWidget((this.width - buttonWidth) / 2, y, buttonWidth, 20, text, action);
+    public ScalableWidget squareButton(int x, int y, Text text, PressCallback<ScalableWidget> action) {
+        return ScalableWidgets.button().x(x - 10).y(y - 10).width(20).height(20).text(text).primaryAction(action);
     }
 
-    public ButtonWidget squareButton(final int x, final int y, final String text, final PressAction action) {
-        return new ButtonWidget(x - 10, y - 10, 20, 20, text, action);
+    public ScalableWidget resetButton(PressCallback<ScalableWidget> action) {
+        return ScalableWidgets.button().x(this.width - this.width / 24 - 112).y(this.height - this.height / 16 - 20).width(112).height(20).text(Translations.menuButtonReset).primaryAction(action);
     }
 
-    public ButtonWidget resetButton(final PressAction action) {
-        return new ButtonWidget(this.width - this.width / 24 - 112, this.height - this.height / 16 - 20, 112, 20, Mappings.MENU_BUTTON_RESET.asFormattedString(), action);
+    public ScalableWidget optionButton(int row, Text text, PressCallback<ScalableWidget> primaryAction, PressCallback<ScalableWidget> secondaryAction) {
+        return ScalableWidgets.button()
+            .x(this.optionX())
+            .y(this.optionY(row))
+            .width(100)
+            .height(20)
+            .text(text)
+            .primaryAction(primaryAction)
+            .secondaryAction(secondaryAction);
     }
 
-    public ExtendedButtonWidget optionButton(final int row, final String text, final PressAction primaryAction, final PressAction secondaryAction) {
-        return new ExtendedButtonWidget(this.getOptionX(), this.getOptionY(row), 100, 20, text, primaryAction, secondaryAction);
+    public RGBASlider colorSlider(double currentValue, Text text, int id) {
+        return new RGBASlider(this.optionX(), this.optionY(id), 100, 20, text, currentValue, id);
     }
 
-    public RGBASlider colorSlider(final int row, final double currentValue, final TranslatableText text) {
-        return new RGBASlider(this.getOptionX(), this.getOptionY(row), 100, 20, currentValue, text);
-    }
-
-    public ButtonWidget[] addPointButtons(final int rows, final int points, final PressAction action) {
-        final ButtonWidget[] buttons = new ButtonWidget[rows];
-        final int start = (this.height - (rows - 1) * this.height / 16) / 2;
+    public ScalableWidget[] addPointButtons(int rows, int points, PressCallback<ScalableWidget> action) {
+        ScalableWidget[] buttons = new ScalableWidget[rows];
+        int start = (this.height - (rows - 1) * this.height / 16) / 2;
 
         for (int row = 0; row < rows; row++) {
-            buttons[row] = squareButton((this.width + 162) / 2, start + row * this.height / 16 + 4, "+", action);
+            buttons[row] = squareButton((this.width + 162) / 2, start + row * this.height / 16 + 4, new LiteralText("+"), action);
             buttons[row].active = points > 0;
         }
 
         return buttons;
     }
 
-    public ButtonWidget[] removePointButtons(final int rows, final PressAction action) {
-        final ButtonWidget[] buttons = new ButtonWidget[rows];
-        final int start = (this.height - (rows - 1) * this.height / 16) / 2;
+    public ScalableWidget[] removePointButtons(int rows, PressCallback<ScalableWidget> action) {
+        ScalableWidget[] buttons = new ScalableWidget[rows];
+        int start = (this.height - (rows - 1) * this.height / 16) / 2;
 
         for (int row = 0; row < rows; row++) {
-            buttons[row] = this.squareButton((this.width + 162) / 2 - 20, start + row * this.height / 16 + 4, "-", action);
+            buttons[row] = this.squareButton((this.width + 162) / 2 - 20, start + row * this.height / 16 + 4, new LiteralText("-"), action);
         }
 
         return buttons;
     }
 
-    public int getOptionX() {
+    public int optionX() {
         return Math.round(this.width * (1 - 1 / 24F)) - 100;
     }
 
-    public int getOptionY(final int row) {
+    public int optionY(int row) {
         return this.height / 16 + Math.max(this.height / 16 * row, 30 * row);
     }
 
-    protected PressAction bindSlotAction() {
-        return (final ButtonWidget button) ->
-                MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_BIND_SLOT, new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
+    protected PressCallback<ScalableWidget> bindSlotAction() {
+        return (ScalableWidget button) -> ClientPlayNetworking.send(Packets.serverBindSlot, new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
     }
 
-    protected PressAction cycleStyleAction(final int change) {
-        return (final ButtonWidget button) -> this.cycleStyle(change);
+    protected PressCallback<ScalableWidget> cycleStyleAction(int change) {
+        return (ScalableWidget button) -> this.cycleStyle(change);
     }
 
-    protected PressAction resetAction(final Category category) {
-        return (final ButtonWidget button) ->
-                MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_RESET, new ExtendedPacketBuffer(this.storage).writeIdentifier(category.getIdentifier()));
+    protected PressCallback<ScalableWidget> resetAction(Category category) {
+        return (ScalableWidget button) -> ClientPlayNetworking.send(Packets.serverReset, new ExtendedPacketBuffer(this.storage).writeIdentifier(category.identifier()));
     }
 }

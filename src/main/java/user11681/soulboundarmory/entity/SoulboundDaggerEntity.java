@@ -1,23 +1,19 @@
 package user11681.soulboundarmory.entity;
 
 import javax.annotation.Nonnull;
-import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.Stats;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.util.math.MathHelper;
@@ -27,13 +23,14 @@ import user11681.soulboundarmory.component.Components;
 import user11681.soulboundarmory.component.soulbound.item.StorageType;
 import user11681.soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
 import user11681.soulboundarmory.component.soulbound.player.SoulboundItemUtil;
+import user11681.soulboundarmory.component.statistics.StatisticType;
 import user11681.soulboundarmory.registry.Skills;
 
-import static net.minecraft.entity.projectile.ProjectileEntity.PickupPermission.ALLOWED;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTACK_DAMAGE;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTACK_SPEED;
-import static user11681.soulboundarmory.entity.EntityTypes.SOULBOUND_DAGGER_ENTITY;
+import static user11681.soulboundarmory.component.statistics.StatisticType.attackDamage;
+import static user11681.soulboundarmory.component.statistics.StatisticType.attackSpeed;
+import static user11681.soulboundarmory.entity.EntityTypes.soulboundDagger;
 
+@SuppressWarnings("EntityConstructor")
 public class SoulboundDaggerEntity extends ExtendedProjectile {
     public ItemStack itemStack;
     protected boolean spawnClone;
@@ -44,11 +41,8 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     protected int ticksInGround;
     protected DaggerStorage storage;
 
-    public SoulboundDaggerEntity(final World world) {
-        super(world);
-    }
-
     public SoulboundDaggerEntity(final SoulboundDaggerEntity original, final boolean spawnClone) {
+        //noinspection ConstantConditions
         this(original.world, original.getOwner(), original.itemStack, spawnClone, original.getVelocityD(), original.getVelocityD());
 
         this.isClone = true;
@@ -63,12 +57,12 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     public SoulboundDaggerEntity(final World world, final Entity shooter, final ItemStack itemStack,
                                  final boolean spawnClone, final double velocity, final double maxVelocity) {
-        super(SOULBOUND_DAGGER_ENTITY, shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ(), world);
+        super(soulboundDagger, shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ(), world);
 
         this.ticksToSeek = -1;
 
         if (shooter instanceof PlayerEntity) {
-            this.pickupType = ALLOWED;
+            this.pickupType = PickupPermission.ALLOWED;
         }
 
         this.itemStack = itemStack;
@@ -80,20 +74,17 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         this.setDamage();
     }
 
-    public <T extends ProjectileEntity> SoulboundDaggerEntity(final EntityType<T> entityType, final World world) {
+    public <T extends SoulboundDaggerEntity> SoulboundDaggerEntity(final EntityType<T> entityType, final World world) {
         super(entityType, world);
     }
 
     public void setDamage() {
-        this.setDamage(this.storage.getAttribute(ATTACK_DAMAGE) * this.attackDamageRatio);
+        this.setDamage(this.storage.getAttribute(attackDamage) * this.attackDamageRatio);
     }
 
     @Override
-    @Nonnull
-    protected ItemStack asItemStack() {
-        return this.itemStack != null
-                ? this.itemStack
-                : this.getOwner() instanceof PlayerEntity
+        protected ItemStack asItemStack() {
+        return this.storage != null
                 ? this.storage.getItemStack()
                 : ItemStack.EMPTY;
     }
@@ -102,7 +93,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         final Entity owner = this.getOwner();
 
         if (owner instanceof PlayerEntity) {
-            this.storage = Components.WEAPON_COMPONENT.get(owner).getStorage(StorageType.DAGGER_STORAGE);
+            this.storage = Components.weaponComponent.get(owner).getStorage(StorageType.dagger);
         }
     }
 
@@ -117,7 +108,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         final Entity owner = this.getOwner();
 
         if (owner instanceof PlayerEntity) {
-            final double attackSpeed = this.storage.getAttribute(ATTACK_SPEED);
+            final double attackSpeed = this.storage.getAttribute(StatisticType.attackSpeed);
 
             if (this.storage.hasSkill(Skills.SNEAK_RETURN) && owner.isSneaking()
                     && this.getLife() >= 60 / attackSpeed
@@ -176,6 +167,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         return false;
     }
 
+/*
     @Override
     protected void onHit(final HitResult result) {
         final Vec3d pos = result.getPos();
@@ -191,6 +183,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
             this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
         }
     }
+*/
 
     @Override
     protected void onHit(final LivingEntity target) {
@@ -209,7 +202,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         if (owner instanceof PlayerEntity) {
             final PlayerEntity player = (PlayerEntity) owner;
             final DamageSource damageSource = DamageSource.thrownProjectile(this, owner);
-            final double attackDamage = this.storage.getAttribute(ATTACK_DAMAGE);
+            final double attackDamage = this.storage.getAttribute(StatisticType.attackDamage);
 
             int burnTime = 0;
 
@@ -234,7 +227,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
                 if (target.damage(damageSource, (float) attackDamage)) {
                     if (knockbackModifier > 0) {
-                        target.takeKnockback(player, knockbackModifier * 0.5F, MathHelper.sin(player.yaw * 0.017453292F), -MathHelper.cos(player.yaw * 0.017453292F));
+                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(player.yaw * 0.017453292F), -MathHelper.cos(player.yaw * 0.017453292F));
                     }
                 }
 
@@ -267,11 +260,12 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     @Override
-    public void onPlayerCollision(@Nonnull final PlayerEntity player) {
-        if (!this.world.isClient && player.getUuid().equals(this.ownerUuid)
+    public void onPlayerCollision(final PlayerEntity player) {
+        if (!this.world.isClient
+                && player == this.getOwner()
                 && (this.isClone
                 || this.storage != null
-                && this.getLife() >= Math.max(1, 20 / this.storage.getAttribute(ATTACK_SPEED))
+                && this.getLife() >= Math.max(1, 20 / this.storage.getAttribute(attackSpeed))
                 && (player.isCreative()
                 && (SoulboundItemUtil.hasSoulWeapon(player)))
                 || SoulboundItemUtil.addItemStack(this.asItemStack(), player, true))) {
@@ -281,21 +275,19 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     @Override
-    public CompoundTag toTag(@Nonnull final CompoundTag tag) {
+    public NbtCompound toTag(final NbtCompound tag) {
         super.toTag(tag);
 
-        tag.putUuid("shooterUUID", this.ownerUuid);
-        tag.put("itemStack", this.itemStack.toTag(new CompoundTag()));
+        tag.put("itemStack", this.itemStack.toTag(new NbtCompound()));
 
         this.updateShooter();
         return tag;
     }
 
     @Override
-    public void fromTag(@Nonnull final CompoundTag tag) {
+    public void fromTag(final NbtCompound tag) {
         super.fromTag(tag);
 
-        this.ownerUuid = tag.getUuid("shooterUUID");
         this.itemStack = ItemStack.fromTag(tag.getCompound("itemStack"));
 
         this.updateShooter();

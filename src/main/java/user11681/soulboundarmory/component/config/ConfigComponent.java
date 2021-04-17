@@ -1,68 +1,61 @@
 package user11681.soulboundarmory.component.config;
 
-import nerdhub.cardinal.components.api.ComponentType;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
-import user11681.soulboundarmory.component.Components;
+import net.minecraft.nbt.NbtCompound;
+import user11681.soulboundarmory.SoulboundArmoryClient;
+import user11681.soulboundarmory.config.Configuration;
+import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.registry.Packets;
 
-import javax.annotation.Nonnull;
-import user11681.soulboundarmory.network.common.ExtendedPacketBuffer;
-
-public class ConfigComponent implements IConfigComponent {
+public class ConfigComponent implements AutoSyncedComponent {
     protected PlayerEntity player;
     protected boolean addToOffhand;
     protected boolean levelupNotifications;
 
+    @SuppressWarnings({"VariableUseSideOnly", "LocalVariableDeclarationSideOnly"})
     public ConfigComponent(final PlayerEntity player) {
         this.player = player;
 
-        if (this.player.world.isClient) {
-            ClientSidePacketRegistry.INSTANCE.sendToServer(Packets.C2S_CONFIG, new ExtendedPacketBuffer());
+        if (player.world.isClient) {
+            final Configuration.Client configuration = Configuration.instance().client;
+
+            this.addToOffhand = configuration.addToOffhand;
+            this.levelupNotifications = configuration.levelupNotifications;
         }
     }
 
-    @Override
     public boolean getAddToOffhand() {
         return this.addToOffhand;
     }
 
-    @Override
     public void setAddToOffhand(final boolean addToOffhand) {
         this.addToOffhand = addToOffhand;
     }
 
-    @Override
     public boolean getLevelupNotifications() {
         return this.levelupNotifications;
     }
 
-    @Override
     public void setLevelupNotifications(final boolean levelupNotifications) {
         this.levelupNotifications = levelupNotifications;
     }
 
     @Override
-    @Nonnull
+    public void writeToNbt(final NbtCompound tag) {
+        tag.putBoolean("addToOffhand", this.addToOffhand);
+        tag.putBoolean("levelupNotifications", this.levelupNotifications);
+    }
+
+    @Environment(EnvType.CLIENT)
+    @Override
+    public void readFromNbt(final NbtCompound tag) {
+        SoulboundArmoryClient.packetRegistry.sendToServer(Packets.serverConfig, new ExtendedPacketBuffer().writeBoolean(this.addToOffhand).writeBoolean(this.levelupNotifications));
+    }
+
     public PlayerEntity getEntity() {
         return this.player;
-    }
-
-    @Override
-    @Nonnull
-    public ComponentType<IConfigComponent> getComponentType() {
-        return Components.CONFIG_COMPONENT;
-    }
-
-    @Override
-    public void fromTag(@Nonnull final CompoundTag compoundTag) {
-
-    }
-
-    @Override
-    @Nonnull
-    public CompoundTag toTag(@Nonnull final CompoundTag compoundTag) {
-        return compoundTag;
     }
 }

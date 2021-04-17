@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import user11681.soulboundarmory.Main;
+import user11681.soulboundarmory.SoulboundArmory;
 
 public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     protected final Class<T> clazz;
@@ -26,7 +26,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
                     values.add(value);
                 }
             } catch (final IllegalAccessException exception) {
-                Main.LOGGER.error(String.format("Cannot access enum %s:", field.getName()), exception);
+                SoulboundArmory.logger.error(String.format("Cannot access enum %s:", field.getName()), exception);
             }
         }
     }
@@ -40,7 +40,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
                 //noinspection unchecked
                 values.add((T) field.get(null));
             } catch (final IllegalAccessException exception) {
-                Main.LOGGER.error(String.format("Cannot access enum %s:", field.getName()), exception);
+                SoulboundArmory.logger.error(String.format("Cannot access enum %s:", field.getName()), exception);
             }
         }
     }

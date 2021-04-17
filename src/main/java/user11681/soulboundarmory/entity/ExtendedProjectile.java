@@ -3,34 +3,27 @@ package user11681.soulboundarmory.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.world.World;
+import user11681.soulboundarmory.asm.access.entity.PersistentProjectileEntityAccess;
 import user11681.usersmanual.math.MathUtil;
-import user11681.soulboundarmory.mixin.duck.entity.ProjectileEntityDuck;
 
-public abstract class ExtendedProjectile extends ProjectileEntity {
-    public ExtendedProjectile(final World world) {
-        super(EntityType.ARROW, world);
-    }
-
-    protected ExtendedProjectile(final EntityType<? extends ProjectileEntity> type, final double x, final double y,
-                                 final double z,
-                                 final World world) {
+@SuppressWarnings("EntityConstructor")
+public abstract class ExtendedProjectile extends PersistentProjectileEntity {
+    protected ExtendedProjectile(final EntityType<? extends PersistentProjectileEntity> type, final double x, final double y, final double z, final World world) {
         super(type, x, y, z, world);
     }
 
-    protected ExtendedProjectile(final EntityType<? extends ProjectileEntity> type, final LivingEntity owner,
-                                 final World world) {
+    protected ExtendedProjectile(final EntityType<? extends PersistentProjectileEntity> type, final LivingEntity owner, final World world) {
         super(type, owner, world);
     }
 
-    public ExtendedProjectile(final EntityType<? extends ProjectileEntity> type, final World world) {
+    public ExtendedProjectile(final EntityType<? extends PersistentProjectileEntity> type, final World world) {
         super(type, world);
     }
 
-    public ExtendedProjectile(final World world, final EntityType<? extends ProjectileEntity> entityType,
-                              final double x, final double y, final double z) {
-        super(entityType, x, y, z, world);
+    public ExtendedProjectile(final World world, final EntityType<? extends PersistentProjectileEntity> type, final double x, final double y, final double z) {
+        super(type, x, y, z, world);
     }
 
     public double displacementTo(final Entity entity) {
@@ -69,6 +62,6 @@ public abstract class ExtendedProjectile extends ProjectileEntity {
     }
 
     protected int getLife() {
-        return ((ProjectileEntityDuck) this).getLife();
+        return ((PersistentProjectileEntityAccess) this).getLife();
     }
 }

@@ -1,8 +1,10 @@
 package user11681.soulboundarmory.item;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -12,8 +14,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import user11681.soulboundarmory.component.soulbound.item.weapon.StaffStorage;
 import user11681.soulboundarmory.entity.SoulboundFireballEntity;
-
-import javax.annotation.Nonnull;
 
 public class SoulboundStaffItem extends StaffItem implements SoulboundWeaponItem {
     public SoulboundStaffItem() {
@@ -45,8 +45,7 @@ public class SoulboundStaffItem extends StaffItem implements SoulboundWeaponItem
     }
 
     @Override
-    @Nonnull
-    public Multimap<String, EntityAttributeModifier> getModifiers(@Nonnull final EquipmentSlot slot) {
-        return this.putReach(super.getModifiers(slot), slot, 0);
+    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(final EquipmentSlot slot) {
+        return HashMultimap.create();
     }
 }

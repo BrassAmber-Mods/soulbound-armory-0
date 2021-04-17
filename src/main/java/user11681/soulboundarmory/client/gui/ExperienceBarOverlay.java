@@ -7,26 +7,29 @@ import java.util.Arrays;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import user11681.soulboundarmory.MainClient;
-import user11681.soulboundarmory.client.i18n.Mappings;
-import user11681.soulboundarmory.client.texture.ExperienceBarTexture;
+import user11681.soulboundarmory.SoulboundArmoryClient;
+import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.component.soulbound.item.StorageType;
+import user11681.soulboundarmory.component.statistics.StatisticType;
 import user11681.soulboundarmory.config.Configuration;
 import user11681.soulboundarmory.item.SoulboundItem;
-import user11681.usersmanual.client.gui.screen.ExtendedScreen;
+import user11681.spun.client.gui.screen.SpunScreen;
+import user11681.spun.client.gui.widget.scalable.ScalableWidget;
 
-import static user11681.soulboundarmory.MainClient.CLIENT;
-import static user11681.soulboundarmory.component.statistics.StatisticType.EXPERIENCE;
-import static user11681.soulboundarmory.component.statistics.StatisticType.LEVEL;
+import static user11681.soulboundarmory.component.statistics.StatisticType.experience;
 
 @Environment(EnvType.CLIENT)
-public class ExperienceBarOverlay extends ExtendedScreen {
-    public static NativeImageBackedTexture TEXTURE = new ExperienceBarTexture(256, 256);
+public class ExperienceBarOverlay extends SpunScreen {
+    protected static final Configuration.Client configuration = Configuration.instance().client;
+    protected static final Configuration.Client.Colors colors = configuration.colors;
+
+    protected final ScalableWidget widget = ExperienceBarWidgetSupplier.COLORED_EXPERIENCE_BAR.get();
 
     protected ItemStack itemStack;
 
@@ -62,12 +65,12 @@ public class ExperienceBarOverlay extends ExtendedScreen {
             final int x = tooltipX + 4;
             final int y = tooltipY + this.row * 10;
 
-            this.draw(x, y, this.length);
+            this.render(x, y, this.length);
         }
     }
 
     public boolean update(final ItemStack itemStack) {
-        if (this.update(ItemStorage.get(MainClient.getPlayer(), itemStack.getItem()))) {
+        if (this.update(ItemStorage.get(SoulboundArmoryClient.getPlayer(), itemStack.getItem()))) {
             if (itemStack.getItem() instanceof SoulboundItem && this.itemStack != itemStack) {
                 this.itemStack = itemStack;
             }
@@ -84,13 +87,17 @@ public class ExperienceBarOverlay extends ExtendedScreen {
         return this.component != null;
     }
 
-    public boolean draw() {
-        final PlayerEntity player = MainClient.getPlayer();
+    public void update() {
+
+    }
+
+    public boolean render() {
+        final PlayerEntity player = SoulboundArmoryClient.getPlayer();
         final Window window = CLIENT.getWindow();
 
         for (final ItemStack itemStack : player.getItemsHand()) {
-            if (this.update(ItemStorage.get(player, itemStack.getItem()))) {
-                this.draw((window.getScaledWidth() - 182) / 2, window.getScaledHeight() - 29, 182);
+            if (this.update(StorageType.get(player, itemStack.getItem()))) {
+                this.render((window.getScaledWidth() - 182) / 2, window.getScaledHeight() - 29, 182);
 
                 return true;
             }
@@ -99,11 +106,10 @@ public class ExperienceBarOverlay extends ExtendedScreen {
         return false;
     }
 
-    public void draw(final int x, final int y, final int width) {
-        final Configuration.Client configuration = Configuration.instance().client;
-
-        if (configuration.colors.alpha >= 26) {
-            final Color color = new Color(configuration.colors.red, configuration.colors.green, configuration.colors.blue, configuration.colors.alpha);
+    public void render(final int x, final int y, final int width) {
+        if (colors.alpha > 3) {
+            final MatrixStack stack = new MatrixStack();
+            final Color color = new Color(colors.red, colors.green, colors.blue, colors.alpha);
             final float[] components = color.getComponents(null);
             Style style = configuration.style;
 
@@ -111,30 +117,29 @@ public class ExperienceBarOverlay extends ExtendedScreen {
                 style = Style.EXPERIENCE;
             }
 
-            final float ratio = (float) this.component.getDatum(EXPERIENCE) / this.component.getNextLevelXP();
+            final float ratio = (float) this.component.getDatum(experience) / this.component.getNextLevelXP();
             final float effectiveWidth = ratio * width;
             final int middleU = (int) Math.min(4, effectiveWidth);
 
-            TEXTURE.bindTexture();
-            RenderSystem.color4f(components[0], components[1], components[2], components[3]);
+            this.widget.color4f(components[0], components[1], components[2], components[3]);
 
-            this.blitHorizontallyInterpolated(x, y, 0, style.v, 4, 177, 182, width, 5);
-            this.blitHorizontallyInterpolated(x, y, 0, style.v + 5, middleU, effectiveWidth < 4 ? middleU : (int) (ratio * 177), (int) (ratio * 182), this.component.canLevelUp()
+            this.widget.renderButton(stack, x, y, 0, style.v, 4, 177, 182, width, 5);
+            this.widget.renderButton(stack, x, y, 0, style.v + 5, middleU, effectiveWidth < 4 ? middleU : (int) (ratio * 177), (int) (ratio * 182), this.component.canLevelUp()
                     ? Math.min(width, (int) (ratio * width))
                     : width, 5);
 
-            final int level = this.component.getDatum(LEVEL);
+            final int level = this.component.getDatum(StatisticType.level);
 
             if (level > 0) {
                 final String levelString = String.format("%d", level);
-                final int levelX = x + (width - TEXT_RENDERER.getStringWidth(levelString)) / 2;
+                final int levelX = x + (width - this.textRenderer.getWidth(levelString)) / 2;
                 final int levelY = y - 6;
 
-                TEXT_RENDERER.draw(levelString, levelX + 1, levelY, 0);
-                TEXT_RENDERER.draw(levelString, levelX - 1, levelY, 0);
-                TEXT_RENDERER.draw(levelString, levelX, levelY + 1, 0);
-                TEXT_RENDERER.draw(levelString, levelX, levelY - 1, 0);
-                TEXT_RENDERER.draw(levelString, levelX, levelY, color.getRGB());
+                this.textRenderer.draw(stack, levelString, levelX + 1, levelY, 0);
+                this.textRenderer.draw(stack, levelString, levelX - 1, levelY, 0);
+                this.textRenderer.draw(stack, levelString, levelX, levelY + 1, 0);
+                this.textRenderer.draw(stack, levelString, levelX, levelY - 1, 0);
+                this.textRenderer.draw(stack, levelString, levelX, levelY, color.getRGB());
             }
 
             RenderSystem.disableLighting();
@@ -142,9 +147,9 @@ public class ExperienceBarOverlay extends ExtendedScreen {
     }
 
     public enum Style {
-        EXPERIENCE(64, Mappings.EXPERIENCE_STYLE),
-        BOSS(74, Mappings.BOSS_STYLE),
-        HORSE(84, Mappings.HORSE_STYLE);
+        EXPERIENCE(64, Translations.xpStyle),
+        BOSS(74, Translations.bossStyle),
+        HORSE(84, Translations.horseStyle);
 
         public static final List<Style> STYLES = new ArrayList<>(Arrays.asList(Style.values()));
         public static final int AMOUNT = STYLES.size();
@@ -157,9 +162,8 @@ public class ExperienceBarOverlay extends ExtendedScreen {
             this.text = text;
         }
 
-        @Override
-        public String toString() {
-            return this.text.asFormattedString();
+        public Text getText() {
+            return this.text;
         }
     }
 }

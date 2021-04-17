@@ -28,14 +28,12 @@ public class SoulboundGreatswordItem extends SoulboundMeleeWeaponItem {
     }
 
     @Override
-    @Nonnull
-    public UseAction getUseAction(@Nonnull final ItemStack stack) {
+        public UseAction getUseAction(final ItemStack stack) {
         return UseAction.BOW;
     }
 
     @Override
-    @Nonnull
-    public TypedActionResult<ItemStack> use(final World world, @Nonnull final PlayerEntity player, @Nonnull final Hand hand) {
+        public TypedActionResult<ItemStack> use(final World world, final PlayerEntity player, final Hand hand) {
         if (!world.isClient && GreatswordStorage.get(player).hasSkill(Skills.LEAPING)) {
             player.setCurrentHand(hand);
 
@@ -46,7 +44,7 @@ public class SoulboundGreatswordItem extends SoulboundMeleeWeaponItem {
     }
 
     @Override
-    public void onStoppedUsing(@Nonnull final ItemStack itemStack, @Nonnull final World world, @Nonnull final LivingEntity player, final int timeLeft) {
+    public void onStoppedUsing(final ItemStack itemStack, final World world, final LivingEntity player, final int timeLeft) {
         final int timeTaken = 200 - timeLeft;
 
         if (timeTaken > 5) {
@@ -62,7 +60,7 @@ public class SoulboundGreatswordItem extends SoulboundMeleeWeaponItem {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void inventoryTick(@Nonnull final ItemStack itemStack, final World world, @Nonnull final Entity entity, final int itemSlot, final boolean isSelected) {
+    public void inventoryTick(final ItemStack itemStack, final World world, final Entity entity, final int itemSlot, final boolean isSelected) {
         if (world.isClient && isSelected) {
             final ClientPlayerEntity player = (ClientPlayerEntity) entity;
             final ItemStack activeStack = player.getActiveItem();

@@ -1,47 +1,47 @@
 package user11681.soulboundarmory.component.entity;
 
-import nerdhub.cardinal.components.api.ComponentType;
+import dev.onyxstudios.cca.api.v3.component.ComponentProvider;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import java.util.function.Consumer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.Projectile;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import user11681.soulboundarmory.component.Components;
 import user11681.soulboundarmory.entity.damage.ExposedDamageSource;
+import user11681.soulboundarmory.util.Util;
 
-import javax.annotation.Nonnull;
+public class EntityData implements AutoSyncedComponent {
+    protected final Entity entity;
 
-import static user11681.soulboundarmory.component.Components.ENTITY_DATA;
-
-public class EntityData implements IEntityData {
-    private final Entity entity;
-    private int freezeTicks;
-    private int blockTeleportTicks;
+    protected int freezeTicks;
+    protected int blockTeleportTicks;
 
     public EntityData(final Entity entity) {
         this.entity = entity;
     }
 
-    @Nonnull
-    @Override
+    public static void ifPresent(final Entity entity, final Consumer<EntityData> consumer) {
+        Components.entityData.maybeGet((ComponentProvider) entity).ifPresent(consumer);
+    }
+
     public Entity getEntity() {
         return this.entity;
     }
 
-    @Override
     public boolean cannotTeleport() {
         return this.blockTeleportTicks > 0;
     }
 
-    @Override
     public void blockTeleport(final int ticks) {
         this.blockTeleportTicks = ticks;
     }
 
-    @Override
     public void freeze(final PlayerEntity freezer, final int ticks, final float damage) {
         if (!freezer.world.isClient) {
             ((ServerWorld) freezer.world).spawnParticles(
@@ -55,25 +55,27 @@ public class EntityData implements IEntityData {
             }
 
             if (this.entity instanceof LivingEntity) {
-                this.entity.damage(ExposedDamageSource.player(freezer).unblockable.set(true), damage);
+                this.entity.damage(ExposedDamageSource.player(freezer).unblockable(), damage);
             }
 
             if (this.entity instanceof CreeperEntity) {
                 ((CreeperEntity) this.entity).setFuseSpeed(-1);
             }
 
-            if (this.entity instanceof Projectile) {
+            if (this.entity instanceof ProjectileEntity) {
                 this.entity.setVelocity(0, this.entity.getVelocity().y, 0);
             }
         }
     }
 
-    @Override
+    public boolean canBeFrozen() {
+        return (!(this.entity instanceof PlayerEntity) || Util.getServer().isPvpEnabled()) && this.entity.isAlive();
+    }
+
     public boolean isFrozen() {
         return this.freezeTicks > 0 && this.entity.isAlive() && !this.entity.isOnFire();
     }
 
-    @Override
     public void tick() {
         if (!this.entity.world.isClient) {
             if (this.isFrozen() && this.entity instanceof LivingEntity) {
@@ -95,21 +97,14 @@ public class EntityData implements IEntityData {
     }
 
     @Override
-    public ComponentType<?> getComponentType() {
-        return ENTITY_DATA;
-    }
-
-    public void fromTag(final CompoundTag tag) {
+    public void readFromNbt(final NbtCompound tag) {
         this.freezeTicks = tag.getInt("freezeTicks");
         this.blockTeleportTicks = tag.getInt("blockTeleportTicks");
     }
 
-    @Nonnull
     @Override
-    public CompoundTag toTag(final CompoundTag tag) {
+    public void writeToNbt(final NbtCompound tag) {
         tag.putInt("freezeTicks", this.freezeTicks);
         tag.putInt("blockTeleportTicks", this.blockTeleportTicks);
-
-        return tag;
     }
 }

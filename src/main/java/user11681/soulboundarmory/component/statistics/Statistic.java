@@ -3,7 +3,7 @@ package user11681.soulboundarmory.component.statistics;
 import java.math.BigDecimal;
 import javax.annotation.Nonnull;
 import nerdhub.cardinal.components.api.util.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class Statistic extends Number implements NbtSerializable {
     protected final Category category;
@@ -29,12 +29,16 @@ public class Statistic extends Number implements NbtSerializable {
         return String.format("Statistic{name: %s, type: %s, min: %.3f, max: %.3f, value: %s}", this.type, this.category, this.min, this.max, this.value.toString());
     }
 
-    public StatisticType getType() {
+    public StatisticType type() {
         return this.type;
     }
 
     public Category getCategory() {
         return this.category;
+    }
+
+    public boolean isAboveMin() {
+        return this.greaterThan(this.min);
     }
 
     public double getMin() {
@@ -45,12 +49,16 @@ public class Statistic extends Number implements NbtSerializable {
         this.min = min;
 
         if (this.doubleValue() < min) {
-            this.setValue(min);
+            this.setToMin();
         }
     }
 
-    public boolean isAboveMin() {
-        return this.greaterThan(this.min);
+    public void setToMin() {
+        this.setValue(this.min);
+    }
+
+    public boolean isBelowMax() {
+        return this.lessThan(this.max);
     }
 
     public double getMax() {
@@ -61,12 +69,12 @@ public class Statistic extends Number implements NbtSerializable {
         this.max = max;
 
         if (this.doubleValue() > max) {
-            this.setValue(max);
+            this.setToMax();
         }
     }
 
-    public boolean isBelowMax() {
-        return this.lessThan(this.max);
+    public void setToMax() {
+        this.setValue(this.max);
     }
 
     public int getPoints() {
@@ -134,16 +142,25 @@ public class Statistic extends Number implements NbtSerializable {
     }
 
     public void add(final Number number) {
-        this.value = this.value.add(number instanceof BigDecimal ? (BigDecimal) number : BigDecimal.valueOf(number.doubleValue()));
+        final double currentValue = this.value.doubleValue();
+        final double addition = number.doubleValue();
+
+        if (currentValue + addition < this.min) {
+            this.setToMin();
+        } else if (currentValue + addition > this.max) {
+            this.setToMax();
+        } else {
+            this.value = this.value.add(number instanceof BigDecimal ? (BigDecimal) number : BigDecimal.valueOf(addition));
+        }
     }
 
-    public CompoundTag toTag() {
-        return this.toTag(new CompoundTag());
+    public void reset() {
+        this.setToMin();
+        this.setPoints(0);
     }
 
-    @Nonnull
-    @Override
-    public CompoundTag toTag(final CompoundTag tag) {
+        @Override
+    public NbtCompound toTag(final NbtCompound tag) {
         tag.putDouble("min", this.min);
         tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
@@ -153,15 +170,10 @@ public class Statistic extends Number implements NbtSerializable {
     }
 
     @Override
-    public void fromTag(final CompoundTag tag) {
+    public void fromTag(final NbtCompound tag) {
         this.min = tag.getDouble("min");
         this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));
         this.points = tag.getInt("points");
-    }
-
-    public void reset() {
-        this.setValue(this.min);
-        this.setPoints(0);
     }
 }

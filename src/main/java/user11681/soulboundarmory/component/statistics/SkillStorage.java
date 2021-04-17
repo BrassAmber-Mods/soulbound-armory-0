@@ -1,38 +1,24 @@
 package user11681.soulboundarmory.component.statistics;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import javax.annotation.Nonnull;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import nerdhub.cardinal.components.api.util.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import user11681.soulboundarmory.registry.Registries;
+import org.jetbrains.annotations.NotNull;
 import user11681.soulboundarmory.skill.Skill;
 import user11681.soulboundarmory.skill.SkillContainer;
 
-public class SkillStorage implements Iterable<Skill>, NbtSerializable {
-    private final Map<Skill, SkillContainer> skills;
-
+public class SkillStorage extends Object2ObjectOpenHashMap<Skill, SkillContainer> implements NbtSerializable {
     public SkillStorage(final Skill... skills) {
-        this.skills = new HashMap<>();
+        super();
 
         for (final Skill skill : skills) {
-            this.skills.put(skill, new SkillContainer(skill, this));
+            this.put(skill, new SkillContainer(skill, this));
         }
     }
 
-    public Map<Skill, SkillContainer> get() {
-        return this.skills;
-    }
-
-    public SkillContainer get(final Skill skill) {
-        return this.skills.get(skill);
-    }
-
-    public void put(SkillContainer skill) {
-        this.skills.put(skill.getSkill(), skill);
+    public void add(SkillContainer skill) {
+        this.put(skill.getSkill(), skill);
     }
 
     public boolean contains(final Skill skill) {
@@ -48,21 +34,16 @@ public class SkillStorage implements Iterable<Skill>, NbtSerializable {
     }
 
     public void reset() {
-        for (final SkillContainer container : this.skills.values()) {
+        for (final SkillContainer container : this.values()) {
             if (container.hasDependencies())
-                this.skills.clear();
+                this.clear();
         }
     }
 
-    public Collection<SkillContainer> values() {
-        return this.skills.values();
-    }
-
-    @Nonnull
-    public CompoundTag toTag(@Nonnull final CompoundTag tag) {
+    public @NotNull NbtCompound toTag(final NbtCompound tag) {
         for (final SkillContainer skill : this.values()) {
             if (skill != null) {
-                tag.put(skill.getSkill().getIdentifier().toString(), skill.toTag(new CompoundTag()));
+                tag.put(skill.getSkill().getIdentifier().toString(), skill.toTag(new NbtCompound()));
             }
         }
 
@@ -70,19 +51,13 @@ public class SkillStorage implements Iterable<Skill>, NbtSerializable {
     }
 
     @Override
-    public void fromTag(final CompoundTag tag) {
+    public void fromTag(final NbtCompound tag) {
         for (final String identifier : tag.getKeys()) {
-            final SkillContainer skill = this.get(Registries.SKILL.get(new Identifier(identifier)));
+            final SkillContainer skill = this.get(Skill.skill.get(new Identifier(identifier)));
 
             if (skill != null) {
                 skill.fromTag(tag.getCompound(identifier));
             }
         }
-    }
-
-    @Nonnull
-    @Override
-    public Iterator<Skill> iterator() {
-        return this.skills.keySet().iterator();
     }
 }

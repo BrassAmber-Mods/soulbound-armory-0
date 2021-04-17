@@ -1,160 +1,159 @@
 package user11681.soulboundarmory.component.soulbound.item.weapon;
 
+import com.google.common.collect.Multimap;
 import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import user11681.soulboundarmory.Main;
-import user11681.soulboundarmory.client.i18n.Mappings;
+import net.minecraft.util.Formatting;
+import user11681.soulboundarmory.client.gui.screen.tab.StatisticEntry;
+import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.component.Components;
 import user11681.soulboundarmory.component.soulbound.item.StorageType;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundComponentBase;
+import user11681.soulboundarmory.component.soulbound.player.SoulboundComponent;
 import user11681.soulboundarmory.component.statistics.EnchantmentStorage;
 import user11681.soulboundarmory.component.statistics.SkillStorage;
 import user11681.soulboundarmory.component.statistics.Statistic;
 import user11681.soulboundarmory.component.statistics.StatisticType;
 import user11681.soulboundarmory.component.statistics.Statistics;
+import user11681.soulboundarmory.entity.SoulboundArmoryAttributes;
 import user11681.soulboundarmory.registry.Skills;
-import user11681.usersmanual.collections.ArrayMap;
-import user11681.usersmanual.collections.CollectionUtil;
-import user11681.usersmanual.collections.OrderedArrayMap;
-import user11681.usersmanual.item.ItemModifiers;
+import user11681.soulboundarmory.text.StringableText;
+import user11681.usersmanual.entity.AttributeModifierIdentifiers;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
+import static net.minecraft.entity.EquipmentSlot.MAINHAND;
 import static net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADDITION;
-import static user11681.soulboundarmory.Main.IMPACT;
-import static user11681.soulboundarmory.component.statistics.Category.ATTRIBUTE;
-import static user11681.soulboundarmory.component.statistics.Category.DATUM;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTACK_DAMAGE;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTACK_RANGE;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTACK_SPEED;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTRIBUTE_POINTS;
-import static user11681.soulboundarmory.component.statistics.StatisticType.CRITICAL_STRIKE_PROBABILITY;
-import static user11681.soulboundarmory.component.statistics.StatisticType.EFFICIENCY;
-import static user11681.soulboundarmory.component.statistics.StatisticType.ENCHANTMENT_POINTS;
-import static user11681.soulboundarmory.component.statistics.StatisticType.EXPERIENCE;
-import static user11681.soulboundarmory.component.statistics.StatisticType.KNOCKBACK;
-import static user11681.soulboundarmory.component.statistics.StatisticType.LEVEL;
-import static user11681.soulboundarmory.component.statistics.StatisticType.REACH;
-import static user11681.soulboundarmory.component.statistics.StatisticType.SKILL_POINTS;
-import static user11681.soulboundarmory.component.statistics.StatisticType.SPENT_ATTRIBUTE_POINTS;
-import static user11681.soulboundarmory.component.statistics.StatisticType.SPENT_ENCHANTMENT_POINTS;
+import static user11681.soulboundarmory.SoulboundArmory.impact;
+import static user11681.soulboundarmory.component.statistics.Category.attribute;
+import static user11681.soulboundarmory.component.statistics.Category.datum;
+import static user11681.soulboundarmory.component.statistics.StatisticType.attackDamage;
+import static user11681.soulboundarmory.component.statistics.StatisticType.attackRange;
+import static user11681.soulboundarmory.component.statistics.StatisticType.attackSpeed;
+import static user11681.soulboundarmory.component.statistics.StatisticType.attributePoints;
+import static user11681.soulboundarmory.component.statistics.StatisticType.criticalStrikeProbability;
+import static user11681.soulboundarmory.component.statistics.StatisticType.efficiency;
+import static user11681.soulboundarmory.component.statistics.StatisticType.enchantmentPoints;
+import static user11681.soulboundarmory.component.statistics.StatisticType.experience;
+import static user11681.soulboundarmory.component.statistics.StatisticType.level;
+import static user11681.soulboundarmory.component.statistics.StatisticType.reach;
+import static user11681.soulboundarmory.component.statistics.StatisticType.skillPoints;
+import static user11681.soulboundarmory.component.statistics.StatisticType.spentAttributePoints;
+import static user11681.soulboundarmory.component.statistics.StatisticType.spentEnchantmentPoints;
+
+;
 
 public class DaggerStorage extends WeaponStorage<DaggerStorage> {
-    public DaggerStorage(final SoulboundComponentBase component, final Item item) {
+    public DaggerStorage(SoulboundComponent<?> component, Item item) {
         super(component, item);
 
         this.statistics = Statistics.create()
-                .category(DATUM, EXPERIENCE, LEVEL, SKILL_POINTS, ATTRIBUTE_POINTS, ENCHANTMENT_POINTS, SPENT_ATTRIBUTE_POINTS, SPENT_ENCHANTMENT_POINTS)
-                .category(ATTRIBUTE, ATTACK_SPEED, ATTACK_DAMAGE, CRITICAL_STRIKE_PROBABILITY, EFFICIENCY, ATTACK_RANGE, REACH)
-                .min(2, ATTACK_SPEED, ATTACK_DAMAGE, REACH)
-                .max(1, CRITICAL_STRIKE_PROBABILITY).build();
+                .category(datum, experience, level, skillPoints, attributePoints, enchantmentPoints, spentAttributePoints, spentEnchantmentPoints)
+                .category(attribute, attackSpeed, attackDamage, criticalStrikeProbability, efficiency, attackRange, reach)
+                .min(2, attackSpeed, attackDamage, reach)
+                .max(1, criticalStrikeProbability).build();
         this.enchantments = new EnchantmentStorage((final Enchantment enchantment) -> {
             final String name = enchantment.getName(1).asString().toLowerCase();
 
-            return enchantment.isAcceptableItem(new ItemStack(this.item)) && !CollectionUtil.hashSet(UNBREAKING, VANISHING_CURSE).contains(enchantment)
-                    && (enchantment == IMPACT || !name.contains("soulbound")) && !name.contains("holding")
+            return enchantment.isAcceptableItem(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
+                    && (enchantment == impact || !name.contains("soulbound")) && !name.contains("holding")
                     && !name.contains("mending");
         });
-        this.skillStorage = new SkillStorage(Skills.NOURISHMENT, Skills.THROWING, Skills.SHADOW_CLONE, Skills.RETURN, Skills.SNEAK_RETURN);
+        this.skills = new SkillStorage(Skills.NOURISHMENT, Skills.THROWING, Skills.SHADOW_CLONE, Skills.RETURN, Skills.SNEAK_RETURN);
     }
 
     public static DaggerStorage get(final Entity entity) {
-        return Components.WEAPON_COMPONENT.get(entity).getStorage(StorageType.DAGGER_STORAGE);
+        return Components.weaponComponent.get(entity).getStorage(StorageType.dagger);
     }
 
     @Override
     public Text getName() {
-        return Mappings.SOULBOUND_DAGGER;
+        return Translations.soulboundDagger;
     }
 
     @Override
     public StorageType<DaggerStorage> getType() {
-        return StorageType.DAGGER_STORAGE;
+        return StorageType.dagger;
     }
 
     @Override
     public Item getConsumableItem() {
-        return Items.WOODEN_SWORD;
-    }
-
-    public Map<String, EntityAttributeModifier> getModifiers() {
-        return CollectionUtil.hashMap(
-                new String[]{
-                        EntityAttributes.ATTACK_SPEED.getId(),
-                        EntityAttributes.ATTACK_DAMAGE.getId(),
-                        ReachEntityAttributes.ATTACK_RANGE.getId(),
-                        ReachEntityAttributes.REACH.getId()
-                },
-                new EntityAttributeModifier(ItemModifiers.ATTACK_SPEED_MODIFIER_UUID, "Weapon modifier", this.getAttributeRelative(ATTACK_SPEED), ADDITION),
-                new EntityAttributeModifier(ItemModifiers.ATTACK_DAMAGE_MODIFIER_UUID, "Weapon modifier", this.getAttributeRelative(ATTACK_DAMAGE), ADDITION),
-                new EntityAttributeModifier(Main.ATTACK_RANGE_MODIFIER_UUID, "Weapon modifier", this.getAttributeRelative(ATTACK_RANGE), ADDITION),
-                new EntityAttributeModifier(Main.REACH_MODIFIER_UUID, "Tool modifier", this.getAttributeRelative(REACH), ADDITION)
-        );
+        return Items.STONE_SWORD;
     }
 
     @Override
-    public ArrayMap<Statistic, Text> getScreenAttributes() {
-        final ArrayMap<Statistic, Text> entries = new OrderedArrayMap<>();
-        final Statistic critical = this.getStatistic(CRITICAL_STRIKE_PROBABILITY);
+    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(final Multimap<EntityAttribute, EntityAttributeModifier> modifiers, final EquipmentSlot slot) {
+        if (slot == MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.ATTACK_SPEED_MODIFIER_ID, "Weapon modifier", this.getAttributeRelative(attackSpeed), ADDITION));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.ATTACK_DAMAGE_MODIFIER_ID, "Weapon modifier", this.getAttributeRelative(attackDamage), ADDITION));
+            modifiers.put(ReachEntityAttributes.ATTACK_RANGE, new EntityAttributeModifier(SoulboundArmoryAttributes.ATTACK_RANGE_MODIFIER_UUID, "Weapon modifier", this.getAttributeRelative(attackRange), ADDITION));
+            modifiers.put(ReachEntityAttributes.REACH, new EntityAttributeModifier(SoulboundArmoryAttributes.REACH_MODIFIER_UUID, "Tool modifier", this.getAttributeRelative(reach), ADDITION));
+        }
 
-        entries.put(this.getStatistic(ATTACK_SPEED), new TranslatableText("%s%s: %s", Mappings.ATTACK_SPEED_FORMAT, Mappings.ATTACK_SPEED_NAME, this.formatStatistic(ATTACK_SPEED)));
-        entries.put(this.getStatistic(ATTACK_DAMAGE), new TranslatableText("%s%s: %s", Mappings.ATTACK_DAMAGE_FORMAT, Mappings.ATTACK_DAMAGE_NAME, this.formatStatistic(ATTACK_DAMAGE)));
-        entries.put(critical, new TranslatableText("%s%s: %s%%", Mappings.CRITICAL_STRIKE_PROBABILITY_FORMAT, Mappings.CRITICAL_STRIKE_PROBABILITY_NAME, FORMAT.format(critical.doubleValue() * 100)));
-        entries.put(this.getStatistic(EFFICIENCY), new TranslatableText("%s%s: %s", Mappings.WEAPON_EFFICIENCY_FORMAT, Mappings.WEAPON_EFFICIENCY_NAME, this.formatStatistic(EFFICIENCY)));
+        return modifiers;
+    }
+
+    @Override
+    public List<StatisticEntry> getScreenAttributes() {
+        List<StatisticEntry> entries = new ReferenceArrayList<>();
+        Statistic critical = this.getStatistic(criticalStrikeProbability);
+
+        entries.add(new StatisticEntry(this.getStatistic(attackSpeed), new StringableText("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed))));
+        entries.add(new StatisticEntry(this.getStatistic(attackDamage), new StringableText("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))));
+        entries.add(new StatisticEntry(critical, new StringableText("%s%s: %s%%", Translations.criticalStrikeProbabilityFormat, Translations.criticalStrikeProbabilityName, format.format(critical.doubleValue() * 100))));
+        entries.add(new StatisticEntry(this.getStatistic(efficiency), new StringableText("%s%s: %s", Translations.weaponEfficiencyFormat, Translations.weaponEfficiencyName, this.formatStatistic(efficiency))));
 
         return entries;
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
     public List<Text> getTooltip() {
         final NumberFormat format = DecimalFormat.getInstance();
         final List<Text> tooltip = new ArrayList<>();
 
-        tooltip.add(new LiteralText(String.format(" %s%s %s", Mappings.ATTACK_SPEED_FORMAT, format.format(this.getAttribute(ATTACK_SPEED)), Mappings.ATTACK_SPEED_NAME)));
-        tooltip.add(new LiteralText(String.format(" %s%s %s", Mappings.ATTACK_DAMAGE_FORMAT, format.format(this.getAttributeTotal(ATTACK_DAMAGE)), Mappings.ATTACK_DAMAGE_NAME)));
-        tooltip.add(new LiteralText(""));
-        tooltip.add(new LiteralText(""));
+        final StringableText text = new StringableText(" %s%s %s", format.format(this.getAttribute(attackSpeed)), Translations.attackSpeedName);
+        text.styled((final Style style) -> style.withColor(Formatting.byCode(Translations.attackSpeedFormat.getKey().charAt(1))));
+        tooltip.add(text);
+        tooltip.add(new StringableText(" %s%s %s", Translations.attackDamageFormat, format.format(this.getAttributeTotal(attackDamage)), Translations.attackDamageName));
+        tooltip.add(new StringableText(""));
+        tooltip.add(new StringableText(""));
 
-        if (this.getAttribute(CRITICAL_STRIKE_PROBABILITY) > 0) {
-            tooltip.add(new LiteralText(String.format(" %s%s%% %s", Mappings.CRITICAL_STRIKE_PROBABILITY_FORMAT, format.format(this.getAttribute(CRITICAL_STRIKE_PROBABILITY) * 100), Mappings.CRITICAL_STRIKE_PROBABILITY_NAME)));
+        if (this.getAttribute(criticalStrikeProbability) > 0) {
+            tooltip.add(new LiteralText(String.format(" %s%s%% %s", Translations.criticalStrikeProbabilityFormat, format.format(this.getAttribute(criticalStrikeProbability) * 100), Translations.criticalStrikeProbabilityName)));
         }
 
-        if (this.getAttribute(EFFICIENCY) > 0) {
-            tooltip.add(new LiteralText(String.format(" %s%s %s", Mappings.TOOL_EFFICIENCY_FORMAT, format.format(this.getAttribute(EFFICIENCY)), Mappings.TOOL_EFFICIENCY_NAME)));
+        if (this.getAttribute(efficiency) > 0) {
+            tooltip.add(new LiteralText(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.getAttribute(efficiency)), Translations.toolEfficiencyName)));
         }
 
         return tooltip;
     }
 
     @Override
-    public double getIncrease(final StatisticType statistic) {
-        return statistic == ATTACK_SPEED
+    public double getIncrease(final StatisticType statistic, final int points) {
+        return statistic == attackSpeed
                 ? 0.04
-                : statistic == ATTACK_DAMAGE
+                : statistic == attackDamage
                 ? 0.05
-                : statistic == CRITICAL_STRIKE_PROBABILITY
+                : statistic == criticalStrikeProbability
                 ? 0.02
-                : statistic == KNOCKBACK
-                ? 0.2
-                : statistic == EFFICIENCY
-                ? 0.15
+                : statistic == efficiency
+                ? 0.06
                 : 0;
     }
 }

@@ -5,9 +5,11 @@ import javax.annotation.Nonnull;
 import nerdhub.cardinal.components.api.util.NbtSerializable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import user11681.soulboundarmory.component.statistics.SkillStorage;
-import user11681.usersmanual.client.gui.screen.ExtendedScreen;
+import user11681.spun.client.gui.screen.SpunScreen;
 
 public class SkillContainer implements Comparable<SkillContainer>, NbtSerializable {
     protected final Skill skill;
@@ -92,31 +94,29 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
     }
 
     @Override
-    public int compareTo(@Nonnull final SkillContainer other) {
+    public int compareTo(final SkillContainer other) {
         final int tierDifference = this.skill.getTier() - other.skill.getTier();
 
         return tierDifference != 0 ? tierDifference : this.getLevel() - other.getLevel();
     }
 
     @Environment(EnvType.CLIENT)
-    public String getName() {
+    public Text getName() {
         return this.skill.getName();
     }
 
     @Environment(EnvType.CLIENT)
-    @Nonnull
-    public List<String> getTooltip() {
+        public List<String> getTooltip() {
         return this.skill.getTooltip();
     }
 
     @Environment(EnvType.CLIENT)
-    public void render(final ExtendedScreen screen, final int x, final int y, final int blitOffset) {
-        this.skill.render(screen, this.level, x, y, blitOffset);
+    public void render(final SpunScreen screen, final MatrixStack matrices, final int x, final int y, final int zOffset) {
+        this.skill.render(screen, matrices, this.level, x, y, zOffset);
     }
 
-    @Nonnull
-    @Override
-    public CompoundTag toTag(final CompoundTag tag) {
+        @Override
+    public NbtCompound toTag(final NbtCompound tag) {
         tag.putBoolean("learned", this.learned);
         tag.putInt("level", this.level);
 
@@ -124,7 +124,7 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
     }
 
     @Override
-    public void fromTag(final CompoundTag tag) {
+    public void fromTag(final NbtCompound tag) {
         this.learned = tag.getBoolean("learned");
         this.level = tag.getInt("level");
     }

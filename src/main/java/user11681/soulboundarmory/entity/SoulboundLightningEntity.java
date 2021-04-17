@@ -1,15 +1,16 @@
 package user11681.soulboundarmory.entity;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.block.NetherPortalBlock;
+import java.util.UUID;
+import net.minecraft.AreaHelper;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -19,34 +20,21 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import user11681.soulboundarmory.component.soulbound.item.weapon.SwordStorage;
-import user11681.usersmanual.reflect.FieldWrapper;
+import user11681.soulboundarmory.asm.access.entity.LightningEntityAccess;
+import user11681.soulboundarmory.component.statistics.StatisticType;
 
-import java.util.UUID;
-
-import static user11681.soulboundarmory.component.statistics.StatisticType.ATTACK_DAMAGE;
-
-public class SoulboundLightningEntity extends LightningEntity {
-    protected final FieldWrapper<Integer, SoulboundLightningEntity> ambientTick;
-    protected final FieldWrapper<Integer, SoulboundLightningEntity> remainingActions;
-
+@SuppressWarnings("EntityConstructor")
+public class SoulboundLightningEntity extends LightningEntity implements LightningEntityAccess {
     protected UUID casterUUID;
 
-    public SoulboundLightningEntity(final World world) {
-        super(world, 0, 0, 0, true);
+    public SoulboundLightningEntity(final World world, final double x, final double y, final double z, final UUID casterUUID) {
+        super(EntityType.LIGHTNING_BOLT, world);
 
-        this.ambientTick = new FieldWrapper<>(LightningEntity.class, this, "ambientTick");
-        this.remainingActions = new FieldWrapper<>(LightningEntity.class, this, "remainingActions");
-    }
-
-    public SoulboundLightningEntity(final World world, final double x, final double y, final double z,
-                                    final UUID casterUUID) {
-        super(world, x, y, z, true);
-
+        this.method_29498(true);
         this.casterUUID = casterUUID;
-        this.ambientTick = new FieldWrapper<>(LightningEntity.class, this, "ambientTick");
-        this.remainingActions = new FieldWrapper<>(LightningEntity.class, this, "remainingActions");
+        this.setPos(x, y, z);
 
-        ((NetherPortalBlock) Blocks.NETHER_PORTAL).createPortalAt(world, this.getBlockPos());
+        AreaHelper.method_30485(world, this.getBlockPos(), null).ifPresent(AreaHelper::createPortal);
     }
 
     public SoulboundLightningEntity(final World world, final Vec3d pos, final UUID casterUUID) {
@@ -61,24 +49,24 @@ public class SoulboundLightningEntity extends LightningEntity {
 
         this.baseTick();
 
-        if (this.ambientTick.get() == 2) {
+        if (this.getAmbientTick() == 2) {
             this.world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 15, 0.8F + this.random.nextFloat() * 0.2F);
             this.world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2, 0.5F + this.random.nextFloat() * 0.2F);
         }
 
-        this.ambientTick.set(this.ambientTick.get() - 1);
+        this.setAmbientTick(this.getAmbientTick() - 1);
 
-        if (this.ambientTick.get() < 0) {
-            if (this.remainingActions.get() == 0) {
+        if (this.getAmbientTick() < 0) {
+            if (this.getRemainingActions() == 0) {
                 this.remove();
-            } else if (this.ambientTick.get() < -this.random.nextInt(10)) {
-                this.remainingActions.set(this.remainingActions.get() - 1);
-                this.ambientTick.set(1);
+            } else if (this.getAmbientTick() < -this.random.nextInt(10)) {
+                this.setRemainingActions(this.getRemainingActions() - 1);
+                this.setAmbientTick(1);
                 this.seed = this.random.nextLong();
             }
         }
 
-        if (this.ambientTick.get() >= 0) {
+        if (this.getAmbientTick() >= 0) {
             if (this.world.isClient) {
                 this.world.setLightningTicksLeft(2);
             } else {
@@ -88,12 +76,11 @@ public class SoulboundLightningEntity extends LightningEntity {
                         new Box(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
                     final LivingEntity caster = this.getCaster();
                     final float attackDamage = caster instanceof PlayerEntity
-                            ? (float) SwordStorage.get(caster).getAttributeTotal(ATTACK_DAMAGE)
+                            ? (float) SwordStorage.get(caster).getAttributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {
-                        entity.onStruckByLightning(this);
-
+                        entity.onStruckByLightning((ServerWorld) this.world, this);
                         entity.setFireTicks(1);
 
                         if (!entity.isOnFire()) {
@@ -125,7 +112,7 @@ public class SoulboundLightningEntity extends LightningEntity {
                                     final PlayerEntity player = (PlayerEntity) caster;
 
                                     if (knockbackModifier > 0) {
-                                        target.takeKnockback(caster, knockbackModifier * 0.5F, MathHelper.sin(caster.yaw * 0.017453292F), -MathHelper.cos(caster.yaw * 0.017453292F));
+                                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(caster.yaw * 0.017453292F), -MathHelper.cos(caster.yaw * 0.017453292F));
                                     }
 
                                     if (attackDamageModifier > 0) {
@@ -153,7 +140,7 @@ public class SoulboundLightningEntity extends LightningEntity {
                             entity.damage(DamageSource.explosion(caster), attackDamage);
                         }
 
-                        entity.onStruckByLightning(this);
+                        entity.onStruckByLightning((ServerWorld) this.world, this);
                     }
                 }
             }
@@ -161,7 +148,7 @@ public class SoulboundLightningEntity extends LightningEntity {
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag compound) {
+    public NbtCompound toTag(NbtCompound compound) {
         compound = super.toTag(compound);
         compound.putUuid("casterUUID", this.casterUUID);
 
@@ -169,7 +156,7 @@ public class SoulboundLightningEntity extends LightningEntity {
     }
 
     @Override
-    public void fromTag(final CompoundTag compound) {
+    public void fromTag(final NbtCompound compound) {
         super.fromTag(compound);
 
         this.casterUUID = compound.getUuid("casterUUID");

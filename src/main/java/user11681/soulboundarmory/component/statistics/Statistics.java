@@ -7,26 +7,22 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import nerdhub.cardinal.components.api.util.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
-import user11681.soulboundarmory.registry.Registries;
+import net.minecraft.nbt.NbtCompound;
 
-public class Statistics implements NbtSerializable, Iterable<Statistic> {
-    protected final Map<Category, Map<StatisticType, Statistic>> categories;
-
+public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements NbtSerializable, Iterable<Statistic> {
     protected Statistics() {
-        this.categories = new HashMap<>();
     }
 
     public static Builder create() {
         return new Builder(new Statistics());
     }
 
-    public Map<StatisticType, Statistic> get(final Category category) {
-        return this.categories.get(category);
+    public Statistic get(final Category category, final StatisticType statistic) {
+        return this.get(category).get(statistic);
     }
 
     public Statistic get(final StatisticType type) {
-        for (final Map<StatisticType, Statistic> category : this.categories.values()) {
+        for (final Map<StatisticType, Statistic> category : this.values()) {
             final Statistic statistic = category.get(type);
 
             if (statistic != null) {
@@ -41,71 +37,20 @@ public class Statistics implements NbtSerializable, Iterable<Statistic> {
         this.get(type).setValue(value);
     }
 
-    public void put(Category category, final Map<StatisticType, Statistic> newValues) {
-        this.categories.put(category, newValues);
-    }
-
-    public Statistic add(final StatisticType type, final Number value) {
+    public void add(final StatisticType type, final Number value) {
         final Statistic statistic = this.get(type);
 
-        statistic.add(value);
-
-        return statistic;
-    }
-
-    public Statistic get(final Category category, final StatisticType statistic) {
-        return this.get(category).get(statistic);
-    }
-
-    public Map<Category, Map<StatisticType, Statistic>> get() {
-        return this.categories;
+        if (statistic != null) {
+            statistic.add(value);
+        }
     }
 
     public int size(final Category category) {
-        return this.categories.get(category).size();
-    }
-
-    @Nonnull
-    @Override
-    public CompoundTag toTag(@Nonnull final CompoundTag tag) {
-        for (final Category category : this.categories.keySet()) {
-            tag.put(category.asString(), this.toTag(category));
-        }
-
-        return tag;
-    }
-
-    public CompoundTag toTag(final Category category) {
-        final CompoundTag tag = new CompoundTag();
-
-        for (final Statistic statistic : this.get(category).values()) {
-            tag.put(statistic.getType().asString(), statistic.toTag());
-        }
-
-        return tag;
-    }
-
-    @Override
-    public void fromTag(final CompoundTag tag) {
-        for (final String key : tag.getKeys()) {
-            this.fromTag(tag.getCompound(key), Registries.CATEGORY.get(key));
-        }
-    }
-
-    public void fromTag(final CompoundTag tag, final Category category) {
-        if (category != null) {
-            for (final String identifier : tag.getKeys()) {
-                final Statistic statistic = this.get(Registries.STATISTIC.get(identifier));
-
-                if (statistic != null) {
-                    statistic.fromTag(tag.getCompound(identifier));
-                }
-            }
-        }
+        return this.get(category).size();
     }
 
     public void reset() {
-        for (final Category category : this.categories.keySet()) {
+        for (final Category category : this.keySet()) {
             this.reset(category);
         }
     }
@@ -116,16 +61,53 @@ public class Statistics implements NbtSerializable, Iterable<Statistic> {
         }
     }
 
-    @Nonnull
-    @Override
+        @Override
     public Iterator<Statistic> iterator() {
         final Set<Statistic> statistics = new HashSet<>();
 
-        for (final Map<StatisticType, Statistic> category : this.categories.values()) {
+        for (final Map<StatisticType, Statistic> category : this.values()) {
             statistics.addAll(category.values());
         }
 
         return statistics.iterator();
+    }
+
+        @Override
+    public NbtCompound toTag(final NbtCompound tag) {
+        for (final Category category : this.keySet()) {
+            tag.put(category.asString(), this.toTag(category));
+        }
+
+        return tag;
+    }
+
+    public NbtCompound toTag(final Category category) {
+        final NbtCompound tag = new NbtCompound();
+
+        for (final Statistic statistic : this.get(category).values()) {
+            tag.put(statistic.type().asString(), statistic.toTag(new NbtCompound()));
+        }
+
+        return tag;
+    }
+
+    @Override
+    public void fromTag(final NbtCompound tag) {
+        for (final String key : tag.getKeys()) {
+            this.fromTag(tag.getCompound(key), Category.category.get(key));
+        }
+    }
+
+    public void fromTag(final NbtCompound tag, final Category category) {
+        if (category != null) {
+            for (final String identifier : tag.getKeys()) {
+                final Statistic statistic = this.get(StatisticType.statistic.get(identifier));
+
+                if (statistic != null) {
+                    statistic.fromTag(tag.getCompound(identifier));
+                }
+            }
+        }
     }
 
     public static class Builder {
