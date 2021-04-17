@@ -1,0 +1,28 @@
+plugins {
+    id("wheel").version("0-SNAPSHOT")
+}
+
+group("user11681")
+version("3.0.0")
+
+minecraft {
+    accessWidener("src/main/resources/soulboundarmory.accesswidener")
+}
+
+wheel {
+    nospam = false
+    javaVersion = null
+}
+
+dependencies {
+    modInclude("cardinal-components-base")
+    modInclude("cardinal-components-entity")
+    modInclude("cardinal-components-item")
+    modInclude("cell")
+    modInclude("reach-entity-attributes")
+    bloatedInclude("auto-config")
+    bloatedInclude("cloth-config:4+")
+
+    mod("api")
+    intransitive("mod-menu")
+}
