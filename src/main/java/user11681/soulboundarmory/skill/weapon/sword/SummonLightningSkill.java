@@ -1,15 +1,15 @@
 package user11681.soulboundarmory.skill.weapon.sword;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import user11681.soulboundarmory.skill.Skill;
 
 public class SummonLightningSkill extends Skill {
-    public SummonLightningSkill(final Identifier identifier) {
+    public SummonLightningSkill(ResourceLocation identifier) {
         super(identifier);
     }
 
     @Override
-    public int getCost(final boolean learned, final int level) {
+    public int cost(boolean learned, final int level) {
         return 3;
     }
 }

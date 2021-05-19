@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.item.StorageType;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 
 public class StorageArgumentType extends RegistryArgumentType<StorageType<? extends ItemStorage<?>>> {
     protected StorageArgumentType() {

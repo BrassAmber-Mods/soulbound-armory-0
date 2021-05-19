@@ -1,26 +1,26 @@
 package user11681.soulboundarmory.skill.weapon.staff;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.item.Items;
-import net.minecraft.potion.PotionUtil;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import user11681.soulboundarmory.skill.Skill;
 public class HealingSkill extends Skill {
-    public HealingSkill(final Identifier identifier) {
+    public HealingSkill(ResourceLocation identifier) {
         super(identifier);
     }
 
     @Override
-    public int getCost(final boolean learned, final int level) {
+    public int cost(boolean learned, final int level) {
             return 2;
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void render(final SpunScreen screen, final MatrixStack matrices, final int level, final int x, final int y, final int zOffset) {
-        screen.renderGuiItem(PotionUtil.setPotion(Items.POTION.getStackForRender(), Potions.HEALING), x, y, zOffset);
+    @OnlyIn(Dist.CLIENT)
+    public void render(SpunScreen screen, final MatrixStack matrices, final int level, final int x, final int y, final int zOffset) {
+        screen.renderGuiItem(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), Potions.HEALING), x, y, zOffset);
     }
 }

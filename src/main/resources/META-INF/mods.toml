@@ -1,0 +1,11 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+issueTrackerURL = "https://github.com/user11681/soulbound-armory"
+license = "GNU LGPL v3.0"
+
+[[mods]]
+modId = "soulbound-armory"
+version = "${file.jarVersion}"
+displayName = "soulbound armory"
+authors = "user11681"
+description = "old Better Dungeons' soul weapons with more things"

@@ -1,17 +1,15 @@
 package user11681.soulboundarmory.network.server;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.statistics.StatisticType;
+import net.minecraftforge.fml.network.NetworkEvent;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
+import user11681.soulboundarmory.network.ItemComponentPacket;
 
-public class C2SAttribute implements ServerItemComponentPacket {
+public class C2SAttribute implements ItemComponentPacket {
     @Override
-    public void execute(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, ExtendedPacketBuffer buffer, PacketSender responder, ItemStorage<?> storage) {
-        storage.incrementPoints(StatisticType.statistic.get(buffer.readString()), buffer.readInt());
+    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
+        storage.incrementPoints(StatisticType.registry.getValue(buffer.readResourceLocation()), buffer.readInt());
         storage.refresh();
     }
 }

@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.item.StorageType;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 import user11681.soulboundarmory.item.SoulboundItem;
 
 @Mixin(PlayerInventory.class)
@@ -19,7 +19,7 @@ public abstract class PlayerInventoryEntityMixin {
     protected final PlayerInventory self = (PlayerInventory) (Object) this;
 
     @Inject(method = "insertStack(ILnet/minecraft/item/ItemStack;)Z", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 0, shift = At.Shift.AFTER), cancellable = true)
-    public void insertStack(final int slot, final ItemStack stack, final CallbackInfoReturnable<Boolean> info) {
+    public void insertStack(int slot, final ItemStack stack, final CallbackInfoReturnable<Boolean> info) {
         final Item item = stack.getItem();
 
         if (item instanceof SoulboundItem) {

@@ -1,21 +1,19 @@
 package user11681.soulboundarmory.network.server;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.statistics.Category;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkEvent;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.statistics.Category;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
+import user11681.soulboundarmory.network.ItemComponentPacket;
 
-public class C2SReset implements ServerItemComponentPacket {
+public class C2SReset implements ItemComponentPacket {
     @Override
-    public void execute(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, ExtendedPacketBuffer buffer, PacketSender responder, ItemStorage<?> storage) {
-        Identifier identifier = buffer.readIdentifier();
+    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
+        ResourceLocation identifier = buffer.readResourceLocation();
 
         if (identifier != null) {
-            Category category = Category.category.get(identifier);
+            Category category = Category.registry.get(identifier);
 
             storage.reset(category);
         } else {

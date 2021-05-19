@@ -1,15 +1,15 @@
 package user11681.soulboundarmory.skill.tool.common;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import user11681.soulboundarmory.skill.Skill;
 
 public class AmbidexteritySkill extends Skill {
-    public AmbidexteritySkill(final Identifier identifier) {
+    public AmbidexteritySkill(ResourceLocation identifier) {
         super(identifier);
     }
 
     @Override
-    public int getCost(final boolean learned, final int level) {
+    public int cost(boolean learned, final int level) {
         return 5;
     }
 }

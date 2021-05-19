@@ -1,14 +1,13 @@
 package user11681.soulboundarmory.network.client;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
+import net.minecraftforge.fml.network.NetworkEvent;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
+import user11681.soulboundarmory.network.ItemComponentPacket;
 
-public class S2CSync implements ClientItemComponentPacket {
+public class S2CSync implements ItemComponentPacket {
     @Override
-    public void execute(MinecraftClient client, ClientPlayNetworkHandler handler, ExtendedPacketBuffer buffer, PacketSender responder, ItemStorage<?> storage) {
+    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
         storage.fromTag(buffer.readNbt());
         storage.sync();
     }

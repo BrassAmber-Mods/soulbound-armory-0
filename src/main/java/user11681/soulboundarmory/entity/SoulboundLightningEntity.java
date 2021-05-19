@@ -1,102 +1,102 @@
 package user11681.soulboundarmory.entity;
 
 import java.util.UUID;
-import net.minecraft.AreaHelper;
+import net.minecraft.block.PortalSize;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Box;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import user11681.soulboundarmory.component.soulbound.item.weapon.SwordStorage;
+import net.minecraft.world.server.ServerWorld;
 import user11681.soulboundarmory.asm.access.entity.LightningEntityAccess;
-import user11681.soulboundarmory.component.statistics.StatisticType;
+import user11681.soulboundarmory.capability.soulbound.item.weapon.SwordStorage;
+import user11681.soulboundarmory.capability.statistics.StatisticType;
+import user11681.soulboundarmory.serial.CompoundSerializable;
 
-@SuppressWarnings("EntityConstructor")
-public class SoulboundLightningEntity extends LightningEntity implements LightningEntityAccess {
-    protected UUID casterUUID;
+public class SoulboundLightningEntity extends LightningBoltEntity implements LightningEntityAccess, CompoundSerializable {
+    protected UUID caster;
 
-    public SoulboundLightningEntity(final World world, final double x, final double y, final double z, final UUID casterUUID) {
+    public SoulboundLightningEntity(World world, double x, double y, double z, UUID caster) {
         super(EntityType.LIGHTNING_BOLT, world);
 
-        this.method_29498(true);
-        this.casterUUID = casterUUID;
+        this.setVisualOnly(true);
+        this.caster = caster;
         this.setPos(x, y, z);
 
-        AreaHelper.method_30485(world, this.getBlockPos(), null).ifPresent(AreaHelper::createPortal);
+        PortalSize.findEmptyPortalShape(world, this.blockPosition(), null).ifPresent(PortalSize::createPortalBlocks);
     }
 
-    public SoulboundLightningEntity(final World world, final Vec3d pos, final UUID casterUUID) {
-        this(world, pos.x, pos.y, pos.z, casterUUID);
+    public SoulboundLightningEntity(World world, final Vector3d pos, final UUID caster) {
+        this(world, pos.x, pos.y, pos.z, caster);
     }
 
     @Override
     public void tick() {
-        if (!this.world.isClient) {
-            this.setFlag(6, this.isGlowing());
+        if (!this.level.isClientSide) {
+            this.setSharedFlag(6, this.isGlowing());
         }
 
         this.baseTick();
 
-        if (this.getAmbientTick() == 2) {
-            this.world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 15, 0.8F + this.random.nextFloat() * 0.2F);
-            this.world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2, 0.5F + this.random.nextFloat() * 0.2F);
+        if (this.life() == 2) {
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 15, 0.8F + this.random.nextFloat() * 0.2F);
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2, 0.5F + this.random.nextFloat() * 0.2F);
         }
 
-        this.setAmbientTick(this.getAmbientTick() - 1);
+        this.life(this.life() - 1);
 
-        if (this.getAmbientTick() < 0) {
-            if (this.getRemainingActions() == 0) {
+        if (this.life() < 0) {
+            if (this.flashes() == 0) {
                 this.remove();
-            } else if (this.getAmbientTick() < -this.random.nextInt(10)) {
-                this.setRemainingActions(this.getRemainingActions() - 1);
-                this.setAmbientTick(1);
+            } else if (this.life() < -this.random.nextInt(10)) {
+                this.flashes(this.flashes() - 1);
+                this.life(1);
                 this.seed = this.random.nextLong();
             }
         }
 
-        if (this.getAmbientTick() >= 0) {
-            if (this.world.isClient) {
-                this.world.setLightningTicksLeft(2);
+        if (this.life() >= 0) {
+            if (this.level.isClientSide) {
+                this.level.setSkyFlashTime(2);
             } else {
-                final double radius = 3;
+                double radius = 3;
 
-                for (final Entity entity : this.world.getEntities(this,
-                        new Box(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
-                    final LivingEntity caster = this.getCaster();
-                    final float attackDamage = caster instanceof PlayerEntity
+                for (Entity entity : this.level.getEntities(this,
+                        new AxisAlignedBB(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
+                    LivingEntity caster = this.caster();
+                    float attackDamage = caster instanceof PlayerEntity
                             ? (float) SwordStorage.get(caster).getAttributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {
-                        entity.onStruckByLightning((ServerWorld) this.world, this);
-                        entity.setFireTicks(1);
+                        entity.thunderHit((ServerWorld) this.level, this);
+                        entity.setRemainingFireTicks(1);
 
                         if (!entity.isOnFire()) {
-                            this.setFireTicks(160);
+                            this.setRemainingFireTicks(160);
                         }
 
                         if (caster instanceof PlayerEntity) {
-                            final LivingEntity target = (LivingEntity) entity;
-                            final ItemStack itemStack = caster.getMainHandStack();
-                            final DamageSource damageSource = DamageSource.explosion(caster);
-                            final float attackDamageModifier = EnchantmentHelper.getAttackDamage(itemStack, target.getGroup());
+                            LivingEntity target = (LivingEntity) entity;
+                            ItemStack itemStack = caster.getMainHandItem();
+                            DamageSource damageSource = DamageSource.explosion(caster);
+                            float attackDamageModifier = EnchantmentHelper.getDamageBonus(itemStack, target.getMobType());
                             int burnTime = 0;
 
                             if (attackDamage > 0 || attackDamageModifier > 0) {
-                                final int knockbackModifier = EnchantmentHelper.getKnockback(caster);
-                                final float initialHealth = target.getHealth();
+                                int knockbackModifier = EnchantmentHelper.getKnockbackBonus(caster);
+                                float initialHealth = target.getHealth();
 
                                 burnTime += 4 * EnchantmentHelper.getFireAspect(caster);
 
@@ -105,68 +105,68 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
                                 }
 
                                 if (burnTime > 0 && !entity.isOnFire()) {
-                                    entity.setFireTicks(20);
+                                    entity.setRemainingFireTicks(20);
                                 }
 
-                                if (entity.damage(damageSource, attackDamage)) {
+                                if (entity.hurt(damageSource, attackDamage)) {
                                     final PlayerEntity player = (PlayerEntity) caster;
 
                                     if (knockbackModifier > 0) {
-                                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(caster.yaw * 0.017453292F), -MathHelper.cos(caster.yaw * 0.017453292F));
+                                        target.knockback(knockbackModifier * 0.5F, MathHelper.sin(caster.yRot * 0.017453292F), -MathHelper.cos(caster.yRot * 0.017453292F));
                                     }
 
                                     if (attackDamageModifier > 0) {
-                                        player.addCritParticles(entity);
+                                        player.crit(entity);
                                     }
 
-                                    ((LivingEntity) entity).setAttacker(caster);
+                                    ((LivingEntity) entity).setLastHurtByMob(caster);
 
-                                    EnchantmentHelper.onTargetDamaged(caster, target);
+                                    EnchantmentHelper.doPostDamageEffects(caster, target);
 
-                                    final float damageDealt = initialHealth - target.getHealth();
+                                    float damageDealt = initialHealth - target.getHealth();
 
                                     if (burnTime > 0) {
-                                        entity.setOnFireFor(burnTime);
+                                        entity.setSecondsOnFire(burnTime);
                                     }
 
-                                    if (caster.world instanceof ServerWorld && damageDealt > 2) {
-                                        final int particles = (int) (damageDealt * 0.5);
+                                    if (caster.level instanceof ServerWorld && damageDealt > 2) {
+                                        int particles = (int) (damageDealt * 0.5);
 
-                                        ((ServerWorld) caster.world).spawnParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + entity.getHeight() * 0.5, entity.getZ(), particles, 0.1, 0, 0.1, 0.2);
+                                        ((ServerWorld) caster.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), particles, 0.1, 0, 0.1, 0.2);
                                     }
                                 }
                             }
                         } else {
-                            entity.damage(DamageSource.explosion(caster), attackDamage);
+                            entity.hurt(DamageSource.explosion(caster), attackDamage);
                         }
 
-                        entity.onStruckByLightning((ServerWorld) this.world, this);
+                        entity.thunderHit((ServerWorld) this.level, this);
                     }
                 }
             }
         }
     }
 
-    @Override
-    public NbtCompound toTag(NbtCompound compound) {
-        compound = super.toTag(compound);
-        compound.putUuid("casterUUID", this.casterUUID);
+    public LivingEntity caster() {
+        return this.level.getPlayerByUUID(this.caster);
+    }
 
-        return compound;
+    public void caster(LivingEntity caster) {
+        this.caster = caster.getUUID();
     }
 
     @Override
-    public void fromTag(final NbtCompound compound) {
-        super.fromTag(compound);
+    public CompoundNBT serializeNBT() {
+        CompoundNBT tag = super.serializeNBT();
+        tag.putUUID("casterUUID", this.caster);
 
-        this.casterUUID = compound.getUuid("casterUUID");
+        return tag;
     }
 
-    public LivingEntity getCaster() {
-        return this.world.getPlayerByUuid(this.casterUUID);
-    }
+    @Override
+    public void deserializeNBT(CompoundNBT tag) {
+        super.deserializeNBT(tag);
 
-    public void setCaster(final LivingEntity caster) {
-        this.casterUUID = caster.getUuid();
+        this.caster = tag.getUUID("casterUUID");
     }
 }

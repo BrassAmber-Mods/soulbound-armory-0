@@ -1,57 +1,50 @@
 package user11681.soulboundarmory.client.gui.screen.tab;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import javax.lang.model.element.Element;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import user11681.cell.client.gui.screen.ScreenTab;
-import user11681.cell.client.gui.widget.callback.PressCallback;
-import user11681.cell.client.gui.widget.scalable.ScalableWidget;
-import user11681.cell.client.gui.widget.scalable.ScalableWidgets;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import user11681.soulboundarmory.SoulboundArmoryClient;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
+import user11681.soulboundarmory.capability.statistics.Category;
 import user11681.soulboundarmory.client.gui.ExperienceBarOverlay;
 import user11681.soulboundarmory.client.gui.ExperienceBarOverlay.Style;
 import user11681.soulboundarmory.client.gui.RGBASlider;
 import user11681.soulboundarmory.client.i18n.Translations;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundComponent;
-import user11681.soulboundarmory.component.statistics.Category;
 import user11681.soulboundarmory.config.Configuration;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.registry.Packets;
-import user11681.soulboundarmory.text.StringableText;
+import user11681.soulboundarmory.text.Translation;
 
-import static user11681.soulboundarmory.component.statistics.StatisticType.experience;
-import static user11681.soulboundarmory.component.statistics.StatisticType.level;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.experience;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.level;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public abstract class SoulboundTab extends ScreenTab {
     protected static final NumberFormat format = DecimalFormat.getInstance();
 
     protected final PlayerEntity player;
     protected final List<Element> options;
     protected final List<RGBASlider> sliders;
-    protected final SoulboundComponent<?> component;
+    protected final SoulboundCapability component;
 
     protected ItemStorage<?> storage;
     protected ItemStack itemStack;
     protected ExperienceBarOverlay xpBar;
     protected int slot;
 
-    public SoulboundTab(Text title, SoulboundComponent<?> component, List<ScreenTab> tabs) {
+    public SoulboundTab(ITextComponent title, SoulboundCapability component, List<ScreenTab> tabs) {
         super(title, tabs);
 
-        this.player = SoulboundArmoryClient.getPlayer();
+        this.player = SoulboundArmoryClient.player();
         this.component = component;
         this.options = new ArrayList<>(5);
         this.sliders = new ArrayList<>(4);
@@ -62,7 +55,7 @@ public abstract class SoulboundTab extends ScreenTab {
         this.storage = this.component.menuStorage();
         this.itemStack = this.component.menuStorage().getItemStack();
 
-        for (ItemStack itemStack : this.player.getItemsHand()) {
+        for (ItemStack itemStack : this.player.getHandSlots()) {
             if (itemStack.equals(this.itemStack)) {
                 this.itemStack = itemStack;
 
@@ -73,9 +66,9 @@ public abstract class SoulboundTab extends ScreenTab {
         super.init();
 
         if (this.displayTabs()) {
-            this.storage.setCurrentTab(this.index);
+            this.storage.currentTab(this.index);
 
-            Text text = this.slot != storage.getBoundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
+            ITextComponent text = this.slot != storage.boundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
             int buttonWidth = Math.max(this.tab.width, this.textRenderer.getWidth(text) + 8);
 
             this.addButton(new ButtonWidget(this.tab.endX() - buttonWidth, this.height - this.height / 16 - 20, buttonWidth, 20, text, this.bindSlotAction()));
@@ -98,7 +91,7 @@ public abstract class SoulboundTab extends ScreenTab {
                 this.sliders.add(this.addButton(this.colorSlider(colors.green, Translations.green, 1)));
                 this.sliders.add(this.addButton(this.colorSlider(colors.blue, Translations.blue, 2)));
                 this.sliders.add(this.addButton(this.colorSlider(colors.alpha, Translations.alpha, 3)));
-                this.options.add(this.add(this.optionButton(4, new StringableText("%s: %s", Translations.xpBarStyle, configuration.style), this.cycleStyleAction(1), this.cycleStyleAction(-1))));
+                this.options.add(this.add(this.optionButton(4, new Translation("%s: %s", Translations.xpBarStyle, configuration.style), this.cycleStyleAction(1), this.cycleStyleAction(-1))));
                 this.options.addAll(sliders);
 
                 return true;
@@ -133,11 +126,11 @@ public abstract class SoulboundTab extends ScreenTab {
         this.xpBar.render();
 
         if (this.isMouseOverLevel(mouseX, mouseY) && maxLevel >= 0) {
-            this.renderTooltip(matrices, new StringableText("%s/%s", this.storage.getDatum(level), maxLevel), mouseX, mouseY);
+            this.renderTooltip(matrices, new Translation("%s/%s", this.storage.getDatum(level), maxLevel), mouseX, mouseY);
         } else if (this.isMouseOverXPBar(mouseX, mouseY)) {
             this.renderTooltip(matrices, this.storage.canLevelUp()
-                    ? new StringableText("%s/%s", xp, this.storage.getNextLevelXP())
-                    : new StringableText("%s", xp), mouseX, mouseY);
+                    ? new Translation("%s/%s", xp, this.storage.nextLevelXP())
+                    : new Translation("%s", xp), mouseX, mouseY);
         }
 
 //        RenderSystem.disableLighting();
@@ -237,11 +230,11 @@ public abstract class SoulboundTab extends ScreenTab {
         }
     }
 
-    public ScalableWidget centeredButton(int y, int buttonWidth, Text text, PressCallback<ScalableWidget> action) {
+    public ScalableWidget centeredButton(int y, int buttonWidth, ITextComponent text, PressCallback<ScalableWidget> action) {
         return ScalableWidgets.button().x((this.width - buttonWidth) / 2).y(y).width(buttonWidth).height(20).text(text).primaryAction(action);
     }
 
-    public ScalableWidget squareButton(int x, int y, Text text, PressCallback<ScalableWidget> action) {
+    public ScalableWidget squareButton(int x, int y, ITextComponent text, PressCallback<ScalableWidget> action) {
         return ScalableWidgets.button().x(x - 10).y(y - 10).width(20).height(20).text(text).primaryAction(action);
     }
 
@@ -249,7 +242,7 @@ public abstract class SoulboundTab extends ScreenTab {
         return ScalableWidgets.button().x(this.width - this.width / 24 - 112).y(this.height - this.height / 16 - 20).width(112).height(20).text(Translations.menuButtonReset).primaryAction(action);
     }
 
-    public ScalableWidget optionButton(int row, Text text, PressCallback<ScalableWidget> primaryAction, PressCallback<ScalableWidget> secondaryAction) {
+    public ScalableWidget optionButton(int row, ITextComponent text, PressCallback<ScalableWidget> primaryAction, PressCallback<ScalableWidget> secondaryAction) {
         return ScalableWidgets.button()
             .x(this.optionX())
             .y(this.optionY(row))
@@ -260,7 +253,7 @@ public abstract class SoulboundTab extends ScreenTab {
             .secondaryAction(secondaryAction);
     }
 
-    public RGBASlider colorSlider(double currentValue, Text text, int id) {
+    public RGBASlider colorSlider(double currentValue, ITextComponent text, int id) {
         return new RGBASlider(this.optionX(), this.optionY(id), 100, 20, text, currentValue, id);
     }
 
@@ -269,7 +262,7 @@ public abstract class SoulboundTab extends ScreenTab {
         int start = (this.height - (rows - 1) * this.height / 16) / 2;
 
         for (int row = 0; row < rows; row++) {
-            buttons[row] = squareButton((this.width + 162) / 2, start + row * this.height / 16 + 4, new LiteralText("+"), action);
+            buttons[row] = squareButton((this.width + 162) / 2, start + row * this.height / 16 + 4, new StringTextComponent("+"), action);
             buttons[row].active = points > 0;
         }
 
@@ -281,7 +274,7 @@ public abstract class SoulboundTab extends ScreenTab {
         int start = (this.height - (rows - 1) * this.height / 16) / 2;
 
         for (int row = 0; row < rows; row++) {
-            buttons[row] = this.squareButton((this.width + 162) / 2 - 20, start + row * this.height / 16 + 4, new LiteralText("-"), action);
+            buttons[row] = this.squareButton((this.width + 162) / 2 - 20, start + row * this.height / 16 + 4, new StringTextComponent("-"), action);
         }
 
         return buttons;
@@ -304,6 +297,6 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     protected PressCallback<ScalableWidget> resetAction(Category category) {
-        return (ScalableWidget button) -> ClientPlayNetworking.send(Packets.serverReset, new ExtendedPacketBuffer(this.storage).writeIdentifier(category.identifier()));
+        return (ScalableWidget button) -> Packets.serverReset.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(category.identifier()));
     }
 }

@@ -1,23 +1,23 @@
 package user11681.soulboundarmory.client.render;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.ProjectileEntityRenderer;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.ArrowRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import user11681.soulboundarmory.SoulboundArmory;
 import user11681.soulboundarmory.entity.SoulboundDaggerEntity;
 
-@Environment(EnvType.CLIENT)
-public class SoulboundDaggerEntityRenderer extends ProjectileEntityRenderer<SoulboundDaggerEntity> {
-    public static final Identifier id = SoulboundArmory.id("textures/item/soulbound_dagger.png");
+@OnlyIn(Dist.CLIENT)
+public class SoulboundDaggerEntityRenderer extends ArrowRenderer<SoulboundDaggerEntity> {
+    private static final ResourceLocation id = SoulboundArmory.id("textures/item/soulbound_dagger.png");
 
-    public SoulboundDaggerEntityRenderer(EntityRendererFactory.Context context) {
-        super(context);
+    public SoulboundDaggerEntityRenderer(EntityRendererManager manager) {
+        super(manager);
     }
 
     @Override
-    public Identifier getTexture(SoulboundDaggerEntity entity) {
+    public ResourceLocation getTextureLocation(SoulboundDaggerEntity entity) {
         return id;
     }
 }

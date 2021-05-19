@@ -1,13 +1,13 @@
 package user11681.soulboundarmory.client.renderer.texture;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@Environment(EnvType.CLIENT)
-public class ExperienceBarTexture extends NativeImageBackedTexture {
-    public ExperienceBarTexture(final NativeImage image) {
+@OnlyIn(Dist.CLIENT)
+public class ExperienceBarTexture extends DynamicTexture {
+    public ExperienceBarTexture(NativeImage image) {
         super(image);
     }
 }

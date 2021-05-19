@@ -1,24 +1,22 @@
 package user11681.soulboundarmory.item;
 
-import net.minecraft.item.ToolMaterial;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.util.Lazy;
+import net.minecraft.item.IItemTier;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraftforge.common.util.Lazy;
 
-public enum ModToolMaterials implements ToolMaterial {
+public enum ModToolMaterials implements IItemTier {
     SOULBOUND(0, 0, 0.5F, 0, 0, null);
 
     private final int miningLevel;
-    private final int itemDurability;
+    private final int uses;
     private final float miningSpeed;
     private final float attackDamage;
     private final int enchantability;
     private final Lazy<Ingredient> repairIngredient;
 
-    ModToolMaterials(final int miningLevel, final int itemDurability, final float miningSpeed, final float attackDamage,
-                     final int enchantability,
-                     final Lazy<Ingredient> repairIngredient) {
+    ModToolMaterials(int miningLevel, int uses, float miningSpeed, float attackDamage, int enchantability, Lazy<Ingredient> repairIngredient) {
         this.miningLevel = miningLevel;
-        this.itemDurability = itemDurability;
+        this.uses = uses;
         this.miningSpeed = miningSpeed;
         this.attackDamage = attackDamage;
         this.enchantability = enchantability;
@@ -26,27 +24,27 @@ public enum ModToolMaterials implements ToolMaterial {
     }
 
     @Override
-    public int getDurability() {
-        return this.itemDurability;
+    public int getUses() {
+        return this.uses;
     }
 
     @Override
-    public float getMiningSpeedMultiplier() {
+    public float getSpeed() {
         return this.miningSpeed;
     }
 
     @Override
-    public float getAttackDamage() {
+    public float getAttackDamageBonus() {
         return this.attackDamage;
     }
 
     @Override
-    public int getMiningLevel() {
+    public int getLevel() {
         return this.miningLevel;
     }
 
     @Override
-    public int getEnchantability() {
+    public int getEnchantmentValue() {
         return this.enchantability;
     }
 

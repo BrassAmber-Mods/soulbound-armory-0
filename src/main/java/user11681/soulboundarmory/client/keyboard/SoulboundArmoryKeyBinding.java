@@ -1,21 +1,21 @@
 package user11681.soulboundarmory.client.keyboard;
 
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.settings.KeyBinding;
 import user11681.soulboundarmory.SoulboundArmory;
 
-public class SoulboundArmoryKeyBinding extends KeyBinding {
+public abstract class SoulboundArmoryKeyBinding extends KeyBinding {
     public SoulboundArmoryKeyBinding(String name, int key) {
-        super(SoulboundArmory.key(name), key, String.format("key.categories.%s", SoulboundArmory.NAME));
+        super(String.format("key.%s.%s", SoulboundArmory.ID, name), key, String.format("key.categories.%s", SoulboundArmory.NAME));
     }
 
-    protected void press() {}
+    protected abstract void press();
 
     @Override
-    public void setPressed(boolean pressed) {
-        if (pressed && !super.isPressed()) {
+    public void setDown(boolean pressed) {
+        if (pressed && !super.isDown()) {
             this.press();
         }
 
-        super.setPressed(pressed);
+        super.setDown(pressed);
     }
 }
