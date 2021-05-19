@@ -9,12 +9,12 @@ import user11681.soulboundarmory.config.Configuration;
 public class RGBASlider extends SliderWidget {
     protected static final Configuration.Client.Colors colors = Configuration.instance().client.colors;
 
-    protected final Text text;
+    protected final ITextComponent text;
     public final int id;
 
     protected int componentValue;
 
-    public RGBASlider(final int x, final int y, final int width, final int height, final Text text, final double value, final int id) {
+    public RGBASlider(int x, final int y, final int width, final int height, final ITextComponent text, final double value, final int id) {
         super(x, y, width, height, text, value);
 
         this.text = text;
@@ -27,7 +27,7 @@ public class RGBASlider extends SliderWidget {
 
     @Override
     protected void updateMessage() {
-        this.setMessage(new StringableText("%s: %s", this.text, this.componentValue));
+        this.setMessage(new Translation("%s: %s", this.text, this.componentValue));
     }
 
     @Override
@@ -37,7 +37,7 @@ public class RGBASlider extends SliderWidget {
         colors.set(this.id, this.componentValue);
     }
 
-    public void scroll(final double value) {
+    public void scroll(double value) {
         this.value = MathHelper.clamp(this.value + value / 255, 0, 1);
 
         this.applyValue();

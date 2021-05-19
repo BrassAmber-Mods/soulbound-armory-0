@@ -13,52 +13,52 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     protected final Class<T> clazz;
     protected final List<T> values;
 
-    protected EnumArgumentType(final Class<T> enumClass, final Predicate<T> include) {
+    protected EnumArgumentType(Class<T> enumClass, final Predicate<T> include) {
         this.clazz = enumClass;
 
         final List<T> values = this.values = new ArrayList<>();
 
-        for (final Field field : enumClass.getDeclaredFields()) {
+        for (Field field : enumClass.getDeclaredFields()) {
             try {
                 //noinspection unchecked
                 final T value = (T) field.get(null);
                 if (include.test(value)) {
                     values.add(value);
                 }
-            } catch (final IllegalAccessException exception) {
+            } catch (IllegalAccessException exception) {
                 SoulboundArmory.logger.error(String.format("Cannot access enum %s:", field.getName()), exception);
             }
         }
     }
 
-    protected EnumArgumentType(final Class<T> enumClass) {
+    protected EnumArgumentType(Class<T> enumClass) {
         this.clazz = enumClass;
         final List<T> values = this.values = new ArrayList<>();
 
-        for (final Field field : enumClass.getDeclaredFields()) {
+        for (Field field : enumClass.getDeclaredFields()) {
             try {
                 //noinspection unchecked
                 values.add((T) field.get(null));
-            } catch (final IllegalAccessException exception) {
+            } catch (IllegalAccessException exception) {
                 SoulboundArmory.logger.error(String.format("Cannot access enum %s:", field.getName()), exception);
             }
         }
     }
 
     @Override
-    public T parse(final StringReader reader) throws CommandSyntaxException {
+    public T parse(StringReader reader) throws CommandSyntaxException {
         return Enum.valueOf(this.clazz, reader.readString());
     }
 
-    public static <T extends Enum<T>> EnumArgumentType<T> enumeration(final Class<T> enumClass) {
+    public static <T extends Enum<T>> EnumArgumentType<T> enumeration(Class<T> enumClass) {
         return new EnumArgumentType<>(enumClass);
     }
 
-    public static <T extends Enum<T>> EnumArgumentType<T> include(final Class<T> enumClass, final Predicate<T> include) {
+    public static <T extends Enum<T>> EnumArgumentType<T> include(Class<T> enumClass, final Predicate<T> include) {
         return new EnumArgumentType<>(enumClass, include);
     }
 
-    public static <T extends Enum<T>> EnumArgumentType<T> exclude(final Class<T> enumClass, final Predicate<T> exclude) {
+    public static <T extends Enum<T>> EnumArgumentType<T> exclude(Class<T> enumClass, final Predicate<T> exclude) {
         return new EnumArgumentType<>(enumClass, exclude.negate());
     }
 

@@ -2,24 +2,21 @@ package user11681.soulboundarmory.client.gui.screen.tab;
 
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ButtonWidget.PressAction;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundComponent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.ITextComponent;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.registry.Packets;
 import user11681.usersmanual.client.gui.screen.ScreenTab;
 
 public class SelectionTab extends SoulboundTab {
-    public SelectionTab(final Text title, final SoulboundComponent component, final List<ScreenTab> tabs) {
+    public SelectionTab(ITextComponent title, final SoulboundCapability component, final List<ScreenTab> tabs) {
         super(title, component, tabs);
     }
 
     @Override
-    public void init(final MinecraftClient client, final int width, final int height) {
+    public void init(Minecraft client, final int width, final int height) {
         super.init(client, width, height);
 
         final int buttonWidth = 128;
@@ -27,9 +24,9 @@ public class SelectionTab extends SoulboundTab {
         final int centerX = (this.width - buttonWidth) / 2;
         final int ySep = 32;
 
-        final List<ItemStorage<?>> selection = this.component.getStorages().values();
+        final List<ItemStorage<?>> selection = this.component.storages().values();
 
-        selection.removeIf((final ItemStorage<?> storage) -> !storage.isUnlocked() && !storage.canUnlock());
+        selection.removeIf((ItemStorage<?> storage) -> !storage.isUnlocked() && !storage.canUnlock());
 
         final int top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
 
@@ -44,15 +41,15 @@ public class SelectionTab extends SoulboundTab {
     }
 
     @Override
-    public void render(final MatrixStack matrices, final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(MatrixStack matrices, final int mouseX, final int mouseY, final float partialTicks) {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
-        if (!this.storage.isItemEquipped()) {
+        if (!this.storage.itemEquipped()) {
             this.drawCenteredString(matrices, this.textRenderer, this.getLabel().toString(), this.width / 2, 40, 0xFFFFFF);
         }
     }
 
-    protected PressAction selectAction(final ItemStorage<?> storage) {
+    protected PressAction selectAction(ItemStorage<?> storage) {
         return (ButtonWidget button) -> {
             ClientPlayNetworking.send(Packets.serverItemType, new ExtendedPacketBuffer(storage).writeInt(this.slot));
             this.onClose();

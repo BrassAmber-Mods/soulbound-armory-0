@@ -1,12 +1,12 @@
 package user11681.soulboundarmory.asm.mixin.entity.projectile;
 
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import user11681.soulboundarmory.asm.access.entity.PersistentProjectileEntityAccess;
+import user11681.soulboundarmory.asm.access.entity.AbstractArrowEntityAccess;
 
-@Mixin(PersistentProjectileEntity.class)
-public abstract class PersistentProjectileEntityMixin implements PersistentProjectileEntityAccess {
+@Mixin(AbstractArrowEntity.class)
+public abstract class AbstractArrowEntityMixin implements AbstractArrowEntityAccess {
     @Accessor
     @Override
     public abstract int getLife();

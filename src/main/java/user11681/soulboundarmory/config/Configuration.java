@@ -1,19 +1,7 @@
 package user11681.soulboundarmory.config;
 
-import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1u.ConfigData;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.Config;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.Config.Gui.Background;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.BoundedDiscrete;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Category;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Gui.CollapsibleObject;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Gui.EnumHandler;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Gui.EnumHandler.EnumDisplayOption;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Gui.Excluded;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Gui.Tooltip;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry.Gui.TransitiveObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import user11681.soulboundarmory.SoulboundArmory;
 import user11681.soulboundarmory.client.gui.ExperienceBarOverlay.Style;
 
@@ -65,7 +53,7 @@ public class Configuration implements ConfigData {
 
     @TransitiveObject
     @Category(CLIENT_CATEGORY)
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Client client = new Client();
 
     public static Configuration instance() {
@@ -101,7 +89,7 @@ public class Configuration implements ConfigData {
             @BoundedDiscrete(max = 255)
             public int alpha = 255;
 
-            public void set(final int id, final int value) {
+            public void set(int id, final int value) {
                 if (id == 0) {
                     this.red = value;
                 } else if (id == 1) {
@@ -115,7 +103,7 @@ public class Configuration implements ConfigData {
                 }
             }
 
-            public int get(final int id) {
+            public int get(int id) {
                 switch (id) {
                     case 0:
                         return this.red;

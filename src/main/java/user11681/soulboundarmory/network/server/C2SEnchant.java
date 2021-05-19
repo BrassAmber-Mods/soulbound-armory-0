@@ -1,24 +1,22 @@
 package user11681.soulboundarmory.network.server;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.statistics.StatisticType;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
+import user11681.soulboundarmory.network.ItemComponentPacket;
 
-public class C2SEnchant implements ServerItemComponentPacket {
+public class C2SEnchant implements ItemComponentPacket {
     @Override
-    public void execute(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, ExtendedPacketBuffer buffer, PacketSender responder, ItemStorage<?> storage) {
-        Enchantment enchantment = Registry.ENCHANTMENT.get(buffer.readIdentifier());
+    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
+        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(buffer.readResourceLocation());
         boolean add = buffer.readBoolean();
         int change = add ? 1 : -1;
 
         if (buffer.readBoolean()) {
-            change *= add ? storage.getDatum(StatisticType.enchantmentPoints) : storage.getEnchantment(enchantment);
+            change *= add ? storage.getDatum(StatisticType.enchantmentPoints) : storage.enchantment(enchantment);
         }
 
         storage.addEnchantment(enchantment, change);

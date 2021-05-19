@@ -1,24 +1,24 @@
 package user11681.soulboundarmory.skill.weapon.dagger;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import user11681.soulboundarmory.skill.Skill;
 public class ThrowingSkill extends Skill {
-    public ThrowingSkill(final Identifier identifier) {
+    public ThrowingSkill(ResourceLocation identifier) {
         super(identifier);
     }
 
     @Override
-    public int getCost(final boolean learned, final int level) {
+    public int cost(boolean learned, int level) {
         return 2;
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void render(final SpunScreen screen, final MatrixStack matrices, final int level, final int x, final int y, final int zOffset) {
-        screen.renderGuiItem(Items.ARROW.getStackForRender(), x, y, zOffset);
+    @OnlyIn(Dist.CLIENT)
+    public void render(SpunScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
+        screen.renderGuiItem(Items.ARROW.getDefaultInstance(), x, y, zOffset);
     }
 }

@@ -1,13 +1,17 @@
 package user11681.soulboundarmory.registry;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
-import user11681.soulboundarmory.network.client.ClientPacket;
-import user11681.soulboundarmory.network.server.ServerPacket;
+import java.util.function.Supplier;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.network.NetworkEvent;
+import user11681.soulboundarmory.SoulboundArmory;
+import user11681.soulboundarmory.network.Packet;
+import user11681.soulboundarmory.network.SimplePacket;
+import user11681.soulboundarmory.network.client.S2CEnchant;
+import user11681.soulboundarmory.network.client.S2CItemType;
+import user11681.soulboundarmory.network.client.S2COpenGUI;
+import user11681.soulboundarmory.network.client.S2CRefresh;
+import user11681.soulboundarmory.network.client.S2CSync;
 import user11681.soulboundarmory.network.server.C2SAttribute;
 import user11681.soulboundarmory.network.server.C2SBindSlot;
 import user11681.soulboundarmory.network.server.C2SConfig;
@@ -16,55 +20,43 @@ import user11681.soulboundarmory.network.server.C2SItemType;
 import user11681.soulboundarmory.network.server.C2SReset;
 import user11681.soulboundarmory.network.server.C2SSkill;
 import user11681.soulboundarmory.network.server.C2SSync;
-import user11681.soulboundarmory.network.client.S2CEnchant;
-import user11681.soulboundarmory.network.client.S2CItemType;
-import user11681.soulboundarmory.network.client.S2COpenGUI;
-import user11681.soulboundarmory.network.client.S2CRefresh;
-import user11681.soulboundarmory.network.client.S2CSync;
-
-import static user11681.soulboundarmory.SoulboundArmory.id;
 
 public class Packets {
-    public static final Identifier serverAttribute = id("server_attribute");
-    public static final Identifier serverBindSlot = id("server_bind_slot");
-    public static final Identifier serverConfig = id("server_config");
-    public static final Identifier serverEnchant = id("server_enchant");
-    public static final Identifier serverItemType = id("server_item_type");
-    public static final Identifier serverReset = id("server_reset");
-    public static final Identifier serverSkill = id("server_skill");
-    public static final Identifier serverSync = id("server_sync");
+    public static final SimplePacket serverAttribute = server(new C2SAttribute());
+    public static final SimplePacket serverBindSlot = server(new C2SBindSlot());
+    public static final SimplePacket serverConfig = server(new C2SConfig());
+    public static final SimplePacket serverEnchant = server(new C2SEnchant());
+    public static final SimplePacket serverItemType = server(new C2SItemType());
+    public static final SimplePacket serverReset = server(new C2SReset());
+    public static final SimplePacket serverSkill = server(new C2SSkill());
+    public static final SimplePacket serverSync = server(new C2SSync());
 
-    public static final Identifier clientEnchant = id("client_enchant");
-    public static final Identifier clientItemType = id("client_item_type");
-    public static final Identifier clientOpenGUI = id("client_open_gui");
-    public static final Identifier clientRefresh = id("client_refresh");
-    public static final Identifier clientSync = id("client_sync");
+    public static final SimplePacket clientEnchant = client(new S2CEnchant());
+    public static final SimplePacket clientItemType = client(new S2CItemType());
+    public static final SimplePacket clientOpenGUI = client(new S2COpenGUI());
+    public static final SimplePacket clientRefresh = client(new S2CRefresh());
+    public static final SimplePacket clientSync = client(new S2CSync());
 
-    public static void register() {
-        register(serverAttribute, new C2SAttribute());
-        register(serverBindSlot, new C2SBindSlot());
-        register(serverConfig, new C2SConfig());
-        register(serverEnchant, new C2SEnchant());
-        register(serverItemType, new C2SItemType());
-        register(serverReset, new C2SReset());
-        register(serverSkill, new C2SSkill());
-        register(serverSync, new C2SSync());
+    private static int id;
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            register(clientEnchant, new S2CEnchant());
-            register(clientItemType, new S2CItemType());
-            register(clientOpenGUI, new S2COpenGUI());
-            register(clientRefresh, new S2CRefresh());
-            register(clientSync, new S2CSync());
+    @SuppressWarnings("unchecked")
+    private static <T, P extends Packet<T>> P server(P handler) {
+        SoulboundArmory.channel.registerMessage(
+            id++,
+            (Class<T>) Object.class,
+            handler::write,
+            handler::read,
+            (T buffer, Supplier<NetworkEvent.Context> context) -> context.get().enqueueWork(() -> handler.execute(buffer, context.get()))
+        );
+
+        return handler;
+    }
+
+    private static <T, P extends Packet<T>> P client(P handler) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return server(handler);
         }
-    }
 
-    private static void register(Identifier identifier, ServerPacket handler) {
-        ServerPlayNetworking.registerGlobalReceiver(identifier, handler);
-    }
-
-    @Environment(EnvType.CLIENT)
-    private static void register(Identifier identifier, ClientPacket handler) {
-        ClientPlayNetworking.registerGlobalReceiver(identifier, handler);
+        return handler;
     }
 }

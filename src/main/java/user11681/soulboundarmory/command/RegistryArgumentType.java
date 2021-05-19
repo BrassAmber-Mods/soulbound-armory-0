@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Identifier;
+import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 
 public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
@@ -28,7 +28,7 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
     }
 
     @Override
-    public Set<T> parse(final StringReader reader) throws CommandSyntaxException {
+    public Set<T> parse(StringReader reader) throws CommandSyntaxException {
         String input = reader.readString();
         Registry<T> entries = this.registry;
 
@@ -36,7 +36,7 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
             return entries.stream().collect(Collectors.toSet());
         }
 
-        for (Identifier name : this.registry.getIds()) {
+        for (ResourceLocation name : this.registry.keySet()) {
             if (Pattern.compile(Pattern.quote(name.getPath()), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(input).find()) {
                 return Collections.singleton(entries.get(name));
             }
@@ -47,10 +47,10 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(this.getSuggestions(context, builder), builder);
+        return ISuggestionProvider.suggest(this.getSuggestions(context, builder), builder);
     }
 
     protected <S> Collection<String> getSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return this.registry.getIds().parallelStream().map(Identifier::getPath).collect(Collectors.toSet());
+        return this.registry.keySet().parallelStream().map(ResourceLocation::getPath).collect(Collectors.toSet());
     }
 }

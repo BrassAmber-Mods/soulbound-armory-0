@@ -4,15 +4,15 @@ import net.minecraft.item.Item;
 import net.minecraft.util.registry.Registry;
 import user11681.soulboundarmory.SoulboundArmory;
 import user11681.soulboundarmory.item.SoulboundDagger;
-import user11681.soulboundarmory.item.SoulboundGreatswordItem;
+import user11681.soulboundarmory.item.SoulboundGreatsword;
 import user11681.soulboundarmory.item.SoulboundPickItem;
 import user11681.soulboundarmory.item.SoulboundStaffItem;
-import user11681.soulboundarmory.item.SoulboundSwordItem;
+import user11681.soulboundarmory.item.SoulboundSword;
 
 public class SoulboundItems {
     public static final SoulboundDagger dagger = new SoulboundDagger();
-    public static final SoulboundSwordItem sword = new SoulboundSwordItem();
-    public static final SoulboundGreatswordItem greatsword = new SoulboundGreatswordItem();
+    public static final SoulboundSword sword = new SoulboundSword();
+    public static final SoulboundGreatsword greatsword = new SoulboundGreatsword();
     public static final SoulboundStaffItem staff = new SoulboundStaffItem();
     public static final SoulboundPickItem pick = new SoulboundPickItem();
 

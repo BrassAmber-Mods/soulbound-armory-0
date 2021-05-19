@@ -1,17 +1,16 @@
 package user11681.soulboundarmory.skill;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.List;
-import javax.annotation.Nonnull;
-import nerdhub.cardinal.components.api.util.NbtSerializable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import user11681.soulboundarmory.component.statistics.SkillStorage;
-import user11681.spun.client.gui.screen.SpunScreen;
+import java.util.Set;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.soulboundarmory.capability.statistics.SkillStorage;
+import user11681.soulboundarmory.serial.CompoundSerializable;
 
-public class SkillContainer implements Comparable<SkillContainer>, NbtSerializable {
+public class SkillContainer implements Comparable<SkillContainer>, CompoundSerializable {
     protected final Skill skill;
     protected final int maxLevel;
     protected final SkillStorage storage;
@@ -19,11 +18,11 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
     protected boolean learned;
     protected int level;
 
-    public SkillContainer(final Skill skill, final SkillStorage storage) {
+    public SkillContainer(Skill skill, SkillStorage storage) {
         this(skill, storage, false, 0);
     }
 
-    public SkillContainer(final Skill skill, final SkillStorage storage, final boolean learned, final int level) {
+    public SkillContainer(Skill skill, SkillStorage storage, boolean learned, int level) {
         this.skill = skill;
         this.maxLevel = skill.maxLevel;
         this.storage = storage;
@@ -31,27 +30,27 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
         this.level = level;
     }
 
-    public Skill getSkill() {
+    public Skill skill() {
         return this.skill;
     }
 
-    public List<Skill> getDependencies() {
-        return this.skill.getDependencies();
+    public Set<Skill> dependencies() {
+        return this.skill.dependencies();
     }
 
     public boolean hasDependencies() {
         return this.skill.hasDependencies();
     }
 
-    public int getTier() {
-        return this.skill.getTier();
+    public int tier() {
+        return this.skill.tier();
     }
 
-    public int getLevel() {
+    public int level() {
         return this.level;
     }
 
-    public void setLevel(final int level) {
+    public void level(int level) {
         this.level = level;
     }
 
@@ -59,25 +58,25 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
         this.level++;
     }
 
-    public boolean canBeUpgraded(final int points) {
-        return this.canBeUpgraded() && points >= this.getCost();
+    public boolean canUpgrade(int points) {
+        return this.canUpgrade() && points >= this.cost();
     }
 
-    public boolean canBeUpgraded() {
-        return this.learned && (this.getCost() >= 0 || this.maxLevel < 0 || this.level < this.maxLevel);
+    public boolean canUpgrade() {
+        return this.learned && (this.cost() >= 0 || this.maxLevel < 0 || this.level < this.maxLevel);
     }
 
-    public int getCost() {
-        return this.skill.getCost(this.learned, this.level);
+    public int cost() {
+        return this.skill.cost(this.learned, this.level);
     }
 
-    public boolean isLearned() {
+    public boolean learned() {
         return this.learned;
     }
 
-    public boolean canBeLearned() {
-        for (final Skill dependency : this.skill.getDependencies()) {
-            if (!this.storage.get(dependency).isLearned()) {
+    public boolean canLearn() {
+        for (Skill dependency : this.skill.dependencies()) {
+            if (!this.storage.get(dependency).learned()) {
                 return false;
             }
         }
@@ -85,8 +84,8 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
         return !this.learned;
     }
 
-    public boolean canBeLearned(final int points) {
-        return this.canBeLearned() && points >= this.getCost();
+    public boolean canLearn(int points) {
+        return this.canLearn() && points >= this.cost();
     }
 
     public void learn() {
@@ -94,37 +93,35 @@ public class SkillContainer implements Comparable<SkillContainer>, NbtSerializab
     }
 
     @Override
-    public int compareTo(final SkillContainer other) {
-        final int tierDifference = this.skill.getTier() - other.skill.getTier();
+    public int compareTo(SkillContainer other) {
+        int tierDifference = this.skill.tier() - other.skill.tier();
 
-        return tierDifference != 0 ? tierDifference : this.getLevel() - other.getLevel();
+        return tierDifference != 0 ? tierDifference : this.level() - other.level();
     }
 
-    @Environment(EnvType.CLIENT)
-    public Text getName() {
-        return this.skill.getName();
+    @OnlyIn(Dist.CLIENT)
+    public ITextComponent name() {
+        return this.skill.name();
     }
 
-    @Environment(EnvType.CLIENT)
-        public List<String> getTooltip() {
-        return this.skill.getTooltip();
+    @OnlyIn(Dist.CLIENT)
+    public List<String> tooltip() {
+        return this.skill.tooltip();
     }
 
-    @Environment(EnvType.CLIENT)
-    public void render(final SpunScreen screen, final MatrixStack matrices, final int x, final int y, final int zOffset) {
+    @OnlyIn(Dist.CLIENT)
+    public void render(SpunScreen screen, MatrixStack matrices, int x, int y, int zOffset) {
         this.skill.render(screen, matrices, this.level, x, y, zOffset);
     }
 
-        @Override
-    public NbtCompound toTag(final NbtCompound tag) {
+    @Override
+    public void serializeNBT(CompoundNBT tag) {
         tag.putBoolean("learned", this.learned);
         tag.putInt("level", this.level);
-
-        return tag;
     }
 
     @Override
-    public void fromTag(final NbtCompound tag) {
+    public void deserializeNBT(CompoundNBT tag) {
         this.learned = tag.getBoolean("learned");
         this.level = tag.getInt("level");
     }

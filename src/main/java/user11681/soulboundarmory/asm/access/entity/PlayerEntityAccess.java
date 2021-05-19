@@ -1,8 +1,8 @@
 package user11681.soulboundarmory.asm.access.entity;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.collection.NonNullList;
 
 public interface PlayerEntityAccess {
-    DefaultedList<ItemStack> combinedInventory();
+    NonNullList<ItemStack> combinedInventory();
 }

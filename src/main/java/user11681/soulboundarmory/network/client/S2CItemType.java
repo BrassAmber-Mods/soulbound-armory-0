@@ -1,20 +1,19 @@
 package user11681.soulboundarmory.network.client;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundItemUtil;
+import net.minecraftforge.fml.network.NetworkEvent;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.player.SoulboundItemUtil;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
+import user11681.soulboundarmory.network.ItemComponentPacket;
 
-public class S2CItemType implements ClientItemComponentPacket {
+public class S2CItemType implements ItemComponentPacket {
     @Override
-    public void execute(MinecraftClient client, ClientPlayNetworkHandler handler, ExtendedPacketBuffer buffer, PacketSender responder, ItemStorage<?> storage) {
-        client.player.getInventory().removeStack(client.player.getInventory().selectedSlot);
+    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
+        this.player().inventory.removeItemNoUpdate(this.player().inventory.selected);
         storage.removeOtherItems();
-        storage.setUnlocked(true);
+        storage.unlocked(true);
 
-        SoulboundItemUtil.addItemStack(storage.getItemStack(), client.player);
+        SoulboundItemUtil.addItemStack(storage.getItemStack(), this.player());
         storage.sync();
         storage.refresh();
     }

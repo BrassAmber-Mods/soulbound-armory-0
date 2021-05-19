@@ -1,21 +1,19 @@
 package user11681.soulboundarmory.network.server;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.item.weapon.StaffStorage;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.fml.network.NetworkEvent;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.item.weapon.StaffStorage;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
+import user11681.soulboundarmory.network.ItemComponentPacket;
 
-public class C2SSync implements ServerItemComponentPacket {
+public class C2SSync implements ItemComponentPacket {
     @Override
-    public void execute(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, ExtendedPacketBuffer buffer, PacketSender responder, ItemStorage<?> storage) {
-        NbtCompound tag = buffer.readNbt();
+    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
+        CompoundNBT tag = buffer.readNbt();
 
         if (tag.contains("tab")) {
-            storage.setCurrentTab(tag.getInt("tab"));
+            storage.currentTab(tag.getInt("tab"));
         }
 
         if (storage instanceof StaffStorage && tag.contains("spell")) {

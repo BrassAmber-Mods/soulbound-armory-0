@@ -5,26 +5,24 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+Translationimport net.fabricmc.api.Environment;
 import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import user11681.soulboundarmory.SoulboundArmoryClient;
 import user11681.soulboundarmory.client.i18n.Translations;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.item.StorageType;
-import user11681.soulboundarmory.component.statistics.StatisticType;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.item.StorageType;
+import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.config.Configuration;
 import user11681.soulboundarmory.item.SoulboundItem;
 import user11681.spun.client.gui.screen.SpunScreen;
 import user11681.spun.client.gui.widget.scalable.ScalableWidget;
 
-import static user11681.soulboundarmory.component.statistics.StatisticType.experience;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.experience;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ExperienceBarOverlay extends SpunScreen {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Colors colors = configuration.colors;
@@ -37,13 +35,13 @@ public class ExperienceBarOverlay extends SpunScreen {
     protected int row;
     protected int length;
 
-    public ExperienceBarOverlay(final ItemStack itemStack) {
+    public ExperienceBarOverlay(ItemStack itemStack) {
         this();
 
         this.update(itemStack);
     }
 
-    public ExperienceBarOverlay(final ItemStorage<?> component) {
+    public ExperienceBarOverlay(ItemStorage<?> component) {
         this();
 
         this.update(component);
@@ -55,12 +53,12 @@ public class ExperienceBarOverlay extends SpunScreen {
         super(null);
     }
 
-    public void setData(final int row, final int length) {
+    public void setData(int row, final int length) {
         this.row = row;
         this.length = length;
     }
 
-    public void drawTooltip(final int tooltipX, final int tooltipY, final ItemStack itemStack) {
+    public void drawTooltip(int tooltipX, final int tooltipY, final ItemStack itemStack) {
         if (this.update(itemStack)) {
             final int x = tooltipX + 4;
             final int y = tooltipY + this.row * 10;
@@ -69,8 +67,8 @@ public class ExperienceBarOverlay extends SpunScreen {
         }
     }
 
-    public boolean update(final ItemStack itemStack) {
-        if (this.update(ItemStorage.get(SoulboundArmoryClient.getPlayer(), itemStack.getItem()))) {
+    public boolean update(ItemStack itemStack) {
+        if (this.update(ItemStorage.get(SoulboundArmoryClient.player(), itemStack.getItem()))) {
             if (itemStack.getItem() instanceof SoulboundItem && this.itemStack != itemStack) {
                 this.itemStack = itemStack;
             }
@@ -79,7 +77,7 @@ public class ExperienceBarOverlay extends SpunScreen {
         return false;
     }
 
-    public boolean update(final ItemStorage<?> component) {
+    public boolean update(ItemStorage<?> component) {
         if (component != null) {
             this.component = component;
         }
@@ -92,10 +90,10 @@ public class ExperienceBarOverlay extends SpunScreen {
     }
 
     public boolean render() {
-        final PlayerEntity player = SoulboundArmoryClient.getPlayer();
+        final PlayerEntity player = SoulboundArmoryClient.player();
         final Window window = CLIENT.getWindow();
 
-        for (final ItemStack itemStack : player.getItemsHand()) {
+        for (ItemStack itemStack : player.getHandSlots()) {
             if (this.update(StorageType.get(player, itemStack.getItem()))) {
                 this.render((window.getScaledWidth() - 182) / 2, window.getScaledHeight() - 29, 182);
 
@@ -106,7 +104,7 @@ public class ExperienceBarOverlay extends SpunScreen {
         return false;
     }
 
-    public void render(final int x, final int y, final int width) {
+    public void render(int x, final int y, final int width) {
         if (colors.alpha > 3) {
             final MatrixStack stack = new MatrixStack();
             final Color color = new Color(colors.red, colors.green, colors.blue, colors.alpha);
@@ -117,7 +115,7 @@ public class ExperienceBarOverlay extends SpunScreen {
                 style = Style.EXPERIENCE;
             }
 
-            final float ratio = (float) this.component.getDatum(experience) / this.component.getNextLevelXP();
+            final float ratio = (float) this.component.getDatum(experience) / this.component.nextLevelXP();
             final float effectiveWidth = ratio * width;
             final int middleU = (int) Math.min(4, effectiveWidth);
 
@@ -155,14 +153,14 @@ public class ExperienceBarOverlay extends SpunScreen {
         public static final int AMOUNT = STYLES.size();
 
         public final int v;
-        protected final Text text;
+        protected final ITextComponent text;
 
-        Style(final int v, final Text text) {
+        Style(int v, final ITextComponent text) {
             this.v = v;
             this.text = text;
         }
 
-        public Text getText() {
+        public ITextComponent getText() {
             return this.text;
         }
     }

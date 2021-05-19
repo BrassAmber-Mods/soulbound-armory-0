@@ -5,24 +5,24 @@ import com.google.common.collect.Multimap;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
 import net.fabricmc.fabric.impl.tool.attribute.ToolManagerImpl;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.EquipmentSlotType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.Attribute;
+import net.minecraft.entity.attribute.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.PickaxeItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import user11681.soulboundarmory.client.i18n.Translations;
-import user11681.soulboundarmory.component.Components;
-import user11681.soulboundarmory.component.soulbound.item.StorageType;
-import user11681.soulboundarmory.component.soulbound.item.tool.PickStorage;
-import user11681.soulboundarmory.text.StringableText;
-import user11681.usersmanual.math.MathUtil;
+import user11681.soulboundarmory.capability.Capabilities;
+import user11681.soulboundarmory.capability.soulbound.item.StorageType;
+import user11681.soulboundarmory.capability.soulbound.item.tool.PickStorage;
+import user11681.soulboundarmory.text.Translation;
+import user11681.soulboundarmory.util.MathUtil;
 
-import static user11681.soulboundarmory.component.statistics.StatisticType.experience;
-import static user11681.soulboundarmory.component.statistics.StatisticType.level;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.experience;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.level;
 import static user11681.soulboundarmory.item.ModToolMaterials.SOULBOUND;
 
 ;
@@ -43,8 +43,8 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
                 xp += entry.getMiningLevel(FabricToolTags.PICKAXES);
             }
 
-            if (!world.isClient && component.incrementStatistic(experience, xp) && Components.config.get(miner).getLevelupNotifications()) {
-                ((PlayerEntity) miner).sendMessage(new StringableText(Translations.messageLevelUp.getKey(), stack.getName(), component.getDatum(level)), true);
+            if (!world.isClientSide && component.incrementStatistic(experience, xp) && Capabilities.config.get(miner).getLevelupNotifications()) {
+                ((PlayerEntity) miner).sendMessage(new Translation(Translations.messageLevelUp.getKey(), stack.getName(), component.getDatum(level)), true);
             }
         }
 
@@ -52,7 +52,7 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
     }
 
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
         return HashMultimap.create();
     }
 }

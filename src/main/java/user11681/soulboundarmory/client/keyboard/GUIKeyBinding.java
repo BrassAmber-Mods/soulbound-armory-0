@@ -2,8 +2,8 @@ package user11681.soulboundarmory.client.keyboard;
 
 import org.lwjgl.glfw.GLFW;
 import user11681.soulboundarmory.SoulboundArmoryClient;
-import user11681.soulboundarmory.component.soulbound.item.ItemStorage;
-import user11681.soulboundarmory.component.soulbound.item.StorageType;
+import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
+import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 
 public class GUIKeyBinding extends SoulboundArmoryKeyBinding {
     public GUIKeyBinding() {
@@ -12,7 +12,7 @@ public class GUIKeyBinding extends SoulboundArmoryKeyBinding {
 
     @Override
     protected void press() {
-        ItemStorage<?> component = StorageType.getFirstMenuStorage(SoulboundArmoryClient.getPlayer());
+        ItemStorage<?> component = StorageType.getFirstMenuStorage(SoulboundArmoryClient.player());
 
         if (component != null) {
             component.openGUI();

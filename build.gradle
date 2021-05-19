@@ -1,28 +1,39 @@
+buildscript {
+    repositories {
+        maven {url = "https://files.minecraftforge.net/maven"}
+        maven {url = "https://repo.spongepowered.org/repository/maven-public"}
+    }
+
+    dependencies {
+        classpath("net.minecraftforge.gradle:ForgeGradle:latest.release")
+        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
+    }
+}
+
 plugins {
-    id("wheel").version("0-SNAPSHOT")
+    id("java-library")
+    id("maven-publish")
 }
 
-group("user11681")
-version("3.0.0")
+plugins.apply("net.minecraftforge.gradle")
+plugins.apply("org.spongepowered.mixin")
 
-minecraft {
-    accessWidener("src/main/resources/soulboundarmory.accesswidener")
-}
+group = "user11681"
+version = "3.0.0"
 
-wheel {
-    nospam = false
-    javaVersion = null
+repositories {
+    mavenCentral()
+
+    maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
+    maven {url = "https://maven.tterrag.com"}
 }
 
 dependencies {
-    modInclude("cardinal-components-base")
-    modInclude("cardinal-components-entity")
-    modInclude("cardinal-components-item")
-    modInclude("cell")
-    modInclude("reach-entity-attributes")
-    bloatedInclude("auto-config")
-    bloatedInclude("cloth-config:4+")
+    minecraft("net.minecraftforge:forge:1.16.5-36.1.23")
 
-    mod("api")
-    intransitive("mod-menu")
+    api("user11681:reflect:latest.release")
+}
+
+minecraft {
+    mappings("official", "1.16.5")
 }

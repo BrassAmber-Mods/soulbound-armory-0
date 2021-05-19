@@ -1,41 +1,38 @@
 package user11681.soulboundarmory.client.gui.screen.tab;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import ;
-import net.minecraft.util.Identifier;
+import java.util.Set;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import user11681.soulboundarmory.client.gui.RGBASlider;
 import user11681.soulboundarmory.client.i18n.Translations;
-import user11681.soulboundarmory.component.soulbound.player.SoulboundComponent;
 import user11681.soulboundarmory.skill.Skill;
 import user11681.soulboundarmory.skill.SkillContainer;
-import user11681.spun.client.gui.screen.ScreenTab;
-import user11681.spun.client.gui.widget.scalable.ScalableWidget;
-import user11681.spun.client.gui.widget.scalable.WidgetSupplier;
+import user11681.soulboundarmory.text.Translation;
 import user11681.usersmanual.client.gui.screen.ScreenTab;
 import user11681.usersmanual.client.gui.widget.scalable.ScalableWidget;
 import user11681.usersmanual.client.gui.widget.scalable.WidgetSupplier;
-import user11681.usersmanual.collections.ArrayMap;
-import user11681.usersmanual.collections.OrderedArrayMap;
 
-import static user11681.soulboundarmory.component.statistics.StatisticType.skillPoints;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.skillPoints;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SkillTab extends SoulboundTab {
-    protected static final Identifier BACKGROUND_TEXTURE = new Identifier("textures/block/andesite.png");
-    protected static final Identifier WINDOW = new Identifier("textures/gui/advancements/window.png");
-    protected static final Identifier WIDGETS = new Identifier("textures/gui/advancements/widgets.png");
+    protected static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation("textures/block/andesite.png");
+    protected static final ResourceLocation WINDOW = new ResourceLocation("textures/gui/advancements/window.png");
+    protected static final ResourceLocation WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
 
-    protected final ArrayMap<SkillContainer, List<Integer>> skills;
+    protected final Map<SkillContainer, List<Integer>> skills;
 
     protected ScalableWidget window;
     protected SkillContainer selectedSkill;
@@ -55,14 +52,14 @@ public class SkillTab extends SoulboundTab {
     protected int x;
     protected int y;
 
-    public SkillTab(final SoulboundComponent component, final List<ScreenTab> tabs) {
+    public SkillTab(SoulboundCapability component, List<ScreenTab> tabs) {
         super(Translations.menuSkills, component, tabs);
 
-        this.skills = new OrderedArrayMap<>();
+        this.skills = new Reference2ReferenceOpenHashMap<>();
     }
 
     @Override
-    public void init(final MinecraftClient client, final int width, final int height) {
+    public void init(Minecraft client, int width, int height) {
         super.init(client, width, height);
 
         this.chroma = 1;
@@ -102,14 +99,14 @@ public class SkillTab extends SoulboundTab {
     }
 
     @Override
-    public void render(final MatrixStack matrices, final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(MatrixStack matrices, final int mouseX, final int mouseY, final float partialTicks) {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
         this.renderWindow(matrices, mouseX, mouseY, partialTicks);
         this.renderSkills(matrices, mouseX, mouseY);
     }
 
-    public void renderWindow(final MatrixStack stack, final int mouseX, final int mouseY, final float tickDelta) {
+    public void renderWindow(MatrixStack stack, final int mouseX, final int mouseY, final float tickDelta) {
         this.setChroma(this.chroma);
         RenderSystem.enableBlend();
 
@@ -124,7 +121,7 @@ public class SkillTab extends SoulboundTab {
         TEXT_RENDERER.draw(stack, Translations.menuSkills, x + 8, y + 6, color);
 
         if (points > 0) {
-            final Text text = new StringableText("%s: %s", Translations.menuUnspentPoints, points);
+            final ITextComponent text = new Translation("%s: %s", Translations.menuUnspentPoints, points);
 
             TEXT_RENDERER.draw(stack, text, this.insideEndX - TEXT_RENDERER.getWidth(text), y + 6, color);
         }
@@ -136,7 +133,7 @@ public class SkillTab extends SoulboundTab {
                 : Math.min(this.chroma + delta, 1F);
     }
 
-    protected void renderSkills(final MatrixStack stack, final int mouseX, final int mouseY) {
+    protected void renderSkills(MatrixStack stack, final int mouseX, final int mouseY) {
         final List<SkillContainer> skills = this.skills.keySet();
 
         for (int i = 0, skillsLength = skills.size(); i < skillsLength; i++) {
@@ -154,13 +151,13 @@ public class SkillTab extends SoulboundTab {
         }
     }
 
-    protected void renderSkill(final MatrixStack matrices, final SkillContainer skill, final int mouseX, final int mouseY) {
+    protected void renderSkill(MatrixStack matrices, final SkillContainer skill, final int mouseX, final int mouseY) {
         final List<Integer> positions = this.skills.get(skill);
         final int width = 16;
         final int height = 16;
         final int x = positions.get(0) - width / 2;
         final int y = positions.get(1) - height / 2;
-        final int offsetV = skill.isLearned() ? 26 : 0;
+        final int offsetV = skill.learned() ? 26 : 0;
         final float chroma;
 
         if (skill == this.selectedSkill) {
@@ -188,39 +185,39 @@ public class SkillTab extends SoulboundTab {
         this.setZOffset(0);
     }
 
-    protected void renderTooltip(final MatrixStack stack, final SkillContainer skill, final int centerX, final int centerY, final int offsetV) {
-        final Text name = skill.getName();
-        List<String> tooltip = skill.getTooltip();
+    protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY, int offsetV) {
+        ITextComponent name = skill.name();
+        List<String> tooltip = skill.tooltip();
         int barWidth = 36 + TEXT_RENDERER.getWidth(name);
         int size = tooltip.size();
 
         if (size > 0) {
-            final boolean learned = skill.isLearned();
-            final boolean belowCenter = centerY > this.insideCenterY;
-            final int y = centerY + (belowCenter ? -56 : 14);
-            final int textY = y + 7;
-            Text string = null;
+            boolean learned = skill.learned();
+            boolean belowCenter = centerY > this.insideCenterY;
+            int y = centerY + (belowCenter ? -56 : 14);
+            int textY = y + 7;
+            ITextComponent string = null;
 
             if (!learned) {
-                final int cost = skill.getCost();
-                final Text plural = cost > 1 ? Translations.menuPoints : Translations.menuPoint;
-                string = new StringableText(Translations.menuSkillLearnCost.toString(), cost, plural);
-            } else if (skill.canBeUpgraded()) {
-                string = new StringableText("%s %s", Translations.menuLevel, skill.getLevel());
+                int cost = skill.cost();
+                ITextComponent plural = cost > 1 ? Translations.menuPoints : Translations.menuPoint;
+                string = new Translation(Translations.menuSkillLearnCost.toString(), cost, plural);
+            } else if (skill.canUpgrade()) {
+                string = new Translation("%s %s", Translations.menuLevel, skill.level());
             }
 
             barWidth = 12 + Math.max(barWidth, 8 + TEXT_RENDERER.getWidth(string));
             tooltip = this.wrap(barWidth, tooltip.toArray(new String[0]));
             size = tooltip.size();
             barWidth = Math.max(barWidth, 8 + TEXT_RENDERER.getWidth(tooltip.stream().max(Comparator.comparingInt(String::length)).get()));
-            final int offset = (1 + size) * TEXT_RENDERER.fontHeight;
-            final int tooltipHeight = 1 + offset;
+            int offset = (1 + size) * TEXT_RENDERER.fontHeight;
+            int tooltipHeight = 1 + offset;
 
-            if (!learned || skill.canBeUpgraded()) {
+            if (!learned || skill.canUpgrade()) {
                 this.setChroma(1);
 
                 TEXTURE_MANAGER.bindTexture(WIDGETS);
-                final int levelY = y + tooltipHeight;
+                int levelY = y + tooltipHeight;
                 this.drawHorizontallyInterpolatedTexture(stack, centerX - 8, levelY, 0, 55, 2, 198, 200, barWidth, 20);
 
                 TEXT_RENDERER.draw(stack, string, centerX - 3, textY + offset, 0x999999);
@@ -244,12 +241,12 @@ public class SkillTab extends SoulboundTab {
         TEXT_RENDERER.draw(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
     }
 
-    protected boolean isSkillSelected(final int mouseX, final int mouseY) {
+    protected boolean isSkillSelected(int mouseX, final int mouseY) {
         return this.getSelectedSkill(mouseX, mouseY) != null;
     }
 
-    protected SkillContainer getSelectedSkill(final double mouseX, final double mouseY) {
-        for (final SkillContainer skill : this.skills.keySet()) {
+    protected SkillContainer getSelectedSkill(double mouseX, final double mouseY) {
+        for (SkillContainer skill : this.skills.keySet()) {
             if (this.isMouseOverSkill(skill, mouseX, mouseY)) {
                 return skill;
             }
@@ -258,31 +255,31 @@ public class SkillTab extends SoulboundTab {
         return null;
     }
 
-    protected boolean isMouseOverSkill(final SkillContainer skill, final double mouseX, final double mouseY) {
+    protected boolean isMouseOverSkill(SkillContainer skill, final double mouseX, final double mouseY) {
         final List<Integer> positions = this.skills.get(skill);
 
         return Math.abs(positions.get(0) - mouseX) <= 12 && Math.abs(positions.get(1) - mouseY) <= 12;
     }
 
-    protected void setChroma(final float chroma) {
+    protected void setChroma(float chroma) {
         RenderSystem.color3f(chroma, chroma, chroma);
     }
 
     @Override
-    public boolean mouseClicked(final double mouseX, final double mouseY, final int mouseButton) {
+    public boolean mouseClicked(double mouseX, final double mouseY, final int mouseButton) {
         super.mouseClicked(mouseX, mouseY, mouseButton);
 
         final SkillContainer skill = this.getSelectedSkill(mouseX, mouseY);
 
         if (skill != null) {
-            this.storage.upgradeSkill(skill);
+            this.storage.upgrade(skill);
         }
         return false;
     }
 
     @Override
     public void refresh() {
-        final float chroma = this.chroma;
+        float chroma = this.chroma;
 
         super.refresh();
 
@@ -292,12 +289,12 @@ public class SkillTab extends SoulboundTab {
     protected void updateIcons() {
         this.skills.clear();
 
-        final Map<Integer, List<Integer>> tierOrders = new LinkedHashMap<>();
-        final List<SkillContainer> skills = this.storage.getSkills();
+        Map<Integer, List<Integer>> tierOrders = new LinkedHashMap<>();
+        List<SkillContainer> skills = this.storage.skills();
 
-        for (final SkillContainer skill : skills) {
-            final int tier = skill.getTier();
-            final List<Integer> data = tierOrders.getOrDefault(tier, Arrays.asList(0, 0, 0));
+        for (SkillContainer skill : skills) {
+            int tier = skill.tier();
+            List<Integer> data = tierOrders.getOrDefault(tier, Arrays.asList(0, 0, 0));
 
             if (!tierOrders.containsValue(data)) {
                 tierOrders.put(tier, data);
@@ -308,34 +305,34 @@ public class SkillTab extends SoulboundTab {
 
         int width = 2;
 
-        for (final int tier : tierOrders.keySet()) {
-            final int tiers = tierOrders.get(tier).get(1);
+        for (int tier : tierOrders.keySet()) {
+            int tiers = tierOrders.get(tier).get(1);
 
             if (tier != 0 && tiers != 0) {
                 width += tiers - 1;
             }
         }
 
-        for (final SkillContainer skill : skills) {
-            final int tier = skill.getTier();
-            final List<Integer> data = tierOrders.getOrDefault(tier, Arrays.asList(0, 0, 0));
+        for (SkillContainer skill : skills) {
+            int tier = skill.tier();
+            List<Integer> data = tierOrders.getOrDefault(tier, Arrays.asList(0, 0, 0));
             data.set(0, data.get(0) + 1);
 
             if (!tierOrders.containsValue(data)) {
                 tierOrders.put(tier, data);
             }
 
-            final int spacing = !skill.hasDependencies() ? width * 24 : 48;
-            final int offset = (1 - data.get(1)) * spacing / 2;
+            int spacing = !skill.hasDependencies() ? width * 24 : 48;
+            int offset = (1 - data.get(1)) * spacing / 2;
             int x = offset + (data.get(0) - 1) * spacing;
 
-            final List<Skill> dependencies = skill.getDependencies();
+            Set<Skill> dependencies = skill.dependencies();
 
             if (skill.hasDependencies()) {
                 int total = 0;
 
-                for (final Skill other : dependencies) {
-                    total += this.skills.get(this.storage.getSkill(other)).get(0);
+                for (Skill other : dependencies) {
+                    total += this.skills.get(this.storage.skill(other)).get(0);
                 }
 
                 x += total / dependencies.size();
