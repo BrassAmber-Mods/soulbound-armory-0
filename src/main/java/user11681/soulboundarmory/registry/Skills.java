@@ -19,27 +19,21 @@ import user11681.soulboundarmory.skill.weapon.staff.VulnerabilitySkill;
 import user11681.soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 
 public class Skills {
-    public static final Skill ambidexterity = register(new AmbidexteritySkill(SoulboundArmory.id("ambidexterity")));
-    public static final Skill endermanacle = register(new EndermanacleSkill(SoulboundArmory.id("endermanacle")));
-    public static final Skill enderPull = register(new EnderPullSkill(SoulboundArmory.id("ender_pull")));
-    public static final Skill fireball = register(new FireballSkill(SoulboundArmory.id("fireball")));
-    public static final Skill freezing = register(new FreezingSkill(SoulboundArmory.id("freezing")));
-    public static final Skill healing = register(new HealingSkill(SoulboundArmory.id("healing")));
-    public static final Skill leaping = register(new LeapingSkill(SoulboundArmory.id("leaping")));
-    public static final Skill nourishment = register(new NourishmentSkill(SoulboundArmory.id("nourishment")));
-    public static final Skill penetration = register(new PenetrationSkill(SoulboundArmory.id("penetration")));
-    public static final Skill returning = register(new ReturnSkill(SoulboundArmory.id("return")));
-    public static final Skill shadowClone = register(new ShadowCloneSkill(SoulboundArmory.id("shadow_clone")));
-    public static final Skill sneakReturn = register(new SneakReturnSkill(SoulboundArmory.id("sneak_return")));
-    public static final Skill summonLightning = register(new SummonLightningSkill(SoulboundArmory.id("summon_lightning")));
-    public static final Skill throwing = register(new ThrowingSkill(SoulboundArmory.id("throwing")));
-    public static final Skill vulnerability = register(new VulnerabilitySkill(SoulboundArmory.id("vulnerability")));
-
-    private static Skill register(Skill skill) {
-        Skill.registry.register(skill);
-
-        return skill;
-    }
+    public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
+    public static final Skill endermanacle = new EndermanacleSkill(SoulboundArmory.id("endermanacle"));
+    public static final Skill enderPull = new EnderPullSkill(SoulboundArmory.id("ender_pull"));
+    public static final Skill fireball = new FireballSkill(SoulboundArmory.id("fireball"));
+    public static final Skill freezing = new FreezingSkill(SoulboundArmory.id("freezing"));
+    public static final Skill healing = new HealingSkill(SoulboundArmory.id("healing"));
+    public static final Skill leaping = new LeapingSkill(SoulboundArmory.id("leaping"));
+    public static final Skill nourishment = new NourishmentSkill(SoulboundArmory.id("nourishment"));
+    public static final Skill penetration = new PenetrationSkill(SoulboundArmory.id("penetration"));
+    public static final Skill returning = new ReturnSkill(SoulboundArmory.id("return"));
+    public static final Skill shadowClone = new ShadowCloneSkill(SoulboundArmory.id("shadow_clone"));
+    public static final Skill sneakReturn = new SneakReturnSkill(SoulboundArmory.id("sneak_return"));
+    public static final Skill summonLightning = new SummonLightningSkill(SoulboundArmory.id("summon_lightning"));
+    public static final Skill throwing = new ThrowingSkill(SoulboundArmory.id("throwing"));
+    public static final Skill vulnerability = new VulnerabilitySkill(SoulboundArmory.id("vulnerability"));
 
     static {
         for (Skill skill : Skill.registry) {

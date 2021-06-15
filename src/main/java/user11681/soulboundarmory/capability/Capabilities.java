@@ -1,9 +1,9 @@
 package user11681.soulboundarmory.capability;
 
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.Map;
+import java.util.stream.Stream;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -16,35 +16,19 @@ import user11681.soulboundarmory.capability.soulbound.player.WeaponCapability;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 
 public class Capabilities {
-    public static final List<CapabilityContainer<? extends SoulboundCapability>> soulboundCapabilities = new ArrayList<>(2);
+    public static final CapabilityContainer<ConfigCapability> config = container(ConfigCapability.class);
+    public static final CapabilityContainer<EntityData> entityData = container(EntityData.class);
+    public static final CapabilityContainer<ToolCapability> tool = container(ToolCapability.class);
+    public static final CapabilityContainer<WeaponCapability> weapon = container(WeaponCapability.class);
+    // public static final CapabilityContainer<ItemData> itemData = register(ItemData.class, ItemData::new);
 
-    public static final CapabilityContainer<ConfigCapability> config = register(ConfigCapability.class, ConfigCapability::new);
-    public static final CapabilityContainer<EntityData> entityData = register(EntityData.class, EntityData::new);
-    public static final CapabilityContainer<ToolCapability> tool = registerSoulbound(ToolCapability.class, ToolCapability::new);
-    public static final CapabilityContainer<WeaponCapability> weapon = registerSoulbound(WeaponCapability.class, WeaponCapability::new);
-    //    public static final CapabilityContainer<ItemData> itemData = register(ItemData.class, ItemData::new);
+    public static final List<CapabilityContainer<? extends SoulboundCapability>> soulboundCapabilities = Arrays.asList(tool, weapon);
 
-    public static <T extends SoulboundCapability> CapabilityContainer<T> registerSoulbound(Class<T> klass, Callable<T> factory) {
-        CapabilityContainer<T> type = register(klass, factory);
-
-        soulboundCapabilities.add(type);
-
-        return type;
+    public static Stream<SoulboundCapability> get(Entity entity) {
+        return soulboundCapabilities.stream().map(type -> type.get(entity));
     }
 
-    public static List<SoulboundCapability> get(Entity entity) {
-        List<SoulboundCapability> components = new ArrayList<>();
-
-        for (CapabilityContainer<? extends SoulboundCapability> type : soulboundCapabilities) {
-            components.add(type.get(entity));
-        }
-
-        return components;
-    }
-
-    public static <T extends CompoundSerializable> CapabilityContainer<T> register(Class<T> type, Callable<T> factory) {
-        CapabilityManager.INSTANCE.register(type, new CapabilityStorage<>(), factory);
-
-        return new CapabilityContainer<>(Accessor.<IdentityHashMap<String, Capability<T>>>getObject(CapabilityManager.INSTANCE, "providers").get(type.getName()));
+    private static <T extends CompoundSerializable> CapabilityContainer<T> container(Class<T> type) {
+        return new CapabilityContainer<>(Accessor.<Map<String, Capability<T>>>getObject(CapabilityManager.INSTANCE, "providers").get(type.getName()));
     }
 }

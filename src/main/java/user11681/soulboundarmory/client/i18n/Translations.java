@@ -50,7 +50,7 @@ public class Translations {
     public static final Translation miningLevelFormat = new Translation("attribute.soulboundarmory.mining_level.format");
     public static final Translation attackSpeedFormat = new Translation("attribute.soulboundarmory.attack_speed.format");
     public static final Translation attackDamageFormat = new Translation("attribute.soulboundarmory.attack_damage.format");
-    public static final Translation criticalStrikeProbabilityFormat = new Translation("attribute.soulboundarmory.critical_strike_probability.format");
+    public static final Translation criticalStrikeProbabilityFormat = new Translation("attribute.soulboundarmory.critical_strike_rate.format");
     public static final Translation attackRangeFormat = new Translation("attribute.soulboundarmory.attack_range.format");
 
     public static final Translation experienceName = new Translation("attribute.soulboundarmory.experience");
@@ -62,7 +62,7 @@ public class Translations {
     public static final Translation spentEnchantmentPointsName = new Translation("attribute.soulboundarmory.spent_enchantment_points");
     public static final Translation attackSpeedName = new Translation("attribute.soulboundarmory.attack_speed");
     public static final Translation attackDamageName = new Translation("attribute.soulboundarmory.attack_damage");
-    public static final Translation criticalStrikeProbabilityName = new Translation("attribute.soulboundarmory.critical_strike_probability");
+    public static final Translation criticalStrikeProbabilityName = new Translation("attribute.soulboundarmory.critical_strike_rate");
     public static final Translation toolEfficiencyName = new Translation("attribute.soulboundarmory.efficiency.tool");
     public static final Translation weaponEfficiencyName = new Translation("attribute.soulboundarmory.efficiency.weapon");
     public static final Translation miningLevelName = new Translation("attribute.soulboundarmory.mining_level");

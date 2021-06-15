@@ -2,7 +2,6 @@ package user11681.soulboundarmory.capability.soulbound.item.tool;
 
 import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -17,6 +16,7 @@ import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import user11681.soulboundarmory.client.gui.screen.tab.AttributeTab;
 import user11681.soulboundarmory.client.gui.screen.tab.EnchantmentTab;
+import user11681.soulboundarmory.client.gui.screen.tab.ScreenTab;
 import user11681.soulboundarmory.client.gui.screen.tab.SelectionTab;
 import user11681.soulboundarmory.client.gui.screen.tab.SkillTab;
 import user11681.soulboundarmory.client.i18n.Translations;
@@ -30,7 +30,7 @@ import static user11681.soulboundarmory.capability.statistics.StatisticType.mini
 import static user11681.soulboundarmory.capability.statistics.StatisticType.reach;
 
 public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<T> {
-    public ToolStorage(SoulboundCapability component, final Item item) {
+    public ToolStorage(SoulboundCapability component, Item item) {
         super(component, item);
     }
 
@@ -42,7 +42,7 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
     }
 
     public ITextComponent getMiningLevelName() {
-        return this.getMiningLevelName((int) this.getAttribute(miningLevel));
+        return this.getMiningLevelName((int) this.attribute(miningLevel));
     }
 
     public ITextComponent getMiningLevelName(int level) {
@@ -56,8 +56,9 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
 
     }
 
+    @Override
     @OnlyIn(Dist.CLIENT)
-    public List<ScreenTab> getTabs() {
+    public List<ScreenTab> tabs() {
         List<ScreenTab> tabs = new ReferenceArrayList<>();
 
         tabs.add(new SelectionTab(Translations.menuToolSelection, this.component, tabs));
@@ -71,8 +72,8 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
     @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
         if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(SAAttributes.efficiency, new AttributeModifier(SAAttributes.efficiencyUUID, "Tool modifier", this.getAttribute(efficiency), AttributeModifier.Operation.ADDITION));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.getAttribute(reach), AttributeModifier.Operation.ADDITION));
+            modifiers.put(SAAttributes.efficiency, new AttributeModifier(SAAttributes.efficiencyUUID, "Tool modifier", this.attribute(efficiency), AttributeModifier.Operation.ADDITION));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attribute(reach), AttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;

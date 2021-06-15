@@ -5,12 +5,17 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import javax.lang.model.element.Element;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.cell.client.gui.DrawableElement;
+import user11681.cell.client.gui.widget.Slider;
+import user11681.cell.client.gui.widget.callback.PressCallback;
+import user11681.cell.client.gui.widget.scalable.ScalableWidget;
+import user11681.cell.client.gui.widget.scalable.ScalableWidgets;
 import user11681.soulboundarmory.SoulboundArmoryClient;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
@@ -32,8 +37,8 @@ public abstract class SoulboundTab extends ScreenTab {
     protected static final NumberFormat format = DecimalFormat.getInstance();
 
     protected final PlayerEntity player;
-    protected final List<Element> options;
-    protected final List<RGBASlider> sliders;
+    protected final List<DrawableElement> options;
+    protected final List<Slider> sliders;
     protected final SoulboundCapability component;
 
     protected ItemStorage<?> storage;
@@ -69,9 +74,16 @@ public abstract class SoulboundTab extends ScreenTab {
             this.storage.currentTab(this.index);
 
             ITextComponent text = this.slot != storage.boundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
-            int buttonWidth = Math.max(this.tab.width, this.textRenderer.getWidth(text) + 8);
+            int buttonWidth = Math.max(this.tab.width, this.fontRenderer.width(text) + 8);
 
-            this.addButton(new ButtonWidget(this.tab.endX() - buttonWidth, this.height - this.height / 16 - 20, buttonWidth, 20, text, this.bindSlotAction()));
+            this.add(ScalableWidgets.button()
+                .x(this.tab.endX() - buttonWidth)
+                .y(this.height - this.height / 16 - 20)
+                .width(buttonWidth)
+                .height(20)
+                .text(text)
+                .primaryAction(this.bindSlotAction())
+            );
 
             if (this.displayXPBar()) {
                 this.xpBar = new ExperienceBarOverlay(this.storage);
@@ -79,6 +91,45 @@ public abstract class SoulboundTab extends ScreenTab {
                 this.initSettings();
             }
         }
+    }
+
+    @Override
+    protected boolean displayTabs() {
+        return this.slot > -1 && this.storage.isUnlocked();
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        super.mouseClicked(mouseX, mouseY, button);
+
+        if (this.isMouseOverXPBar(mouseX, mouseY)) {
+            if (Configuration.instance().client.displayOptions) {
+                this.remove(this.options);
+                Configuration.instance().client.displayOptions = false;
+            } else {
+                this.add(this.options);
+                Configuration.instance().client.displayOptions = true;
+            }
+
+            this.refresh();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double x, double y, double dWheel) {
+        Slider slider = this.sliderMousedOver(x, y);
+
+        if (slider != null) {
+            slider.scroll(dWheel);
+
+            return true;
+        }
+
+        return super.mouseScrolled(x, y, dWheel);
     }
 
     protected boolean initSettings() {
@@ -104,11 +155,6 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     @Override
-    protected boolean displayTabs() {
-        return this.slot > -1 && this.storage.isUnlocked();
-    }
-
-    @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         this.withZ(-500, () -> this.renderBackground(matrices));
 
@@ -120,20 +166,20 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     protected void drawXPBar(MatrixStack matrices, int mouseX, int mouseY) {
-        int xp = this.storage.getDatum(experience);
+        int xp = this.storage.datum(experience);
         int maxLevel = Configuration.instance().maxLevel;
 
         this.xpBar.render();
 
         if (this.isMouseOverLevel(mouseX, mouseY) && maxLevel >= 0) {
-            this.renderTooltip(matrices, new Translation("%s/%s", this.storage.getDatum(level), maxLevel), mouseX, mouseY);
+            this.renderTooltip(matrices, new Translation("%s/%s", this.storage.datum(level), maxLevel), mouseX, mouseY);
         } else if (this.isMouseOverXPBar(mouseX, mouseY)) {
             this.renderTooltip(matrices, this.storage.canLevelUp()
-                    ? new Translation("%s/%s", xp, this.storage.nextLevelXP())
-                    : new Translation("%s", xp), mouseX, mouseY);
+                ? new Translation("%s/%s", xp, this.storage.nextLevelXP())
+                : new Translation("%s", xp), mouseX, mouseY);
         }
 
-//        RenderSystem.disableLighting();
+        //        RenderSystem.disableLighting();
     }
 
     protected boolean displayXPBar() {
@@ -156,19 +202,19 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     protected boolean isMouseOverLevel(int mouseX, int mouseY) {
-        String levelString = "" + this.storage.getDatum(level);
+        String levelString = "" + this.storage.datum(level);
 
-        int levelLeftX = (this.width - this.textRenderer.getWidth(levelString)) / 2;
+        int levelLeftX = (this.width - this.fontRenderer.width(levelString)) / 2;
         int levelTopY = height - 35;
 
-        return mouseX >= levelLeftX && mouseX <= levelLeftX + this.textRenderer.getWidth(levelString)
-                && mouseY >= levelTopY && mouseY <= levelTopY + this.textRenderer.fontHeight;
+        return mouseX >= levelLeftX && mouseX <= levelLeftX + this.fontRenderer.width(levelString)
+            && mouseY >= levelTopY && mouseY <= levelTopY + this.fontRenderer.lineHeight;
     }
 
-    protected RGBASlider sliderMousedOver(double mouseX, double mouseY) {
+    protected Slider sliderMousedOver(double mouseX, double mouseY) {
         for (int slider = 0; slider < 4; slider++) {
             if (mouseX >= this.optionX() && mouseX <= this.optionX() + 100
-                    && mouseY >= this.optionY(slider) && mouseY <= this.optionY(slider) + 20) {
+                && mouseY >= this.optionY(slider) && mouseY <= this.optionY(slider) + 20) {
                 return this.sliders.get(slider);
             }
         }
@@ -177,55 +223,21 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX, mouseY, button);
-
-        if (this.isMouseOverXPBar(mouseX, mouseY)) {
-            if (Configuration.instance().client.displayOptions) {
-                this.removeButtons(this.options);
-                Configuration.instance().client.displayOptions = false;
-            } else {
-                this.add(this.options);
-                Configuration.instance().client.displayOptions = true;
-            }
-
-            this.refresh();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (SoulboundArmoryClient.guiKeyBinding.matchesKey(keyCode, scanCode)) {
+        if (SoulboundArmoryClient.guiKeyBinding.matches(keyCode, scanCode)) {
             this.onClose();
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override
-    public boolean mouseScrolled(double x, double y, double dWheel) {
-        RGBASlider slider = this.sliderMousedOver(x, y);
-
-        if (slider != null) {
-            slider.scroll(dWheel);
-
-            return true;
-        }
-
-        return super.mouseScrolled(x, y, dWheel);
-    }
-
     protected void cycleStyle(int change) {
-        int index = (Style.STYLES.indexOf(Configuration.instance().client.style) + change) % Style.AMOUNT;
+        int index = (Style.styles.indexOf(Configuration.instance().client.style) + change) % Style.count;
 
         if (index < 0) {
-            this.cycleStyle(Style.AMOUNT + index);
+            this.cycleStyle(Style.count + index);
         } else {
-            Configuration.instance().client.style = Style.STYLES.get(index);
+            Configuration.instance().client.style = Style.styles.get(index);
             this.refresh();
         }
     }
@@ -253,8 +265,8 @@ public abstract class SoulboundTab extends ScreenTab {
             .secondaryAction(secondaryAction);
     }
 
-    public RGBASlider colorSlider(double currentValue, ITextComponent text, int id) {
-        return new RGBASlider(this.optionX(), this.optionY(id), 100, 20, text, currentValue, id);
+    public Slider colorSlider(double currentValue, ITextComponent text, int id) {
+        return new RGBASlider(id, text).x(this.optionX()).y(this.optionY(id)).width(100).height(20).value(currentValue);
     }
 
     public ScalableWidget[] addPointButtons(int rows, int points, PressCallback<ScalableWidget> action) {
@@ -289,7 +301,7 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     protected PressCallback<ScalableWidget> bindSlotAction() {
-        return (ScalableWidget button) -> ClientPlayNetworking.send(Packets.serverBindSlot, new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
+        return (ScalableWidget button) -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
     }
 
     protected PressCallback<ScalableWidget> cycleStyleAction(int change) {
@@ -297,6 +309,6 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     protected PressCallback<ScalableWidget> resetAction(Category category) {
-        return (ScalableWidget button) -> Packets.serverReset.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(category.identifier()));
+        return (ScalableWidget button) -> Packets.serverReset.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(category.id()));
     }
 }

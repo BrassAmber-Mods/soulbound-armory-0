@@ -1,7 +1,7 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "soulboundarmory:item/soulbound_greatsword"
+        "layer0": "soulbound-armory:item/greatsword"
     },
     "display": {
         "thirdperson_righthand": {

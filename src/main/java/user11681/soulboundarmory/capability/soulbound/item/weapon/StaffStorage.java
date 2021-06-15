@@ -51,7 +51,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     protected int fireballCooldown;
     protected int spell;
 
-    public StaffStorage(SoulboundCapability component, final Item item) {
+    public StaffStorage(SoulboundCapability component, Item item) {
         super(component, item);
         this.statistics = Statistics.create()
                 .category(datum, experience, level, skillPoints, attributePoints, enchantmentPoints, spentAttributePoints, spentEnchantmentPoints)
@@ -59,7 +59,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
                 .min(0.48, attackSpeed).min(8, attackDamage)
                 .max(1, criticalStrikeProbability).build();
         this.enchantments = new EnchantmentStorage((Enchantment enchantment) -> {
-            final String name = enchantment.getFullname(1).getContents().toLowerCase();
+             String name = enchantment.getFullname(1).getContents().toLowerCase();
 
             return enchantment.canEnchant(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
                     && (enchantment == impact || !name.contains("soulbound")) && !name.contains("holding")
@@ -78,7 +78,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public StorageType<StaffStorage> getType() {
+    public StorageType<StaffStorage> type() {
         return StorageType.staff;
     }
 
@@ -91,7 +91,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     public void resetFireballCooldown() {
-        this.fireballCooldown = (int) Math.round(20 / this.getAttribute(attackSpeed));
+        this.fireballCooldown = (int) Math.round(20 / this.attribute(attackSpeed));
     }
 
     public int spell() {
@@ -111,8 +111,8 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
         if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.ATTACK_SPEED_MODIFIER_ID, "Weapon modifier", this.getAttributeRelative(attackSpeed), AttributeModifier.Operation.ADDITION));
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.ATTACK_DAMAGE_MODIFIER_ID, "Weapon modifier", this.getAttributeRelative(attackDamage), AttributeModifier.Operation.ADDITION));
+            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.attackSpeedModifier, "Weapon modifier", this.attributeRelative(attackSpeed), AttributeModifier.Operation.ADDITION));
+            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.attackDamageModifier, "Weapon modifier", this.attributeRelative(attackDamage), AttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;
@@ -120,27 +120,27 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
 
     @Override
     public List<StatisticEntry> getScreenAttributes() {
-        final List<StatisticEntry> entries = new ReferenceArrayList<>();
+         List<StatisticEntry> entries = new ReferenceArrayList<>();
 
-        entries.add(new StatisticEntry(this.getStatistic(attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed))));
-        entries.add(new StatisticEntry(this.getStatistic(attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))));
-        entries.add(new StatisticEntry(this.getStatistic(criticalStrikeProbability), new Translation("%s%s: %s%%", Translations.criticalStrikeProbabilityFormat, Translations.criticalStrikeProbabilityName, this.formatStatistic(criticalStrikeProbability))));
+        entries.add(new StatisticEntry(this.statistic(attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed))));
+        entries.add(new StatisticEntry(this.statistic(attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))));
+        entries.add(new StatisticEntry(this.statistic(criticalStrikeProbability), new Translation("%s%s: %s%%", Translations.criticalStrikeProbabilityFormat, Translations.criticalStrikeProbabilityName, this.formatStatistic(criticalStrikeProbability))));
 
         return entries;
     }
 
     @Override
     public List<ITextComponent> getTooltip() {
-        final NumberFormat format = DecimalFormat.getInstance();
-        final List<ITextComponent> tooltip = new ArrayList<>();
+         NumberFormat format = DecimalFormat.getInstance();
+         List<ITextComponent> tooltip = new ArrayList<>();
 
-        tooltip.add(new Translation(" %s%s %s", Translations.attackSpeedFormat, format.format(this.getAttribute(attackSpeed)), Translations.attackSpeedName));
-        tooltip.add(new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.getAttributeTotal(attackDamage)), Translations.attackDamageName));
+        tooltip.add(new Translation(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(attackSpeed)), Translations.attackSpeedName));
+        tooltip.add(new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(attackDamage)), Translations.attackDamageName));
         tooltip.add(new StringTextComponent(""));
         tooltip.add(new StringTextComponent(""));
 
-        if (this.getAttribute(criticalStrikeProbability) > 0) {
-            tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeProbabilityFormat, format.format(this.getAttribute(criticalStrikeProbability) * 100), Translations.criticalStrikeProbabilityName)));
+        if (this.attribute(criticalStrikeProbability) > 0) {
+            tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeProbabilityFormat, format.format(this.attribute(criticalStrikeProbability) * 100), Translations.criticalStrikeProbabilityName)));
         }
 
         return tooltip;

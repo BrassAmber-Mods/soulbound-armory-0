@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import user11681.soulboundarmory.asm.access.entity.AbstractArrowEntityAccess;
 
 @Mixin(AbstractArrowEntity.class)
-public abstract class AbstractArrowEntityMixin implements AbstractArrowEntityAccess {
+abstract class AbstractArrowEntityMixin implements AbstractArrowEntityAccess {
     @Accessor
     @Override
     public abstract int getLife();

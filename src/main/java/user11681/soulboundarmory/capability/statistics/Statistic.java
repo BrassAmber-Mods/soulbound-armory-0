@@ -1,10 +1,10 @@
 package user11681.soulboundarmory.capability.statistics;
 
 import java.math.BigDecimal;
-import nerdhub.cardinal.components.api.util.INBTSerializable;
 import net.minecraft.nbt.CompoundNBT;
+import user11681.soulboundarmory.serial.CompoundSerializable;
 
-public class Statistic extends Number implements INBTSerializable {
+public class Statistic extends Number implements CompoundSerializable {
     protected final Category category;
     protected final StatisticType type;
 
@@ -13,7 +13,7 @@ public class Statistic extends Number implements INBTSerializable {
     protected double max;
     protected int points;
 
-    public Statistic(Category category, final StatisticType statistic) {
+    public Statistic(Category category, StatisticType statistic) {
         super();
 
         this.type = statistic;
@@ -100,28 +100,34 @@ public class Statistic extends Number implements INBTSerializable {
         this.value = BigDecimal.valueOf(value.doubleValue());
     }
 
-    public byte byteValue() {
-        return this.value.byteValue();
-    }
-
-    public short shortValue() {
-        return this.value.shortValue();
-    }
-
+    @Override
     public int intValue() {
         return this.value.intValue();
     }
 
+    @Override
     public long longValue() {
         return this.value.longValue();
     }
 
+    @Override
     public float floatValue() {
         return this.value.floatValue();
     }
 
+    @Override
     public double doubleValue() {
         return this.value.doubleValue();
+    }
+
+    @Override
+    public byte byteValue() {
+        return this.value.byteValue();
+    }
+
+    @Override
+    public short shortValue() {
+        return this.value.shortValue();
     }
 
     public boolean lessThan(Number number) {
@@ -141,8 +147,8 @@ public class Statistic extends Number implements INBTSerializable {
     }
 
     public void add(Number number) {
-        final double currentValue = this.value.doubleValue();
-        final double addition = number.doubleValue();
+        double currentValue = this.value.doubleValue();
+        double addition = number.doubleValue();
 
         if (currentValue + addition < this.min) {
             this.setToMin();
@@ -158,18 +164,16 @@ public class Statistic extends Number implements INBTSerializable {
         this.setPoints(0);
     }
 
-        @Override
-    public CompoundNBT toTag(CompoundNBT tag) {
+    @Override
+    public void serializeNBT(CompoundNBT tag) {
         tag.putDouble("min", this.min);
         tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
         tag.putInt("points", this.points);
-
-        return tag;
     }
 
     @Override
-    public void fromTag(CompoundNBT tag) {
+    public void deserializeNBT(CompoundNBT tag) {
         this.min = tag.getDouble("min");
         this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));

@@ -6,7 +6,7 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.SwordItem;
 
 public abstract class SoulboundMeleeWeapon extends SwordItem implements SoulboundWeaponItem {
@@ -14,7 +14,7 @@ public abstract class SoulboundMeleeWeapon extends SwordItem implements Soulboun
     protected final float attackSpeed;
 
     public SoulboundMeleeWeapon(int attackDamage, float attackSpeed, float reach) {
-        super(ModToolMaterials.SOULBOUND, attackDamage, attackSpeed, new Item.Properties());
+        super(ModToolMaterials.SOULBOUND, attackDamage, attackSpeed, new Properties().tab(ItemGroup.TAB_COMBAT));
 
         this.reach = reach;
         this.attackSpeed = attackSpeed;

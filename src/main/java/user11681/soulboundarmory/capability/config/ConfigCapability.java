@@ -9,8 +9,13 @@ import user11681.soulboundarmory.registry.Packets;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 
 public class ConfigCapability implements CompoundSerializable {
-    public PlayerEntity player;
     public boolean levelupNotifications;
+
+    public ConfigCapability(PlayerEntity player) {
+        if (!player.level.isClientSide) {
+            Packets.serverConfig.send(player, new ExtendedPacketBuffer());
+        }
+    }
 
     @OnlyIn(Dist.CLIENT)
     @Override

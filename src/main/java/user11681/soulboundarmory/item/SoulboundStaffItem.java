@@ -2,36 +2,37 @@ package user11681.soulboundarmory.item;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.EquipmentSlotType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.Attribute;
-import net.minecraft.entity.attribute.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import user11681.soulboundarmory.capability.soulbound.item.weapon.StaffStorage;
 import user11681.soulboundarmory.entity.SoulboundFireballEntity;
 
 public class SoulboundStaffItem extends StaffItem implements SoulboundWeaponItem {
     public SoulboundStaffItem() {
-        super(ModToolMaterials.SOULBOUND, new Settings());
+        super(ModToolMaterials.SOULBOUND, new Properties().tab(ItemGroup.TAB_COMBAT));
     }
 
     @Override
-    public boolean postHit(ItemStack stack, final LivingEntity target, final LivingEntity attacker) {
+    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         return true;
     }
 
     @Override
-    public ActionResult<ItemStack> use(World world, final PlayerEntity user, final Hand hand) {
+    public ActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!world.isClientSide) {
-            final StaffStorage component = StaffStorage.get(user);
+             StaffStorage component = StaffStorage.get(user);
 
             if (component.getFireballCooldown() <= 0) {
-                world.spawnEntity(new SoulboundFireballEntity(world, user, component.spell()));
+                world.addFreshEntity(new SoulboundFireballEntity(world, user, component.spell()));
 
                 if (!user.isCreative()) {
                     component.resetFireballCooldown();
@@ -45,7 +46,7 @@ public class SoulboundStaffItem extends StaffItem implements SoulboundWeaponItem
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
         return HashMultimap.create();
     }
 }

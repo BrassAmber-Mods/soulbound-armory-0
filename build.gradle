@@ -1,39 +1,23 @@
-buildscript {
-    repositories {
-        maven {url = "https://files.minecraftforge.net/maven"}
-        maven {url = "https://repo.spongepowered.org/repository/maven-public"}
-    }
-
-    dependencies {
-        classpath("net.minecraftforge.gradle:ForgeGradle:latest.release")
-        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
-    }
-}
-
 plugins {
-    id("java-library")
-    id("maven-publish")
+    id("wheel-forge").version("latest.integration")
 }
-
-plugins.apply("net.minecraftforge.gradle")
-plugins.apply("org.spongepowered.mixin")
 
 group = "user11681"
 version = "3.0.0"
 
-repositories {
-    mavenCentral()
+sourceCompatibility = 16
+targetCompatibility = 8
 
+repositories {
     maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
-    maven {url = "https://maven.tterrag.com"}
 }
 
 dependencies {
-    minecraft("net.minecraftforge:forge:1.16.5-36.1.23")
+    api("user11681:reflect:latest.integration")
 
-    api("user11681:reflect:latest.release")
+    annotationProcessor("user11681:liberica:latest.integration")
 }
 
-minecraft {
-    mappings("official", "1.16.5")
+wheel {
+    publish = false
 }

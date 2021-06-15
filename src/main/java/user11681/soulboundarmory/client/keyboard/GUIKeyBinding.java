@@ -12,7 +12,7 @@ public class GUIKeyBinding extends SoulboundArmoryKeyBinding {
 
     @Override
     protected void press() {
-        ItemStorage<?> component = StorageType.getFirstMenuStorage(SoulboundArmoryClient.player());
+        ItemStorage<?> component = StorageType.firstMenuStorage(SoulboundArmoryClient.player());
 
         if (component != null) {
             component.openGUI();

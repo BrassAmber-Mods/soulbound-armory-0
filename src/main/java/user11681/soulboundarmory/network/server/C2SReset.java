@@ -13,7 +13,7 @@ public class C2SReset implements ItemComponentPacket {
         ResourceLocation identifier = buffer.readResourceLocation();
 
         if (identifier != null) {
-            Category category = Category.registry.get(identifier);
+            Category category = Category.registry.getValue(identifier);
 
             storage.reset(category);
         } else {

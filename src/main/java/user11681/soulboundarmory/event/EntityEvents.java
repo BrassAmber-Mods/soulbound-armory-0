@@ -1,28 +1,37 @@
 package user11681.soulboundarmory.event;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import user11681.soulboundarmory.SoulboundArmory;
 import user11681.soulboundarmory.asm.access.entity.BossEntityAccess;
 import user11681.soulboundarmory.capability.Capabilities;
+import user11681.soulboundarmory.capability.CapabilityContainer;
 import user11681.soulboundarmory.capability.config.ConfigCapability;
 import user11681.soulboundarmory.capability.entity.EntityData;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
@@ -31,6 +40,7 @@ import user11681.soulboundarmory.capability.soulbound.item.weapon.GreatswordStor
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.config.Configuration;
+import user11681.soulboundarmory.entity.SAAttributes;
 import user11681.soulboundarmory.entity.SoulboundDaggerEntity;
 import user11681.soulboundarmory.entity.SoulboundFireballEntity;
 import user11681.soulboundarmory.entity.SoulboundLightningEntity;
@@ -43,9 +53,106 @@ import user11681.soulboundarmory.util.Util;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.criticalStrikeProbability;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.experience;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.level;
+import static user11681.soulboundarmory.registry.Skills.enderPull;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public class EntityEvents {
+    @SubscribeEvent
+    public static void onPlayerDrops(LivingDropsEvent event) {
+        Entity entity = event.getEntity();
+
+        if (entity instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) event.getEntity();
+
+            if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+                for (CapabilityContainer<? extends SoulboundCapability> type : Capabilities.soulboundCapabilities) {
+                    ItemStorage<?> storage = type.get(player).storage();
+
+                    if (storage != null && storage.datum(level) >= Configuration.instance().preservationLevel) {
+                        Collection<ItemEntity> drops = event.getDrops();
+
+                        for (ItemEntity item : drops) {
+                            ItemStack itemStack = item.getItem();
+
+                            if (storage.getBaseItemClass().isInstance(itemStack.getItem()) && player.addItem(itemStack)) {
+                                drops.remove(item);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerCopy(PlayerEvent.Clone event) {
+        PlayerEntity original = event.getOriginal();
+        PlayerEntity player = event.getPlayer();
+
+        for (CapabilityContainer<? extends SoulboundCapability> type : Capabilities.soulboundCapabilities) {
+            SoulboundCapability originalComponent = type.get(original);
+            SoulboundCapability currentComponent = type.get(player);
+
+            currentComponent.deserializeNBT(originalComponent.serializeNBT());
+
+            if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+                ItemStorage<?> storage = currentComponent.storage();
+
+                if (storage != null && storage.datum(level) >= Configuration.instance().preservationLevel) {
+                    player.addItem(storage.getItemStack());
+                }
+            }
+        }
+    }
+
+    /*
+    @SubscribeEvent
+    public static void onUseBlock(UseBlockEvent event) {
+        PlayerEntity player = event.getPlayer();
+        ItemStack mainStack = player.getMainHandStack();
+
+        if (mainStack.getItem() instanceof SoulboundWeaponItem && mainStack != event.getItemStack()) {
+            event.setFail();
+        }
+    }
+    */
+
+    @SubscribeEvent
+    public static void onBlockBreakSpeed(PlayerEvent.BreakSpeed event) {
+        PlayerEntity player = event.getPlayer();
+
+        if (player != null) {
+            event.setNewSpeed(event.getNewSpeed() * (float) player.getAttributeValue(SAAttributes.efficiency));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBlockDrop(BlockEvent.BreakEvent event) {
+        PlayerEntity entity = event.getPlayer();
+        ItemStack tool = entity.getMainHandItem();
+
+        if (tool.getItem() == SoulboundItems.pick && Capabilities.tool.get(entity).storage().hasSkill(enderPull)) {
+            event.setCanceled(true);
+            event.getWorld().removeBlock(event.getPos(), false);
+
+            Block.dropResources(event.getState(), event.getWorld(), entity.blockPosition(), null);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onEntityItemPickup(PlayerEvent.ItemPickupEvent event) {
+/*
+         ItemEntity entity = event.getItemEntity();
+         ItemStack stack = entity.getStack();
+         PlayerEntity player = event.getPlayer();
+
+        player.sendPickup(entity, stack.getCount());
+        SoulboundItemUtil.addItemStack(stack, player);
+
+        event.setFail();
+*/
+    }
+
     @SubscribeEvent
     public static void damage(LivingDamageEvent event) {
         Entity entity = event.getEntity();
@@ -77,7 +184,7 @@ public class EntityEvents {
 
             if (storage != null) {
                 Random random = entity.level.random;
-                float attackDamage = storage.getAttribute(criticalStrikeProbability) > random.nextDouble() ? 2 * event.getAmount() : event.getAmount();
+                float attackDamage = storage.attribute(criticalStrikeProbability) > random.nextDouble() ? 2 * event.getAmount() : event.getAmount();
 
                 if (storage.hasSkill(Skills.nourishment)) {
                     SkillContainer leeching = storage.skill(Skills.nourishment);
@@ -101,7 +208,8 @@ public class EntityEvents {
             attacker = entity.getCombatTracker().getKiller();
         }
 
-        if ((attacker instanceof PlayerEntity player) && !attacker.level.isClientSide) {
+        if ((attacker instanceof PlayerEntity) && !attacker.level.isClientSide) {
+            PlayerEntity player = (PlayerEntity) attacker;
             ModifiableAttributeInstance attackDamageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
             double attackDamage = attackDamageAttribute == null ? 0 : attackDamageAttribute.getValue();
             double armor = entity.getAttributeValue(Attributes.ARMOR);
@@ -134,7 +242,7 @@ public class EntityEvents {
                     xp *= configuration.bossMultiplier;
                 }
 
-                if (Util.getServer().isHardcore()) {
+                if (Util.server().isHardcore()) {
                     xp *= configuration.hardcoreMultiplier;
                 }
 
@@ -145,10 +253,11 @@ public class EntityEvents {
                 ConfigCapability configCapability = Capabilities.config.get(player);
 
                 if (storage.incrementStatistic(experience, (int) Math.round(xp)) && configCapability.levelupNotifications) {
-                    ((PlayerEntity) attacker).displayClientMessage(Translations.messageLevelUp.format(displayName, storage.getDatum(level)), true);
+                    ((PlayerEntity) attacker).displayClientMessage(Translations.messageLevelUp.format(displayName, storage.datum(level)), true);
                 }
 
-                component.sync();
+                // capability.sync();
+                storage.sync();
             }
         }
     }
@@ -157,7 +266,8 @@ public class EntityEvents {
     public static void fall(LivingFallEvent event) {
         Entity fallen = event.getEntity();
 
-        if (!fallen.level.isClientSide && fallen instanceof PlayerEntity player) {
+        if (!fallen.level.isClientSide && fallen instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) fallen;
             SoulboundCapability component = Capabilities.weapon.get(player);
             GreatswordStorage storage = component.storage(StorageType.greatsword);
             double leapForce = storage.leapForce();
@@ -223,7 +333,6 @@ public class EntityEvents {
     @SubscribeEvent
     public static void livingUpdate(LivingEvent.LivingUpdateEvent event) {
         EntityData entityData = Capabilities.entityData.get(event.getEntity());
-
         entityData.tick();
 
         if (entityData.isFrozen()) {

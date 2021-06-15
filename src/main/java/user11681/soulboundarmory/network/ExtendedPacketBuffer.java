@@ -19,7 +19,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     public ExtendedPacketBuffer(ItemStorage<?> component) {
         this();
 
-        this.writeResourceLocation(component.getType().id());
+        this.writeResourceLocation(component.type().id());
     }
 
     public ExtendedPacketBuffer() {

@@ -20,6 +20,7 @@ import user11681.soulboundarmory.network.server.C2SItemType;
 import user11681.soulboundarmory.network.server.C2SReset;
 import user11681.soulboundarmory.network.server.C2SSkill;
 import user11681.soulboundarmory.network.server.C2SSync;
+import user11681.soulboundarmory.util.Util;
 
 public class Packets {
     public static final SimplePacket serverAttribute = server(new C2SAttribute());
@@ -40,10 +41,10 @@ public class Packets {
     private static int id;
 
     @SuppressWarnings("unchecked")
-    private static <T, P extends Packet<T>> P server(P handler) {
+    private static <T, P extends Packet<T>> P server(P handler, T... dummy) {
         SoulboundArmory.channel.registerMessage(
             id++,
-            (Class<T>) Object.class,
+            Util.componentType(dummy),
             handler::write,
             handler::read,
             (T buffer, Supplier<NetworkEvent.Context> context) -> context.get().enqueueWork(() -> handler.execute(buffer, context.get()))

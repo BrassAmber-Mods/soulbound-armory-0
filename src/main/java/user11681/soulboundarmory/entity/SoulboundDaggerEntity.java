@@ -2,6 +2,7 @@ package user11681.soulboundarmory.entity;
 
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,11 +14,9 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import user11681.soulboundarmory.SoulboundArmory;
@@ -41,10 +40,9 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     protected int ticksSeeking;
     protected int ticksInGround;
     protected DaggerStorage storage;
-    public static final EntityType<SoulboundDaggerEntity> type = Registry
-            .register(Registry.ENTITY_TYPE, new ResourceLocation(SoulboundArmory.ID, "dagger"), FabricEntityTypeBuilder
-                    .create(SpawnGroup.MISC, (EntityType.EntityFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new)
-                    .dimensions(EntityDimensions.fixed(1, 1)).build());
+    public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
+        .of((EntityType.IFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new, EntityClassification.MISC)
+        .sized(1, 1).build(SoulboundArmory.id("dagger").toString());
 
     public SoulboundDaggerEntity(SoulboundDaggerEntity original, boolean spawnClone) {
         this(original.level, original.getOwner(), original.itemStack, spawnClone, original.getDeltaMovementD(), original.getDeltaMovementD());
@@ -81,19 +79,14 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     public void setDamage() {
-        this.setBaseDamage(this.storage.getAttribute(attackDamage) * this.attackDamageRatio);
-    }
-
-    @Override
-    protected ItemStack getPickupItem() {
-        return this.storage == null ? ItemStack.EMPTY : this.storage.getItemStack();
+        this.setBaseDamage(this.storage.attribute(attackDamage) * this.attackDamageRatio);
     }
 
     protected void updateShooter() {
-        final Entity owner = this.getOwner();
+        Entity owner = this.getOwner();
 
         if (owner instanceof PlayerEntity) {
-            this.storage = Capabilities.weapon.get(owner).getStorage(StorageType.dagger);
+            this.storage = Capabilities.weapon.get(owner).storage(StorageType.dagger);
         }
     }
 
@@ -104,20 +97,131 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         }
     }
 
-    protected boolean tryReturn() {
-        final Entity owner = this.getOwner();
+    @Override
+    protected void doPostHurtEffects(LivingEntity target) {
+        Entity owner = this.getOwner();
+
+        if (this.spawnClone) {
+            this.level.addFreshEntity(new SoulboundDaggerEntity(this, false));
+        }
+
+        if (!this.isClone && this.ticksSeeking == 0) {
+            this.setDeltaMovement(this.getDeltaMovement().multiply(-0.1, 1, 1));
+            this.yRot += 180;
+            this.yRotO += 180;
+        }
 
         if (owner instanceof PlayerEntity) {
-            final double attackSpeed = this.storage.getAttribute(StatisticType.attackSpeed);
+            PlayerEntity player = (PlayerEntity) owner;
+            DamageSource damageSource = DamageSource.arrow(this, owner);
+            double attackDamage = this.storage.attribute(StatisticType.attackDamage);
+            int burnTime = 0;
+
+            if (attackDamage > 0) {
+                int knockbackModifier = EnchantmentHelper.getKnockbackBonus(player);
+                float initialHealth = target.getHealth();
+
+                burnTime += EnchantmentHelper.getFireAspect(player) * 80;
+
+                if (this.isOnFire()) {
+                    burnTime += 100;
+                }
+
+                if (burnTime > 0 && !target.isOnFire()) {
+                    target.setRemainingFireTicks(1);
+                }
+
+                Vector3d velocity = target.getDeltaMovement();
+                double velocityX = velocity.x;
+                double velocityY = velocity.y;
+                double velocityZ = velocity.z;
+
+                if (target.hurt(damageSource, (float) attackDamage)) {
+                    if (knockbackModifier > 0) {
+                        target.knockback(knockbackModifier * 0.5F, MathHelper.sin(player.yRot * 0.017453292F), -MathHelper.cos(player.yRot * 0.017453292F));
+                    }
+                }
+
+                if (!target.level.isClientSide && target.hurtMarked) {
+                    ((ServerPlayerEntity) target).connection.send(new SEntityVelocityPacket(target));
+                    target.hurtMarked = false;
+                    this.setDeltaMovement(velocityX, velocityY, velocityZ);
+                }
+
+                if (attackDamage > 0) {
+                    player.crit(target);
+                }
+
+                player.setLastHurtByMob(target);
+
+                EnchantmentHelper.doPostDamageEffects(target, player);
+
+                float damageDealt = initialHealth - target.getHealth();
+                player.awardStat(Stats.DAMAGE_DEALT, Math.round(damageDealt * 10));
+
+                if (burnTime > 0) {
+                    target.setRemainingFireTicks(burnTime);
+                }
+
+                if (!player.level.isClientSide && damageDealt > 2) {
+                    ((ServerWorld) player.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), (int) (damageDealt * 0.5), 0.1, 0, 0.1, 0.2);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void playerTouch(PlayerEntity player) {
+        if (!this.level.isClientSide
+            && player == this.getOwner()
+            && (this.isClone
+            || this.storage != null
+            && this.getLife() >= Math.max(1, 20 / this.storage.attribute(attackSpeed))
+            && (player.isCreative()
+            && (SoulboundItemUtil.hasSoulWeapon(player)))
+            || SoulboundItemUtil.addItemStack(this.getPickupItem(), player, true))) {
+            player.take(this, 1);
+            this.remove();
+        }
+    }
+
+/*
+    @Override
+    protected void onHit(RayTraceResult result) {
+         Vector3d pos = result.getPos();
+         BlockPos blockPos = new BlockPos(pos);
+         BlockState blockState = this.level.getBlockState(blockPos);
+
+        if (this.ticksSeeking == 0) {
+            super.onHit(result);
+        }
+
+        if (this.level.isClientSide) {
+            //noinspection MethodCallSideOnly
+            this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+        }
+    }
+*/
+
+    @Override
+    protected ItemStack getPickupItem() {
+        return this.storage == null ? ItemStack.EMPTY : this.storage.getItemStack();
+    }
+
+    protected boolean tryReturn() {
+        Entity owner = this.getOwner();
+
+        if (owner instanceof PlayerEntity) {
+            double attackSpeed = this.storage.attribute(StatisticType.attackSpeed);
 
             if (this.storage.hasSkill(Skills.sneakReturn) && owner.isShiftKeyDown()
-                    && this.getLife() >= 60 / attackSpeed
-                    || this.storage.hasSkill(Skills.returning)
-                    && (this.getLife() >= 300
-                    || this.ticksInGround > 20 / attackSpeed
-                    || owner.distanceTo(this) >= 16 * (this.level.getServer().getPlayerList().getViewDistance() - 1)
-                    || this.getY() <= 0)
-                    || this.ticksSeeking > 0) {
+                && this.getLife() >= 60 / attackSpeed
+                || this.storage.hasSkill(Skills.returning)
+                && (this.getLife() >= 300
+                || this.ticksInGround > 20 / attackSpeed
+                || owner.distanceTo(this) >= 16 * (this.level.getServer().getPlayerList().getViewDistance() - 1)
+                || this.getY() <= 0)
+                || this.ticksSeeking > 0) {
                 AxisAlignedBB box = owner.getBoundingBox();
                 double dX = (box.max(Direction.Axis.X) + box.min(Direction.Axis.X)) / 2 - this.getZ();
                 double dY = (box.max(Direction.Axis.Y) + box.min(Direction.Axis.Y)) / 2 - this.getY();
@@ -154,7 +258,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
                         }
                     } else {
                         multiplier = 0.08;
-                        this.addVelocity(normalized.x * multiplier, normalized.y * multiplier, normalized.z * multiplier);
+                        this.push(normalized.x * multiplier, normalized.y * multiplier, normalized.z * multiplier);
                     }
 
                     this.ticksSeeking++;
@@ -165,112 +269,6 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         }
 
         return false;
-    }
-
-/*
-    @Override
-    protected void onHit(RayTraceResult result) {
-        final Vector3d pos = result.getPos();
-        final BlockPos blockPos = new BlockPos(pos);
-        final BlockState blockState = this.level.getBlockState(blockPos);
-
-        if (this.ticksSeeking == 0) {
-            super.onHit(result);
-        }
-
-        if (this.level.isClientSide) {
-            //noinspection MethodCallSideOnly
-            this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
-        }
-    }
-*/
-
-    @Override
-    protected void doPostHurtEffects(LivingEntity target) {
-        Entity owner = this.getOwner();
-
-        if (this.spawnClone) {
-            this.level.addFreshEntity(new SoulboundDaggerEntity(this, false));
-        }
-
-        if (!this.isClone && this.ticksSeeking == 0) {
-            this.setDeltaMovement(this.getDeltaMovement().multiply(-0.1, 1, 1));
-            this.yRot += 180;
-            this.yRotO += 180;
-        }
-
-        if (owner instanceof PlayerEntity player) {
-            DamageSource damageSource = DamageSource.arrow(this, owner);
-            double attackDamage = this.storage.getAttribute(StatisticType.attackDamage);
-
-            int burnTime = 0;
-
-            if (attackDamage > 0) {
-                int knockbackModifier = EnchantmentHelper.getKnockbackBonus(player);
-                float initialHealth = target.getHealth();
-
-                burnTime += EnchantmentHelper.getFireAspect(player) * 80;
-
-                if (this.isOnFire()) {
-                    burnTime += 100;
-                }
-
-                if (burnTime > 0 && !target.isOnFire()) {
-                    target.setRemainingFireTicks(1);
-                }
-
-                Vector3d velocity = target.getDeltaMovement();
-                double velocityX = velocity.x;
-                double velocityY = velocity.y;
-                double velocityZ = velocity.z;
-
-                if (target.hurt(damageSource, (float) attackDamage)) {
-                    if (knockbackModifier > 0) {
-                        target.knockback(knockbackModifier * 0.5F, MathHelper.sin(player.yRot * 0.017453292F), -MathHelper.cos(player.yRot * 0.017453292F));
-                    }
-                }
-
-                if (!target.level.isClientSide && target.velocityModified) {
-                    ((ServerPlayerEntity) target).connection.send(new SEntityVelocityPacket(target));
-                    target.velocityModified = false;
-                    this.setDeltaMovement(velocityX, velocityY, velocityZ);
-                }
-
-                if (attackDamage > 0) {
-                    player.crit(target);
-                }
-
-                player.setLastHurtByMob(target);
-
-                EnchantmentHelper.doPostDamageEffects(target, player);
-
-                float damageDealt = initialHealth - target.getHealth();
-                player.awardStat(Stats.DAMAGE_DEALT, Math.round(damageDealt * 10));
-
-                if (burnTime > 0) {
-                    target.setRemainingFireTicks(burnTime);
-                }
-
-                if (!player.level.isClientSide && damageDealt > 2) {
-                    ((ServerWorld) player.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), (int) (damageDealt * 0.5), 0.1, 0, 0.1, 0.2);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void playerTouch(PlayerEntity player) {
-        if (!this.level.isClientSide
-                && player == this.getOwner()
-                && (this.isClone
-                || this.storage != null
-                && this.getLife() >= Math.max(1, 20 / this.storage.getAttribute(attackSpeed))
-                && (player.isCreative()
-                && (SoulboundItemUtil.hasSoulWeapon(player)))
-                || SoulboundItemUtil.addItemStack(this.getPickupItem(), player, true))) {
-            player.take(this, 1);
-            this.remove();
-        }
     }
 
     @Override

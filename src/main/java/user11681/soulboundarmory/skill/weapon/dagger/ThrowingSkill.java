@@ -5,6 +5,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.cell.client.gui.screen.CellScreen;
 import user11681.soulboundarmory.skill.Skill;
 public class ThrowingSkill extends Skill {
     public ThrowingSkill(ResourceLocation identifier) {
@@ -18,7 +19,7 @@ public class ThrowingSkill extends Skill {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(SpunScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
+    public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
         screen.renderGuiItem(Items.ARROW.getDefaultInstance(), x, y, zOffset);
     }
 }

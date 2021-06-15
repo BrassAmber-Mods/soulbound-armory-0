@@ -16,7 +16,7 @@ public class C2SEnchant implements ItemComponentPacket {
         int change = add ? 1 : -1;
 
         if (buffer.readBoolean()) {
-            change *= add ? storage.getDatum(StatisticType.enchantmentPoints) : storage.enchantment(enchantment);
+            change *= add ? storage.datum(StatisticType.enchantmentPoints) : storage.enchantment(enchantment);
         }
 
         storage.addEnchantment(enchantment, change);

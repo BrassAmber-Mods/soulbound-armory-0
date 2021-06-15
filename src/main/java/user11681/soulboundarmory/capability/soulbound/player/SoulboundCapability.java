@@ -7,26 +7,26 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import user11681.soulboundarmory.SoulboundArmory;
+import user11681.soulboundarmory.capability.EntityCapability;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 import user11681.soulboundarmory.item.SoulboundItem;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 import user11681.soulboundarmory.util.ItemUtil;
 
-public abstract class SoulboundCapability implements CompoundSerializable {
-    public PlayerEntity player;
-
-    protected final Map<StorageType<?>, ItemStorage<?>> storages;
+public abstract class SoulboundCapability extends EntityCapability<PlayerEntity> implements CompoundSerializable {
+    protected final Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages;
 
     protected ItemStorage<?> currentItem;
 
-    public SoulboundCapability() {
+    public SoulboundCapability(PlayerEntity player) {
+        super(player);
+
         this.storages = new Object2ObjectOpenHashMap<>();
     }
 
     protected void store(ItemStorage<?> storage) {
-        this.storages.put(storage.getType(), storage);
+        this.storages.put(storage.type(), storage);
     }
 
     public ItemStorage<?> storage() {
@@ -40,7 +40,7 @@ public abstract class SoulboundCapability implements CompoundSerializable {
     }
 
     public ItemStorage<?> heldItemStorage() {
-        for (ItemStack itemStack : this.player.getHandSlots()) {
+        for (ItemStack itemStack : this.entity.getHandSlots()) {
             for (ItemStorage<?> component : this.storages.values()) {
                 if (itemStack.getItem() == component.getItem()) {
                     return component;
@@ -66,13 +66,13 @@ public abstract class SoulboundCapability implements CompoundSerializable {
         return (S) this.storages.get(type);
     }
 
-    public Map<StorageType<?>, ItemStorage<?>> storages() {
+    public Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages() {
         return this.storages;
     }
 
     public boolean hasSoulboundItem() {
         for (ItemStorage<?> storage : this.storages.values()) {
-            if (ItemUtil.hasItem(this.player, storage.getBaseItemClass())) {
+            if (ItemUtil.hasItem(this.entity, storage.getBaseItemClass())) {
                 return true;
             }
         }
@@ -92,8 +92,8 @@ public abstract class SoulboundCapability implements CompoundSerializable {
 
             if (storage != null) {
                 Class<? extends SoulboundItem> baseItemClass = storage.getBaseItemClass();
-                PlayerInventory inventory = this.player.inventory;
-                List<ItemStack> combinedInventory = ItemUtil.inventory(this.player);
+                PlayerInventory inventory = this.entity.inventory;
+                List<ItemStack> combinedInventory = ItemUtil.inventory(this.entity);
                 ItemStack newItemStack = storage.getItemStack();
                 int firstSlot = -1;
 
@@ -115,7 +115,7 @@ public abstract class SoulboundCapability implements CompoundSerializable {
                             if (tag != null && !tag.equals(itemStack.getTag())) {
                                 inventory.setItem(firstSlot, newItemStack);
                             }
-                        } else if (!this.player.isCreative() && (index != firstSlot || firstSlot != -1)) {
+                        } else if (!this.entity.isCreative() && (index != firstSlot || firstSlot != -1)) {
                             inventory.removeItem(itemStack);
                         }
                     }
@@ -128,25 +128,27 @@ public abstract class SoulboundCapability implements CompoundSerializable {
         }
     }
 
+    @Override
     public void deserializeNBT(CompoundNBT tag) {
         if (this.currentItem != null) {
-            tag.putString("storage", this.currentItem.getType().toString());
+            tag.putString("storage", this.currentItem.type().string());
         }
 
         for (ItemStorage<?> storage : this.storages.values()) {
-            tag.put(storage.getType().toString(), storage.toTag(new CompoundNBT()));
+            tag.put(storage.type().toString(), storage.serializeNBT());
         }
     }
 
+    @Override
     public void serializeNBT(CompoundNBT tag) {
-        StorageType<?> type = StorageType.registry.get(SoulboundArmory.id((tag).getString("storage")));
+        StorageType<?> type = StorageType.get(tag.getString("storage"));
 
         if (type != null) {
-            this.currentItem = type.get(this);
+            this.currentItem = this.storage(type);
         }
 
         for (ItemStorage<?> storage : this.storages.values()) {
-            storage.fromTag(tag.getCompound(storage.getType().toString()));
+            storage.deserializeNBT(tag.getCompound(storage.type().toString()));
         }
     }
 }

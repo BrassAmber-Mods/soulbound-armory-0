@@ -1,57 +1,57 @@
 package user11681.soulboundarmory.client.gui.screen.tab;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.List;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
+import user11681.cell.client.gui.widget.callback.PressCallback;
+import user11681.cell.client.gui.widget.scalable.ScalableWidget;
+import user11681.cell.client.gui.widget.scalable.ScalableWidgets;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.registry.Packets;
-import user11681.usersmanual.client.gui.screen.ScreenTab;
 
 public class SelectionTab extends SoulboundTab {
-    public SelectionTab(ITextComponent title, final SoulboundCapability component, final List<ScreenTab> tabs) {
+    public SelectionTab(ITextComponent title, SoulboundCapability component, List<ScreenTab> tabs) {
         super(title, component, tabs);
     }
 
     @Override
-    public void init(Minecraft client, final int width, final int height) {
+    public void init(Minecraft client, int width, int height) {
         super.init(client, width, height);
 
-        final int buttonWidth = 128;
-        final int buttonHeight = 20;
-        final int centerX = (this.width - buttonWidth) / 2;
-        final int ySep = 32;
+        int buttonWidth = 128;
+        int buttonHeight = 20;
+        int centerX = (this.width - buttonWidth) / 2;
+        int ySep = 32;
 
-        final List<ItemStorage<?>> selection = this.component.storages().values();
-
-        selection.removeIf((ItemStorage<?> storage) -> !storage.isUnlocked() && !storage.canUnlock());
-
-        final int top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
+        List<ItemStorage<?>> selection = this.component.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
+        int top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
 
         for (int row = 0, size = selection.size(); row < size; row++) {
-            final ItemStorage<?> storage = selection.get(row);
-            final ButtonWidget button = this.addButton(new ButtonWidget(centerX, top + (row * ySep), buttonWidth, buttonHeight, storage.getName(), this.selectAction(storage)));
+            ItemStorage<?> storage = selection.get(row);
+            ScalableWidget button = this.add(ScalableWidgets.button().x(centerX).y(top + (row * ySep)).width(buttonWidth).height(buttonHeight).text(storage.getName()).primaryAction(this.selectAction(storage)));
 
             if (this.displayTabs()) {
-                button.active = storage.getType().getIdentifier() != this.storage.getType().getIdentifier();
+                button.active = storage.type().id() != this.storage.type().id();
             }
         }
     }
 
     @Override
-    public void render(MatrixStack matrices, final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
         if (!this.storage.itemEquipped()) {
-            this.drawCenteredString(matrices, this.textRenderer, this.getLabel().toString(), this.width / 2, 40, 0xFFFFFF);
+            drawCenteredString(matrices, this.fontRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
         }
     }
 
-    protected PressAction selectAction(ItemStorage<?> storage) {
-        return (ButtonWidget button) -> {
-            ClientPlayNetworking.send(Packets.serverItemType, new ExtendedPacketBuffer(storage).writeInt(this.slot));
+    protected PressCallback<ScalableWidget> selectAction(ItemStorage<?> storage) {
+        return button -> {
+            Packets.serverItemType.send(new ExtendedPacketBuffer(storage).writeInt(this.slot));
             this.onClose();
         };
     }

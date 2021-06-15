@@ -33,6 +33,7 @@ import user11681.soulboundarmory.capability.statistics.SkillStorage;
 import user11681.soulboundarmory.capability.statistics.Statistic;
 import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.capability.statistics.Statistics;
+import user11681.soulboundarmory.client.gui.screen.tab.ScreenTab;
 import user11681.soulboundarmory.client.gui.screen.tab.SoulboundTab;
 import user11681.soulboundarmory.client.gui.screen.tab.StatisticEntry;
 import user11681.soulboundarmory.config.Configuration;
@@ -62,14 +63,15 @@ import static user11681.soulboundarmory.capability.statistics.StatisticType.spen
 import static user11681.soulboundarmory.capability.statistics.StatisticType.spentEnchantmentPoints;
 
 public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundSerializable {
-    protected static final NumberFormat format = DecimalFormat.getInstance();
+    protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
+
+    public EnchantmentStorage enchantments;
 
     protected final SoulboundCapability component;
     protected final PlayerEntity player;
     protected final Item item;
     protected final boolean isClientSide;
 
-    protected EnchantmentStorage enchantments;
     protected SkillStorage skills;
     protected Statistics statistics;
     protected ItemStack itemStack;
@@ -79,28 +81,20 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public ItemStorage(SoulboundCapability component, Item item) {
         this.component = component;
-        this.player = component.player;
-        this.isClientSide = component.player.level.isClientSide;
+        this.player = component.entity;
+        this.isClientSide = component.entity.level.isClientSide;
         this.item = item;
         this.itemStack = this.newItemStack();
     }
 
     public static ItemStorage<?> get(Entity entity, Item item) {
-        for (SoulboundCapability component : Capabilities.get(entity)) {
-            for (ItemStorage<?> storage : component.storages().values()) {
-                if (storage.player == entity && storage.getItem() == item) {
-                    return storage;
-                }
-            }
-        }
-
-        return null;
+        return Capabilities.get(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.player == entity && storage.getItem() == item).findAny().orElse(null);
     }
 
     public static ItemStorage<?> get(Entity entity, StorageType<?> type) {
         for (CapabilityContainer<? extends SoulboundCapability> component : Capabilities.soulboundCapabilities) {
             for (ItemStorage<?> storage : component.get(entity).storages().values()) {
-                if (storage.getType() == type) {
+                if (storage.type() == type) {
                     return storage;
                 }
             }
@@ -123,7 +117,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public ItemStack getMenuEquippedStack() {
         for (ItemStack itemStack : this.player.getHandSlots()) {
-            final Item item = itemStack.getItem();
+             Item item = itemStack.getItem();
 
             if (item == this.getItem() || item == this.getConsumableItem()) {
                 return itemStack;
@@ -145,24 +139,24 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return this.statistics.size(category);
     }
 
-    public Statistic getStatistic(StatisticType statistic) {
+    public Statistic statistic(StatisticType statistic) {
         return this.statistics.get(statistic);
     }
 
-    public Statistic getStatistic(Category category, final StatisticType statistic) {
+    public Statistic statistic(Category category, StatisticType statistic) {
         return this.statistics.get(category, statistic);
     }
 
-    public int getDatum(StatisticType statistic) {
+    public int datum(StatisticType statistic) {
         return this.statistics.get(statistic).intValue();
     }
 
-    public double getAttributeTotal(StatisticType statistic) {
+    public double attributeTotal(StatisticType statistic) {
         if (statistic == attackDamage) {
-            double attackDamage = this.getAttribute(StatisticType.attackDamage);
+            double attackDamage = this.attribute(StatisticType.attackDamage);
 
             for (Entry<Enchantment, Integer> entry : this.enchantments.entrySet()) {
-                final Enchantment enchantment = entry.getKey();
+                 Enchantment enchantment = entry.getKey();
 
                 if (entry.getValue() > 0) {
                     attackDamage += enchantment.getDamageBonus(this.enchantment(enchantment), CreatureAttribute.UNDEFINED);
@@ -172,39 +166,39 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             return attackDamage;
         }
 
-        return this.getAttribute(statistic);
+        return this.attribute(statistic);
     }
 
-    public double getAttributeRelative(StatisticType attribute) {
+    public double attributeRelative(StatisticType attribute) {
         if (attribute == attackSpeed) {
-            return this.getAttribute(attackSpeed) - 4;
+            return this.attribute(attackSpeed) - 4;
         }
 
         if (attribute == attackDamage) {
-            return this.getAttribute(attackDamage) - 1;
+            return this.attribute(attackDamage) - 1;
         }
 
         if (attribute == reach) {
-            return this.getAttribute(reach) - 3;
+            return this.attribute(reach) - 3;
         }
 
-        return this.getAttribute(attribute);
+        return this.attribute(attribute);
     }
 
-    public double getAttribute(StatisticType type) {
+    public double attribute(StatisticType type) {
         return this.statistics.get(type).doubleValue();
     }
 
-    public boolean incrementStatistic(StatisticType type, final double amount) {
+    public boolean incrementStatistic(StatisticType type, double amount) {
         boolean leveledUp = false;
 
         if (type == experience) {
-            final Statistic statistic = this.getStatistic(experience);
+             Statistic statistic = this.statistic(experience);
             statistic.add(amount);
-            final int xp = statistic.intValue();
+             int xp = statistic.intValue();
 
             if (xp >= this.nextLevelXP() && this.canLevelUp()) {
-                final int nextLevelXP = this.nextLevelXP();
+                 int nextLevelXP = this.nextLevelXP();
 
                 this.incrementStatistic(level, 1);
                 this.incrementStatistic(experience, -nextLevelXP);
@@ -213,13 +207,13 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             }
 
             if (xp < 0) {
-                final int currentLevelXP = this.getLevelXP(this.getDatum(level) - 1);
+                 int currentLevelXP = this.getLevelXP(this.datum(level) - 1);
 
                 this.incrementStatistic(level, -1);
                 this.incrementStatistic(experience, currentLevelXP);
             }
         } else if (type == level) {
-            final int sign = (int) Math.signum(amount);
+             int sign = (int) Math.signum(amount);
 
             for (int i = 0; i < Math.abs(amount); i++) {
                 this.onLevelup(sign);
@@ -234,16 +228,16 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return leveledUp;
     }
 
-    public void incrementPoints(StatisticType type, final int points) {
-        final int sign = (int) Math.signum(points);
-        final Statistic statistic = this.getStatistic(type);
+    public void incrementPoints(StatisticType type, int points) {
+         int sign = (int) Math.signum(points);
+         Statistic statistic = this.statistic(type);
 
         for (int i = 0; i < Math.abs(points); i++) {
-            if (sign > 0 && this.getDatum(attributePoints) > 0 || sign < 0 && statistic.isAboveMin()) {
-                this.getStatistic(attributePoints).add(-sign);
-                this.getStatistic(spentAttributePoints).add(sign);
+            if (sign > 0 && this.datum(attributePoints) > 0 || sign < 0 && statistic.isAboveMin()) {
+                this.statistic(attributePoints).add(-sign);
+                this.statistic(spentAttributePoints).add(sign);
 
-                final double change = sign * this.getIncrease(type);
+                 double change = sign * this.getIncrease(type);
 
                 statistic.add(change);
                 statistic.incrementPoints();
@@ -255,28 +249,28 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public double getIncrease(StatisticType statisticType) {
-        final Statistic statistic = this.getStatistic(statisticType);
+         Statistic statistic = this.statistic(statisticType);
 
         return statistic == null ? 0 : this.getIncrease(statisticType, statistic.getPoints());
     }
 
-    public void setStatistic(StatisticType statistic, final Number value) {
+    public void set(StatisticType statistic, Number value) {
         this.statistics.put(statistic, value);
 
         this.sync();
     }
 
     public boolean canLevelUp() {
-        final Configuration configuration = Configuration.instance();
+         Configuration configuration = Configuration.instance();
 
-        return this.getDatum(level) < configuration.maxLevel || configuration.maxLevel < 0;
+        return this.datum(level) < configuration.maxLevel || configuration.maxLevel < 0;
     }
 
     public void onLevelup(int sign) {
-        final Statistic statistic = this.getStatistic(level);
+         Statistic statistic = this.statistic(level);
         statistic.add(sign);
-        final int level = statistic.intValue();
-        final Configuration configuration = Configuration.instance();
+         int level = statistic.intValue();
+         Configuration configuration = Configuration.instance();
 
         if (level % configuration.levelsPerEnchantment == 0) {
             this.incrementStatistic(enchantmentPoints, sign);
@@ -321,7 +315,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 //        if (this.isClientSide) {
 //            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_SKILL, new ExtendedPacketBuffer(this, item).writeString(skill.toString()));
 //        } else {
-        int points = this.getDatum(skillPoints);
+        int points = this.datum(skillPoints);
         int cost = skill.cost();
 
         if (skill.canLearn(points)) {
@@ -337,15 +331,11 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public int nextLevelXP() {
-        return this.getLevelXP(this.getDatum(level));
+        return this.getLevelXP(this.datum(level));
     }
 
     public int enchantment(Enchantment enchantment) {
         return this.enchantments.get(enchantment);
-    }
-
-    public EnchantmentStorage enchantments() {
-        return this.enchantments;
     }
 
     public void addEnchantment(Enchantment enchantment, int value) {
@@ -382,7 +372,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
                 type.reset();
             }
 
-            this.setStatistic(spentAttributePoints, 0);
+            this.set(spentAttributePoints, 0);
             this.updateItemStack();
         } else if (category == enchantment) {
             for (Enchantment enchantment : this.enchantments) {
@@ -390,12 +380,12 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
                 this.enchantments.put(enchantment, 0);
             }
 
-            this.getStatistic(spentEnchantmentPoints).setToMin();
+            this.statistic(spentEnchantmentPoints).setToMin();
             this.updateItemStack();
         } else if (category == skill) {
             this.skills.reset();
 
-            this.getStatistic(skillPoints).setToMin();
+            this.statistic(skillPoints).setToMin();
         }
 
         this.sync();
@@ -462,7 +452,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             if (currentScreen instanceof SoulboundTab && this.currentTab == tab) {
                 ((SoulboundTab) currentScreen).refresh();
             } else {
-                List<ScreenTab> tabs = this.getTabs();
+                List<ScreenTab> tabs = this.tabs();
 
                 client.setScreen(tabs.get(MathHelper.clamp(tab, 0, tabs.size() - 1)));
             }
@@ -531,16 +521,16 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     protected String formatStatistic(StatisticType statistic) {
-        double value = this.getAttributeTotal(statistic);
+        double value = this.attributeTotal(statistic);
 
-        return format.format(statistic == criticalStrikeProbability ? value * 100 : value);
+        return statisticFormat.format(statistic == criticalStrikeProbability ? value * 100 : value);
     }
 
     @Override
     public void serializeNBT(CompoundNBT tag) {
-        tag.put("statistics", this.statistics.toTag(new CompoundNBT()));
-        tag.put("enchantments", this.enchantments.toTag(new CompoundNBT()));
-        tag.put("skills", this.skills.toTag(new CompoundNBT()));
+        tag.put("statistics", this.statistics.serializeNBT());
+        tag.put("enchantments", this.enchantments.serializeNBT());
+        tag.put("skills", this.skills.serializeNBT());
         tag.putBoolean("unlocked", this.unlocked);
         tag.putInt("slot", this.boundSlot());
         tag.putInt("tab", this.currentTab());
@@ -548,9 +538,9 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     @Override
     public void deserializeNBT(CompoundNBT tag) {
-        this.statistics.fromTag(tag.getCompound("statistics"));
-        this.enchantments.fromTag(tag.getCompound("enchantments"));
-        this.skills.fromTag(tag.getCompound("skills"));
+        this.statistics.deserializeNBT(tag.getCompound("statistics"));
+        this.enchantments.deserializeNBT(tag.getCompound("enchantments"));
+        this.skills.deserializeNBT(tag.getCompound("skills"));
         this.unlocked(tag.getBoolean("unlocked"));
         this.bindSlot(tag.getInt("slot"));
         this.currentTab(tag.getInt("tab"));
@@ -559,7 +549,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public CompoundNBT toClientTag() {
-        final CompoundNBT tag = new CompoundNBT();
+         CompoundNBT tag = new CompoundNBT();
 
         tag.putInt("tab", this.currentTab);
 
@@ -590,9 +580,9 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     public abstract int getLevelXP(int level);
 
     @OnlyIn(Dist.CLIENT)
-    public abstract List<ScreenTab> getTabs();
+    public abstract List<ScreenTab> tabs();
 
-    public abstract StorageType<T> getType();
+    public abstract StorageType<T> type();
 
     public abstract Class<? extends SoulboundItem> getBaseItemClass();
 

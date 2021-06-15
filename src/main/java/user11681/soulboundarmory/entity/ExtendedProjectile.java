@@ -9,19 +9,19 @@ import user11681.soulboundarmory.asm.access.entity.AbstractArrowEntityAccess;
 import user11681.soulboundarmory.util.MathUtil;
 
 public abstract class ExtendedProjectile extends AbstractArrowEntity {
-    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, final double x, final double y, final double z, final World world) {
+    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, double x, double y, double z, World world) {
         super(type, x, y, z, world);
     }
 
-    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, final LivingEntity owner, final World world) {
+    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, LivingEntity owner, World world) {
         super(type, owner, world);
     }
 
-    public ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, final World world) {
+    public ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, World world) {
         super(type, world);
     }
 
-    public ExtendedProjectile(World world, final EntityType<? extends AbstractArrowEntity> type, final double x, final double y, final double z) {
+    public ExtendedProjectile(World world, EntityType<? extends AbstractArrowEntity> type, double x, double y, double z) {
         super(type, x, y, z, world);
     }
 
@@ -29,11 +29,11 @@ public abstract class ExtendedProjectile extends AbstractArrowEntity {
         return this.displacementTo(entity.getX(), entity.getY(), entity.getZ());
     }
 
-    public double displacementTo(double x, final double y, final double z) {
+    public double displacementTo(double x, double y, double z) {
         return this.distanceTo(x, y, z) * MathUtil.signum(x - this.getX(), y - this.getY(), z - this.getZ());
     }
 
-    public double distanceTo(double x, final double y, final double z) {
+    public double distanceTo(double x, double y, double z) {
         return Math.sqrt(this.distanceToSqr(x, y, z));
     }
 

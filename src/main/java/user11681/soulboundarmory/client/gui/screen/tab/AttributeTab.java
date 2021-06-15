@@ -5,6 +5,8 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import user11681.cell.client.gui.widget.callback.PressCallback;
+import user11681.cell.client.gui.widget.scalable.ScalableWidget;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import user11681.soulboundarmory.capability.statistics.Statistic;
 import user11681.soulboundarmory.client.i18n.Translations;
@@ -31,15 +33,15 @@ public class AttributeTab extends SoulboundTab {
         int start = (this.height - (size - 1) * this.height / 16) / 2;
         ScalableWidget resetButton = this.add(this.resetButton(this.resetAction(attribute)));
 
-        resetButton.active = this.storage.getDatum(spentAttributePoints) > 0;
+        resetButton.active = this.storage.datum(spentAttributePoints) > 0;
 
         for (int index = 0; index < size; index++) {
-            Statistic attribute = this.attributes.get(index).statistic();
-            ButtonWidget add = this.addButton(this.squareButton((this.width + 182) / 2, start + index * this.height / 16 + 4, new StringTextComponent("+"), this.addPointAction(attribute)));
-            ButtonWidget remove = this.addButton(this.squareButton((this.width + 182) / 2 - 20, start + index * this.height / 16 + 4, new StringTextComponent("-"), this.removePointAction(attribute)));
+            Statistic attribute = this.attributes.get(index).statistic;
+            ScalableWidget add = this.add(this.squareButton((this.width + 182) / 2, start + index * this.height / 16 + 4, new StringTextComponent("+"), this.addPointAction(attribute)));
+            ScalableWidget remove = this.add(this.squareButton((this.width + 182) / 2 - 20, start + index * this.height / 16 + 4, new StringTextComponent("-"), this.removePointAction(attribute)));
 
             remove.active = attribute.isAboveMin();
-            add.active = this.storage.getDatum(attributePoints) > 0 && attribute.isBelowMax();
+            add.active = this.storage.datum(attributePoints) > 0 && attribute.isBelowMax();
         }
     }
 
@@ -47,28 +49,26 @@ public class AttributeTab extends SoulboundTab {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float tickDelta) {
         super.render(matrices, mouseX, mouseY, tickDelta);
 
-        int points = this.storage.getDatum(attributePoints);
+        int points = this.storage.datum(attributePoints);
 
         if (points > 0) {
-            drawCenteredString(matrices, this.textRenderer, String.format("%s: %s", Translations.menuUnspentPoints, points), Math.round(width / 2F), 4, 0xFFFFFF);
+            drawCenteredString(matrices, this.fontRenderer, String.format("%s: %s", Translations.menuUnspentPoints, points), Math.round(width / 2F), 4, 0xFFFFFF);
         }
 
         for (int row = 0, size = this.attributes.size(); row < size; row++) {
-            this.drawAttribute(matrices, this.attributes.get(row).text(), row, size);
+            this.drawAttribute(matrices, this.attributes.get(row).text, row, size);
         }
     }
 
     public void drawAttribute(MatrixStack stack, ITextComponent format, int row, int rows) {
-        textRenderer.draw(stack, format, (this.width - 182) / 2F, this.getHeight(rows, row), 0xFFFFFF);
+        fontRenderer.draw(stack, format, (this.width - 182) / 2F, this.height(rows, row), 0xFFFFFF);
     }
 
-    protected PressAction addPointAction(Statistic statistic) {
-        return (ButtonWidget button) ->
-            Packets.serverAttribute.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(statistic.type().id()).writeInt(hasShiftDown() ? this.storage.getDatum(attributePoints) : 1));
+    protected PressCallback<ScalableWidget> addPointAction(Statistic statistic) {
+        return button -> Packets.serverAttribute.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(statistic.type().id()).writeInt(hasShiftDown() ? this.storage.datum(attributePoints) : 1));
     }
 
-    protected PressAction removePointAction(Statistic statistic) {
-        return (ButtonWidget button) ->
-            Packets.serverAttribute.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(statistic.type().id()).writeInt(-(hasShiftDown() ? statistic.getPoints() : 1)));
+    protected PressCallback<ScalableWidget> removePointAction(Statistic statistic) {
+        return button -> Packets.serverAttribute.send(new ExtendedPacketBuffer(this.storage).writeResourceLocation(statistic.type().id()).writeInt(-(hasShiftDown() ? statistic.getPoints() : 1)));
     }
 }

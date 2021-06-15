@@ -1,4 +1,4 @@
-package user11681.soulboundarmory.command;
+package user11681.soulboundarmory.command.argument;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -17,8 +17,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.minecraft.server.command.CommandSource;
-import user11681.mirror.reflect.Fields;
+import java.util.stream.Stream;
+import net.minecraft.command.ISuggestionProvider;
+import user11681.reflect.Accessor;
 import user11681.soulboundarmory.SoulboundArmory;
 
 public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
@@ -30,35 +31,33 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
         this.validFields = new LinkedHashMap<>();
     }
 
-    public static <T> List<T> getConstants(CommandContext<?> context, final String name, final Class<T> clazz) {
+    public static <T> List<T> getConstants(CommandContext<?> context, String name, Class<T> clazz) {
         //noinspection unchecked
         return (List<T>) context.getArgument(name, List.class);
     }
 
     public static <T> ConstantArgumentType<T> allConstants(Class<T> clazz) {
-        final ConstantArgumentType<T> type = new ConstantArgumentType<>(clazz);
-        final Map<String, Field> fields = type.validFields;
+         ConstantArgumentType<T> type = new ConstantArgumentType<>(clazz);
 
         for (Field field : type.clazz.getDeclaredFields()) {
-            final int modifiers = field.getModifiers();
+             int modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                fields.put(field.getName(), field);
+                type.validFields.put(field.getName(), field);
             }
         }
 
         return type;
     }
 
-    public static <T, U> ConstantArgumentType<T> allConstants(Class<T> holderClass, final Class<U> fieldClass) {
-        final ConstantArgumentType<T> type = new ConstantArgumentType<>(holderClass);
-        final Map<String, Field> fields = type.validFields;
+    public static <T, U> ConstantArgumentType<T> allConstants(Class<T> holderClass, Class<U> fieldClass) {
+         ConstantArgumentType<T> type = new ConstantArgumentType<>(holderClass);
 
         for (Field field : type.clazz.getDeclaredFields()) {
-            final int modifiers = field.getModifiers();
+             int modifiers = field.getModifiers();
 
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && fieldClass.isInstance(Fields.getFieldValue(field))) {
-                fields.put(field.getName(), field);
+            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && fieldClass.isInstance(Accessor.get(field))) {
+                type.validFields.put(field.getName(), field);
             }
         }
 
@@ -66,41 +65,40 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     }
 
     @SafeVarargs
-    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, final T... values) {
+    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, T... values) {
         return excludeConstants(clazz, Arrays.asList(values));
     }
 
     @SafeVarargs
-    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, final T... values) {
+    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, T... values) {
         return includeConstants(clazz, Arrays.asList(values));
     }
 
-    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, final List<T> values) {
+    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, List<T> values) {
         return excludeConstants(clazz, values::contains);
     }
 
-    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, final List<T> values) {
+    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, List<T> values) {
         return includeConstants(clazz, values::contains);
     }
 
-    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, final Predicate<T> exclude) {
+    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, Predicate<T> exclude) {
         return includeConstants(clazz, exclude.negate());
     }
 
-    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, final Predicate<T> include) {
-        final ConstantArgumentType<T> type = new ConstantArgumentType<>(clazz);
-        final Map<String, Field> fields = type.validFields;
+    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, Predicate<T> include) {
+         ConstantArgumentType<T> type = new ConstantArgumentType<>(clazz);
 
         for (Field field : type.clazz.getDeclaredFields()) {
-            final int modifiers = field.getModifiers();
+             int modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                final String name = field.getName();
+                 String name = field.getName();
 
                 try {
                     //noinspection unchecked
                     if (include.test((T) field.get(null))) {
-                        fields.put(name, field);
+                        type.validFields.put(name, field);
                     }
                 } catch (IllegalAccessException exception) {
                     SoulboundArmory.logger.warn(String.format("Unable to access public static final field %s.", name), exception);
@@ -113,12 +111,12 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     @Override
     public List<T> parse(StringReader reader) throws CommandSyntaxException {
-        final String input = reader.readString();
-        final Map<String, Field> fields = this.validFields;
+         String input = reader.readString();
+         Map<String, Field> fields = this.validFields;
 
         if (Pattern.compile(Pattern.quote("ALL"), Pattern.CASE_INSENSITIVE).matcher(input).find()) {
             //noinspection unchecked
-            return this.validFields.values().parallelStream().map((Field field) -> (T) Fields.getFieldValue(field)).collect(Collectors.toList());
+            return this.validFields.values().parallelStream().map((Field field) -> (T) Accessor.get(field)).collect(Collectors.toList());
         }
 
         for (String name : fields.keySet()) {
@@ -135,11 +133,7 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, final SuggestionsBuilder builder) {
-        final List<String> suggestions = this.validFields.values().parallelStream().map(Field::getName).collect(Collectors.toList());
-
-        suggestions.add("ALL");
-
-        return CommandSource.suggestMatching(suggestions, builder);
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        return ISuggestionProvider.suggest(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
     }
 }

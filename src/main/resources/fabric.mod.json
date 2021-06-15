@@ -1,6 +1,6 @@
 {
     "schemaVersion": 1,
-    "id": "soulbound_armory",
+    "id": "soulbound-armory",
     "version": "3.0.0",
     "name": "soulbound armory",
     "description": "RPG-style armory",
@@ -31,8 +31,8 @@
 
     "custom": {
         "cardinal-components": [
-            "soulbound_armory:weapon",
-            "soulbound_armory:tool"
+            "soulbound-armory:weapon",
+            "soulbound-armory:tool"
         ]
     }
 }
