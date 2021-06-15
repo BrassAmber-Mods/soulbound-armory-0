@@ -13,7 +13,7 @@ public class SoulboundItemUtil {
         }
 
         for (ItemStack itemStack : entity.getHandSlots()) {
-            final ItemStorage<?> component = ItemStorage.get(entity, itemStack.getItem());
+            ItemStorage<?> component = ItemStorage.get(entity, itemStack.getItem());
 
             if (component != null) {
                 return component;
@@ -24,18 +24,18 @@ public class SoulboundItemUtil {
     }
 
     public static boolean isSoulWeaponEquipped(PlayerEntity player) {
-        return player.getMainHandStack().getItem() instanceof SoulboundWeaponItem
-                || player.getOffHandStack().getItem() instanceof SoulboundWeaponItem;
+        return player.getMainHandItem().getItem() instanceof SoulboundWeaponItem
+            || player.getOffhandItem().getItem() instanceof SoulboundWeaponItem;
     }
 
-    public static boolean addItemStack(ItemStack itemStack, final PlayerEntity player) {
+    public static boolean addItemStack(ItemStack itemStack, PlayerEntity player) {
         return addItemStack(itemStack, player, true);
     }
 
-    public static boolean addItemStack(ItemStack itemStack, final PlayerEntity player, boolean hasReservedSlot) {
+    public static boolean addItemStack(ItemStack itemStack, PlayerEntity player, boolean hasReservedSlot) {
         return true;
 /*
-        final PlayerInventory inventory = player.inventory;
+         PlayerInventory inventory = player.inventory;
 
         if (!(itemStack.getItem() instanceof SoulboundItem)) {
             hasReservedSlot = false;
@@ -48,12 +48,12 @@ public class SoulboundItemUtil {
                 slot = inventory.getEmptySlot();
             }
 
-            final int size = inventory.main.size();
-            final List<ItemStack> mergedInventory = CollectionUtil.merge(NonNullList.of(), inventory.main, inventory.offHand);
+             int size = inventory.main.size();
+             List<ItemStack> mergedInventory = CollectionUtil.merge(NonNullList.of(), inventory.main, inventory.offHand);
 
             if (slot != -1) {
-                final ItemStack slotStack = slot != 40 ? mergedInventory.get(slot) : mergedInventory.get(size);
-                final int transferred = Math.min(slotStack.getMaxCount() - slotStack.getCount(), itemStack.getCount());
+                 ItemStack slotStack = slot != 40 ? mergedInventory.get(slot) : mergedInventory.get(size);
+                 int transferred = Math.min(slotStack.getMaxCount() - slotStack.getCount(), itemStack.getCount());
 
                 itemStack.setCount(itemStack.getCount() - transferred);
                 slotStack.setCount(slotStack.getCount() + transferred);
@@ -66,7 +66,7 @@ public class SoulboundItemUtil {
             }
 
             for (ComponentType<? extends SoulboundComponent> type : Components.SOULBOUND_COMPONENTS) {
-                final SoulboundComponent component = type.get(player);
+                 SoulboundComponent component = type.get(player);
 
                 for (ItemStorage<?> storage : component.getStorages().values()) {
                     for (int index = 0; index < mergedInventory.size(); index++) {
@@ -87,14 +87,14 @@ public class SoulboundItemUtil {
             return false;
         }
 
-        final int boundSlot = ItemStorage.get(player, itemStack.getItem()).getBoundSlot();
+         int boundSlot = ItemStorage.get(player, itemStack.getItem()).getBoundSlot();
 
         if (boundSlot >= 0) {
             if (inventory.getInvStack(boundSlot).isEmpty()) {
                 return inventory.insertStack(boundSlot, itemStack);
             }
         } else {
-            final ItemStack mainhandStack = player.getMainHandStack();
+             ItemStack mainhandStack = player.getMainHandStack();
 
             if (mainhandStack.isEmpty()) {
                 return inventory.insertStack(ItemUtil.getSlotFor(inventory, mainhandStack), itemStack);
@@ -106,9 +106,9 @@ public class SoulboundItemUtil {
     }
 
     public static boolean hasSoulWeapon(PlayerEntity player) {
-        final int size = player.inventory.size();
-        final ItemStack[] inventory = player.inventory.main.toArray(new ItemStack[size + 1]);
-        inventory[size] = player.getOffHandStack();
+        int size = player.inventory.getContainerSize();
+        ItemStack[] inventory = player.inventory.items.toArray(new ItemStack[size + 1]);
+        inventory[size] = player.getOffhandItem();
 
         for (ItemStack itemStack : inventory) {
             if (itemStack != null && itemStack.getItem() instanceof SoulboundWeaponItem) {

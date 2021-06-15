@@ -1,27 +1,26 @@
-package user11681.soulboundarmory.command;
+package user11681.soulboundarmory.command.argument;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 
-public class StorageArgumentType extends RegistryArgumentType<StorageType<? extends ItemStorage<?>>> {
+public class StorageArgumentType extends RegistryArgumentType<StorageType<?>> {
     protected StorageArgumentType() {
-        super(StorageType.registry);
+        super(StorageType.registry());
     }
 
     public static StorageArgumentType storages() {
         return new StorageArgumentType();
     }
 
-    @SuppressWarnings("unchecked")
-    public static Set<StorageType<? extends ItemStorage<?>>> getStorages(CommandContext<?> context, String name) {
+    public static Set<StorageType<? extends ItemStorage<?>>> get(CommandContext<?> context, String name) {
         return context.getArgument(name, Set.class);
     }
 
@@ -30,7 +29,7 @@ public class StorageArgumentType extends RegistryArgumentType<StorageType<? exte
         int cursor = reader.getCursor();
 
         if (Pattern.compile(Pattern.quote("current"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(reader.readString()).find()) {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         reader.setCursor(cursor);
@@ -39,10 +38,7 @@ public class StorageArgumentType extends RegistryArgumentType<StorageType<? exte
     }
 
     @Override
-    protected <S> Collection<String> getSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        Collection<String> suggestions = super.getSuggestions(context, builder);
-        suggestions.add("current");
-
-        return suggestions;
+    protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        return Stream.concat(Stream.of("current"), super.suggestions(context,builder));
     }
 }

@@ -4,7 +4,6 @@ import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
-import user11681.soulboundarmory.util.Util;
 import user11681.soulboundarmory.asm.access.entity.BossEntityAccess;
 
 public class EntityUtil {
@@ -15,7 +14,7 @@ public class EntityUtil {
     }
 
     public static Entity entity(UUID id) {
-        for (ServerWorld world : Util.getServer().getAllLevels()) {
+        for (ServerWorld world : Util.server().getAllLevels()) {
             Entity entity = world.getEntity(id);
 
             if (entity != null) {

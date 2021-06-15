@@ -9,7 +9,7 @@ public class AmbidexteritySkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, final int level) {
+    public int cost(boolean learned, int level) {
         return 5;
     }
 }

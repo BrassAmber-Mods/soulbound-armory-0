@@ -1,6 +1,6 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "soulboundarmory:item/soulbound_pick"
+        "layer0": "soulbound-armory:item/dagger"
     }
 }

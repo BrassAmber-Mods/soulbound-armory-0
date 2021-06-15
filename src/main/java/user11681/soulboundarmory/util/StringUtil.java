@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 public class StringUtil {
     public static String macroCaseToCamelCase(String string) {
-        final StringBuilder builder = new StringBuilder();
-        final char[] chars = string.toLowerCase().toCharArray();
+         StringBuilder builder = new StringBuilder();
+         char[] chars = string.toLowerCase().toCharArray();
 
         for (int i = 0; i < chars.length; i++) {
             char character = chars[i];
@@ -21,11 +21,15 @@ public class StringUtil {
         return builder.toString();
     }
 
-    public static boolean contains(String string, final String regex) {
+    public static boolean contains(String string, String regex) {
         return Pattern.compile(regex).matcher(string).find();
     }
 
-    public static Matcher match(String string, final String regex) {
+    public static Matcher match(String string, String regex) {
         return Pattern.compile(regex).matcher(string);
+    }
+
+    public static int lastIndex(String string, int end, int character) {
+        return string.substring(0, end).lastIndexOf(character);
     }
 }

@@ -9,6 +9,6 @@ public interface ItemComponentPacket extends SimplePacket {
 
     @Override
     default void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context) {
-        this.execute(buffer, context, StorageType.storage.get(buffer.readResourceLocation()).get(this.player(context)));
+        this.execute(buffer, context, StorageType.get(buffer.readResourceLocation()).get(this.player(context)));
     }
 }

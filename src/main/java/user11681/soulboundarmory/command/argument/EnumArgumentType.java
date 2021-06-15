@@ -1,4 +1,4 @@
-package user11681.soulboundarmory.command;
+package user11681.soulboundarmory.command.argument;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -13,15 +13,15 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     protected final Class<T> clazz;
     protected final List<T> values;
 
-    protected EnumArgumentType(Class<T> enumClass, final Predicate<T> include) {
+    protected EnumArgumentType(Class<T> enumClass, Predicate<T> include) {
         this.clazz = enumClass;
 
-        final List<T> values = this.values = new ArrayList<>();
+         List<T> values = this.values = new ArrayList<>();
 
         for (Field field : enumClass.getDeclaredFields()) {
             try {
                 //noinspection unchecked
-                final T value = (T) field.get(null);
+                 T value = (T) field.get(null);
                 if (include.test(value)) {
                     values.add(value);
                 }
@@ -33,7 +33,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
 
     protected EnumArgumentType(Class<T> enumClass) {
         this.clazz = enumClass;
-        final List<T> values = this.values = new ArrayList<>();
+         List<T> values = this.values = new ArrayList<>();
 
         for (Field field : enumClass.getDeclaredFields()) {
             try {
@@ -54,11 +54,11 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
         return new EnumArgumentType<>(enumClass);
     }
 
-    public static <T extends Enum<T>> EnumArgumentType<T> include(Class<T> enumClass, final Predicate<T> include) {
+    public static <T extends Enum<T>> EnumArgumentType<T> include(Class<T> enumClass, Predicate<T> include) {
         return new EnumArgumentType<>(enumClass, include);
     }
 
-    public static <T extends Enum<T>> EnumArgumentType<T> exclude(Class<T> enumClass, final Predicate<T> exclude) {
+    public static <T extends Enum<T>> EnumArgumentType<T> exclude(Class<T> enumClass, Predicate<T> exclude) {
         return new EnumArgumentType<>(enumClass, exclude.negate());
     }
 

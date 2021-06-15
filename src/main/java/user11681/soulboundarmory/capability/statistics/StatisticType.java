@@ -1,12 +1,11 @@
 package user11681.soulboundarmory.capability.statistics;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistry;
-import user11681.soulboundarmory.SoulboundArmory;
+import user11681.soulboundarmory.registry.RegistryEntry;
 import user11681.soulboundarmory.util.Util;
 
-public class StatisticType extends ForgeRegistryEntry<StatisticType> {
+public class StatisticType extends RegistryEntry<StatisticType> {
+    @SuppressWarnings("unused")
     public static final IForgeRegistry<StatisticType> registry = Util.registry("statistic");
 
     public static final StatisticType experience = register("xp");
@@ -21,21 +20,6 @@ public class StatisticType extends ForgeRegistryEntry<StatisticType> {
     public static final StatisticType miningLevel = register("harvest_level");
     public static final StatisticType attackSpeed = register("attack_speed");
     public static final StatisticType attackDamage = register("attack_damage");
-    public static final StatisticType criticalStrikeProbability = register("critical_strike_probability");
+    public static final StatisticType criticalStrikeProbability = register("critical_strike_rate");
     public static final StatisticType attackRange = register("attack_range");
-
-    public StatisticType(ResourceLocation identifier) {
-        this.setRegistryName(identifier);
-    }
-
-    private static StatisticType register(String path) {
-        StatisticType type = new StatisticType(SoulboundArmory.id(path));
-        registry.register(type);
-
-        return type;
-    }
-
-    public ResourceLocation id() {
-        return registry.getKey(this);
-    }
 }

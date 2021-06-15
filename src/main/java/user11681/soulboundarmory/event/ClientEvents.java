@@ -17,37 +17,23 @@ import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import user11681.soulboundarmory.SoulboundArmoryClient;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import user11681.soulboundarmory.SoulboundArmory;
 import user11681.soulboundarmory.capability.Capabilities;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.item.weapon.StaffStorage;
 import user11681.soulboundarmory.client.gui.ExperienceBarOverlay;
-import user11681.soulboundarmory.client.render.SoulboundDaggerEntityRenderer;
-import user11681.soulboundarmory.client.render.SoulboundFireballEntityRenderer;
 import user11681.soulboundarmory.config.Configuration;
-import user11681.soulboundarmory.entity.SoulboundDaggerEntity;
-import user11681.soulboundarmory.entity.SoulboundFireballEntity;
 import user11681.soulboundarmory.item.SoulboundItem;
 import user11681.soulboundarmory.text.Translation;
 
 import static user11681.soulboundarmory.SoulboundArmoryClient.client;
 
 @OnlyIn(Dist.CLIENT)
+@EventBusSubscriber(modid = SoulboundArmory.ID)
 public class ClientEvents {
     public static ExperienceBarOverlay overlayBar;
     public static ExperienceBarOverlay tooltipBar;
-
-    @SubscribeEvent
-    public static void setup(FMLClientSetupEvent event) {
-        ClientRegistry.registerKeyBinding(SoulboundArmoryClient.guiKeyBinding);
-        ClientRegistry.registerKeyBinding(SoulboundArmoryClient.toggleXPBarKeyBinding);
-
-        RenderingRegistry.registerEntityRenderingHandler(SoulboundDaggerEntity.type, SoulboundDaggerEntityRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(SoulboundFireballEntity.type, SoulboundFireballEntityRenderer::new);
-    }
 
     @SubscribeEvent
     public static void scroll(InputEvent.MouseScrollEvent event) {

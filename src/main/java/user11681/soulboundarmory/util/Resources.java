@@ -7,83 +7,76 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import user11681.usersmanual.Main;
 
-@SuppressWarnings("ConstantConditions")
 public class Resources {
-    public static final ResourceManager RESOURCE_MANAGER = Minecraft.getInstance().getResourceManager();
+    public static final IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 
-    public static ByteArrayInputStream toInputStream(Raster raster) {
+    public static ByteArrayInputStream inputStream(Raster raster) {
         return new ByteArrayInputStream(((DataBufferByte) raster.getDataBuffer()).getData());
     }
 
-    public static NativeImage toNativeImage(Raster raster) {
+    public static NativeImage nativeImage(Raster raster) {
         try {
-            return NativeImage.read(toInputStream(raster));
+            return NativeImage.read(inputStream(raster));
         } catch (IOException exception) {
-            Main.logger.error("An error occurred while attempting to read an image:", exception);
+            throw Unsafe.throwException(exception);
         }
-
-        return null;
     }
 
     public static BufferedImage readTexture(ResourceLocation identifier) {
         try {
-            return ImageIO.read(getInputStream(identifier));
+            return ImageIO.read(inputStream(identifier));
         } catch (IOException exception) {
-            Main.logger.error("An error occurred in an attempt get the image of a texture.", exception);
+            throw Unsafe.throwException(exception);
         }
-
-        return null;
     }
 
-    public static byte[] getBytes(ResourceLocation resource) {
-        return getBytes(getInputStream(resource));
+    public static byte[] bytes(ResourceLocation resource) {
+        return bytes(inputStream(resource));
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    public static byte[] getBytes(InputStream input) {
+    public static byte[] bytes(InputStream input) {
         try {
-            final byte[] content = new byte[input.available()];
+             byte[] content = new byte[input.available()];
 
             while (input.read(content) > -1);
 
             return content;
         } catch (IOException exception) {
-            throw new RuntimeException("An error occurred while attempting to read a resource to a byte array.", exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
-    public static InputStream getInputStream(ResourceLocation resource) {
-        return getResource(resource).getInputStream();
+    public static InputStream inputStream(ResourceLocation resource) {
+        return resource(resource).getInputStream();
     }
 
-    public static Resource getResource(ResourceLocation identifier) {
+    public static IResource resource(ResourceLocation identifier) {
         try {
-            return RESOURCE_MANAGER.getResource(identifier);
+            return resourceManager.getResource(identifier);
         } catch (IOException exception) {
-            Main.logger.error(String.format("Resource %s was not found.", identifier), exception);
+            throw Unsafe.throwException(exception);
         }
-
-        return null;
     }
 
-    public static int[][][] getPixels(ResourceLocation texture) {
-        return getPixels(readTexture(texture));
+    public static int[][][] pixels(ResourceLocation texture) {
+        return pixels(readTexture(texture));
     }
 
-    public static int[][][] getPixels(BufferedImage image) {
-        return getPixels(image, 0, 0, image.getWidth(), image.getHeight());
+    public static int[][][] pixels(BufferedImage image) {
+        return pixels(image, 0, 0, image.getWidth(), image.getHeight());
     }
 
-    public static int[][][] getPixels(BufferedImage image, final int u, final int v, final int width, final int height) {
-        final int[][][] pixels = new int[image.getHeight()][image.getWidth()][4];
-        final Raster raster = image.getData();
+    public static int[][][] pixels(BufferedImage image, int u, int v, int width, int height) {
+         int[][][] pixels = new int[image.getHeight()][image.getWidth()][4];
+         Raster raster = image.getData();
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -94,8 +87,8 @@ public class Resources {
         return pixels;
     }
 
-    public static int[] getRGB(int color) {
-        final int[] rgb = new int[3];
+    public static int[] rgb(int color) {
+         int[] rgb = new int[3];
 
         rgb[0] = color >> 16 & 0xFF;
         rgb[1] = color >> 8 & 0xFF;

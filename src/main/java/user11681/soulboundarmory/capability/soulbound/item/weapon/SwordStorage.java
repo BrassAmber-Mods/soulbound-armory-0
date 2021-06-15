@@ -54,7 +54,7 @@ import static user11681.soulboundarmory.capability.statistics.StatisticType.spen
 public class SwordStorage extends WeaponStorage<SwordStorage> {
     protected int lightningCooldown;
 
-    public SwordStorage(SoulboundCapability component, final Item item) {
+    public SwordStorage(SoulboundCapability component, Item item) {
         super(component, item);
 
         this.statistics = Statistics.create()
@@ -64,7 +64,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
             .max(1, criticalStrikeProbability)
             .build();
         this.enchantments = new EnchantmentStorage((Enchantment enchantment) -> {
-            final String name = enchantment.getFullname(1).getContents().toLowerCase();
+             String name = enchantment.getFullname(1).getContents().toLowerCase();
 
             return enchantment.canEnchant(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
                 && (enchantment == impact || !name.contains("soulbound")) && !name.contains("holding")
@@ -83,7 +83,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public StorageType<SwordStorage> getType() {
+    public StorageType<SwordStorage> type() {
         return StorageType.sword;
     }
 
@@ -93,26 +93,26 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
 
     public void resetLightningCooldown() {
         if (!this.player.isCreative()) {
-            this.lightningCooldown = (int) Math.round(96 / this.getAttribute(attackSpeed));
+            this.lightningCooldown = (int) Math.round(96 / this.attribute(attackSpeed));
         }
     }
 
     @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
         if (slot == EquipmentSlotType.MAINHAND) {
-            final AttributeModifier.Operation addition = AttributeModifier.Operation.ADDITION;
+             AttributeModifier.Operation addition = AttributeModifier.Operation.ADDITION;
 
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.ATTACK_DAMAGE_MODIFIER_ID,
-                "Weapon modifier", this.getAttributeRelative(attackDamage), addition
+            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.attackDamageModifier,
+                "Weapon modifier", this.attributeRelative(attackDamage), addition
             ));
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.ATTACK_SPEED_MODIFIER_ID,
-                "Weapon modifier", this.getAttributeRelative(attackSpeed), addition
+            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.attackSpeedModifier,
+                "Weapon modifier", this.attributeRelative(attackSpeed), addition
             ));
             modifiers.put(SAAttributes.efficiency, new AttributeModifier(SAAttributes.efficiencyUUID,
-                "Weapon modifier", this.getAttribute(efficiency), AttributeModifier.Operation.MULTIPLY_TOTAL
+                "Weapon modifier", this.attribute(efficiency), AttributeModifier.Operation.MULTIPLY_TOTAL
             ));
-            modifiers.put(SAAttributes.criticalStrikeProbability, new AttributeModifier(SAAttributes.criticalStrikeRateUUID,
-                "Weapon modifier", this.getAttribute(criticalStrikeProbability), AttributeModifierOperations.percentageAddition
+            modifiers.put(SAAttributes.criticalStrikeRate, new AttributeModifier(SAAttributes.criticalStrikeRateUUID,
+                "Weapon modifier", this.attribute(criticalStrikeProbability), AttributeModifierOperations.percentageAddition
             ));
         }
 
@@ -123,27 +123,27 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     public List<StatisticEntry> getScreenAttributes() {
         List<StatisticEntry> entries = new ReferenceArrayList<>();
 
-        entries.add(new StatisticEntry(this.getStatistic(attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed)).withStyle(TextFormatting.GOLD)));
-        entries.add(new StatisticEntry(this.getStatistic(attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))));
-        entries.add(new StatisticEntry(this.getStatistic(criticalStrikeProbability), new Translation("%s%s: %s%%", Translations.criticalStrikeProbabilityFormat, Translations.criticalStrikeProbabilityName, this.formatStatistic(criticalStrikeProbability))));
-        entries.add(new StatisticEntry(this.getStatistic(efficiency), new Translation("%s%s: %s", Translations.weaponEfficiencyFormat, Translations.weaponEfficiencyName, this.formatStatistic(efficiency))));
+        entries.add(new StatisticEntry(this.statistic(attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed)).withStyle(TextFormatting.GOLD)));
+        entries.add(new StatisticEntry(this.statistic(attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))));
+        entries.add(new StatisticEntry(this.statistic(criticalStrikeProbability), new Translation("%s%s: %s%%", Translations.criticalStrikeProbabilityFormat, Translations.criticalStrikeProbabilityName, this.formatStatistic(criticalStrikeProbability))));
+        entries.add(new StatisticEntry(this.statistic(efficiency), new Translation("%s%s: %s", Translations.weaponEfficiencyFormat, Translations.weaponEfficiencyName, this.formatStatistic(efficiency))));
 
         return entries;
     }
 
     @Override
     public List<ITextComponent> getTooltip() {
-        final NumberFormat format = DecimalFormat.getInstance();
-        final List<ITextComponent> tooltip = new ReferenceArrayList<>();
+         NumberFormat format = DecimalFormat.getInstance();
+         List<ITextComponent> tooltip = new ReferenceArrayList<>();
 
-        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.attackSpeedFormat, format.format(this.getAttribute(attackSpeed)), Translations.attackSpeedName)));
-        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.attackDamageFormat, format.format(this.getAttributeTotal(attackDamage)), Translations.attackDamageName)));
+        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(attackSpeed)), Translations.attackSpeedName)));
+        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(attackDamage)), Translations.attackDamageName)));
 
         tooltip.add(new StringTextComponent(""));
         tooltip.add(new StringTextComponent(""));
 
-        tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeProbabilityFormat, format.format(this.getAttribute(criticalStrikeProbability) * 100), Translations.criticalStrikeProbabilityName)));
-        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.getAttribute(efficiency)), Translations.toolEfficiencyName)));
+        tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeProbabilityFormat, format.format(this.attribute(criticalStrikeProbability) * 100), Translations.criticalStrikeProbabilityName)));
+        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(efficiency)), Translations.toolEfficiencyName)));
 
         return tooltip;
     }

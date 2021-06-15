@@ -2,15 +2,11 @@
     "required": true,
     "package": "user11681.soulboundarmory.asm.mixin",
     "compatibilityLevel": "JAVA_8",
-    "client": ["client.MouseMixin"],
+    "minVersion": "0.8",
     "mixins": [
-        "entity.LightningEntityMixin",
-        "entity.LivingEntityMixin",
-        "entity.player.PlayerEntityMixin",
-        "entity.player.PlayerInventoryAccess",
-        "entity.player.PlayerInventoryEntityMixin",
-        "entity.projectile.AbstractArrowEntityMixin",
-        "item.ItemStackMixin"
+        "entity.EntityMixin", "entity.LightningEntityMixin", "entity.LivingEntityMixin", "entity.attribute.AttributeModifierMixin",
+        "entity.player.PlayerEntityMixin", "entity.player.PlayerInventoryAccess", "entity.player.PlayerInventoryEntityMixin",
+        "entity.projectile.AbstractArrowEntityMixin", "item.ItemMixin", "item.ItemStackMixin"
     ],
     "injectors": {
         "defaultRequire": 1,

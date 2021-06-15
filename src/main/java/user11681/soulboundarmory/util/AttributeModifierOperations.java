@@ -1,5 +1,6 @@
 package user11681.soulboundarmory.util;
 
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import user11681.reflect.EnumConstructor;
 
 public class AttributeModifierOperations {

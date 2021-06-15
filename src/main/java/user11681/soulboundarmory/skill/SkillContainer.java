@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.cell.client.gui.screen.CellScreen;
 import user11681.soulboundarmory.capability.statistics.SkillStorage;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 
@@ -110,7 +111,7 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void render(SpunScreen screen, MatrixStack matrices, int x, int y, int zOffset) {
+    public void render(CellScreen screen, MatrixStack matrices, int x, int y, int zOffset) {
         this.skill.render(screen, matrices, this.level, x, y, zOffset);
     }
 

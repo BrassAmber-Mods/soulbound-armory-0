@@ -7,20 +7,22 @@ import net.minecraft.potion.Potions;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.cell.client.gui.screen.CellScreen;
 import user11681.soulboundarmory.skill.Skill;
+
 public class HealingSkill extends Skill {
     public HealingSkill(ResourceLocation identifier) {
         super(identifier);
     }
 
     @Override
-    public int cost(boolean learned, final int level) {
-            return 2;
+    public int cost(boolean learned, int level) {
+        return 2;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(SpunScreen screen, final MatrixStack matrices, final int level, final int x, final int y, final int zOffset) {
+    public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
         screen.renderGuiItem(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), Potions.HEALING), x, y, zOffset);
     }
 }

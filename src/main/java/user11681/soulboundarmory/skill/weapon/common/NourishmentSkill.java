@@ -6,6 +6,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import user11681.cell.client.gui.screen.CellScreen;
 import user11681.soulboundarmory.skill.Skill;
 
 public class NourishmentSkill extends Skill {
@@ -14,13 +15,13 @@ public class NourishmentSkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, final int level) {
+    public int cost(boolean learned, int level) {
         return !learned ? 3 : level + 1;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(SpunScreen screen, final MatrixStack matrices, final int level, final int x, final int y, final int zOffset) {
+    public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
         screen.renderGuiItem(new ItemStack(Items.COOKED_BEEF), x, y, zOffset);
     }
 }

@@ -47,7 +47,7 @@ import static user11681.soulboundarmory.capability.statistics.StatisticType.spen
 import static user11681.soulboundarmory.capability.statistics.StatisticType.spentEnchantmentPoints;
 
 public class PickStorage extends ToolStorage<PickStorage> {
-    public PickStorage(SoulboundCapability component, final Item item) {
+    public PickStorage(SoulboundCapability component, Item item) {
         super(component, item);
 
         this.statistics = Statistics.create()
@@ -57,7 +57,7 @@ public class PickStorage extends ToolStorage<PickStorage> {
             .max(3, miningLevel)
             .build();
         this.enchantments = new EnchantmentStorage((Enchantment enchantment) -> {
-            final String name = enchantment.getFullname(1).getString().toLowerCase();
+             String name = enchantment.getFullname(1).getString().toLowerCase();
 
             return enchantment.canEnchant(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE, MENDING).contains(enchantment)
                 && !Stream.of("soulbound", "holding", "smelt").map(name::contains).reduce(false, (Boolean contains, Boolean value) -> value || contains);
@@ -76,7 +76,7 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public StorageType<PickStorage> getType() {
+    public StorageType<PickStorage> type() {
         return StorageType.pick;
     }
 
@@ -85,7 +85,7 @@ public class PickStorage extends ToolStorage<PickStorage> {
         Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
 
         if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.getAttributeRelative(reach), AttributeModifier.Operation.ADDITION));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(reach), AttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;
@@ -95,9 +95,9 @@ public class PickStorage extends ToolStorage<PickStorage> {
     public List<StatisticEntry> getScreenAttributes() {
         List<StatisticEntry> entries = new ReferenceArrayList<>();
 
-        entries.add(new StatisticEntry(this.getStatistic(efficiency), new Translation("%s%s: %s", Translations.toolEfficiencyFormat, Translations.toolEfficiencyName, this.formatStatistic(efficiency))));
-        entries.add(new StatisticEntry(this.getStatistic(miningLevel), new Translation("%s%s: %s (%s)", Translations.miningLevelFormat, Translations.miningLevelName, this.formatStatistic(miningLevel), this.getMiningLevelName())));
-        entries.add(new StatisticEntry(this.getStatistic(reach), new Translation("%s%s: %s", Translations.reachFormat, Translations.attackRangeName, this.formatStatistic(reach))));
+        entries.add(new StatisticEntry(this.statistic(efficiency), new Translation("%s%s: %s", Translations.toolEfficiencyFormat, Translations.toolEfficiencyName, this.formatStatistic(efficiency))));
+        entries.add(new StatisticEntry(this.statistic(miningLevel), new Translation("%s%s: %s (%s)", Translations.miningLevelFormat, Translations.miningLevelName, this.formatStatistic(miningLevel), this.getMiningLevelName())));
+        entries.add(new StatisticEntry(this.statistic(reach), new Translation("%s%s: %s", Translations.reachFormat, Translations.attackRangeName, this.formatStatistic(reach))));
 
         return entries;
     }
@@ -107,9 +107,9 @@ public class PickStorage extends ToolStorage<PickStorage> {
         NumberFormat FORMAT = DecimalFormat.getInstance();
         List<ITextComponent> tooltip = new ArrayList<>(5);
 
-        tooltip.add(new Translation(" %s%s %s", Translations.reachFormat, FORMAT.format(this.getAttribute(reach)), Translations.attackRangeName));
-        tooltip.add(new Translation(" %s%s %s", Translations.toolEfficiencyFormat, FORMAT.format(this.getAttribute(efficiency)), Translations.toolEfficiencyName));
-        tooltip.add(new Translation(" %s%s %s", Translations.miningLevelFormat, FORMAT.format(this.getAttribute(miningLevel)), Translations.miningLevelName));
+        tooltip.add(new Translation(" %s%s %s", Translations.reachFormat, FORMAT.format(this.attribute(reach)), Translations.attackRangeName));
+        tooltip.add(new Translation(" %s%s %s", Translations.toolEfficiencyFormat, FORMAT.format(this.attribute(efficiency)), Translations.toolEfficiencyName));
+        tooltip.add(new Translation(" %s%s %s", Translations.miningLevelFormat, FORMAT.format(this.attribute(miningLevel)), Translations.miningLevelName));
 
         tooltip.add(StringTextComponent.EMPTY);
         tooltip.add(StringTextComponent.EMPTY);

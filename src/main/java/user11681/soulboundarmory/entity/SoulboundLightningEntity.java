@@ -37,7 +37,7 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
         PortalSize.findEmptyPortalShape(world, this.blockPosition(), null).ifPresent(PortalSize::createPortalBlocks);
     }
 
-    public SoulboundLightningEntity(World world, final Vector3d pos, final UUID caster) {
+    public SoulboundLightningEntity(World world, Vector3d pos, UUID caster) {
         this(world, pos.x, pos.y, pos.z, caster);
     }
 
@@ -76,7 +76,7 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
                         new AxisAlignedBB(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
                     LivingEntity caster = this.caster();
                     float attackDamage = caster instanceof PlayerEntity
-                            ? (float) SwordStorage.get(caster).getAttributeTotal(StatisticType.attackDamage)
+                            ? (float) SwordStorage.get(caster).attributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {
@@ -109,7 +109,7 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
                                 }
 
                                 if (entity.hurt(damageSource, attackDamage)) {
-                                    final PlayerEntity player = (PlayerEntity) caster;
+                                     PlayerEntity player = (PlayerEntity) caster;
 
                                     if (knockbackModifier > 0) {
                                         target.knockback(knockbackModifier * 0.5F, MathHelper.sin(caster.yRot * 0.017453292F), -MathHelper.cos(caster.yRot * 0.017453292F));

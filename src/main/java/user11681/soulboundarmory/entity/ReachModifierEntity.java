@@ -8,11 +8,11 @@ public class ReachModifierEntity {
         super(worldIn);
     }
 
-    public ReachModifierEntity(World world, final double x, final double y, final double z) {
+    public ReachModifierEntity(World world, double x, double y, double z) {
         super(world, x, y, z);
     }
 
-    public ReachModifierEntity(World world, final LivingEntity shooter, final float reachDistance) {
+    public ReachModifierEntity(World world, LivingEntity shooter, float reachDistance) {
         this(world, shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ());
 
         this.level = world;
@@ -27,7 +27,7 @@ public class ReachModifierEntity {
     }
 
     public void tick() {
-        final Vector3d pos = this.getPos();
+         Vector3d pos = this.getPos();
 
         Vector3d newPos = new Vector3d(this.getX() + this.motionX, this.getY() + this.motionY, this.getZ() + this.velocityZ());
         RayTraceContext rayTraceResult = this.level.rayTraceBlocks(pos, newPos, false, true, false);
@@ -36,7 +36,7 @@ public class ReachModifierEntity {
             newPos = new Vector3d(rayTraceResult.hitVec.x, rayTraceResult.hitVec.y, rayTraceResult.hitVec.z);
         }
 
-        final Entity entity = this.findEntityOnPath(pos, newPos);
+         Entity entity = this.findEntityOnPath(pos, newPos);
 
         if (entity != null) {
             rayTraceResult = new RayTraceResult(entity);
@@ -61,9 +61,9 @@ public class ReachModifierEntity {
     @Override
     protected void onHit(RayTraceResult result) {
         if (!this.level.isClientSide && result.entityHit != owner && owner instanceof PlayerEntity) {
-            final Entity target = result.entityHit;
-            final PlayerEntity player = (PlayerEntity) owner;
-            final IWeaponComponent component = WeaponProvider.get(player);
+             Entity target = result.entityHit;
+             PlayerEntity player = (PlayerEntity) owner;
+             IWeaponComponent component = WeaponProvider.get(player);
 
             if (target != null) {
                 if (this.distanceToHit(result) <= this.reachDistance * this.reachDistance
@@ -74,13 +74,13 @@ public class ReachModifierEntity {
                         ? EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), ((LivingEntity) target).getCreatureAttribute())
                         : EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), EnumCreatureAttribute.UNDEFINED);
 
-                    final double cooldownRatio = component.getAttackRatio(component.getItemType());
+                     double cooldownRatio = component.getAttackRatio(component.getItemType());
                     attackDamageModifier *= 0.2 + cooldownRatio * cooldownRatio * 0.8;
                     attackDamageRatio *= cooldownRatio;
 
                     if (attackDamageModifier > 0 || attackDamageRatio > 0) {
-                        final boolean strong = cooldownRatio > 0.9F;
-                        final boolean knockback = player.isSprinting() && strong;
+                         boolean strong = cooldownRatio > 0.9F;
+                         boolean knockback = player.isSprinting() && strong;
                         int knockbackModifier = EnchantmentHelper.getKnockbackModifier(player);
 
                         if (knockback) {
@@ -92,7 +92,7 @@ public class ReachModifierEntity {
                             && !player.isInWater() && !player.isPotionActive(MobEffects.BLINDNESS) && !player.isRiding()
                             && target instanceof LivingEntity && !player.isSprinting();
 
-                        final CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(player, target, critical, critical ? 1.5F : 1);
+                         CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(player, target, critical, critical ? 1.5F : 1);
                         critical = hitResult != null;
 
                         if (critical) {
@@ -100,9 +100,9 @@ public class ReachModifierEntity {
                         }
 
                         attackDamageModifier += attackDamageRatio;
-                        final double speed = player.distanceWalkedModified - player.prevDistanceWalkedModified;
-                        final boolean sweep = strong && !critical && !knockback && player.onGround && speed < player.getAIMoveSpeed() && player.getItemInHand(Hand.MAIN_HAND).getItem() instanceof ItemSword;
-                        final int fireAspectModifier = EnchantmentHelper.getFireAspectModifier(player);
+                         double speed = player.distanceWalkedModified - player.prevDistanceWalkedModified;
+                         boolean sweep = strong && !critical && !knockback && player.onGround && speed < player.getAIMoveSpeed() && player.getItemInHand(Hand.MAIN_HAND).getItem() instanceof ItemSword;
+                         int fireAspectModifier = EnchantmentHelper.getFireAspectModifier(player);
                         float initialHealth = 0;
                         boolean burn = false;
 
@@ -115,9 +115,9 @@ public class ReachModifierEntity {
                             }
                         }
 
-                        final double motionX = target.motionX;
-                        final double motionY = target.motionY;
-                        final double velocityZ() = target.velocityZ();
+                         double motionX = target.motionX;
+                         double motionY = target.motionY;
+                         double velocityZ() = target.velocityZ();
 
                         if (target.attackEntityFrom(DamageSource.causePlayerDamage(player), attackDamageModifier)) {
                             if (knockbackModifier > 0) {
@@ -211,14 +211,14 @@ public class ReachModifierEntity {
         this.setDead();
     }
 
-    public void shoot(double x, final double y, final double z) {
+    public void shoot(double x, double y, double z) {
         this.motionX = x * 255;
         this.motionY = y * 255;
         this.velocityZ() = z * 255;
     }
 
     private double distanceToHit(RayTraceResult rayTraceResult) {
-        final Vector3d pos = rayTraceResult.hitVec;
+         Vector3d pos = rayTraceResult.hitVec;
 
         return Math.pow(pos.x - this.getX(), 2) + Math.pow(pos.y - this.getY(), 2) + Math.pow(pos.z - this.getZ(), 2);
     }

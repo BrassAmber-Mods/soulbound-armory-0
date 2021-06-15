@@ -12,21 +12,20 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.NonNullConsumer;
 import user11681.soulboundarmory.capability.Capabilities;
+import user11681.soulboundarmory.capability.EntityCapability;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 import user11681.soulboundarmory.util.Util;
 
-public class EntityData implements CompoundSerializable {
-    protected Entity entity;
-
+public class EntityData extends EntityCapability<Entity> implements CompoundSerializable {
     protected int freezeTicks;
     protected int blockTeleportTicks;
 
-    public static void ifPresent(Entity entity, NonNullConsumer<EntityData> consumer) {
-        entity.getCapability(Capabilities.entityData).ifPresent(consumer);
+    public EntityData(Entity entity) {
+        super(entity);
     }
 
-    public Entity getEntity() {
-        return this.entity;
+    public static void ifPresent(Entity entity, NonNullConsumer<EntityData> consumer) {
+        Capabilities.entityData.find(entity).ifPresent(consumer);
     }
 
     public boolean cannotTeleport() {
@@ -53,18 +52,18 @@ public class EntityData implements CompoundSerializable {
                 this.entity.hurt(DamageSource.playerAttack(freezer), damage);
             }
 
-            if (this.entity instanceof CreeperEntity creeper) {
-                creeper.setSwellDir(-1);
+            if (this.entity instanceof CreeperEntity) {
+                ((CreeperEntity) this.entity).setSwellDir(-1);
             }
 
-            if (this.entity instanceof ProjectileEntity projectile) {
-                projectile.setDeltaMovement(0, this.entity.getDeltaMovement().y, 0);
+            if (this.entity instanceof ProjectileEntity) {
+                this.entity.setDeltaMovement(0, this.entity.getDeltaMovement().y, 0);
             }
         }
     }
 
     public boolean canBeFrozen() {
-        return (!(this.entity instanceof PlayerEntity) || Util.getServer().isPvpAllowed()) && this.entity.isAlive();
+        return (!(this.entity instanceof PlayerEntity) || Util.server().isPvpAllowed()) && this.entity.isAlive();
     }
 
     public boolean isFrozen() {

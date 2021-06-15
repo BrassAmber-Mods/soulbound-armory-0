@@ -7,16 +7,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import user11681.soulboundarmory.capability.Capabilities;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 import user11681.soulboundarmory.capability.soulbound.item.weapon.GreatswordStorage;
-import user11681.soulboundarmory.entity.SAAttributes;
 import user11681.soulboundarmory.registry.Skills;
 import user11681.soulboundarmory.util.EntityUtil;
 
@@ -28,11 +27,14 @@ abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "createLivingAttributes", at = @At("RETURN"), cancellable = true)
     private static void createSoulboundArmoryAttributes(CallbackInfoReturnable<AttributeModifierMap.MutableAttribute> info) {
-        info.getReturnValue().add(SAAttributes.criticalStrikeProbability, 0).add(SAAttributes.efficiency, 1);
+        // info.getReturnValue().add(SAAttributes.criticalStrikeProbability, 0).add(SAAttributes.efficiency, 1);
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "pushEntities", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 0, shift = At.Shift.AFTER))
+    @Inject(method = "pushEntities",
+            at = @At(value = "INVOKE_ASSIGN",
+                     target = "Lnet/minecraft/world/World;getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"),
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
         if ((Object) this instanceof PlayerEntity player && !this.level.isClientSide) {
             GreatswordStorage greatsword = Capabilities.weapon.get(player).storage(StorageType.greatsword);

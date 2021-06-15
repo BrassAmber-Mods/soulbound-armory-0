@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.arguments.EntityArgument;
@@ -19,46 +20,48 @@ import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability
 import user11681.soulboundarmory.capability.statistics.Category;
 import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.client.i18n.Translations;
+import user11681.soulboundarmory.command.argument.ConstantArgumentType;
+import user11681.soulboundarmory.command.argument.StatisticArgumentType;
+import user11681.soulboundarmory.command.argument.StorageArgumentType;
 import user11681.soulboundarmory.text.Translation;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static net.minecraft.command.Commands.argument;
 import static net.minecraft.command.Commands.literal;
-import static net.minecraft.command.arguments.EntityArgument.players;
-import static user11681.soulboundarmory.command.RegistryArgumentType.registry;
-import static user11681.soulboundarmory.command.StatisticArgumentType.statisticTypes;
-import static user11681.soulboundarmory.command.StorageArgumentType.storages;
+import static user11681.soulboundarmory.command.argument.RegistryArgumentType.registry;
+import static user11681.soulboundarmory.command.argument.StatisticArgumentType.statisticTypes;
+import static user11681.soulboundarmory.command.argument.StorageArgumentType.storages;
 
 public class SoulboundArmoryCommand {
     protected static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType((Object player) -> new Translation(Translations.commandNoItem.getKey(), ((PlayerEntity) player).getName()));
 
     public static LiteralArgumentBuilder<CommandSource> get() {
-        return (literal("sba").requires((CommandSource source) -> source.hasPermission(2)))
+        return (literal("sa").requires((CommandSource source) -> source.hasPermission(2)))
                 .then(literal("add")
                         .then(argument("storage", storages())
                                 .then(argument("statistic", statisticTypes())
                                         .then(argument("value", doubleArg()).executes((CommandContext<CommandSource> context) -> add(context, false))
-                                                .then(argument("players", players()).executes((CommandContext<CommandSource> context) -> add(context, true)))))))
+                                                .then(argument("players", EntityArgument.players()).executes((CommandContext<CommandSource> context) -> add(context, true)))))))
                 .then(literal("set")
                         .then(argument("storage", storages())
                                 .then(argument("statistic", statisticTypes())
                                         .then(argument("value", doubleArg()).executes((CommandContext<CommandSource> context) -> set(context, false))
-                                                .then(argument("players", players()).executes((CommandContext<CommandSource> context) -> set(context, true)))))))
+                                                .then(argument("players", EntityArgument.players()).executes((CommandContext<CommandSource> context) -> set(context, true)))))))
                 .then(literal("reset")
                         .then(argument("storage", storages()).executes((CommandContext<CommandSource> context) -> reset(context, false, false))
                                 .then(argument("category", registry(Category.registry)).executes((CommandContext<CommandSource> context) -> reset(context, false, true))
-                                        .then(argument("players", players()).executes((CommandContext<CommandSource> context) -> reset(context, true, true))))
-                                .then(argument("players", players()).executes((CommandContext<CommandSource> context) -> reset(context, true, false)))));
+                                        .then(argument("players", EntityArgument.players()).executes((CommandContext<CommandSource> context) -> reset(context, true, true))))
+                                .then(argument("players", EntityArgument.players()).executes((CommandContext<CommandSource> context) -> reset(context, true, false)))));
     }
 
     protected static int add(CommandContext<CommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
-        Collection<ServerPlayerEntity> players = getPlayers(context, hasPlayerArgument);
-        Set<StorageType<? extends ItemStorage<?>>> types = StorageArgumentType.getStorages(context, "storage");
+        Collection<ServerPlayerEntity> players = players(context, hasPlayerArgument);
+        Set<StorageType<? extends ItemStorage<?>>> types = StorageArgumentType.get(context, "storage");
 
         for (PlayerEntity player : players) {
-            for (StatisticType statistic : StatisticArgumentType.getTypes(context, "statistic")) {
+            for (StatisticType statistic : StatisticArgumentType.get(context, "statistic")) {
                 if (types.isEmpty()) {
-                    getStorage(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
+                    storage(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
                 } else {
                     for (StorageType<? extends ItemStorage<?>> type : types) {
                         type.get(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
@@ -71,16 +74,16 @@ public class SoulboundArmoryCommand {
     }
 
     protected static int set(CommandContext<CommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
-        Collection<ServerPlayerEntity> players = getPlayers(context, hasPlayerArgument);
-        Set<StorageType<? extends ItemStorage<?>>> types = StorageArgumentType.getStorages(context, "storage");
+        Collection<ServerPlayerEntity> players = players(context, hasPlayerArgument);
+        Set<StorageType<? extends ItemStorage<?>>> types = StorageArgumentType.get(context, "storage");
 
         for (PlayerEntity player : players) {
-            for (StatisticType statistic : StatisticArgumentType.getTypes(context, "statistic")) {
+            for (StatisticType statistic : StatisticArgumentType.get(context, "statistic")) {
                 if (types.isEmpty()) {
-                    getStorage(player).setStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
+                    storage(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
                 } else {
                     for (StorageType<? extends ItemStorage<?>> type : types) {
-                        type.get(player).setStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
+                        type.get(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
                     }
                 }
             }
@@ -90,12 +93,12 @@ public class SoulboundArmoryCommand {
     }
 
     protected static int reset(CommandContext<CommandSource> context, boolean hasPlayerArgument, boolean hasCategoryArgument) throws CommandSyntaxException {
-        Collection<ServerPlayerEntity> players = getPlayers(context, hasPlayerArgument);
-        Set<StorageType<? extends ItemStorage<?>>> types = StorageArgumentType.getStorages(context, "storage");
+        Collection<ServerPlayerEntity> players = players(context, hasPlayerArgument);
+        Set<StorageType<? extends ItemStorage<?>>> types = StorageArgumentType.get(context, "storage");
 
         for (PlayerEntity player : players) {
             if (types.isEmpty()) {
-                types.add(getStorage(player).getType());
+                types.add(storage(player).type());
             }
 
             for (StorageType<?> type : types) {
@@ -112,31 +115,15 @@ public class SoulboundArmoryCommand {
         return players.size();
     }
 
-    protected static Collection<ServerPlayerEntity> getPlayers(CommandContext<CommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
-        Collection<ServerPlayerEntity> players;
-
-        if (hasPlayerArgument) {
-            players = EntityArgument.getPlayers(context, "players");
-        } else {
-            players = Collections.singleton(player(context));
-        }
-
-        return players;
-    }
-
-    protected static ItemStorage<?> getStorage(PlayerEntity player) throws CommandSyntaxException {
-        for (SoulboundCapability component : Capabilities.get(player)) {
-            ItemStorage<?> storage = component.heldItemStorage();
-
-            if (storage != null) {
-                return storage;
-            }
-        }
-
-        throw noItemException.create(player);
+    protected static Collection<ServerPlayerEntity> players(CommandContext<CommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+        return hasPlayerArgument ? EntityArgument.getPlayers(context, "players") : Collections.singleton(player(context));
     }
 
     protected static ServerPlayerEntity player(CommandContext<CommandSource> context) {
         return (ServerPlayerEntity) context.getSource().getEntity();
+    }
+
+    protected static ItemStorage<?> storage(PlayerEntity player) throws CommandSyntaxException {
+        return Capabilities.get(player).map(SoulboundCapability::heldItemStorage).filter(Objects::nonNull).findAny().orElseThrow(() -> noItemException.create(player));
     }
 }

@@ -1,4 +1,4 @@
-package user11681.soulboundarmory.command;
+package user11681.soulboundarmory.command.argument;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -6,39 +6,40 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
-    protected final Registry<T> registry;
+public class RegistryArgumentType<T extends IForgeRegistryEntry<?>> implements ArgumentType<Set<T>> {
+    protected final IForgeRegistry<?> registry;
 
-    protected RegistryArgumentType(Registry<T> registry) {
+    protected RegistryArgumentType(IForgeRegistry<?> registry) {
         this.registry = registry;
     }
 
-    public static <T> RegistryArgumentType<T> registry(Registry<T> registry) {
+    public static <T extends IForgeRegistryEntry<T>> RegistryArgumentType<T> registry(IForgeRegistry<T> registry) {
         return new RegistryArgumentType<>(registry);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Set<T> parse(StringReader reader) throws CommandSyntaxException {
         String input = reader.readString();
-        Registry<T> entries = this.registry;
 
         if (Pattern.compile(Pattern.quote("all"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(input).find()) {
-            return entries.stream().collect(Collectors.toSet());
+            return new HashSet(this.registry.getValues());
         }
 
-        for (ResourceLocation name : this.registry.keySet()) {
+        for (ResourceLocation name : this.registry.getKeys()) {
             if (Pattern.compile(Pattern.quote(name.getPath()), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(input).find()) {
-                return Collections.singleton(entries.get(name));
+                return (Set<T>) Collections.singleton(this.registry.getValue(name));
             }
         }
 
@@ -47,10 +48,10 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ISuggestionProvider.suggest(this.getSuggestions(context, builder), builder);
+        return ISuggestionProvider.suggest(this.suggestions(context, builder), builder);
     }
 
-    protected <S> Collection<String> getSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return this.registry.keySet().parallelStream().map(ResourceLocation::getPath).collect(Collectors.toSet());
+    protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        return this.registry.getKeys().stream().map(ResourceLocation::getPath);
     }
 }

@@ -1,22 +1,20 @@
 package user11681.soulboundarmory.util;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import net.minecraft.client.Minecraft;
+import java.util.Map;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.apache.logging.log4j.util.TriConsumer;
 import user11681.soulboundarmory.SoulboundArmory;
 
 public class Util {
-    public static MinecraftServer getServer() {
-        return FMLEnvironment.dist == Dist.CLIENT
-            ? Minecraft.getInstance().level.getServer()
-            : (MinecraftServer) ;
+    public static MinecraftServer server() {
+        return LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
     }
 
     public static <T> T nul() {
@@ -32,7 +30,22 @@ public class Util {
         return new HashSet<>(Arrays.asList(elements));
     }
 
-    public static <T extends IForgeRegistryEntry<T>> IForgeRegistry<T> registry(String path) {
-        return new RegistryBuilder<T>().setName(SoulboundArmory.id(path)).create();
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    public static <T> Class<T> componentType(T... array) {
+        return (Class<T>) array.getClass().getComponentType();
+    }
+
+    @SafeVarargs
+    public static <T extends IForgeRegistryEntry<T>> IForgeRegistry<T> registry(String path, T... dummy) {
+        return new RegistryBuilder<T>().setType(componentType(dummy)).setName(SoulboundArmory.id(path)).create();
+    }
+
+    public static <K, V> void enumerate(Map<K, V> map, TriConsumer<K, V, Integer> action) {
+        int counter = 0;
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            action.accept(entry.getKey(), entry.getValue(), counter++);
+        }
     }
 }

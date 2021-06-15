@@ -1,8 +1,5 @@
 package user11681.soulboundarmory.network.client;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraftforge.fml.network.NetworkEvent;
 import user11681.soulboundarmory.SoulboundArmoryClient;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
