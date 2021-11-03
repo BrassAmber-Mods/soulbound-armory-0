@@ -10,7 +10,7 @@
         "entity.attribute.AttributeModifierMixin",
         "entity.attribute.OperationMixin",
         "entity.player.PlayerEntityMixin",
-        "entity.player.PlayerInventoryAccess",
+        "net.auoeke.soulboundarmory.asm.mixin.entity.player.PlayerInventoryAccess",
         "entity.player.PlayerInventoryEntityMixin",
         "entity.projectile.AbstractArrowEntityMixin",
         "item.ItemMixin",
