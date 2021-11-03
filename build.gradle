@@ -72,15 +72,7 @@ mixin {
 }
 
 jar {
-    manifest.attributes(
-        "Specification-Title": project.name,
-        "Specification-Vendor": project.group,
-        "Specification-Version": "1",
-        "Implementation-Title": project.name,
-        "Implementation-Version": project.version,
-        "Implementation-Vendor": project.group,
-        "MixinConfigs": "${project.name}.mixins.json"
-    )
+    manifest.attributes(MixinConfigs: "${project.name}.mixins.json")
 }
 
 // Example configuration to allow publishing using the maven-publish task
