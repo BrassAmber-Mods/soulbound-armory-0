@@ -1,23 +1,102 @@
-plugins {
-    id("wheel-forge").version("latest.integration")
+buildscript {
+    repositories {
+        mavenCentral()
+
+        maven {url = "https://maven.minecraftforge.net"}
+        maven {url = "https://repo.spongepowered.org/repository/maven-public"}
+    }
+
+    dependencies {
+        classpath(group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.+", changing: true)
+        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
+    }
 }
 
-group = "user11681"
+plugins {
+    id("maven-publish")
+}
+
+plugins.with {
+    apply("net.minecraftforge.gradle")
+    apply("org.spongepowered.mixin")
+}
+
+group = "net.auoeke"
 version = "3.0.0"
 
 sourceCompatibility = 16
-targetCompatibility = 8
+targetCompatibility = 16
 
 repositories {
-    maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
+    maven {url = "https://maven.auoeke.net"}
 }
 
 dependencies {
-    api("user11681:reflect:latest.integration")
-
-    annotationProcessor("user11681:liberica:latest.integration")
+    minecraft("net.minecraftforge:forge:1.17.1-37.0.104")
+    implementation("net.auoeke:reflect:latest.integration")
 }
 
-wheel {
-    publish = false
+minecraft {
+    mappings("official", "1.17.1")
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+
+    //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        ["client", "server"].each {
+            register(it) {
+                properties("mixin.env.remapRefMap": "true")
+                property("mixin.env.refMapRemappingFile", "${project.projectDir}/build/createSrgToMcp/output.srg")
+                workingDirectory(project.file("run"))
+                arg("-mixin.config=${project.name}.mixins.json" as String)
+
+                property("forge.logging.console.level", "debug")
+
+                mods {
+                    soulboundarmory {
+                        source(sourceSets.main)
+                    }
+                }
+            }
+        }
+    }
+}
+
+mixin {
+    add(sourceSets.main, "${project.name}.refmap.json")
+}
+
+jar {
+    manifest.attributes(
+        "Specification-Title": project.name,
+        "Specification-Vendor": project.group,
+        "Specification-Version": "1",
+        "Implementation-Title": project.name,
+        "Implementation-Version": project.version,
+        "Implementation-Vendor": project.group,
+        "MixinConfigs": "${project.name}.mixins.json"
+    )
+}
+
+// Example configuration to allow publishing using the maven-publish task
+// we define a custom artifact that is sourced from the reobfJar output task
+// and then declare that to be published
+// Note you'll need to add a repository here
+def reobfArtifact = artifacts.add("default", file("$buildDir/reobfJar/output.jar")) {
+    type("jar")
+    builtBy("reobfJar")
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact(reobfArtifact)
+        }
+    }
+
+    repositories {
+        maven {
+            url = "https://maven.auoeke.net"
+        }
+    }
 }

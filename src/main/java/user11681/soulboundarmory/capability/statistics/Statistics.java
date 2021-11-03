@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.nbt.CompoundNBT;
-import user11681.soulboundarmory.SoulboundArmory;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 
 public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements CompoundSerializable, Iterable<Statistic> {
@@ -73,14 +73,14 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         for (Category category : this.keySet()) {
             tag.put(category.id().toString(), this.toTag(category));
         }
     }
 
-    public CompoundNBT toTag(Category category) {
-        CompoundNBT tag = new CompoundNBT();
+    public NbtCompound toTag(Category category) {
+        NbtCompound tag = new NbtCompound();
 
         for (Statistic statistic : this.get(category).values()) {
             tag.put(statistic.type().id().toString(), statistic.serializeNBT());
@@ -90,16 +90,16 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
-        for (String key : tag.getAllKeys()) {
-            this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(SoulboundArmory.id(key)));
+    public void deserializeNBT(NbtCompound tag) {
+        for (String key : tag.getKeys()) {
+            this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(new Identifier(key)));
         }
     }
 
-    public void deserializeNBT(CompoundNBT tag, Category category) {
+    public void deserializeNBT(NbtCompound tag, Category category) {
         if (category != null) {
-            for (String identifier : tag.getAllKeys()) {
-                Statistic statistic = this.get(StatisticType.registry.getValue(SoulboundArmory.id(identifier)));
+            for (String identifier : tag.getKeys()) {
+                Statistic statistic = this.get(StatisticType.registry.getValue(new Identifier(identifier)));
 
                 if (statistic != null) {
                     statistic.deserializeNBT(tag.getCompound(identifier));

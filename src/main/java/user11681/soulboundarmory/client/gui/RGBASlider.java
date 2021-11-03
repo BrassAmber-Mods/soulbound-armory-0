@@ -1,6 +1,6 @@
 package user11681.soulboundarmory.client.gui;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 import user11681.cell.client.gui.widget.Slider;
 import user11681.soulboundarmory.config.Configuration;
 import user11681.soulboundarmory.text.Translation;
@@ -10,17 +10,17 @@ public class RGBASlider extends Slider {
 
     public final int id;
 
-    protected final ITextComponent text;
+    protected final Text text;
 
     protected int componentValue;
 
-    public RGBASlider(int id, ITextComponent text) {
+    public RGBASlider(int id, Text text) {
         this.min(0).max(255);
 
         this.text = text;
         this.id = id;
 
-        // this.value = colors.get(id) / 255D;
+        this.value(colors.get(id));
         this.applyValue();
         this.updateMessage();
     }

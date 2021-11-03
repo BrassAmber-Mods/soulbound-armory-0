@@ -1,10 +1,9 @@
 package user11681.soulboundarmory.registry;
 
-import java.util.function.Supplier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.NetworkEvent;
 import user11681.soulboundarmory.SoulboundArmory;
+import user11681.soulboundarmory.network.ExtendedPacketBuffer;
 import user11681.soulboundarmory.network.Packet;
 import user11681.soulboundarmory.network.SimplePacket;
 import user11681.soulboundarmory.network.client.S2CEnchant;
@@ -20,7 +19,6 @@ import user11681.soulboundarmory.network.server.C2SItemType;
 import user11681.soulboundarmory.network.server.C2SReset;
 import user11681.soulboundarmory.network.server.C2SSkill;
 import user11681.soulboundarmory.network.server.C2SSync;
-import user11681.soulboundarmory.util.Util;
 
 public class Packets {
     public static final SimplePacket serverAttribute = server(new C2SAttribute());
@@ -40,24 +38,27 @@ public class Packets {
 
     private static int id;
 
-    @SuppressWarnings("unchecked")
-    private static <T, P extends Packet<T>> P server(P handler, T... dummy) {
+    @SuppressWarnings("SameParameterValue")
+    private static <T, P extends Packet<T>> P register(P handler, Class<T> type) {
         SoulboundArmory.channel.registerMessage(
             id++,
-            Util.componentType(dummy),
+            type,
             handler::write,
             handler::read,
-            (T buffer, Supplier<NetworkEvent.Context> context) -> context.get().enqueueWork(() -> handler.execute(buffer, context.get()))
+            (buffer, context) -> context.get().enqueueWork(() -> {
+                handler.execute(buffer, context.get());
+                context.get().setPacketHandled(true);
+            })
         );
 
         return handler;
     }
 
-    private static <T, P extends Packet<T>> P client(P handler) {
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            return server(handler);
-        }
+    private static <P extends Packet<ExtendedPacketBuffer>> P server(P handler) {
+        return register(handler, ExtendedPacketBuffer.class);
+    }
 
-        return handler;
+    private static <P extends Packet<ExtendedPacketBuffer>> P client(P handler) {
+        return FMLEnvironment.dist == Dist.CLIENT ? register(handler, ExtendedPacketBuffer.class) : handler;
     }
 }

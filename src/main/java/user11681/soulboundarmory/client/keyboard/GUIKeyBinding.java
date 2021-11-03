@@ -5,7 +5,7 @@ import user11681.soulboundarmory.SoulboundArmoryClient;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 
-public class GUIKeyBinding extends SoulboundArmoryKeyBinding {
+public class GUIKeyBinding extends KeyBindingBase {
     public GUIKeyBinding() {
         super("menu", GLFW.GLFW_KEY_R);
     }

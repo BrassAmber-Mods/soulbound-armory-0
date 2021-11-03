@@ -4,8 +4,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -38,11 +38,11 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(NbtCompound nbt) {
         Registry<Enchantment> registry = Registry.ENCHANTMENT;
 
-        for (String key : nbt.getAllKeys()) {
-            Enchantment enchantment = registry.get(new ResourceLocation(key));
+        for (String key : nbt.getKeys()) {
+            Enchantment enchantment = registry.get(new Identifier(key));
 
             if (this.containsKey(enchantment)) {
                 this.put(enchantment, nbt.getInt(key));
@@ -51,14 +51,14 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         IForgeRegistry<Enchantment> registry = ForgeRegistries.ENCHANTMENTS;
 
         for (Enchantment enchantment : this) {
             Integer level = this.get(enchantment);
 
             if (level != null) {
-                ResourceLocation identifier = registry.getKey(enchantment);
+                Identifier identifier = registry.getKey(enchantment);
 
                 if (identifier != null) {
                     tag.putInt(identifier.toString(), this.get(enchantment));

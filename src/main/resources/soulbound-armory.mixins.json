@@ -4,9 +4,17 @@
     "compatibilityLevel": "JAVA_8",
     "minVersion": "0.8",
     "mixins": [
-        "entity.EntityMixin", "entity.LightningEntityMixin", "entity.LivingEntityMixin", "entity.attribute.AttributeModifierMixin",
-        "entity.player.PlayerEntityMixin", "entity.player.PlayerInventoryAccess", "entity.player.PlayerInventoryEntityMixin",
-        "entity.projectile.AbstractArrowEntityMixin", "item.ItemMixin", "item.ItemStackMixin"
+        "entity.EntityMixin",
+        "entity.LightningEntityMixin",
+        "entity.LivingEntityMixin",
+        "entity.attribute.AttributeModifierMixin",
+        "entity.attribute.OperationMixin",
+        "entity.player.PlayerEntityMixin",
+        "entity.player.PlayerInventoryAccess",
+        "entity.player.PlayerInventoryEntityMixin",
+        "entity.projectile.AbstractArrowEntityMixin",
+        "item.ItemMixin",
+        "item.ItemStackMixin"
     ],
     "injectors": {
         "defaultRequire": 1,

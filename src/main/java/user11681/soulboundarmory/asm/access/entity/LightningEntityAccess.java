@@ -1,15 +1,15 @@
 package user11681.soulboundarmory.asm.access.entity;
 
 public interface LightningEntityAccess {
-    default int life() {
+    default int ambientTick() {
         return 0;
     }
 
-    default void life(int flashes) {}
+    default void ambientTick(int flashes) {}
 
-    default int flashes() {
+    default int remainingActions() {
         return 0;
     }
 
-    default void flashes(int flashes) {}
+    default void remainingActions(int flashes) {}
 }

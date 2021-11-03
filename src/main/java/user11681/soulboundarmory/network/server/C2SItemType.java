@@ -8,8 +8,8 @@ import user11681.soulboundarmory.network.ItemComponentPacket;
 public class C2SItemType implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        this.player(context).inventory.setItem(buffer.readInt(), storage.getItemStack());
-        storage.getComponent().currentItem(storage);
+        this.player(context).inventory.setStack(buffer.readInt(), storage.itemStack());
+        storage.getCapability().currentItem(storage);
         storage.removeOtherItems();
         storage.sync();
     }

@@ -9,6 +9,5 @@ public class S2CSync implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
         storage.deserializeNBT(buffer.readNbt());
-        storage.sync();
     }
 }

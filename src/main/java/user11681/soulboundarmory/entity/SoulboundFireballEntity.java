@@ -2,17 +2,17 @@ package user11681.soulboundarmory.entity;
 
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.EndermanEntity;
+import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,8 +29,8 @@ import static user11681.soulboundarmory.capability.statistics.StatisticType.atta
 
 public class SoulboundFireballEntity extends SmallFireballEntity implements CompoundSerializable {
     public static final EntityType<SoulboundFireballEntity> type = EntityType.Builder
-        .of((EntityType.IFactory<SoulboundFireballEntity>) SoulboundFireballEntity::new, EntityClassification.MISC)
-        .sized(1, 1)
+        .create((EntityType.EntityFactory<SoulboundFireballEntity>) SoulboundFireballEntity::new, SpawnGroup.MISC)
+        .setDimensions(1, 1)
         .build(SoulboundArmory.id("fireball").toString());
 
     protected StaffStorage storage;
@@ -42,8 +42,8 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
 
         this.updatePlayer();
         this.setPos(shooter.getX(), shooter.getEyeY(), shooter.getZ());
-        this.setRot(shooter.xRot, shooter.yRot);
-        this.setDeltaMovement(shooter.getLookAngle().multiply(1.5, 1.5, 1.5));
+        this.setRotation(shooter.pitch, shooter.yaw);
+        this.setVelocity(shooter.getRotationVector().multiply(1.5, 1.5, 1.5));
     }
 
     public SoulboundFireballEntity(World world) {
@@ -61,36 +61,35 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
     }
 
     @Override
-    protected void onHit(RayTraceResult result) {
-        if (!this.level.isClientSide && result.getType() == RayTraceResult.Type.ENTITY && this.getOwner() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) this.getOwner();
-            Entity entity = ((EntityRayTraceResult) result).getEntity();
+    protected void onCollision(HitResult result) {
+        if (!this.world.isClient && result.getType() == HitResult.Type.ENTITY && this.getOwner() instanceof PlayerEntity player) {
+            Entity entity = ((EntityHitResult) result).getEntity();
             boolean fiery = this.isOnFire();
 
             if (entity != null) {
                 EntityData data = Capabilities.entityData.get(entity);
-                SkillContainer endermanacle = storage.skill(Skills.endermanacle);
-                boolean invulnerable = entity.fireImmune() || entity instanceof EndermanEntity;
+                SkillContainer endermanacle = this.storage.skill(Skills.endermanacle);
+                boolean invulnerable = entity.isFireImmune() || entity instanceof EndermanEntity;
                 boolean canAttack = invulnerable && this.storage.hasSkill(Skills.vulnerability);
                 boolean canBurn = (canAttack || !invulnerable) && fiery;
-                DamageSource source = canAttack ? DamageSource.playerAttack(player) : DamageSource.fireball(this, player);
+                DamageSource source = canAttack ? DamageSource.player(player) : DamageSource.fireball(this, player);
 
                 if (endermanacle.learned()) {
                     data.blockTeleport(20 * (1 + endermanacle.level()));
                 }
 
                 if (canBurn) {
-                    entity.setRemainingFireTicks(20);
+                    entity.setFireTicks(20);
                 }
 
-                if (entity.hurt(source, (float) storage.attributeTotal(attackDamage))) {
-                    EnchantmentHelper.doPostDamageEffects(player, entity);
+                if (entity.damage(source, (float) this.storage.attributeTotal(attackDamage))) {
+                    EnchantmentHelper.onTargetDamaged(player, entity);
 
                     if (canBurn) {
-                        entity.setRemainingFireTicks(100);
+                        entity.setFireTicks(100);
                     }
 
-                     SkillContainer penetration = storage.skill(Skills.penetration);
+                     SkillContainer penetration = this.storage.skill(Skills.penetration);
 
                     if (penetration.learned() && this.hitCount < penetration.level() + 1) {
                         this.hitCount++;
@@ -107,24 +106,24 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
     @Override
     @OnlyIn(Dist.CLIENT)
     public ItemStack getItem() {
-        return (this.shouldBurn() ? Items.FIRE_CHARGE : Items.ENDER_PEARL).getDefaultInstance();
+        return (this.isBurning() ? Items.FIRE_CHARGE : Items.ENDER_PEARL).getDefaultStack();
     }
 
     @Override
-    protected boolean shouldBurn() {
+    protected boolean isBurning() {
         return this.spell == 1;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         super.deserializeNBT(tag);
 
         this.spell = tag.getInt("spell");
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tag = super.serializeNBT();
+    public NbtCompound serializeNBT() {
+        NbtCompound tag = super.serializeNBT();
         tag.putInt("spell", this.spell);
 
         return tag;

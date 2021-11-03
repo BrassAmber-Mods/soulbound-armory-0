@@ -2,28 +2,24 @@ package user11681.soulboundarmory.capability.soulbound.item;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import user11681.soulboundarmory.capability.Capabilities;
 import user11681.soulboundarmory.capability.CapabilityContainer;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
@@ -33,9 +29,13 @@ import user11681.soulboundarmory.capability.statistics.SkillStorage;
 import user11681.soulboundarmory.capability.statistics.Statistic;
 import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.capability.statistics.Statistics;
-import user11681.soulboundarmory.client.gui.screen.tab.ScreenTab;
-import user11681.soulboundarmory.client.gui.screen.tab.SoulboundTab;
-import user11681.soulboundarmory.client.gui.screen.tab.StatisticEntry;
+import user11681.soulboundarmory.client.gui.screen.AttributeTab;
+import user11681.soulboundarmory.client.gui.screen.EnchantmentTab;
+import user11681.soulboundarmory.client.gui.screen.SelectionTab;
+import user11681.soulboundarmory.client.gui.screen.SkillTab;
+import user11681.soulboundarmory.client.gui.screen.SoulboundScreen;
+import user11681.soulboundarmory.client.gui.screen.SoulboundTab;
+import user11681.soulboundarmory.client.gui.screen.StatisticEntry;
 import user11681.soulboundarmory.config.Configuration;
 import user11681.soulboundarmory.item.SoulboundItem;
 import user11681.soulboundarmory.network.ExtendedPacketBuffer;
@@ -53,7 +53,7 @@ import static user11681.soulboundarmory.capability.statistics.Category.skill;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.attackDamage;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.attackSpeed;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.attributePoints;
-import static user11681.soulboundarmory.capability.statistics.StatisticType.criticalStrikeProbability;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.criticalStrikeRate;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.enchantmentPoints;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.experience;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.level;
@@ -67,10 +67,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public EnchantmentStorage enchantments;
 
-    protected final SoulboundCapability component;
+    protected final SoulboundCapability capability;
     protected final PlayerEntity player;
     protected final Item item;
-    protected final boolean isClientSide;
+    protected final boolean isClient;
 
     protected SkillStorage skills;
     protected Statistics statistics;
@@ -79,13 +79,31 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     protected int boundSlot;
     protected int currentTab;
 
-    public ItemStorage(SoulboundCapability component, Item item) {
-        this.component = component;
-        this.player = component.entity;
-        this.isClientSide = component.entity.level.isClientSide;
+    public ItemStorage(SoulboundCapability capability, Item item) {
+        this.capability = capability;
+        this.player = capability.entity;
+        this.isClient = capability.entity.world.isClient;
         this.item = item;
         this.itemStack = this.newItemStack();
     }
+
+    public abstract Text getName();
+
+    public abstract List<StatisticEntry> screenAttributes();
+
+    public abstract List<Text> tooltip();
+
+    public abstract Item getConsumableItem();
+
+    public abstract double increase(StatisticType statistic, int points);
+
+    public abstract int getLevelXP(int level);
+
+    public abstract StorageType<T> type();
+
+    public abstract Class<? extends SoulboundItem> itemClass();
+
+    public abstract Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot);
 
     public static ItemStorage<?> get(Entity entity, Item item) {
         return Capabilities.get(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.player == entity && storage.getItem() == item).findAny().orElse(null);
@@ -107,8 +125,8 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return this.player;
     }
 
-    public SoulboundCapability getComponent() {
-        return this.component;
+    public SoulboundCapability getCapability() {
+        return this.capability;
     }
 
     public Item getItem() {
@@ -116,8 +134,8 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public ItemStack getMenuEquippedStack() {
-        for (ItemStack itemStack : this.player.getHandSlots()) {
-             Item item = itemStack.getItem();
+        for (ItemStack itemStack : this.player.getItemsHand()) {
+            Item item = itemStack.getItem();
 
             if (item == this.getItem() || item == this.getConsumableItem()) {
                 return itemStack;
@@ -148,7 +166,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public int datum(StatisticType statistic) {
-        return this.statistics.get(statistic).intValue();
+        return this.statistic(statistic).intValue();
     }
 
     public double attributeTotal(StatisticType statistic) {
@@ -156,10 +174,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             double attackDamage = this.attribute(StatisticType.attackDamage);
 
             for (Entry<Enchantment, Integer> entry : this.enchantments.entrySet()) {
-                 Enchantment enchantment = entry.getKey();
+                Enchantment enchantment = entry.getKey();
 
                 if (entry.getValue() > 0) {
-                    attackDamage += enchantment.getDamageBonus(this.enchantment(enchantment), CreatureAttribute.UNDEFINED);
+                    attackDamage += enchantment.getAttackDamage(this.enchantment(enchantment), EntityGroup.DEFAULT);
                 }
             }
 
@@ -193,12 +211,12 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         boolean leveledUp = false;
 
         if (type == experience) {
-             Statistic statistic = this.statistic(experience);
+            Statistic statistic = this.statistic(experience);
             statistic.add(amount);
-             int xp = statistic.intValue();
+            int xp = statistic.intValue();
 
             if (xp >= this.nextLevelXP() && this.canLevelUp()) {
-                 int nextLevelXP = this.nextLevelXP();
+                int nextLevelXP = this.nextLevelXP();
 
                 this.incrementStatistic(level, 1);
                 this.incrementStatistic(experience, -nextLevelXP);
@@ -207,13 +225,13 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             }
 
             if (xp < 0) {
-                 int currentLevelXP = this.getLevelXP(this.datum(level) - 1);
+                int currentLevelXP = this.getLevelXP(this.datum(level) - 1);
 
                 this.incrementStatistic(level, -1);
                 this.incrementStatistic(experience, currentLevelXP);
             }
         } else if (type == level) {
-             int sign = (int) Math.signum(amount);
+            int sign = (int) Math.signum(amount);
 
             for (int i = 0; i < Math.abs(amount); i++) {
                 this.onLevelup(sign);
@@ -229,15 +247,15 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void incrementPoints(StatisticType type, int points) {
-         int sign = (int) Math.signum(points);
-         Statistic statistic = this.statistic(type);
+        int sign = (int) Math.signum(points);
+        Statistic statistic = this.statistic(type);
 
         for (int i = 0; i < Math.abs(points); i++) {
             if (sign > 0 && this.datum(attributePoints) > 0 || sign < 0 && statistic.isAboveMin()) {
                 this.statistic(attributePoints).add(-sign);
                 this.statistic(spentAttributePoints).add(sign);
 
-                 double change = sign * this.getIncrease(type);
+                double change = sign * this.increase(type);
 
                 statistic.add(change);
                 statistic.incrementPoints();
@@ -248,10 +266,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.sync();
     }
 
-    public double getIncrease(StatisticType statisticType) {
-         Statistic statistic = this.statistic(statisticType);
+    public double increase(StatisticType statisticType) {
+        Statistic statistic = this.statistic(statisticType);
 
-        return statistic == null ? 0 : this.getIncrease(statisticType, statistic.getPoints());
+        return statistic == null ? 0 : this.increase(statisticType, statistic.getPoints());
     }
 
     public void set(StatisticType statistic, Number value) {
@@ -261,16 +279,16 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public boolean canLevelUp() {
-         Configuration configuration = Configuration.instance();
+        Configuration configuration = Configuration.instance();
 
         return this.datum(level) < configuration.maxLevel || configuration.maxLevel < 0;
     }
 
     public void onLevelup(int sign) {
-         Statistic statistic = this.statistic(level);
+        Statistic statistic = this.statistic(level);
         statistic.add(sign);
-         int level = statistic.intValue();
-         Configuration configuration = Configuration.instance();
+        int level = statistic.intValue();
+        Configuration configuration = Configuration.instance();
 
         if (level % configuration.levelsPerEnchantment == 0) {
             this.incrementStatistic(enchantmentPoints, sign);
@@ -283,15 +301,11 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.incrementStatistic(attributePoints, sign);
     }
 
-    public List<SkillContainer> skills() {
-        List<SkillContainer> skills = new ObjectArrayList<>(this.skills.values());
-
-        skills.sort(Comparator.comparingInt(SkillContainer::tier));
-
-        return skills;
+    public Collection<SkillContainer> skills() {
+        return this.skills.values();
     }
 
-    public SkillContainer skill(ResourceLocation identifier) {
+    public SkillContainer skill(Identifier identifier) {
         return this.skill(Skill.registry.getValue(identifier));
     }
 
@@ -299,7 +313,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return this.skills.get(skill);
     }
 
-    public boolean hasSkill(ResourceLocation identifier) {
+    public boolean hasSkill(Identifier identifier) {
         return this.hasSkill(Skill.registry.getValue(identifier));
     }
 
@@ -312,9 +326,9 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void upgrade(SkillContainer skill) {
-//        if (this.isClientSide) {
-//            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_SKILL, new ExtendedPacketBuffer(this, item).writeString(skill.toString()));
-//        } else {
+        //        if (this.isClient) {
+        //            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_SKILL, new ExtendedPacketBuffer(this, item).writeString(skill.toString()));
+        //        } else {
         int points = this.datum(skillPoints);
         int cost = skill.cost();
 
@@ -327,7 +341,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
             this.incrementStatistic(skillPoints, -cost);
         }
-//        }
+        //        }
     }
 
     public int nextLevelXP() {
@@ -411,22 +425,22 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.boundSlot = -1;
     }
 
-    public int currentTab() {
+    public int tab() {
         return this.currentTab;
     }
 
-    public void currentTab(int tab) {
+    public void tab(int tab) {
         this.currentTab = tab;
 
-        if (this.isClientSide) {
+        if (this.isClient) {
             this.sync();
         }
     }
 
     @SuppressWarnings("VariableUseSideOnly")
     public void refresh() {
-        if (this.isClientSide) {
-            if (client.screen instanceof SoulboundTab) {
+        if (this.isClient) {
+            if (client.currentScreen instanceof SoulboundTab) {
                 List<Item> handItems = ItemUtil.handItems(this.player);
 
                 if (handItems.contains(this.getItem())) {
@@ -441,20 +455,18 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void openGUI() {
-        this.openGUI(ItemUtil.equippedStack(this.player.inventory, this.getBaseItemClass()) == null ? 0 : this.currentTab);
+        this.openGUI(ItemUtil.equippedStack(this.player.inventory, this.itemClass()) == null ? 0 : this.currentTab);
     }
 
     @SuppressWarnings({"LocalVariableDeclarationSideOnly", "VariableUseSideOnly", "MethodCallSideOnly"})
     public void openGUI(int tab) {
-        if (this.isClientSide) {
-            Screen currentScreen = client.screen;
+        if (this.isClient) {
+            Screen currentScreen = client.currentScreen;
 
-            if (currentScreen instanceof SoulboundTab && this.currentTab == tab) {
-                ((SoulboundTab) currentScreen).refresh();
+            if (currentScreen instanceof SoulboundScreen screen && this.currentTab == tab) {
+                screen.refresh();
             } else {
-                List<ScreenTab> tabs = this.tabs();
-
-                client.setScreen(tabs.get(MathHelper.clamp(tab, 0, tabs.size() - 1)));
+                client.openScreen(new SoulboundScreen(this.capability, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
             }
         } else {
             Packets.clientOpenGUI.send(this.player, new ExtendedPacketBuffer(this).writeInt(tab));
@@ -470,32 +482,32 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void removeOtherItems() {
-        for (ItemStorage<?> storage : this.component.storages().values()) {
+        for (ItemStorage<?> storage : this.capability.storages().values()) {
             if (storage != this) {
                 PlayerEntity player = this.player;
 
                 for (ItemStack itemStack : ItemUtil.inventory(player)) {
                     if (itemStack.getItem() == storage.getItem()) {
-                        player.inventory.removeItem(itemStack);
+                        player.inventory.removeOne(itemStack);
                     }
                 }
             }
         }
     }
 
-    public ItemStack getItemStack() {
+    public ItemStack itemStack() {
         return this.itemStack;
     }
 
     protected void updateItemStack() {
         ItemStack itemStack = this.itemStack = this.newItemStack();
 
-        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            Multimap<Attribute, AttributeModifier> attributeModifiers = this.getAttributeModifiers(slot);
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers = this.attributeModifiers(slot);
 
-            for (Attribute attribute : attributeModifiers.keySet()) {
-                for (AttributeModifier modifier : attributeModifiers.get(attribute)) {
-                    itemStack.addAttributeModifier(attribute, modifier, EquipmentSlotType.MAINHAND);
+            for (EntityAttribute attribute : attributeModifiers.keySet()) {
+                for (EntityAttributeModifier modifier : attributeModifiers.get(attribute)) {
+                    itemStack.addAttributeModifier(attribute, modifier, EquipmentSlot.MAINHAND);
                 }
             }
         }
@@ -504,87 +516,64 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             int level = entry.getValue();
 
             if (level > 0) {
-                itemStack.enchant(entry.getKey(), level);
+                itemStack.addEnchantment(entry.getKey(), level);
             }
         }
     }
 
     protected ItemStack newItemStack() {
         ItemStack itemStack = new ItemStack(this.item);
-//        Capabilities.itemData.get(itemStack).storage = this;
+        //        Capabilities.itemData.get(itemStack).storage = this;
 
         return itemStack;
     }
 
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
-        return this.getAttributeModifiers(LinkedHashMultimap.create(), slot);
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
+        return this.attributeModifiers(LinkedHashMultimap.create(), slot);
     }
 
     protected String formatStatistic(StatisticType statistic) {
         double value = this.attributeTotal(statistic);
 
-        return statisticFormat.format(statistic == criticalStrikeProbability ? value * 100 : value);
+        return statisticFormat.format(statistic == criticalStrikeRate ? value * 100 : value);
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
-        tag.put("statistics", this.statistics.serializeNBT());
-        tag.put("enchantments", this.enchantments.serializeNBT());
-        tag.put("skills", this.skills.serializeNBT());
-        tag.putBoolean("unlocked", this.unlocked);
-        tag.putInt("slot", this.boundSlot());
-        tag.putInt("tab", this.currentTab());
-    }
-
-    @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         this.statistics.deserializeNBT(tag.getCompound("statistics"));
         this.enchantments.deserializeNBT(tag.getCompound("enchantments"));
         this.skills.deserializeNBT(tag.getCompound("skills"));
         this.unlocked(tag.getBoolean("unlocked"));
         this.bindSlot(tag.getInt("slot"));
-        this.currentTab(tag.getInt("tab"));
+        this.tab(tag.getInt("tab"));
 
         this.updateItemStack();
     }
 
-    public CompoundNBT toClientTag() {
-         CompoundNBT tag = new CompoundNBT();
+    @Override
+    public void serializeNBT(NbtCompound tag) {
+        tag.put("statistics", this.statistics.serializeNBT());
+        tag.put("enchantments", this.enchantments.serializeNBT());
+        tag.put("skills", this.skills.serializeNBT());
+        tag.putBoolean("unlocked", this.unlocked);
+        tag.putInt("slot", this.boundSlot());
+        tag.putInt("tab", this.tab());
+    }
 
+    public NbtCompound clientTag() {
+        NbtCompound tag = new NbtCompound();
         tag.putInt("tab", this.currentTab);
 
         return tag;
     }
 
-    @SuppressWarnings("VariableUseSideOnly")
     public void sync() {
-        if (!this.isClientSide) {
-            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.tag()));
+        if (this.isClient) {
+            Packets.serverSync.send(new ExtendedPacketBuffer(this).writeNbt(this.clientTag()));
         } else {
-            Packets.serverSync.send(new ExtendedPacketBuffer(this).writeNbt(this.toClientTag()));
+            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.tag()));
         }
     }
 
     public void tick() {}
-
-    public abstract ITextComponent getName();
-
-    public abstract List<StatisticEntry> getScreenAttributes();
-
-    public abstract List<ITextComponent> getTooltip();
-
-    public abstract Item getConsumableItem();
-
-    public abstract double getIncrease(StatisticType statistic, int points);
-
-    public abstract int getLevelXP(int level);
-
-    @OnlyIn(Dist.CLIENT)
-    public abstract List<ScreenTab> tabs();
-
-    public abstract StorageType<T> type();
-
-    public abstract Class<? extends SoulboundItem> getBaseItemClass();
-
-    public abstract Multimap<Attribute, AttributeModifier> getAttributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot);
 }

@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.CommandSource;
 import user11681.reflect.Accessor;
 import user11681.soulboundarmory.SoulboundArmory;
 
@@ -134,6 +134,6 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ISuggestionProvider.suggest(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
+        return CommandSource.suggestMatching(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
     }
 }

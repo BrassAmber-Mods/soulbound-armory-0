@@ -1,36 +1,37 @@
 package user11681.soulboundarmory.client.texture;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
 import java.util.List;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.resources.IResourceManager;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.ResourceTexture;
+import net.minecraft.resource.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import user11681.soulboundarmory.client.gui.ExperienceBarOverlay;
+import user11681.cell.client.gui.CellElement;
+import user11681.soulboundarmory.SoulboundArmory;
+import user11681.soulboundarmory.client.gui.bar.Style;
+import user11681.soulboundarmory.util.MathUtil;
 import user11681.soulboundarmory.util.Resources;
 
 @OnlyIn(Dist.CLIENT)
-public class ExperienceBarTexture extends DynamicTexture {
-    public ExperienceBarTexture() {
-        super(256, 256, true);
+public class ExperienceBarTexture extends ResourceTexture {
+    public static final ExperienceBarTexture instance = new ExperienceBarTexture();
 
-        Minecraft.getInstance().getTextureManager().register("soulboundarmory/gui/experience_bar", this);
+    private ExperienceBarTexture() {
+        super(SoulboundArmory.id("gui/experience_bar"));
+
+        CellElement.textureManager.registerTexture(this.location, this);
     }
 
     @Override
-    public void load(IResourceManager manager) {
-        super.load(manager);
-
-        BufferedImage image = Resources.readTexture(AbstractGui.GUI_ICONS_LOCATION);
+    protected TextureData loadTextureData(ResourceManager resourceManager) {
+        BufferedImage image = Resources.readTexture(DrawableHelper.GUI_ICONS_TEXTURE);
         WritableRaster raster = image.getRaster();
-        List<ExperienceBarOverlay.Style> styles = ExperienceBarOverlay.Style.styles;
-        int amount = ExperienceBarOverlay.Style.count;
+        List<Style> styles = Style.styles;
+        int amount = Style.count;
         float scale = image.getWidth() / 256F;
         int scaledWidth = (int) (182 * scale);
         int scaledHeight = (int) (5 * scale);
@@ -56,7 +57,7 @@ public class ExperienceBarTexture extends DynamicTexture {
             }
         }
 
-        NativeImage nativeImage = this.getPixels();
+        NativeImage nativeImage = new NativeImage(256, 256, true);
 
         for (int bar = 0; bar < amount; bar++) {
             int y = styles.get(bar).v;
@@ -71,12 +72,14 @@ public class ExperienceBarTexture extends DynamicTexture {
                         int[] pixel = raster.getPixel(u, v, (int[]) null);
                         int color = (int) (multipliers[bar] * Math.round(Math.sqrt(0.299F * pixel[0] * pixel[0] + 0.587F * pixel[1] * pixel[1] + 0.114F * pixel[2] * pixel[2])));
 
-                        nativeImage.setPixelRGBA(u, v, new Color(color, color, color).getRGB());
+                        if (pixel[3] > 0) {
+                            nativeImage.setPixelColor(u, v, MathUtil.pack(color, color, color));
+                        }
                     }
                 }
             }
         }
 
-        var bp = true;
+        return new TextureData(null, nativeImage);
     }
 }

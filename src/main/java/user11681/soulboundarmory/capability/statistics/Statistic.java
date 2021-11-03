@@ -1,7 +1,7 @@
 package user11681.soulboundarmory.capability.statistics;
 
 import java.math.BigDecimal;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NbtCompound;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 
 public class Statistic extends Number implements CompoundSerializable {
@@ -165,7 +165,7 @@ public class Statistic extends Number implements CompoundSerializable {
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         tag.putDouble("min", this.min);
         tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
@@ -173,7 +173,7 @@ public class Statistic extends Number implements CompoundSerializable {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         this.min = tag.getDouble("min");
         this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));

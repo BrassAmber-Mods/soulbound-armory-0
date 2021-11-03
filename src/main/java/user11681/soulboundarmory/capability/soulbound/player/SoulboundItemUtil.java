@@ -12,7 +12,7 @@ public class SoulboundItemUtil {
             return null;
         }
 
-        for (ItemStack itemStack : entity.getHandSlots()) {
+        for (ItemStack itemStack : entity.getItemsHand()) {
             ItemStorage<?> component = ItemStorage.get(entity, itemStack.getItem());
 
             if (component != null) {
@@ -24,8 +24,8 @@ public class SoulboundItemUtil {
     }
 
     public static boolean isSoulWeaponEquipped(PlayerEntity player) {
-        return player.getMainHandItem().getItem() instanceof SoulboundWeaponItem
-            || player.getOffhandItem().getItem() instanceof SoulboundWeaponItem;
+        return player.getMainHandStack().getItem() instanceof SoulboundWeaponItem
+            || player.getOffHandStack().getItem() instanceof SoulboundWeaponItem;
     }
 
     public static boolean addItemStack(ItemStack itemStack, PlayerEntity player) {
@@ -49,7 +49,7 @@ public class SoulboundItemUtil {
             }
 
              int size = inventory.main.size();
-             List<ItemStack> mergedInventory = CollectionUtil.merge(NonNullList.of(), inventory.main, inventory.offHand);
+             List<ItemStack> mergedInventory = CollectionUtil.merge(DefaultedList.of(), inventory.main, inventory.offHand);
 
             if (slot != -1) {
                  ItemStack slotStack = slot != 40 ? mergedInventory.get(slot) : mergedInventory.get(size);
@@ -106,9 +106,9 @@ public class SoulboundItemUtil {
     }
 
     public static boolean hasSoulWeapon(PlayerEntity player) {
-        int size = player.inventory.getContainerSize();
-        ItemStack[] inventory = player.inventory.items.toArray(new ItemStack[size + 1]);
-        inventory[size] = player.getOffhandItem();
+        int size = player.inventory.size();
+        ItemStack[] inventory = player.inventory.main.toArray(new ItemStack[size + 1]);
+        inventory[size] = player.getOffHandStack();
 
         for (ItemStack itemStack : inventory) {
             if (itemStack != null && itemStack.getItem() instanceof SoulboundWeaponItem) {

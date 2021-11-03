@@ -1,7 +1,10 @@
 package user11681.soulboundarmory.util;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.LogicalSide;
@@ -10,6 +13,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.util.TriConsumer;
+import user11681.reflect.Classes;
 import user11681.soulboundarmory.SoulboundArmory;
 
 public class Util {
@@ -30,7 +34,6 @@ public class Util {
         return new HashSet<>(Arrays.asList(elements));
     }
 
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> Class<T> componentType(T... array) {
         return (Class<T>) array.getClass().getComponentType();
@@ -47,5 +50,19 @@ public class Util {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             action.accept(entry.getKey(), entry.getValue(), counter++);
         }
+    }
+
+    public static List<Type> arguments(Class<?> subtype, Class<?> supertype) {
+        for (Class<?> type : Classes.supertypes(subtype)) {
+            if (type == supertype) {
+                for (Type genericType : Classes.genericSupertypes(subtype)) {
+                    if (genericType.equals(supertype)) {
+                        return Arrays.asList(((ParameterizedType) genericType).getActualTypeArguments());
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

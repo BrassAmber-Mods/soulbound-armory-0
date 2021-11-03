@@ -9,11 +9,11 @@ import user11681.soulboundarmory.network.ItemComponentPacket;
 public class S2CItemType implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        this.player().inventory.removeItemNoUpdate(this.player().inventory.selected);
+        this.player().inventory.removeStack(this.player().inventory.selectedSlot);
         storage.removeOtherItems();
         storage.unlocked(true);
 
-        SoulboundItemUtil.addItemStack(storage.getItemStack(), this.player());
+        SoulboundItemUtil.addItemStack(storage.itemStack(), this.player());
         storage.sync();
         storage.refresh();
     }

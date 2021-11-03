@@ -11,7 +11,7 @@ import user11681.soulboundarmory.network.ItemComponentPacket;
 public class C2SEnchant implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(buffer.readResourceLocation());
+        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(buffer.readIdentifier());
         boolean add = buffer.readBoolean();
         int change = add ? 1 : -1;
 

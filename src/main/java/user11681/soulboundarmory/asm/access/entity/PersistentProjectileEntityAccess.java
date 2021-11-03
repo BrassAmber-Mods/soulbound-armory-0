@@ -1,5 +1,5 @@
 package user11681.soulboundarmory.asm.access.entity;
 
-public interface AbstractArrowEntityAccess {
+public interface PersistentProjectileEntityAccess {
     int getLife();
 }

@@ -1,10 +1,10 @@
 package user11681.soulboundarmory.skill.weapon.sword;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import user11681.soulboundarmory.skill.Skill;
 
 public class SummonLightningSkill extends Skill {
-    public SummonLightningSkill(ResourceLocation identifier) {
+    public SummonLightningSkill(Identifier identifier) {
         super(identifier);
     }
 

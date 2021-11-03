@@ -10,7 +10,7 @@ import user11681.soulboundarmory.network.ItemComponentPacket;
 public class S2CEnchant implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(buffer.readResourceLocation());
+        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(buffer.readIdentifier());
 
         storage.addEnchantment(enchantment, buffer.readInt());
         storage.refresh();

@@ -8,7 +8,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import user11681.reflect.Accessor;
-import user11681.soulboundarmory.client.gui.ExperienceBarOverlay.Style;
+import user11681.soulboundarmory.client.gui.bar.Style;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
@@ -165,27 +165,23 @@ public class Configuration {
             public int alpha = 255;
 
             public void set(int id, int value) {
-                // @formatter:off
                 switch (id) {
-                    case 0: this.red = value; break;
-                    case 1: this.green = value; break;
-                    case 2: this.blue = value; break;
-                    case 3: this.alpha = value; break;
-                    default: throw new IllegalArgumentException(String.format("invalid color component ID: %s", id));
+                    case 0 -> this.red = value;
+                    case 1 -> this.green = value;
+                    case 2 -> this.blue = value;
+                    case 3 -> this.alpha = value;
+                    default -> throw new IllegalArgumentException(String.format("invalid color component ID: %s", id));
                 }
-                // @formatter:on
             }
 
             public int get(int id) {
-                // @formatter:off
-                switch (id) {
-                    case 0: return this.red;
-                    case 1: return this.green;
-                    case 2: return this.blue;
-                    case 3: return this.alpha;
-                    default: throw new IllegalArgumentException(String.format("invalid color component ID: %s", id));
-                }
-                // @formatter:on
+                return switch (id) {
+                    case 0 -> this.red;
+                    case 1 -> this.green;
+                    case 2 -> this.blue;
+                    case 3 -> this.alpha;
+                    default -> throw new IllegalArgumentException(String.format("invalid color component ID: %s", id));
+                };
             }
         }
     }
