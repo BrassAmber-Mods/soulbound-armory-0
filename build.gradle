@@ -1,11 +1,4 @@
 buildscript {
-    repositories {
-        mavenCentral()
-
-        maven {url = "https://maven.minecraftforge.net"}
-        maven {url = "https://repo.spongepowered.org/repository/maven-public"}
-    }
-
     dependencies {
         classpath(group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.+", changing: true)
         classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
@@ -27,6 +20,17 @@ version = "3.0.0"
 sourceCompatibility = 16
 targetCompatibility = 16
 
+sourceSets {
+    main {
+        java.srcDir("src")
+
+        resources {
+            srcDir("resources")
+            include("assets/", "META-INF/", "pack.mcmeta", "*.json")
+        }
+    }
+}
+
 repositories {
     maven {url = "https://maven.auoeke.net"}
 }
@@ -46,7 +50,7 @@ minecraft {
         ["client", "server"].each {
             register(it) {
                 properties("mixin.env.remapRefMap": "true")
-                property("mixin.env.refMapRemappingFile", "${project.projectDir}/build/createSrgToMcp/output.srg")
+                property("mixin.env.refMapRemappingFile", "${project.buildDir}/createSrgToMcp/output.srg")
                 workingDirectory(project.file("run"))
                 arg("-mixin.config=${project.name}.mixins.json" as String)
 
@@ -97,6 +101,11 @@ publishing {
     repositories {
         maven {
             url = "https://maven.auoeke.net"
+
+            credentials {
+                username = System.properties["maven.username"]
+                password = System.properties["maven.password"]
+            }
         }
     }
 }
