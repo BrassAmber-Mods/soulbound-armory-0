@@ -1,7 +1,0 @@
-accessWidener   v1  named
-accessible  field   net/minecraft/client/gui/DrawableHelper                 zOffset         I
-accessible  field   net/minecraft/client/gui/widget/AbstractButtonWidget    hovered         Z
-accessible  field   net/minecraft/client/gui/widget/ButtonWidget            onPress         Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;
-accessible  field   net/minecraft/client/gui/widget/ButtonWidget            tooltipSupplier Lnet/minecraft/client/gui/widget/ButtonWidget$TooltipSupplier;
-mutable     field   net/minecraft/client/gui/widget/ButtonWidget            onPress         Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;
-mutable     field   net/minecraft/client/gui/widget/ButtonWidget            tooltipSupplier Lnet/minecraft/client/gui/widget/ButtonWidget$TooltipSupplier;

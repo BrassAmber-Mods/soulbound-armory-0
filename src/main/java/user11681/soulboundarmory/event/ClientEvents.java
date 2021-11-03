@@ -7,8 +7,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.SinglePreparationResourceReloader;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
@@ -18,11 +21,12 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import user11681.cell.client.gui.CellElement;
 import user11681.soulboundarmory.SoulboundArmory;
 import user11681.soulboundarmory.capability.Capabilities;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.item.weapon.StaffStorage;
-import user11681.soulboundarmory.client.gui.ExperienceBarOverlay;
+import user11681.soulboundarmory.client.gui.bar.ExperienceBarOverlay;
 import user11681.soulboundarmory.config.Configuration;
 import user11681.soulboundarmory.item.SoulboundItem;
 import user11681.soulboundarmory.text.Translation;
@@ -40,7 +44,7 @@ public class ClientEvents {
         if (Screen.hasAltDown()) {
             PlayerEntity player = client.player;
 
-            if (player != null && player.level != null) {
+            if (player != null && player.world != null) {
                 ItemStorage<?> storage = Capabilities.weapon.get(player).heldItemStorage();
 
                 if (storage instanceof StaffStorage) {
@@ -50,7 +54,7 @@ public class ClientEvents {
                         StaffStorage staffStorage = (StaffStorage) storage;
 
                         staffStorage.cycleSpells(-dY);
-                        client.gui.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
+                        client.inGameHud.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
 
                         event.setCanceled(true);
                     }
@@ -61,7 +65,7 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
-        if (Configuration.instance().client.overlayExperienceBar && overlayBar.render()) {
+        if (event.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE && Configuration.instance().client.overlayExperienceBar && overlayBar.render(event.getMatrixStack(), event.getWindow())) {
             event.setCanceled(true);
         }
     }
@@ -76,11 +80,11 @@ public class ClientEvents {
             ItemStorage<?> storage = ItemStorage.get(player, item);
 
             if (storage != null) {
-                List<ITextComponent> tooltip = event.getToolTip();
+                List<Text> tooltip = event.getToolTip();
                 int startIndex = 1;
 
                 for (int index = 0, size = tooltip.size(); index < size; index++) {
-                    ITextComponent entry = tooltip.get(index);
+                    Text entry = tooltip.get(index);
 
                     if (entry instanceof Translation && ((Translation) entry).getKey().equals("item.modifiers.mainhand")) {
                         startIndex += index;
@@ -90,18 +94,18 @@ public class ClientEvents {
                 int toIndex = tooltip.size();
 //                int fromIndex = Math.min(toIndex - 1, startIndex + ((SoulboundItem) item).getMainhandAttributeEntries(itemStack, player));
 
-                List<ITextComponent> prior = new ArrayList<>(tooltip).subList(0, startIndex);
-                List<ITextComponent> insertion = storage.getTooltip();
-//                List<ITextComponent> posterior = new ArrayList<>(tooltip).subList(fromIndex, toIndex);
+                List<Text> prior = new ArrayList<>(tooltip).subList(0, startIndex);
+                List<Text> insertion = storage.tooltip();
+//                List<Text> posterior = new ArrayList<>(tooltip).subList(fromIndex, toIndex);
 
                 tooltip.clear();
                 tooltip.addAll(prior);
                 tooltip.addAll(insertion);
 //                tooltip.addAll(posterior);
 
-                int row = insertion.lastIndexOf(StringTextComponent.EMPTY) + prior.size();
+                int row = insertion.lastIndexOf(LiteralText.EMPTY) + prior.size();
 
-                tooltipBar.setData(row, client.font.width(tooltip.get(row - 2)) - 4);
+                tooltipBar.data(row, CellElement.textRenderer.getWidth(tooltip.get(row - 2)) - 4);
             }
         }
     }
@@ -109,15 +113,29 @@ public class ClientEvents {
     @SubscribeEvent
     public static void onRenderTooltip(RenderTooltipEvent.PostBackground event) {
         if (event.getStack().getItem() instanceof SoulboundItem) {
-            tooltipBar.drawTooltip(event.getX(), event.getY(), event.getStack());
+            tooltipBar.drawTooltip(event.getMatrixStack(), event.getX(), event.getY(), event.getStack());
         }
     }
 
     @SubscribeEvent
     public static void onLoadResources(AddReloadListenerEvent event) {
-        RenderSystem.recordRenderCall(() -> {
-            overlayBar = new ExperienceBarOverlay();
-            tooltipBar = new ExperienceBarOverlay();
-        });
+        event.addListener(new ExperienceBarReloader());
+    }
+
+    private static class ExperienceBarReloader extends SinglePreparationResourceReloader<Void> {
+        @Override
+        protected Void prepare(ResourceManager manager, Profiler profiler) {
+            return null;
+        }
+
+        @Override
+        protected void apply(Void nothing, ResourceManager manager, Profiler profiler) {
+            RenderSystem.recordRenderCall(() -> {
+                overlayBar = new ExperienceBarOverlay();
+                tooltipBar = new ExperienceBarOverlay();
+
+                overlayBar.width(182).height(5).center(true);
+            });
+        }
     }
 }

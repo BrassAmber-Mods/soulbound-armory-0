@@ -10,13 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
@@ -24,7 +24,7 @@ import user11681.soulboundarmory.capability.statistics.EnchantmentStorage;
 import user11681.soulboundarmory.capability.statistics.SkillStorage;
 import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.capability.statistics.Statistics;
-import user11681.soulboundarmory.client.gui.screen.tab.StatisticEntry;
+import user11681.soulboundarmory.client.gui.screen.StatisticEntry;
 import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.entity.SAAttributes;
 import user11681.soulboundarmory.registry.Skills;
@@ -57,9 +57,9 @@ public class PickStorage extends ToolStorage<PickStorage> {
             .max(3, miningLevel)
             .build();
         this.enchantments = new EnchantmentStorage((Enchantment enchantment) -> {
-             String name = enchantment.getFullname(1).getString().toLowerCase();
+             String name = enchantment.getName(1).getString().toLowerCase();
 
-            return enchantment.canEnchant(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE, MENDING).contains(enchantment)
+            return enchantment.isAcceptableItem(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE, MENDING).contains(enchantment)
                 && !Stream.of("soulbound", "holding", "smelt").map(name::contains).reduce(false, (Boolean contains, Boolean value) -> value || contains);
         });
         this.skills = new SkillStorage(Skills.enderPull, Skills.ambidexterity);
@@ -71,7 +71,7 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public ITextComponent getName() {
+    public Text getName() {
         return Translations.soulboundPick;
     }
 
@@ -81,44 +81,44 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
-        Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
+        Multimap<EntityAttribute, EntityAttributeModifier> modifiers = HashMultimap.create();
 
-        if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(reach), AttributeModifier.Operation.ADDITION));
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(reach), EntityAttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;
     }
 
     @Override
-    public List<StatisticEntry> getScreenAttributes() {
+    public List<StatisticEntry> screenAttributes() {
         List<StatisticEntry> entries = new ReferenceArrayList<>();
 
         entries.add(new StatisticEntry(this.statistic(efficiency), new Translation("%s%s: %s", Translations.toolEfficiencyFormat, Translations.toolEfficiencyName, this.formatStatistic(efficiency))));
-        entries.add(new StatisticEntry(this.statistic(miningLevel), new Translation("%s%s: %s (%s)", Translations.miningLevelFormat, Translations.miningLevelName, this.formatStatistic(miningLevel), this.getMiningLevelName())));
+        entries.add(new StatisticEntry(this.statistic(miningLevel), new Translation("%s%s: %s (%s)", Translations.miningLevelFormat, Translations.miningLevelName, this.formatStatistic(miningLevel), this.miningLevelName())));
         entries.add(new StatisticEntry(this.statistic(reach), new Translation("%s%s: %s", Translations.reachFormat, Translations.attackRangeName, this.formatStatistic(reach))));
 
         return entries;
     }
 
     @Override
-    public List<ITextComponent> getTooltip() {
+    public List<Text> tooltip() {
         NumberFormat FORMAT = DecimalFormat.getInstance();
-        List<ITextComponent> tooltip = new ArrayList<>(5);
+        List<Text> tooltip = new ArrayList<>(5);
 
         tooltip.add(new Translation(" %s%s %s", Translations.reachFormat, FORMAT.format(this.attribute(reach)), Translations.attackRangeName));
         tooltip.add(new Translation(" %s%s %s", Translations.toolEfficiencyFormat, FORMAT.format(this.attribute(efficiency)), Translations.toolEfficiencyName));
         tooltip.add(new Translation(" %s%s %s", Translations.miningLevelFormat, FORMAT.format(this.attribute(miningLevel)), Translations.miningLevelName));
 
-        tooltip.add(StringTextComponent.EMPTY);
-        tooltip.add(StringTextComponent.EMPTY);
+        tooltip.add(LiteralText.EMPTY);
+        tooltip.add(LiteralText.EMPTY);
 
         return tooltip;
     }
 
     @Override
-    public double getIncrease(StatisticType statistic, int points) {
+    public double increase(StatisticType statistic, int points) {
         if (statistic == efficiency) {
             return 0.5;
         }

@@ -20,6 +20,6 @@ public class StatisticType extends RegistryEntry<StatisticType> {
     public static final StatisticType miningLevel = register("harvest_level");
     public static final StatisticType attackSpeed = register("attack_speed");
     public static final StatisticType attackDamage = register("attack_damage");
-    public static final StatisticType criticalStrikeProbability = register("critical_strike_rate");
+    public static final StatisticType criticalStrikeRate = register("critical_strike_rate");
     public static final StatisticType attackRange = register("attack_range");
 }

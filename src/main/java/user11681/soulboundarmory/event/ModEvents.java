@@ -3,7 +3,7 @@ package user11681.soulboundarmory.event;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -80,7 +80,7 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void registerAttributes(RegistryEvent.Register<Attribute> event) {
+    public static void registerAttributes(RegistryEvent.Register<EntityAttribute> event) {
         event.getRegistry().register(SAAttributes.efficiency.setRegistryName("efficiency"));
         event.getRegistry().register(SAAttributes.criticalStrikeRate.setRegistryName("critical_strike_rate"));
     }

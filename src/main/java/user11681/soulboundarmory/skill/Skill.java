@@ -1,44 +1,45 @@
 package user11681.soulboundarmory.skill;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.IForgeRegistry;
 import user11681.cell.client.gui.screen.CellScreen;
 import user11681.soulboundarmory.registry.RegistryEntry;
+import user11681.soulboundarmory.text.Translation;
 import user11681.soulboundarmory.util.Util;
 
 public abstract class Skill extends RegistryEntry<Skill> {
     public static final IForgeRegistry<Skill> registry = Util.registry("skill");
 
-    protected final ResourceLocation texture;
+    protected final Identifier texture;
 
     protected Set<Skill> dependencies;
     protected int maxLevel;
     protected int tier;
 
-    public Skill(ResourceLocation identifier) {
+    public Skill(Identifier identifier) {
         this(identifier, 0);
     }
 
-    public Skill(ResourceLocation identifier, int maxLevel) {
-        this(identifier, new ResourceLocation(identifier.getNamespace(), String.format("textures/skill/%s.png", identifier.getPath())), maxLevel);
+    public Skill(Identifier identifier, int maxLevel) {
+        this(identifier, new Identifier(identifier.getNamespace(), String.format("textures/skill/%s.png", identifier.getPath())), maxLevel);
     }
 
-    public Skill(ResourceLocation identifier, ResourceLocation texture) {
+    public Skill(Identifier identifier, Identifier texture) {
         this(identifier, texture, 0);
     }
 
-    public Skill(ResourceLocation identifier, ResourceLocation texture, int maxLevel) {
+    public Skill(Identifier identifier, Identifier texture, int maxLevel) {
         this.texture = texture;
         this.maxLevel = maxLevel;
         this.dependencies = new HashSet<>();
@@ -49,8 +50,8 @@ public abstract class Skill extends RegistryEntry<Skill> {
     public abstract int cost(boolean learned, int level);
 
     /**
-     Register dependencies for this skill.<br>
-     Must be called <b><i>after</i></b> all skills are initialized and <b><i>at the ends</i></b> of any overriding methods.
+     * Register dependencies for this skill.<br>
+     * Must be called <b><i>after</i></b> all skills are initialized and <b><i>at the ends</i></b> of any overriding methods.
      */
     public void initDependencies() {
         this.tier = this.hasDependencies() ? 1 : 0;
@@ -77,26 +78,25 @@ public abstract class Skill extends RegistryEntry<Skill> {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public ITextComponent name() {
-        String name = I18n.get(String.format("skill.%s.%s.name", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
+    public Text name() {
+        String name = I18n.translate(String.format("skill.%s.%s.name", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
 
-        return new StringTextComponent(name.substring(0, 1).toUpperCase() + name.substring(1));
+        return new LiteralText(name.substring(0, 1).toUpperCase() + name.substring(1));
     }
 
     @OnlyIn(Dist.CLIENT)
-    public List<String> tooltip() {
-
-        return Arrays.asList(I18n.get(String.format("skill.%s.%s.desc", this.getRegistryName().getNamespace(), this.getRegistryName().getPath())).split("\\\\n"));
+    public List<Text> tooltip() {
+        return Collections.singletonList(Translation.of("skill.%s.%s.desc", this.getRegistryName().getNamespace(), this.getRegistryName().getPath().split("\\\\n")));
     }
 
     @OnlyIn(Dist.CLIENT)
-    public ResourceLocation texture() {
+    public Identifier texture() {
         return this.texture;
     }
 
     @OnlyIn(Dist.CLIENT)
     public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
-        CellScreen.textureManager.bind(this.texture());
-        screen.withZ(zOffset, () -> AbstractGui.blit(matrices, x, y, 0, 0, 16, 16, 16, 16));
+        CellScreen.textureManager.bindTexture(this.texture());
+        screen.withZ(zOffset, () -> DrawableHelper.drawTexture(matrices, x, y, 0, 0, 16, 16, 16, 16));
     }
 }

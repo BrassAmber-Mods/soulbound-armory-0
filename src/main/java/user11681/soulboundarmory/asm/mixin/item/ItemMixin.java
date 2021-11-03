@@ -11,14 +11,14 @@ import user11681.soulboundarmory.util.AttributeModifierIdentifiers;
 abstract class ItemMixin {
     @Shadow
     @Final
-    protected static UUID BASE_ATTACK_SPEED_UUID;
+    protected static UUID ATTACK_SPEED_MODIFIER_ID;
 
     @Shadow
     @Final
-    protected static UUID BASE_ATTACK_DAMAGE_UUID;
+    protected static UUID ATTACK_DAMAGE_MODIFIER_ID;
 
     static {
-        AttributeModifierIdentifiers.attackDamageModifier = BASE_ATTACK_DAMAGE_UUID;
-        AttributeModifierIdentifiers.attackSpeedModifier = BASE_ATTACK_SPEED_UUID;
+        AttributeModifierIdentifiers.attackDamageModifier = ATTACK_DAMAGE_MODIFIER_ID;
+        AttributeModifierIdentifiers.attackSpeedModifier = ATTACK_SPEED_MODIFIER_ID;
     }
 }

@@ -8,16 +8,16 @@ import java.util.Arrays;
 import java.util.List;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import user11681.soulboundarmory.capability.Capabilities;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
 import user11681.soulboundarmory.capability.soulbound.player.SoulboundCapability;
@@ -25,7 +25,7 @@ import user11681.soulboundarmory.capability.statistics.EnchantmentStorage;
 import user11681.soulboundarmory.capability.statistics.SkillStorage;
 import user11681.soulboundarmory.capability.statistics.StatisticType;
 import user11681.soulboundarmory.capability.statistics.Statistics;
-import user11681.soulboundarmory.client.gui.screen.tab.StatisticEntry;
+import user11681.soulboundarmory.client.gui.screen.StatisticEntry;
 import user11681.soulboundarmory.client.i18n.Translations;
 import user11681.soulboundarmory.entity.SAAttributes;
 import user11681.soulboundarmory.registry.Skills;
@@ -41,7 +41,7 @@ import static user11681.soulboundarmory.capability.statistics.Category.datum;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.attackDamage;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.attackSpeed;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.attributePoints;
-import static user11681.soulboundarmory.capability.statistics.StatisticType.criticalStrikeProbability;
+import static user11681.soulboundarmory.capability.statistics.StatisticType.criticalStrikeRate;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.efficiency;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.enchantmentPoints;
 import static user11681.soulboundarmory.capability.statistics.StatisticType.experience;
@@ -59,14 +59,14 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
 
         this.statistics = Statistics.create()
             .category(datum, experience, level, skillPoints, attributePoints, enchantmentPoints, spentAttributePoints, spentEnchantmentPoints)
-            .category(attribute, attackSpeed, attackDamage, criticalStrikeProbability, efficiency, reach)
+            .category(attribute, attackSpeed, attackDamage, criticalStrikeRate, efficiency, reach)
             .min(1.6, attackSpeed).min(4, attackDamage).min(3, reach)
-            .max(1, criticalStrikeProbability)
+            .max(1, criticalStrikeRate)
             .build();
         this.enchantments = new EnchantmentStorage((Enchantment enchantment) -> {
-             String name = enchantment.getFullname(1).getContents().toLowerCase();
+            String name = enchantment.getName(1).asString().toLowerCase();
 
-            return enchantment.canEnchant(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
+            return enchantment.isAcceptableItem(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
                 && (enchantment == impact || !name.contains("soulbound")) && !name.contains("holding")
                 && !name.contains("mending");
         });
@@ -78,7 +78,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public ITextComponent getName() {
+    public Text getName() {
         return Translations.soulboundSword;
     }
 
@@ -98,52 +98,42 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
-        if (slot == EquipmentSlotType.MAINHAND) {
-             AttributeModifier.Operation addition = AttributeModifier.Operation.ADDITION;
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            EntityAttributeModifier.Operation addition = EntityAttributeModifier.Operation.ADDITION;
 
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.attackDamageModifier,
-                "Weapon modifier", this.attributeRelative(attackDamage), addition
-            ));
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.attackSpeedModifier,
-                "Weapon modifier", this.attributeRelative(attackSpeed), addition
-            ));
-            modifiers.put(SAAttributes.efficiency, new AttributeModifier(SAAttributes.efficiencyUUID,
-                "Weapon modifier", this.attribute(efficiency), AttributeModifier.Operation.MULTIPLY_TOTAL
-            ));
-            modifiers.put(SAAttributes.criticalStrikeRate, new AttributeModifier(SAAttributes.criticalStrikeRateUUID,
-                "Weapon modifier", this.attribute(criticalStrikeProbability), AttributeModifierOperations.percentageAddition
-            ));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.attackDamageModifier, "Weapon modifier", this.attributeRelative(attackDamage), addition));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.attackSpeedModifier, "Weapon modifier", this.attributeRelative(attackSpeed), addition));
+            modifiers.put(SAAttributes.efficiency, new EntityAttributeModifier(SAAttributes.efficiencyUUID, "Weapon modifier", this.attribute(efficiency), EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+            modifiers.put(SAAttributes.criticalStrikeRate, new EntityAttributeModifier(SAAttributes.criticalStrikeRateUUID, "Weapon modifier", this.attribute(criticalStrikeRate), AttributeModifierOperations.percentageAddition));
         }
 
         return modifiers;
     }
 
     @Override
-    public List<StatisticEntry> getScreenAttributes() {
-        List<StatisticEntry> entries = new ReferenceArrayList<>();
-
-        entries.add(new StatisticEntry(this.statistic(attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed)).withStyle(TextFormatting.GOLD)));
-        entries.add(new StatisticEntry(this.statistic(attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))));
-        entries.add(new StatisticEntry(this.statistic(criticalStrikeProbability), new Translation("%s%s: %s%%", Translations.criticalStrikeProbabilityFormat, Translations.criticalStrikeProbabilityName, this.formatStatistic(criticalStrikeProbability))));
-        entries.add(new StatisticEntry(this.statistic(efficiency), new Translation("%s%s: %s", Translations.weaponEfficiencyFormat, Translations.weaponEfficiencyName, this.formatStatistic(efficiency))));
-
-        return entries;
+    public List<StatisticEntry> screenAttributes() {
+        return Arrays.asList(
+            new StatisticEntry(this.statistic(attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(attackSpeed)).formatted(Formatting.GOLD)),
+            new StatisticEntry(this.statistic(attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(attackDamage))),
+            new StatisticEntry(this.statistic(criticalStrikeRate), new Translation("%s%s: %s%%", Translations.criticalStrikeRateFormat, Translations.criticalStrikeRateName, this.formatStatistic(criticalStrikeRate))),
+            new StatisticEntry(this.statistic(efficiency), new Translation("%s%s: %s", Translations.weaponEfficiencyFormat, Translations.weaponEfficiencyName, this.formatStatistic(efficiency)))
+        );
     }
 
     @Override
-    public List<ITextComponent> getTooltip() {
-         NumberFormat format = DecimalFormat.getInstance();
-         List<ITextComponent> tooltip = new ReferenceArrayList<>();
+    public List<Text> tooltip() {
+        NumberFormat format = DecimalFormat.getInstance();
+        List<Text> tooltip = new ReferenceArrayList<>();
 
-        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(attackSpeed)), Translations.attackSpeedName)));
-        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(attackDamage)), Translations.attackDamageName)));
+        tooltip.add(new LiteralText(String.format(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(attackSpeed)), Translations.attackSpeedName)));
+        tooltip.add(new LiteralText(String.format(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(attackDamage)), Translations.attackDamageName)));
 
-        tooltip.add(new StringTextComponent(""));
-        tooltip.add(new StringTextComponent(""));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new LiteralText(""));
 
-        tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeProbabilityFormat, format.format(this.attribute(criticalStrikeProbability) * 100), Translations.criticalStrikeProbabilityName)));
-        tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(efficiency)), Translations.toolEfficiencyName)));
+        tooltip.add(new LiteralText(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
+        tooltip.add(new LiteralText(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(efficiency)), Translations.toolEfficiencyName)));
 
         return tooltip;
     }
@@ -154,7 +144,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public double getIncrease(StatisticType statistic, int points) {
+    public double increase(StatisticType statistic, int points) {
         if (statistic == attackSpeed) {
             return 0.03;
         }
@@ -163,7 +153,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
             return 0.07;
         }
 
-        if (statistic == criticalStrikeProbability) {
+        if (statistic == criticalStrikeRate) {
             return 0.015;
         }
 
@@ -176,7 +166,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
 
     @Override
     public void tick() {
-        if (!this.isClientSide) {
+        if (!this.isClient) {
             if (this.lightningCooldown > 0) {
                 this.lightningCooldown--;
             }
@@ -184,14 +174,14 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         super.serializeNBT(tag);
 
         tag.putInt("lightningCooldown", this.getLightningCooldown());
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         super.deserializeNBT(tag);
 
         this.lightningCooldown = tag.getInt("lightningCooldown");

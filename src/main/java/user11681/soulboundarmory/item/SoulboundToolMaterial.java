@@ -1,10 +1,10 @@
 package user11681.soulboundarmory.item;
 
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.ToolMaterial;
+import net.minecraft.recipe.Ingredient;
 import net.minecraftforge.common.util.Lazy;
 
-public enum ModToolMaterials implements IItemTier {
+public enum SoulboundToolMaterial implements ToolMaterial {
     SOULBOUND(0, 0, 0.5F, 0, 0, null);
 
     private final int miningLevel;
@@ -14,7 +14,7 @@ public enum ModToolMaterials implements IItemTier {
     private final int enchantability;
     private final Lazy<Ingredient> repairIngredient;
 
-    ModToolMaterials(int miningLevel, int uses, float miningSpeed, float attackDamage, int enchantability, Lazy<Ingredient> repairIngredient) {
+    SoulboundToolMaterial(int miningLevel, int uses, float miningSpeed, float attackDamage, int enchantability, Lazy<Ingredient> repairIngredient) {
         this.miningLevel = miningLevel;
         this.uses = uses;
         this.miningSpeed = miningSpeed;
@@ -24,27 +24,27 @@ public enum ModToolMaterials implements IItemTier {
     }
 
     @Override
-    public int getUses() {
+    public int getDurability() {
         return this.uses;
     }
 
     @Override
-    public float getSpeed() {
+    public float getMiningSpeedMultiplier() {
         return this.miningSpeed;
     }
 
     @Override
-    public float getAttackDamageBonus() {
+    public float getAttackDamage() {
         return this.attackDamage;
     }
 
     @Override
-    public int getLevel() {
+    public int getMiningLevel() {
         return this.miningLevel;
     }
 
     @Override
-    public int getEnchantmentValue() {
+    public int getEnchantability() {
         return this.enchantability;
     }
 

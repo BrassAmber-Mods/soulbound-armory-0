@@ -2,16 +2,14 @@ package user11681.soulboundarmory.capability.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.util.NonNullConsumer;
-import user11681.soulboundarmory.capability.Capabilities;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
 import user11681.soulboundarmory.capability.EntityCapability;
 import user11681.soulboundarmory.serial.CompoundSerializable;
 import user11681.soulboundarmory.util.Util;
@@ -24,10 +22,6 @@ public class EntityData extends EntityCapability<Entity> implements CompoundSeri
         super(entity);
     }
 
-    public static void ifPresent(Entity entity, NonNullConsumer<EntityData> consumer) {
-        Capabilities.entityData.find(entity).ifPresent(consumer);
-    }
-
     public boolean cannotTeleport() {
         return this.blockTeleportTicks > 0;
     }
@@ -37,33 +31,33 @@ public class EntityData extends EntityCapability<Entity> implements CompoundSeri
     }
 
     public void freeze(PlayerEntity freezer, int ticks, float damage) {
-        if (!freezer.level.isClientSide) {
-            ((ServerWorld) freezer.level).sendParticles(
+        if (!freezer.world.isClient) {
+            ((ServerWorld) freezer.world).spawnParticles(
                     ParticleTypes.ITEM_SNOWBALL,
                     this.entity.getX(), this.entity.getEyeY(), this.entity.getZ(), 32, 0.1, 0, 0.1, 2D);
-            this.entity.playSound(SoundEvents.SNOW_HIT, 1, 1.2F / (this.entity.level.random.nextFloat() * 0.2F + 0.9F));
-            this.entity.clearFire();
+            this.entity.playSound(SoundEvents.BLOCK_SNOW_HIT, 1, 1.2F / (this.entity.world.random.nextFloat() * 0.2F + 0.9F));
+            this.entity.extinguish();
 
             if (ticks > this.freezeTicks) {
                 this.freezeTicks = ticks;
             }
 
             if (this.entity instanceof LivingEntity) {
-                this.entity.hurt(DamageSource.playerAttack(freezer), damage);
+                this.entity.damage(DamageSource.player(freezer), damage);
             }
 
             if (this.entity instanceof CreeperEntity) {
-                ((CreeperEntity) this.entity).setSwellDir(-1);
+                ((CreeperEntity) this.entity).setFuseSpeed(-1);
             }
 
             if (this.entity instanceof ProjectileEntity) {
-                this.entity.setDeltaMovement(0, this.entity.getDeltaMovement().y, 0);
+                this.entity.setVelocity(0, this.entity.getVelocity().y, 0);
             }
         }
     }
 
     public boolean canBeFrozen() {
-        return (!(this.entity instanceof PlayerEntity) || Util.server().isPvpAllowed()) && this.entity.isAlive();
+        return (!(this.entity instanceof PlayerEntity) || Util.server().isPvpEnabled()) && this.entity.isAlive();
     }
 
     public boolean isFrozen() {
@@ -71,7 +65,7 @@ public class EntityData extends EntityCapability<Entity> implements CompoundSeri
     }
 
     public void tick() {
-        if (!this.entity.level.isClientSide) {
+        if (!this.entity.world.isClient) {
             if (this.isFrozen() && this.entity instanceof LivingEntity entity) {
                 if (entity.hurtTime > 0) {
                     entity.hurtTime--;
@@ -89,13 +83,13 @@ public class EntityData extends EntityCapability<Entity> implements CompoundSeri
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         this.freezeTicks = tag.getInt("freezeTicks");
         this.blockTeleportTicks = tag.getInt("blockTeleportTicks");
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         tag.putInt("freezeTicks", this.freezeTicks);
         tag.putInt("blockTeleportTicks", this.blockTeleportTicks);
     }

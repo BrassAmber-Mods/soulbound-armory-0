@@ -6,12 +6,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 
-public class ExtendedPacketBuffer extends PacketBuffer {
+public class ExtendedPacketBuffer extends PacketByteBuf {
+    public ExtendedPacketBuffer() {
+        super(Unpooled.buffer());
+    }
+
     public ExtendedPacketBuffer(ByteBuf buffer) {
         super(buffer);
     }
@@ -19,11 +23,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     public ExtendedPacketBuffer(ItemStorage<?> component) {
         this();
 
-        this.writeResourceLocation(component.type().id());
-    }
-
-    public ExtendedPacketBuffer() {
-        super(Unpooled.buffer());
+        this.writeIdentifier(component.type().id());
     }
 
     public static ExtendedPacketBuffer copy(ByteBuf buffer) {
@@ -38,16 +38,18 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     @Override
-    public ExtendedPacketBuffer writeResourceLocation(ResourceLocation identifier) {
-        super.writeResourceLocation(identifier);
+    public ExtendedPacketBuffer writeIdentifier(Identifier identifier) {
+        super.writeIdentifier(identifier);
 
         return this;
     }
 
+    @Override
     public String readString() {
         return this.readCharSequence(this.readInt(), StandardCharsets.UTF_8).toString();
     }
 
+    @Override
     public ExtendedPacketBuffer writeString(String string) {
         this.writeInt(string.length());
         this.writeCharSequence(string, StandardCharsets.UTF_8);
@@ -55,13 +57,14 @@ public class ExtendedPacketBuffer extends PacketBuffer {
         return this;
     }
 
+    @Override
     public ExtendedPacketBuffer writeItemStack(ItemStack itemStack) {
         return (ExtendedPacketBuffer) super.writeItemStack(itemStack, false);
     }
 
     @Override
-    public ExtendedPacketBuffer writeUUID(UUID id) {
-        return (ExtendedPacketBuffer) super.writeUUID(id);
+    public ExtendedPacketBuffer writeUuid(UUID id) {
+        return (ExtendedPacketBuffer) super.writeUuid(id);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     public ExtendedPacketBuffer writeEntity(Entity entity) {
-        return this.writeUUID(entity.getUUID());
+        return this.writeUuid(entity.getUuid());
     }
 
     //    public Entity readEntity() {
@@ -88,7 +91,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     //    }
 
     @Override
-    public ExtendedPacketBuffer writeNbt(CompoundNBT tag) {
+    public ExtendedPacketBuffer writeNbt(NbtCompound tag) {
         super.writeNbt(tag);
 
         return this;

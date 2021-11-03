@@ -6,7 +6,7 @@ import java.util.Map;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NbtCompound;
 import user11681.soulboundarmory.capability.EntityCapability;
 import user11681.soulboundarmory.capability.soulbound.item.ItemStorage;
 import user11681.soulboundarmory.capability.soulbound.item.StorageType;
@@ -25,6 +25,8 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
         this.storages = new Object2ObjectOpenHashMap<>();
     }
 
+    public abstract boolean hasSoulboundItem();
+
     protected void store(ItemStorage<?> storage) {
         this.storages.put(storage.type(), storage);
     }
@@ -40,7 +42,7 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
     }
 
     public ItemStorage<?> heldItemStorage() {
-        for (ItemStack itemStack : this.entity.getHandSlots()) {
+        for (ItemStack itemStack : this.entity.getItemsHand()) {
             for (ItemStorage<?> component : this.storages.values()) {
                 if (itemStack.getItem() == component.getItem()) {
                     return component;
@@ -61,7 +63,6 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public <S extends ItemStorage<S>> S storage(StorageType<S> type) {
         return (S) this.storages.get(type);
     }
@@ -70,31 +71,21 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
         return this.storages;
     }
 
-    public boolean hasSoulboundItem() {
-        for (ItemStorage<?> storage : this.storages.values()) {
-            if (ItemUtil.hasItem(this.entity, storage.getBaseItemClass())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public void tick() {
         if (this.hasSoulboundItem()) {
             ItemStorage<?> storage = this.heldItemStorage();
 
-            if (storage != null) {
-                this.currentItem(storage);
-            } else {
+            if (storage == null) {
                 storage = this.currentItem;
+            } else {
+                this.currentItem(storage);
             }
 
             if (storage != null) {
-                Class<? extends SoulboundItem> baseItemClass = storage.getBaseItemClass();
+                Class<? extends SoulboundItem> baseItemClass = storage.itemClass();
                 PlayerInventory inventory = this.entity.inventory;
                 List<ItemStack> combinedInventory = ItemUtil.inventory(this.entity);
-                ItemStack newItemStack = storage.getItemStack();
+                ItemStack newItemStack = storage.itemStack();
                 int firstSlot = -1;
 
                 for (ItemStack itemStack : combinedInventory) {
@@ -108,15 +99,14 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
                                 storage.bindSlot(firstSlot);
                             }
 
-                            CompoundNBT tag = newItemStack.getTag();
-
-                            newItemStack.setHoverName(itemStack.getHoverName());
+                            NbtCompound tag = newItemStack.getTag();
+                            newItemStack.setCustomName(itemStack.getName());
 
                             if (tag != null && !tag.equals(itemStack.getTag())) {
-                                inventory.setItem(firstSlot, newItemStack);
+                                inventory.setStack(firstSlot, newItemStack);
                             }
                         } else if (!this.entity.isCreative() && (index != firstSlot || firstSlot != -1)) {
-                            inventory.removeItem(itemStack);
+                            inventory.removeOne(itemStack);
                         }
                     }
                 }
@@ -129,7 +119,7 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         if (this.currentItem != null) {
             tag.putString("storage", this.currentItem.type().string());
         }
@@ -140,7 +130,7 @@ public abstract class SoulboundCapability extends EntityCapability<PlayerEntity>
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         StorageType<?> type = StorageType.get(tag.getString("storage"));
 
         if (type != null) {

@@ -1,5 +1,6 @@
 package user11681.soulboundarmory.client.i18n;
 
+import user11681.soulboundarmory.client.gui.bar.Style;
 import user11681.soulboundarmory.text.Translation;
 
 public class Translations {
@@ -26,19 +27,23 @@ public class Translations {
     public static final Translation menuPoint = new Translation("gui.soulboundarmory.point");
     public static final Translation menuSkillLearnCost = new Translation("gui.soulboundarmory.learn_cost");
     public static final Translation menuSkillUpgradeCost = new Translation("gui.soulboundarmory.upgrade_cost");
-    public static final Translation menuLevel = new Translation("gui.soulboundarmory.level");
+    public static final Translation menuLevel = new Translation("gui.soulboundarmory.world");
     public static final Translation red = new Translation("gui.soulboundarmory.red");
     public static final Translation green = new Translation("gui.soulboundarmory.green");
     public static final Translation blue = new Translation("gui.soulboundarmory.blue");
     public static final Translation alpha = new Translation("gui.soulboundarmory.alpha");
 
-    public static final Translation xpBarStyle = new Translation("gui.soulboundarmory.style");
+    public static final Translation barLevel = new Translation("gui.soulboundarmory.bar.world");
+    public static final Translation barXP = new Translation("gui.soulboundarmory.bar.xp");
+    public static final Translation barFullXP = new Translation("gui.soulboundarmory.bar.full_xp");
+
+    public static final Translation style = new Translation("gui.soulboundarmory.style");
     public static final Translation xpStyle = new Translation("gui.soulboundarmory.style.experience");
     public static final Translation bossStyle = new Translation("gui.soulboundarmory.style.boss");
     public static final Translation horseStyle = new Translation("gui.soulboundarmory.style.horse");
 
     public static final Translation experienceFormat = new Translation("datum.soulboundarmory.experience.format");
-    public static final Translation levelFormat = new Translation("datum.soulboundarmory.level.format");
+    public static final Translation levelFormat = new Translation("datum.soulboundarmory.world.format");
     public static final Translation skillPointsFormat = new Translation("datum.soulboundarmory.skill_points.format");
     public static final Translation attributePointsFormat = new Translation("datum.soulboundarmory.attribute_points.format");
     public static final Translation enchantmentPointsFormat = new Translation("datum.soulboundarmory.enchantment_points.format");
@@ -50,11 +55,11 @@ public class Translations {
     public static final Translation miningLevelFormat = new Translation("attribute.soulboundarmory.mining_level.format");
     public static final Translation attackSpeedFormat = new Translation("attribute.soulboundarmory.attack_speed.format");
     public static final Translation attackDamageFormat = new Translation("attribute.soulboundarmory.attack_damage.format");
-    public static final Translation criticalStrikeProbabilityFormat = new Translation("attribute.soulboundarmory.critical_strike_rate.format");
+    public static final Translation criticalStrikeRateFormat = new Translation("attribute.soulboundarmory.critical_strike_rate.format");
     public static final Translation attackRangeFormat = new Translation("attribute.soulboundarmory.attack_range.format");
 
     public static final Translation experienceName = new Translation("attribute.soulboundarmory.experience");
-    public static final Translation levelName = new Translation("attribute.soulboundarmory.level");
+    public static final Translation levelName = new Translation("attribute.soulboundarmory.world");
     public static final Translation skillPointsName = new Translation("attribute.soulboundarmory.skill_points");
     public static final Translation attributePointsName = new Translation("attribute.soulboundarmory.attribute_points");
     public static final Translation enchantmentPointsName = new Translation("attribute.soulboundarmory.enchantment_points");
@@ -62,7 +67,7 @@ public class Translations {
     public static final Translation spentEnchantmentPointsName = new Translation("attribute.soulboundarmory.spent_enchantment_points");
     public static final Translation attackSpeedName = new Translation("attribute.soulboundarmory.attack_speed");
     public static final Translation attackDamageName = new Translation("attribute.soulboundarmory.attack_damage");
-    public static final Translation criticalStrikeProbabilityName = new Translation("attribute.soulboundarmory.critical_strike_rate");
+    public static final Translation criticalStrikeRateName = new Translation("attribute.soulboundarmory.critical_strike_rate");
     public static final Translation toolEfficiencyName = new Translation("attribute.soulboundarmory.efficiency.tool");
     public static final Translation weaponEfficiencyName = new Translation("attribute.soulboundarmory.efficiency.weapon");
     public static final Translation miningLevelName = new Translation("attribute.soulboundarmory.mining_level");
@@ -79,4 +84,12 @@ public class Translations {
     public static final Translation commandUsage0 = new Translation("command.soulboundarmory.client_usage0");
     public static final Translation commandUsage1 = new Translation("command.soulboundarmory.client_usage1");
     public static final Translation commandNoItem = new Translation("command.soulboundarmory.no_item");
+
+    public static Translation style(Style style) {
+        return switch (style) {
+            case EXPERIENCE -> xpStyle;
+            case BOSS -> bossStyle;
+            case HORSE -> horseStyle;
+        };
+    }
 }
