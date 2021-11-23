@@ -1,9 +1,9 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity;
+package net.auoeke.soulboundarmory.mixin.mixin.entity;
 
 import net.minecraft.entity.effect.LightningBoltEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import net.auoeke.soulboundarmory.asm.access.entity.LightningEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.LightningEntityAccess;
 
 @Mixin(LightningBoltEntity.class)
 abstract class LightningEntityMixin implements LightningEntityAccess {

@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    minecraft("net.minecraftforge:forge:1.16.5-36.2.9")
+    minecraft("net.minecraftforge:forge:1.16.5-36.2.18")
     implementation("net.auoeke:reflect:latest.integration")
 
     if (!Boolean.getBoolean("idea.sync.active")) {
@@ -49,7 +49,7 @@ minecraft {
 
     runs {
         ["client", "server"].each {
-            register(it) {
+            create(it) {
                 properties("mixin.env.remapRefMap": "true")
                 property("mixin.env.refMapRemappingFile", "${project.buildDir}/createSrgToMcp/output.srg")
                 workingDirectory(project.file("run"))

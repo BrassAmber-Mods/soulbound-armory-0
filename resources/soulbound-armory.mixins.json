@@ -1,7 +1,7 @@
 {
     "required": true,
-    "package": "user11681.soulboundarmory.asm.mixin",
-    "compatibilityLevel": "JAVA_8",
+    "package": "net.auoeke.soulboundarmory.mixin.mixin",
+    "compatibilityLevel": "JAVA_16",
     "minVersion": "0.8",
     "mixins": [
         "entity.EntityMixin",
@@ -10,10 +10,9 @@
         "entity.attribute.AttributeModifierMixin",
         "entity.attribute.OperationMixin",
         "entity.player.PlayerEntityMixin",
-        "net.auoeke.soulboundarmory.asm.mixin.entity.player.PlayerInventoryAccess",
+        "entity.player.PlayerInventoryAccess",
         "entity.player.PlayerInventoryEntityMixin",
         "entity.projectile.AbstractArrowEntityMixin",
-        "item.ItemMixin",
         "item.ItemStackMixin"
     ],
     "injectors": {

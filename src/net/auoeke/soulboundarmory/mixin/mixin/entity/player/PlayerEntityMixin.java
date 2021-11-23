@@ -1,6 +1,6 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity.player;
+package net.auoeke.soulboundarmory.mixin.mixin.entity.player;
 
-import net.auoeke.soulboundarmory.asm.access.entity.PlayerEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.PlayerEntityAccess;
 import net.auoeke.soulboundarmory.entity.SAAttributes;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;

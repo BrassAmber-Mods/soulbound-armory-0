@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import net.auoeke.soulboundarmory.asm.mixin.entity.player.PlayerInventoryAccess;
+import net.auoeke.soulboundarmory.mixin.mixin.entity.player.PlayerInventoryAccess;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;

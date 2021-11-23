@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity.attribute;
+package net.auoeke.soulboundarmory.mixin.mixin.entity.attribute;
 
 import java.util.UUID;
 import net.auoeke.soulboundarmory.util.AttributeModifierIdentifiers;
@@ -18,7 +18,7 @@ abstract class AttributeModifierMixin {
     @Mutable
     private UUID id;
 
-    @Inject(method = "<init>(Ljava/util/UUID;Ljava/lang/String;DLnet/minecraft/entity/attribute/AttributeModifier$Operation;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Ljava/util/UUID;Ljava/lang/String;DLnet/minecraft/entity/ai/attributes/AttributeModifier$Operation;)V", at = @At("RETURN"))
     public void construct(UUID uuid, String name, double value, AttributeModifier.Operation operation, CallbackInfo info) {
         var original = AttributeModifierIdentifiers.get(uuid);
 

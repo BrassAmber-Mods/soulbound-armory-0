@@ -5,15 +5,8 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.item.Item;
 
-public final class AttributeModifierIdentifiers extends Item {
+public final class AttributeModifierIdentifiers {
     private static final Set<UUID> reserved = new HashSet<>();
-
-    public static final UUID attackDamageModifier = BASE_ATTACK_DAMAGE_UUID;
-    public static final UUID attackSpeedModifier = BASE_ATTACK_SPEED_UUID;
-
-    public AttributeModifierIdentifiers(Properties __) {
-        super(__);
-    }
 
     public static UUID reserve(String uuid) {
         return reserve(UUID.fromString(uuid));
@@ -37,5 +30,14 @@ public final class AttributeModifierIdentifiers extends Item {
 
     public static boolean isReserved(UUID uuid) {
         return reserved.contains(uuid);
+    }
+
+    public static class ItemAccess extends Item {
+        public static final UUID attackDamageModifier = BASE_ATTACK_DAMAGE_UUID;
+        public static final UUID attackSpeedModifier = BASE_ATTACK_SPEED_UUID;
+
+        public ItemAccess(Properties __) {
+            super(__);
+        }
     }
 }

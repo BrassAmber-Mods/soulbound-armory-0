@@ -1,7 +1,7 @@
 package net.auoeke.soulboundarmory.event;
 
 import net.auoeke.soulboundarmory.SoulboundArmory;
-import net.auoeke.soulboundarmory.asm.access.entity.BossEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.BossEntityAccess;
 import net.auoeke.soulboundarmory.capability.Capabilities;
 import net.auoeke.soulboundarmory.capability.soulbound.item.ItemStorage;
 import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;

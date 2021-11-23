@@ -1,7 +1,7 @@
 package net.auoeke.soulboundarmory.util;
 
 import java.util.UUID;
-import net.auoeke.soulboundarmory.asm.access.entity.BossEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.BossEntityAccess;
 import net.minecraft.entity.Entity;
 
 public class EntityUtil {

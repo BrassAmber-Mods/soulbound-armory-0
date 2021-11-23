@@ -1,7 +1,7 @@
 package net.auoeke.soulboundarmory.entity;
 
 import java.util.UUID;
-import net.auoeke.soulboundarmory.asm.access.entity.LightningEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.LightningEntityAccess;
 import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.SwordStorage;
 import net.auoeke.soulboundarmory.capability.statistics.StatisticType;
 import net.auoeke.soulboundarmory.serial.CompoundSerializable;
