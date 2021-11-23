@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.mixin.item;
+package net.auoeke.soulboundarmory.mixin.mixin.item;
 
 import com.google.common.collect.Multimap;
 import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
@@ -18,12 +18,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 abstract class ItemStackMixin {
     private AttributeModifier modifier;
 
-    @ModifyVariable(method = "getTooltip", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
+    @ModifyVariable(method = "getTooltipLines", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
     private AttributeModifier captureModifier(AttributeModifier modifier) {
         return this.modifier = modifier;
     }
 
-    @ModifyVariable(method = "getTooltip", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
+    @ModifyVariable(method = "getTooltipLines", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
     private boolean normalizeCustomAttributes(boolean green) {
         return AttributeModifierIdentifiers.isReserved(this.modifier.getId()) || green;
     }
@@ -35,7 +35,7 @@ abstract class ItemStackMixin {
     }
     */
 
-    @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"))
+    @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"))
     private Multimap<Attribute, AttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlotType slot, PlayerEntity player) {
         return stack.getItem() instanceof SoulboundItem && player != null ? StorageType.get(player, stack.getItem()).get().attributeModifiers(slot) : stack.getAttributeModifiers(slot);
     }

@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity;
+package net.auoeke.soulboundarmory.mixin.mixin.entity;
 
 import java.util.List;
 import net.auoeke.soulboundarmory.capability.Capabilities;
@@ -32,7 +32,7 @@ abstract class LivingEntityMixin extends Entity {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "pushEntities",
             at = @At(value = "INVOKE_ASSIGN",
-                     target = "Lnet/minecraft/world/World;getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;)Ljava/util/List;"),
+                     target = "Lnet/minecraft/world/World;getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
         if ((Object) this instanceof PlayerEntity player && !this.level.isClientSide) {

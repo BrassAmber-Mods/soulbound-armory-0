@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity.player;
+package net.auoeke.soulboundarmory.mixin.mixin.entity.player;
 
 import java.util.List;
 import net.minecraft.entity.player.PlayerInventory;
@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PlayerInventory.class)
 public interface PlayerInventoryAccess {
-    @Accessor("combinedInventory")
+    @Accessor("compartments")
     List<NonNullList<ItemStack>> compartments();
 }

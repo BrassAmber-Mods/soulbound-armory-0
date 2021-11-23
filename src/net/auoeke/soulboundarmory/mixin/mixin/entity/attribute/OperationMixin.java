@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity.attribute;
+package net.auoeke.soulboundarmory.mixin.mixin.entity.attribute;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import org.spongepowered.asm.mixin.Final;
@@ -14,10 +14,9 @@ abstract class OperationMixin {
     @Final
     private int value;
 
-    @Inject(method = "fromId", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "fromValue", at = @At("HEAD"), cancellable = true)
     private static void getIdModSupport(int id, CallbackInfoReturnable<AttributeModifier.Operation> info) {
         for (var operation : AttributeModifier.Operation.values()) {
-            //noinspection ConstantConditions
             if (((OperationMixin) (Object) operation).value == id) {
                 info.setReturnValue(operation);
             }

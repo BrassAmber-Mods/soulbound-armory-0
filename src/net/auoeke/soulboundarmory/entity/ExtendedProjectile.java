@@ -1,6 +1,6 @@
 package net.auoeke.soulboundarmory.entity;
 
-import net.auoeke.soulboundarmory.asm.access.entity.AbstractArrowEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.AbstractArrowEntityAccess;
 import net.auoeke.soulboundarmory.util.MathUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

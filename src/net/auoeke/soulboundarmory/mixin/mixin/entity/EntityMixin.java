@@ -1,9 +1,9 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity;
+package net.auoeke.soulboundarmory.mixin.mixin.entity;
 
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import net.auoeke.reflect.Fields;
-import net.auoeke.soulboundarmory.asm.access.entity.BossEntityAccess;
+import net.auoeke.soulboundarmory.mixin.access.entity.BossEntityAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.world.BossInfo;

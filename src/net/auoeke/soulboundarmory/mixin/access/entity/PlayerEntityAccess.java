@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.access.entity;
+package net.auoeke.soulboundarmory.mixin.access.entity;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;

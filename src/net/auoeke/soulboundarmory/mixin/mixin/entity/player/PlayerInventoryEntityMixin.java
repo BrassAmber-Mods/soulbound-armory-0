@@ -1,4 +1,4 @@
-package net.auoeke.soulboundarmory.asm.mixin.entity.player;
+package net.auoeke.soulboundarmory.mixin.mixin.entity.player;
 
 import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.asm.mixin.Mixin;
