@@ -5,11 +5,11 @@ import java.util.regex.Pattern;
 
 public class StringUtil {
     public static String macroCaseToCamelCase(String string) {
-         StringBuilder builder = new StringBuilder();
-         char[] chars = string.toLowerCase().toCharArray();
+        var builder = new StringBuilder();
+        var chars = string.toLowerCase().toCharArray();
 
-        for (int i = 0; i < chars.length; i++) {
-            char character = chars[i];
+        for (var i = 0; i < chars.length; i++) {
+            var character = chars[i];
 
             if (character == '_') {
                 character = (char) (chars[++i] - 32);

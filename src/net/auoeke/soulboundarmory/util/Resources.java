@@ -7,16 +7,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
+import net.auoeke.cell.client.gui.CellElement;
 import net.gudenau.lib.unsafe.Unsafe;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.resources.IResource;
+import net.minecraft.util.ResourceLocation;
 
 public class Resources {
-    public static final ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
-
     public static ByteArrayInputStream inputStream(Raster raster) {
         return new ByteArrayInputStream(((DataBufferByte) raster.getDataBuffer()).getData());
     }
@@ -29,7 +26,7 @@ public class Resources {
         }
     }
 
-    public static BufferedImage readTexture(Identifier identifier) {
+    public static BufferedImage readTexture(ResourceLocation identifier) {
         try {
             return ImageIO.read(inputStream(identifier));
         } catch (IOException exception) {
@@ -37,16 +34,16 @@ public class Resources {
         }
     }
 
-    public static byte[] bytes(Identifier resource) {
+    public static byte[] bytes(ResourceLocation resource) {
         return bytes(inputStream(resource));
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     public static byte[] bytes(InputStream input) {
         try {
-            byte[] content = new byte[input.available()];
+            var content = new byte[input.available()];
 
-            while (input.read(content) > -1) { ; }
+            while (input.read(content) > -1) {}
 
             return content;
         } catch (IOException exception) {
@@ -54,19 +51,19 @@ public class Resources {
         }
     }
 
-    public static InputStream inputStream(Identifier resource) {
+    public static InputStream inputStream(ResourceLocation resource) {
         return resource(resource).getInputStream();
     }
 
-    public static Resource resource(Identifier identifier) {
+    public static IResource resource(ResourceLocation identifier) {
         try {
-            return resourceManager.getResource(identifier);
+            return CellElement.resourceManager.getResource(identifier);
         } catch (IOException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static int[][][] pixels(Identifier texture) {
+    public static int[][][] pixels(ResourceLocation texture) {
         return pixels(readTexture(texture));
     }
 
@@ -75,11 +72,11 @@ public class Resources {
     }
 
     public static int[][][] pixels(BufferedImage image, int u, int v, int width, int height) {
-        int[][][] pixels = new int[image.getHeight()][image.getWidth()][4];
-        Raster raster = image.getData();
+        var pixels = new int[image.getHeight()][image.getWidth()][4];
+        var raster = image.getData();
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
                 pixels[y][x] = raster.getPixel(u + x, v + y, (int[]) null);
             }
         }

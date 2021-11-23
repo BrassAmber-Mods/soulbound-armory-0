@@ -4,16 +4,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import net.auoeke.reflect.Accessor;
 import net.auoeke.soulboundarmory.capability.config.ConfigCapability;
 import net.auoeke.soulboundarmory.capability.entity.EntityData;
+import net.auoeke.soulboundarmory.capability.soulbound.player.SoulboundCapability;
+import net.auoeke.soulboundarmory.capability.soulbound.player.ToolCapability;
+import net.auoeke.soulboundarmory.capability.soulbound.player.WeaponCapability;
 import net.auoeke.soulboundarmory.serial.CompoundSerializable;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import user11681.reflect.Accessor;
-import net.auoeke.soulboundarmory.capability.soulbound.player.SoulboundCapability;
-import net.auoeke.soulboundarmory.capability.soulbound.player.ToolCapability;
-import net.auoeke.soulboundarmory.capability.soulbound.player.WeaponCapability;
 
 public class Capabilities {
     public static final CapabilityContainer<ConfigCapability> config = container(ConfigCapability.class);
@@ -25,7 +25,7 @@ public class Capabilities {
     public static final List<CapabilityContainer<? extends SoulboundCapability>> soulboundCapabilities = Arrays.asList(tool, weapon);
 
     public static Stream<SoulboundCapability> get(Entity entity) {
-        return soulboundCapabilities.stream().map(type -> type.get(entity));
+        return soulboundCapabilities.stream().map(type -> type.get(entity).get());
     }
 
     private static <T extends CompoundSerializable> CapabilityContainer<T> container(Class<T> type) {

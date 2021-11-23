@@ -1,20 +1,19 @@
 package net.auoeke.soulboundarmory.item;
 
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.GreatswordStorage;
+import net.auoeke.soulboundarmory.registry.Skills;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.GreatswordStorage;
-import net.auoeke.soulboundarmory.registry.Skills;
 
 public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     public SoulboundGreatsword() {
@@ -22,36 +21,36 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack) {
+    public int getUseDuration(ItemStack stack) {
         return 200;
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAction getUseAnimation(ItemStack stack) {
         return UseAction.BOW;
     }
 
     @Override
-        public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        if (!world.isClient && GreatswordStorage.get(player).hasSkill(Skills.leaping)) {
-            player.setCurrentHand(hand);
+        public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        if (!world.isClientSide && GreatswordStorage.get(player).hasSkill(Skills.leaping)) {
+            player.startUsingItem(hand);
 
-            return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
+            return new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand));
         }
 
-        return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
+        return new ActionResult<>(ActionResultType.FAIL, player.getItemInHand(hand));
     }
 
     @Override
-    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity player, int timeLeft) {
-        int timeTaken = 200 - timeLeft;
+    public void releaseUsing(ItemStack itemStack, World world, LivingEntity player, int timeLeft) {
+        var timeTaken = 200 - timeLeft;
 
         if (timeTaken > 5) {
-            Vec3d look = player.getRotationVector();
-            float maxSpeed = 1.25F;
-            float speed = Math.min(maxSpeed, timeTaken / 20F * maxSpeed);
+            var look = player.getLookAngle();
+            var maxSpeed = 1.25F;
+            var speed = Math.min(maxSpeed, timeTaken / 20F * maxSpeed);
 
-            player.addVelocity(look.x * speed, look.y * speed / 4 + 0.2, look.z * speed);
+            player.push(look.x * speed, look.y * speed / 4 + 0.2, look.z * speed);
             player.setSprinting(true);
             GreatswordStorage.get(player).leapForce(speed / maxSpeed);
         }
@@ -60,13 +59,12 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     @OnlyIn(Dist.CLIENT)
     @Override
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int itemSlot, boolean isSelected) {
-        if (world.isClient && isSelected) {
-            ClientPlayerEntity player = (ClientPlayerEntity) entity;
-            ItemStack activeStack = player.getActiveItem();
+        if (world.isClientSide && isSelected) {
+            var player = (ClientPlayerEntity) entity;
 
-            if (!activeStack.isEmpty() && activeStack.getItem() == this) {
-                player.forwardSpeed *= 4.5;
-                player.sidewaysSpeed *= 4.5;
+            if (player.getUseItem().getItem() == this) {
+                player.zza *= 4.5;
+                player.xxa *= 4.5;
             }
         }
     }

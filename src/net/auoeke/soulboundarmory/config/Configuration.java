@@ -4,11 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import net.auoeke.reflect.Accessor;
+import net.auoeke.soulboundarmory.client.gui.bar.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
-import user11681.reflect.Accessor;
-import net.auoeke.soulboundarmory.client.gui.bar.Style;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
@@ -74,27 +74,27 @@ public class Configuration {
     }
 
     private static ForgeConfigSpec configuration(Class<?> type) {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        var builder = new ForgeConfigSpec.Builder();
 
-        for (Field field : type.getDeclaredFields()) {
+        for (var field : type.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.TRANSIENT | ~Modifier.STATIC)) != 0) {
                 continue;
             }
 
-            Category category = field.getAnnotation(Category.class);
+            var category = field.getAnnotation(Category.class);
 
             if (category != null) {
                 builder.push(category.value());
             }
 
-            Comment comment = field.getAnnotation(Comment.class);
+            var comment = field.getAnnotation(Comment.class);
 
             if (comment != null) {
                 builder.comment(comment.value());
             }
 
-            Object defaultValue = Accessor.get(field);
-            Interval interval = field.getAnnotation(Interval.class);
+            var defaultValue = Accessor.get(field);
+            var interval = field.getAnnotation(Interval.class);
 
             if (interval == null) {
                 builder.define(field.getName(), defaultValue);
@@ -115,7 +115,7 @@ public class Configuration {
     public static void paths(String mod, Class<?> holder) {
         Map<Field, String> paths = new HashMap<>();
 
-        for (Field field : holder.getDeclaredFields()) {
+        for (var field : holder.getDeclaredFields()) {
             paths(paths, field, String.format("config.%s.%s", mod, field.getName()));
         }
     }
@@ -123,7 +123,7 @@ public class Configuration {
     public static void paths(Map<Field, String> paths, Field field, String path) {
         paths.put(field, path);
 
-        for (Field child : field.getType().getDeclaredFields()) {
+        for (var child : field.getType().getDeclaredFields()) {
             if (Accessor.get(child) != null) {
                 paths(paths, child, path + "." + child.getName());
             }

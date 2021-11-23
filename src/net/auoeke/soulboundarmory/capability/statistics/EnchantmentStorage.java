@@ -5,24 +5,19 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 import net.auoeke.soulboundarmory.serial.CompoundSerializable;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 
 public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, Integer> implements Iterable<Enchantment>, CompoundSerializable {
     public EnchantmentStorage(Predicate<Enchantment> predicate) {
-        for (Enchantment enchantment : ForgeRegistries.ENCHANTMENTS) {
-            if (predicate.test(enchantment)) {
-                this.put(enchantment, 0);
-            }
-        }
+        ForgeRegistries.ENCHANTMENTS.getValues().stream().filter(predicate).forEach(enchantment -> this.put(enchantment, 0));
     }
 
     @Override
     public Integer get(Object enchantment) {
-        Integer result = super.get(enchantment);
+        var result = super.get(enchantment);
 
         return result == null ? 0 : result;
     }
@@ -32,17 +27,17 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     public void reset() {
-        for (Enchantment enchantment : this) {
+        for (var enchantment : this) {
             this.put(enchantment, 0);
         }
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
-        Registry<Enchantment> registry = Registry.ENCHANTMENT;
+    public void deserializeNBT(CompoundNBT nbt) {
+        var registry = Registry.ENCHANTMENT;
 
-        for (String key : nbt.getKeys()) {
-            Enchantment enchantment = registry.get(new Identifier(key));
+        for (var key : nbt.getAllKeys()) {
+            var enchantment = registry.get(new ResourceLocation(key));
 
             if (this.containsKey(enchantment)) {
                 this.put(enchantment, nbt.getInt(key));
@@ -51,14 +46,14 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
-        IForgeRegistry<Enchantment> registry = ForgeRegistries.ENCHANTMENTS;
+    public void serializeNBT(CompoundNBT tag) {
+        var registry = ForgeRegistries.ENCHANTMENTS;
 
-        for (Enchantment enchantment : this) {
-            Integer level = this.get(enchantment);
+        for (var enchantment : this) {
+            var level = this.get(enchantment);
 
             if (level != null) {
-                Identifier identifier = registry.getKey(enchantment);
+                var identifier = registry.getKey(enchantment);
 
                 if (identifier != null) {
                     tag.putInt(identifier.toString(), this.get(enchantment));

@@ -1,11 +1,11 @@
 package net.auoeke.cell;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 
 public class Cell {
     public static final String ID = "cell";
 
-    public static Identifier id(String path) {
-        return new Identifier(ID, path);
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(ID, path);
     }
 }

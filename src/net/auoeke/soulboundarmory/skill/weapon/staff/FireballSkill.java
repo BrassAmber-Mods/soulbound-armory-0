@@ -1,15 +1,15 @@
 package net.auoeke.soulboundarmory.skill.weapon.staff;
 
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.auoeke.cell.client.gui.screen.CellScreen;
 import net.auoeke.soulboundarmory.skill.Skill;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 public class FireballSkill extends Skill {
-    public FireballSkill(Identifier identifier) {
+    public FireballSkill(ResourceLocation identifier) {
         super(identifier);
     }
 

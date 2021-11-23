@@ -1,19 +1,19 @@
 package net.auoeke.soulboundarmory.client.render;
 
 import net.auoeke.soulboundarmory.entity.SoulboundFireballEntity;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.util.ResourceLocation;
 
 public class SoulboundFireballEntityRenderer extends EntityRenderer<SoulboundFireballEntity> {
-    private static final Identifier id = new Identifier("item/fire_charge.png");
+    private static final ResourceLocation id = new ResourceLocation("item/fire_charge.png");
 
-    public SoulboundFireballEntityRenderer(EntityRenderDispatcher manager) {
+    public SoulboundFireballEntityRenderer(EntityRendererManager manager) {
         super(manager);
     }
 
     @Override
-    public Identifier getTexture(SoulboundFireballEntity entity) {
+    public ResourceLocation getTextureLocation(SoulboundFireballEntity entity) {
         return id;
     }
 }

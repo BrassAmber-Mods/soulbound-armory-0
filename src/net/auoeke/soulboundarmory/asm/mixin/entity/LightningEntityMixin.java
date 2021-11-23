@@ -1,25 +1,25 @@
 package net.auoeke.soulboundarmory.asm.mixin.entity;
 
-import net.minecraft.entity.LightningEntity;
+import net.minecraft.entity.effect.LightningBoltEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import net.auoeke.soulboundarmory.asm.access.entity.LightningEntityAccess;
 
-@Mixin(LightningEntity.class)
+@Mixin(LightningBoltEntity.class)
 abstract class LightningEntityMixin implements LightningEntityAccess {
-    @Accessor("ambientTick")
+    @Accessor("life")
     @Override
-    public abstract int ambientTick();
+    public abstract int life();
 
-    @Accessor("ambientTick")
+    @Accessor("life")
     @Override
-    public abstract void ambientTick(int flashes);
+    public abstract void life(int flashes);
 
-    @Accessor("remainingActions")
+    @Accessor("flashes")
     @Override
-    public abstract int remainingActions();
+    public abstract int flashes();
 
-    @Accessor("remainingActions")
+    @Accessor("flashes")
     @Override
-    public abstract void remainingActions(int flashes);
+    public abstract void flashes(int flashes);
 }

@@ -6,13 +6,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import net.auoeke.soulboundarmory.asm.mixin.entity.player.PlayerInventoryAccess;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
-import net.auoeke.soulboundarmory.asm.mixin.entity.player.PlayerInventoryAccess;
+import net.minecraft.util.NonNullList;
 
 public class ItemUtil {
     public static List<ItemStack> inventory(PlayerEntity player) {
@@ -20,43 +20,35 @@ public class ItemUtil {
     }
 
     public static Stream<ItemStack> inventoryStream(PlayerEntity player) {
-        return ((PlayerInventoryAccess) player.inventory).compartments().stream().flatMap(DefaultedList::stream);
+        return ((PlayerInventoryAccess) player.inventory).compartments().stream().flatMap(NonNullList::stream);
     }
 
     public static List<Item> handItems(LivingEntity entity) {
-        return Arrays.asList(entity.getMainHandStack().getItem(), entity.getOffHandStack().getItem());
+        return Arrays.asList(entity.getMainHandItem().getItem(), entity.getOffhandItem().getItem());
     }
 
     public static Stream<ItemStack> handStacks(LivingEntity entity) {
-        return StreamSupport.stream(entity.getItemsHand().spliterator(), false);
+        return StreamSupport.stream(entity.getHandSlots().spliterator(), false);
+    }
+
+    public static Stream<ItemStack> handStacks(PlayerInventory inventory) {
+        return Stream.of(inventory.getSelected(), inventory.offhand.get(0));
     }
 
     public static ItemStack equippedStack(PlayerEntity player, Item... validItems) {
-        for (ItemStack itemStack : player.getItemsHand()) {
-            if (Arrays.asList(validItems).contains(itemStack.getItem())) {
-                return itemStack;
-            }
-        }
-
-        return null;
+        return handStacks(player).filter(itemStack -> Arrays.asList(validItems).contains(itemStack.getItem())).findAny().orElse(null);
     }
 
-    public static ItemStack equippedStack(PlayerInventory inventory, Class<?> clazz) {
-        for (ItemStack itemStack : Arrays.asList(inventory.getMainHandStack(), inventory.offHand.get(0))) {
-            if (clazz.isInstance(itemStack.getItem())) {
-                return itemStack;
-            }
-        }
-
-        return null;
+    public static ItemStack equippedStack(PlayerInventory inventory, Class<?> type) {
+        return handStacks(inventory).filter(stack -> type.isInstance(stack.getItem())).findAny().orElse(null);
     }
 
-    public static ItemStack getRequiredItemStack(PlayerEntity player, Class<?>... classes) {
-        ItemStack itemStack = player.getMainHandStack();
-        Item item = itemStack.getItem();
+    public static ItemStack getRequiredItemStack(PlayerEntity player, Class<?>... types) {
+        var itemStack = player.getMainHandItem();
+        var item = itemStack.getItem();
 
-        for (Class<?> clazz : classes) {
-            if (clazz.isInstance(item)) {
+        for (var type : types) {
+            if (type.isInstance(item)) {
                 return itemStack;
             }
         }
@@ -65,9 +57,8 @@ public class ItemUtil {
     }
 
     public static int matchingSlot(PlayerInventory inventory, ItemStack itemStack) {
-        return IntStream
-            .range(0, inventory.main.size())
-            .filter(slot -> !inventory.main.get(slot).isEmpty() && ItemStack.areItemsEqualIgnoreDamage(itemStack, inventory.main.get(slot)))
+        return IntStream.range(0, inventory.items.size())
+            .filter(slot -> !inventory.items.get(slot).isEmpty() && ItemStack.isSameIgnoreDurability(itemStack, inventory.items.get(slot)))
             .findFirst()
             .orElse(-1);
     }
@@ -81,9 +72,7 @@ public class ItemUtil {
     }
 
     public static boolean has(PlayerEntity player, Item item, int min, int max) {
-        List<ItemStack> merged = inventory(player);
-
-        return IntStream.range(min, max).mapToObj(merged::get).anyMatch(itemStack -> itemStack.getItem() == item);
+        return IntStream.range(min, max).mapToObj(inventory(player)::get).anyMatch(itemStack -> itemStack.getItem() == item);
     }
 
     public static boolean has(PlayerEntity player, Class<?>... classes) {

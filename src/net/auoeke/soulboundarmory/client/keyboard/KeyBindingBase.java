@@ -1,7 +1,7 @@
 package net.auoeke.soulboundarmory.client.keyboard;
 
-import net.minecraft.client.option.KeyBinding;
 import net.auoeke.soulboundarmory.SoulboundArmory;
+import net.minecraft.client.settings.KeyBinding;
 
 public abstract class KeyBindingBase extends KeyBinding {
     public KeyBindingBase(String name, int key) {
@@ -11,11 +11,11 @@ public abstract class KeyBindingBase extends KeyBinding {
     protected abstract void press();
 
     @Override
-    public void setPressed(boolean pressed) {
-        if (pressed && !super.isPressed()) {
+    public void setDown(boolean pressed) {
+        if (pressed && !super.isDown()) {
             this.press();
         }
 
-        super.setPressed(pressed);
+        super.setDown(pressed);
     }
 }

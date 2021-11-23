@@ -1,15 +1,15 @@
 package net.auoeke.soulboundarmory.asm.access.entity;
 
 public interface LightningEntityAccess {
-    default int ambientTick() {
+    default int life() {
         return 0;
     }
 
-    default void ambientTick(int flashes) {}
+    default void life(int flashes) {}
 
-    default int remainingActions() {
+    default int flashes() {
         return 0;
     }
 
-    default void remainingActions(int flashes) {}
+    default void flashes(int flashes) {}
 }

@@ -1,15 +1,15 @@
 package net.auoeke.soulboundarmory.enchantment;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentTarget;
-import net.minecraft.entity.EntityGroup;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
 import net.auoeke.soulboundarmory.item.SoulboundStaffItem;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentType;
+import net.minecraft.entity.CreatureAttribute;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
 
 public class ImpactEnchantment extends Enchantment {
     public ImpactEnchantment() {
-        super(Rarity.COMMON, EnchantmentTarget.WEAPON, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
+        super(Rarity.COMMON, EnchantmentType.WEAPON, new EquipmentSlotType[]{EquipmentSlotType.MAINHAND});
     }
 
     @Override
@@ -18,22 +18,22 @@ public class ImpactEnchantment extends Enchantment {
     }
 
     @Override
-    public int getMinPower(int level) {
+    public int getMinCost(int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public int getMaxPower(int level) {
+    public int getMaxCost(int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public float getAttackDamage(int level, EntityGroup group) {
+    public float getDamageBonus(int level, CreatureAttribute group) {
         return 1 + Math.max(0, level - 1) / 2F;
     }
 
     @Override
-    public boolean isAcceptableItem(ItemStack stack) {
+    public boolean canEnchant(ItemStack stack) {
         return stack.getItem() instanceof SoulboundStaffItem;
     }
 }

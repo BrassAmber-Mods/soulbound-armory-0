@@ -3,12 +3,14 @@ package net.auoeke.soulboundarmory.capability.soulbound.item.weapon;
 import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import net.auoeke.soulboundarmory.SoulboundArmory;
 import net.auoeke.soulboundarmory.capability.Capabilities;
+import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
+import net.auoeke.soulboundarmory.capability.soulbound.player.SoulboundCapability;
 import net.auoeke.soulboundarmory.capability.statistics.Category;
+import net.auoeke.soulboundarmory.capability.statistics.EnchantmentStorage;
 import net.auoeke.soulboundarmory.capability.statistics.SkillStorage;
 import net.auoeke.soulboundarmory.capability.statistics.StatisticType;
 import net.auoeke.soulboundarmory.capability.statistics.Statistics;
@@ -19,19 +21,15 @@ import net.auoeke.soulboundarmory.registry.SoulboundItems;
 import net.auoeke.soulboundarmory.text.Translation;
 import net.auoeke.soulboundarmory.util.AttributeModifierIdentifiers;
 import net.auoeke.soulboundarmory.util.Util;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
-import net.auoeke.soulboundarmory.capability.soulbound.player.SoulboundCapability;
-import net.auoeke.soulboundarmory.capability.statistics.EnchantmentStorage;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
@@ -43,26 +41,26 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     public StaffStorage(SoulboundCapability component, Item item) {
         super(component, item);
         this.statistics = Statistics.create()
-                .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
-                .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
-                .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
-                .max(1, StatisticType.criticalStrikeRate).build();
-        this.enchantments = new EnchantmentStorage((Enchantment enchantment) -> {
-             String name = enchantment.getName(1).asString().toLowerCase();
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
+            .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
+            .max(1, StatisticType.criticalStrikeRate).build();
+        this.enchantments = new EnchantmentStorage(enchantment -> {
+            var name = enchantment.getFullname(1).getContents().toLowerCase();
 
-            return enchantment.isAcceptableItem(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
-                    && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
-                    && !name.contains("mending");
+            return enchantment.canEnchant(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
+                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
+                && !name.contains("mending");
         });
         this.skills = new SkillStorage(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 
     public static StaffStorage get(Entity entity) {
-        return Capabilities.weapon.get(entity).storage(StorageType.staff);
+        return Capabilities.weapon.get(entity).get().storage(StorageType.staff);
     }
 
     @Override
-    public Text getName() {
+    public ITextComponent getName() {
         return Translations.soulboundStaff;
     }
 
@@ -98,10 +96,10 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), EntityAttributeModifier.Operation.ADDITION));
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), EntityAttributeModifier.Operation.ADDITION));
+    public Multimap<Attribute, AttributeModifier> attributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
+        if (slot == EquipmentSlotType.MAINHAND) {
+            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), AttributeModifier.Operation.ADDITION));
+            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), AttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;
@@ -109,27 +107,25 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
 
     @Override
     public List<StatisticEntry> screenAttributes() {
-         List<StatisticEntry> entries = new ReferenceArrayList<>();
-
-        entries.add(new StatisticEntry(this.statistic(StatisticType.attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(StatisticType.attackSpeed))));
-        entries.add(new StatisticEntry(this.statistic(StatisticType.attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(StatisticType.attackDamage))));
-        entries.add(new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), new Translation("%s%s: %s%%", Translations.criticalStrikeRateFormat, Translations.criticalStrikeRateName, this.formatStatistic(StatisticType.criticalStrikeRate))));
-
-        return entries;
+        return new ReferenceArrayList<>(List.of(
+            new StatisticEntry(this.statistic(StatisticType.attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(StatisticType.attackSpeed))),
+            new StatisticEntry(this.statistic(StatisticType.attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(StatisticType.attackDamage))),
+            new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), new Translation("%s%s: %s%%", Translations.criticalStrikeRateFormat, Translations.criticalStrikeRateName, this.formatStatistic(StatisticType.criticalStrikeRate)))
+        ));
     }
 
     @Override
-    public List<Text> tooltip() {
-         NumberFormat format = DecimalFormat.getInstance();
-         List<Text> tooltip = new ArrayList<>();
-
-        tooltip.add(new Translation(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName));
-        tooltip.add(new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName));
-        tooltip.add(new LiteralText(""));
-        tooltip.add(new LiteralText(""));
+    public List<ITextComponent> tooltip() {
+        var format = DecimalFormat.getInstance();
+        var tooltip = new ArrayList<>(List.of(
+            new Translation(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName),
+            new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName),
+            StringTextComponent.EMPTY,
+            StringTextComponent.EMPTY
+        ));
 
         if (this.attribute(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(new LiteralText(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
+            tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
         }
 
         return tooltip;
@@ -165,23 +161,22 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
+    public void serializeNBT(CompoundNBT tag) {
         super.serializeNBT(tag);
-        
+
         tag.putInt("spell", this.spell);
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
+    public void deserializeNBT(CompoundNBT tag) {
         super.deserializeNBT(tag);
 
         this.setSpell(tag.getInt("spell"));
     }
 
     @Override
-    public NbtCompound clientTag() {
-        NbtCompound tag = super.clientTag();
-
+    public CompoundNBT clientTag() {
+        var tag = super.clientTag();
         tag.putInt("spell", this.spell);
 
         return tag;

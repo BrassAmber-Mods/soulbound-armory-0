@@ -3,7 +3,7 @@ package net.auoeke.soulboundarmory.client.gui.bar;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
 import net.auoeke.soulboundarmory.client.i18n.Translations;
-import net.minecraft.text.Text;
+import net.minecraft.util.text.ITextComponent;
 
 public enum Style {
     EXPERIENCE(64, Translations.xpStyle),
@@ -15,14 +15,14 @@ public enum Style {
 
     public final int v;
 
-    protected final Text text;
+    private final ITextComponent text;
 
-    Style(int v, Text text) {
+    Style(int v, ITextComponent text) {
         this.v = v;
         this.text = text;
     }
 
-    public Text getText() {
+    public ITextComponent getText() {
         return this.text;
     }
 }

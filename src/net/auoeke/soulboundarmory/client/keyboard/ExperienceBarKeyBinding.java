@@ -10,8 +10,6 @@ public class ExperienceBarKeyBinding extends KeyBindingBase {
 
     @Override
     protected void press() {
-        Configuration.Client client = Configuration.instance().client;
-
-        client.toggleOverlayExperienceBar();
+        Configuration.instance().client.toggleOverlayExperienceBar();
     }
 }

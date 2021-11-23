@@ -4,9 +4,9 @@ import java.util.Random;
 
 public class MathUtil {
     public static double signum(double first, double... others) {
-        double sign = Math.signum(first);
+        var sign = Math.signum(first);
 
-        for (double number : others) {
+        for (var number : others) {
             sign *= Math.signum(number);
         }
 
@@ -14,9 +14,9 @@ public class MathUtil {
     }
 
     public static int min(int... values) {
-        int min = values[0];
+        var min = values[0];
 
-        for (int value : values) {
+        for (var value : values) {
             if (value < min) {
                 min = value;
             }
@@ -26,9 +26,9 @@ public class MathUtil {
     }
 
     public static double min(double... values) {
-        double min = values[0];
+        var min = values[0];
 
-        for (double value : values) {
+        for (var value : values) {
             if (value < min) {
                 min = value;
             }
@@ -38,9 +38,9 @@ public class MathUtil {
     }
 
     public static int max(int... values) {
-        int max = values[0];
+        var max = values[0];
 
-        for (int value : values) {
+        for (var value : values) {
             if (value > max) {
                 max = value;
             }
@@ -50,9 +50,9 @@ public class MathUtil {
     }
 
     public static double max(double... values) {
-        double max = values[0];
+        var max = values[0];
 
-        for (double value : values) {
+        for (var value : values) {
             if (value > max) {
                 max = value;
             }
@@ -66,9 +66,9 @@ public class MathUtil {
     }
 
     public static int sum(int... values) {
-        int sum = 0;
+        var sum = 0;
 
-        for (int value : values) {
+        for (var value : values) {
             sum += value;
         }
 
@@ -78,7 +78,7 @@ public class MathUtil {
     public static double sum(double... values) {
         double sum = 0;
 
-        for (double value : values) {
+        for (var value : values) {
             sum += value;
         }
 
@@ -88,7 +88,7 @@ public class MathUtil {
     public static double sqSum(double... values) {
         double sum = 0;
 
-        for (double value : values) {
+        for (var value : values) {
             sum += value * value;
         }
 
@@ -96,13 +96,13 @@ public class MathUtil {
     }
 
     public static int ceil(double value) {
-        int floor = (int) value;
+        var floor = (int) value;
 
         return value == floor ? floor : floor + 1;
     }
 
     public static int ceil(float value) {
-        int floor = (int) value;
+        var floor = (int) value;
 
         return value == floor ? floor : floor + 1;
     }

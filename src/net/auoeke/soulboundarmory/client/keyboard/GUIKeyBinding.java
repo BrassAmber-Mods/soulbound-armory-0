@@ -1,9 +1,9 @@
 package net.auoeke.soulboundarmory.client.keyboard;
 
-import org.lwjgl.glfw.GLFW;
 import net.auoeke.soulboundarmory.SoulboundArmoryClient;
 import net.auoeke.soulboundarmory.capability.soulbound.item.ItemStorage;
 import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
+import org.lwjgl.glfw.GLFW;
 
 public class GUIKeyBinding extends KeyBindingBase {
     public GUIKeyBinding() {
@@ -12,10 +12,6 @@ public class GUIKeyBinding extends KeyBindingBase {
 
     @Override
     protected void press() {
-        ItemStorage<?> component = StorageType.firstMenuStorage(SoulboundArmoryClient.player());
-
-        if (component != null) {
-            component.openGUI();
-        }
+        StorageType.firstMenuStorage(SoulboundArmoryClient.player()).ifPresent(ItemStorage::openGUI);
     }
 }

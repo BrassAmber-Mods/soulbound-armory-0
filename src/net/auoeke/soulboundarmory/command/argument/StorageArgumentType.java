@@ -26,7 +26,7 @@ public class StorageArgumentType extends RegistryArgumentType<StorageType<?>> {
 
     @Override
     public Set<StorageType<? extends ItemStorage<?>>> parse(StringReader reader) throws CommandSyntaxException {
-        int cursor = reader.getCursor();
+        var cursor = reader.getCursor();
 
         if (Pattern.compile(Pattern.quote("current"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(reader.readString()).find()) {
             return Collections.emptySet();

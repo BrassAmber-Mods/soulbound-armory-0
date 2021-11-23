@@ -1,18 +1,26 @@
 package net.auoeke.soulboundarmory.event;
 
+import net.auoeke.soulboundarmory.SoulboundArmory;
 import net.auoeke.soulboundarmory.SoulboundArmoryClient;
 import net.auoeke.soulboundarmory.capability.CapabilityStorage;
 import net.auoeke.soulboundarmory.capability.config.ConfigCapability;
 import net.auoeke.soulboundarmory.capability.entity.EntityData;
+import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
+import net.auoeke.soulboundarmory.capability.soulbound.player.ToolCapability;
+import net.auoeke.soulboundarmory.capability.soulbound.player.WeaponCapability;
 import net.auoeke.soulboundarmory.capability.statistics.Category;
 import net.auoeke.soulboundarmory.capability.statistics.StatisticType;
+import net.auoeke.soulboundarmory.client.render.SoulboundDaggerEntityRenderer;
+import net.auoeke.soulboundarmory.client.render.SoulboundFireballEntityRenderer;
+import net.auoeke.soulboundarmory.entity.SAAttributes;
 import net.auoeke.soulboundarmory.entity.SoulboundDaggerEntity;
 import net.auoeke.soulboundarmory.entity.SoulboundFireballEntity;
 import net.auoeke.soulboundarmory.registry.SoulboundItems;
+import net.auoeke.soulboundarmory.skill.Skill;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -23,15 +31,6 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.auoeke.soulboundarmory.SoulboundArmory;
-import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
-import net.auoeke.soulboundarmory.capability.soulbound.player.ToolCapability;
-import net.auoeke.soulboundarmory.capability.soulbound.player.WeaponCapability;
-import net.auoeke.soulboundarmory.client.render.SoulboundDaggerEntityRenderer;
-import net.auoeke.soulboundarmory.client.render.SoulboundFireballEntityRenderer;
-import net.auoeke.soulboundarmory.entity.SAAttributes;
-import net.auoeke.soulboundarmory.skill.Skill;
 
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
@@ -65,8 +64,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        IForgeRegistry<Item> registry = event.getRegistry();
-
+        var registry = event.getRegistry();
         registry.register(SoulboundItems.dagger.setRegistryName("dagger"));
         registry.register(SoulboundItems.sword.setRegistryName("sword"));
         registry.register(SoulboundItems.greatsword.setRegistryName("greatsword"));
@@ -80,7 +78,7 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void registerAttributes(RegistryEvent.Register<EntityAttribute> event) {
+    public static void registerAttributes(RegistryEvent.Register<Attribute> event) {
         event.getRegistry().register(SAAttributes.efficiency.setRegistryName("efficiency"));
         event.getRegistry().register(SAAttributes.criticalStrikeRate.setRegistryName("critical_strike_rate"));
     }

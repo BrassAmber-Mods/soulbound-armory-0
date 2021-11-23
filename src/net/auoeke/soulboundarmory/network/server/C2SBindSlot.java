@@ -8,7 +8,7 @@ import net.auoeke.soulboundarmory.network.ItemComponentPacket;
 public class C2SBindSlot implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        int slot = buffer.readInt();
+        var slot = buffer.readInt();
 
         if (storage.boundSlot() == slot) {
             storage.unbindSlot();
@@ -16,7 +16,7 @@ public class C2SBindSlot implements ItemComponentPacket {
             storage.bindSlot(slot);
         }
 
-        //        this.component.sync();
+        // this.component.sync();
         storage.refresh();
     }
 }

@@ -2,19 +2,19 @@ package net.auoeke.soulboundarmory.client.gui;
 
 import net.auoeke.cell.client.gui.widget.Slider;
 import net.auoeke.soulboundarmory.config.Configuration;
-import net.minecraft.text.Text;
 import net.auoeke.soulboundarmory.text.Translation;
+import net.minecraft.util.text.ITextComponent;
 
 public class RGBASlider extends Slider {
     protected static final Configuration.Client.Colors colors = Configuration.instance().client.colors;
 
     public final int id;
 
-    protected final Text text;
+    protected final ITextComponent text;
 
     protected int componentValue;
 
-    public RGBASlider(int id, Text text) {
+    public RGBASlider(int id, ITextComponent text) {
         this.min(0).max(255);
 
         this.text = text;

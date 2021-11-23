@@ -1,16 +1,16 @@
 package net.auoeke.soulboundarmory.skill.weapon.greatsword;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.auoeke.cell.client.gui.screen.CellScreen;
 import net.auoeke.soulboundarmory.skill.Skill;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class LeapingSkill extends Skill {
-    public LeapingSkill(Identifier identifier) {
+    public LeapingSkill(ResourceLocation identifier) {
         super(identifier);
     }
 

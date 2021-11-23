@@ -5,12 +5,14 @@ import net.auoeke.soulboundarmory.SoulboundArmory;
 import net.auoeke.soulboundarmory.capability.Capabilities;
 import net.auoeke.soulboundarmory.capability.config.ConfigCapability;
 import net.auoeke.soulboundarmory.capability.entity.EntityData;
+import net.auoeke.soulboundarmory.capability.soulbound.player.ToolCapability;
+import net.auoeke.soulboundarmory.capability.soulbound.player.WeaponCapability;
 import net.auoeke.soulboundarmory.command.SoulboundArmoryCommand;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -18,14 +20,12 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.auoeke.soulboundarmory.capability.soulbound.player.ToolCapability;
-import net.auoeke.soulboundarmory.capability.soulbound.player.WeaponCapability;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public class CommonEvents {
     @SubscribeEvent
     public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        Entity entity = event.getObject();
+        var entity = event.getObject();
 
         if (entity instanceof PlayerEntity player) {
             event.addCapability(SoulboundArmory.id("config"), new EntityProvider<>(player, Capabilities.config.capability, ConfigCapability::new));
@@ -40,7 +40,7 @@ public class CommonEvents {
 
     @SubscribeEvent
     public static void registerCommand(RegisterCommandsEvent event) {
-        event.getDispatcher().register(SoulboundArmoryCommand.get());
+        SoulboundArmoryCommand.register(event);
     }
 
     private static class EntityProvider<E extends Entity> implements ICapabilityProvider {

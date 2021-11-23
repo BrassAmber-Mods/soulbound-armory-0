@@ -1,17 +1,17 @@
 package net.auoeke.soulboundarmory.skill.weapon.staff;
 
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.potion.Potions;
-import net.minecraft.util.Identifier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.auoeke.cell.client.gui.screen.CellScreen;
 import net.auoeke.soulboundarmory.skill.Skill;
+import net.minecraft.item.Items;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.potion.Potions;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class HealingSkill extends Skill {
-    public HealingSkill(Identifier identifier) {
+    public HealingSkill(ResourceLocation identifier) {
         super(identifier);
     }
 
@@ -23,6 +23,6 @@ public class HealingSkill extends Skill {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
-        screen.renderGuiItem(PotionUtil.setPotion(Items.POTION.getDefaultStack(), Potions.HEALING), x, y, zOffset);
+        screen.renderGuiItem(PotionUtils.setPotion(Items.POTION.getDefaultInstance(), Potions.HEALING), x, y, zOffset);
     }
 }
