@@ -1,16 +1,16 @@
 package net.auoeke.soulboundarmory.skill.weapon.dagger;
 
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.auoeke.cell.client.gui.screen.CellScreen;
 import net.auoeke.soulboundarmory.registry.Skills;
 import net.auoeke.soulboundarmory.skill.Skill;
+import net.minecraft.item.Items;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class SneakReturnSkill extends Skill {
-    public SneakReturnSkill(Identifier identifier) {
+    public SneakReturnSkill(ResourceLocation identifier) {
         super(identifier);
     }
 
@@ -29,6 +29,6 @@ public class SneakReturnSkill extends Skill {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
-        screen.renderGuiItem(Items.LEAD.getDefaultStack(), x, y, zOffset);
+        screen.renderGuiItem(Items.LEAD.getDefaultInstance(), x, y, zOffset);
     }
 }

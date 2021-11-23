@@ -4,7 +4,6 @@ import net.auoeke.soulboundarmory.asm.access.entity.PlayerEntityAccess;
 import net.auoeke.soulboundarmory.entity.SAAttributes;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,10 +20,10 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAcc
 
     @ModifyArg(method = "attack", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
     private float applyCriticalStrikeRate(float damage) {
-        // EntityAttributeInstance instance = self.getEntityAttributeInstance(SoulboundArmoryAttributes.GENERIC_CRITICAL_STRIKE_PROBABILITY);
+        // AttributeInstance instance = self.getAttributeInstance(SoulboundArmoryAttributes.GENERIC_CRITICAL_STRIKE_PROBABILITY);
         //
         // if (instance != null) {
-        //      EntityAttributeModifier modifier = instance.getModifier(SoulboundArmoryAttributes.CRITICAL_STRIKE_PROBABILITY_MODIFIER_ID);
+        //      AttributeModifier modifier = instance.getModifier(SoulboundArmoryAttributes.CRITICAL_STRIKE_PROBABILITY_MODIFIER_ID);
         //
         //     if (modifier != null) {
         //         return modifier.getValue() > self.getRandom().nextDouble() ? 2 * damage : damage;
@@ -33,7 +32,7 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAcc
         //
         // return damage;
 
-        EntityAttributeInstance instance = this.getAttributeInstance(SAAttributes.criticalStrikeRate);
+        var instance = this.getAttribute(SAAttributes.criticalStrikeRate);
 
         return instance != null && instance.getValue() > this.random.nextDouble() ? 2 * damage : damage;
     }

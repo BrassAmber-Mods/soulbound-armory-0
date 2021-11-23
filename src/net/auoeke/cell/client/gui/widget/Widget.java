@@ -1,33 +1,31 @@
 package net.auoeke.cell.client.gui.widget;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.auoeke.cell.client.gui.CellElement;
 import net.auoeke.cell.client.gui.widget.callback.PressCallback;
 import net.auoeke.cell.client.gui.widget.callback.TextProvider;
 import net.auoeke.cell.client.gui.widget.callback.TooltipProvider;
 import net.auoeke.cell.client.gui.widget.callback.TooltipRenderer;
-import net.minecraft.client.font.TextHandler;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
-import net.auoeke.cell.client.gui.CellElement;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class Widget<T extends Widget<T>> extends CellElement {
-    protected static final SoundManager soundManager = client.getSoundManager();
-    protected static final TextHandler textHandler = textRenderer.getTextHandler();
+    protected static final SoundHandler soundManager = client.getSoundManager();
 
     public List<CellElement> children = new ReferenceArrayList<>();
 
-    public Text text = LiteralText.EMPTY;
+    public ITextComponent text = StringTextComponent.EMPTY;
     public PressCallback<T> primaryAction;
     public PressCallback<T> secondaryAction;
     public PressCallback<T> tertiaryAction;
@@ -97,10 +95,10 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
     }
 
     public T text(String text) {
-        return this.text(new TranslatableText(text));
+        return this.text(new TranslationTextComponent(text));
     }
 
-    public T text(Text text) {
+    public T text(ITextComponent text) {
         this.text = text;
 
         return (T) this;
@@ -125,14 +123,14 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
     }
 
     public T tooltip(String tooltip) {
-        return this.tooltip((T widget, int mouseX, int mouseY) -> new TranslatableText(tooltip));
+        return this.tooltip((T widget, int mouseX, int mouseY) -> new TranslationTextComponent(tooltip));
     }
 
-    public T tooltip(Text... tooltip) {
+    public T tooltip(ITextComponent... tooltip) {
         return this.tooltip(Arrays.asList(tooltip));
     }
 
-    public T tooltip(List<Text> tooltip) {
+    public T tooltip(List<ITextComponent> tooltip) {
         return this.tooltip((T widget, int mouseX, int mouseY) -> tooltip);
     }
 
@@ -229,7 +227,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     public void renderForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (this.text != null) {
-            drawCenteredText(matrices, textRenderer, this.text, this.x() + this.width() / 2, this.y() + this.height() / 2 - textRenderer.fontHeight / 2, this.active ? 0xFFFFFFFF : 0xA0FFFFFF);
+            drawString(matrices, textRenderer, this.text, this.x() + this.width() / 2, this.y() + this.height() / 2 - textRenderer.lineHeight / 2, this.active ? 0xFFFFFFFF : 0xA0FFFFFF);
         }
     }
 
@@ -344,6 +342,6 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
     }
 
     public void playSound() {
-        soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1));
+        soundManager.play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1));
     }
 }

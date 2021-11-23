@@ -1,8 +1,8 @@
 package net.auoeke.soulboundarmory.text;
 
-import net.minecraft.text.TranslatableText;
+import net.minecraft.util.text.TranslationTextComponent;
 
-public class Translation extends TranslatableText {
+public class Translation extends TranslationTextComponent {
     public Translation(String key) {
         super(key);
     }

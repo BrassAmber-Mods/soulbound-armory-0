@@ -1,10 +1,10 @@
 package net.auoeke.soulboundarmory.skill.weapon.staff;
 
-import net.minecraft.util.Identifier;
 import net.auoeke.soulboundarmory.skill.Skill;
+import net.minecraft.util.ResourceLocation;
 
 public class PenetrationSkill extends Skill {
-    public PenetrationSkill(Identifier identifier) {
+    public PenetrationSkill(ResourceLocation identifier) {
         super(identifier);
     }
 

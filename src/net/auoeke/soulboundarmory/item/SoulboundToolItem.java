@@ -8,6 +8,6 @@ import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
 
 public interface SoulboundToolItem extends SoulboundItem {
     default int harvestLevel(LivingEntity user, ItemStack stack) {
-        return user instanceof PlayerEntity ? StorageType.get(user, stack.getItem()).statistic(StatisticType.miningLevel).intValue() : 0;
+        return user instanceof PlayerEntity ? StorageType.get(user, stack.getItem()).get().statistic(StatisticType.miningLevel).intValue() : 0;
     }
 }

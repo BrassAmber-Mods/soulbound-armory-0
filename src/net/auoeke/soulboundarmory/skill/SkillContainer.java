@@ -1,15 +1,15 @@
 package net.auoeke.soulboundarmory.skill;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.List;
 import java.util.Set;
+import net.auoeke.cell.client.gui.screen.CellScreen;
 import net.auoeke.soulboundarmory.capability.statistics.SkillStorage;
 import net.auoeke.soulboundarmory.serial.CompoundSerializable;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.auoeke.cell.client.gui.screen.CellScreen;
 
 public class SkillContainer implements Comparable<SkillContainer>, CompoundSerializable {
     protected final Skill skill;
@@ -76,7 +76,7 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
     }
 
     public boolean canLearn() {
-        for (Skill dependency : this.skill.dependencies()) {
+        for (var dependency : this.skill.dependencies()) {
             if (!this.storage.get(dependency).learned()) {
                 return false;
             }
@@ -95,18 +95,18 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
 
     @Override
     public int compareTo(SkillContainer other) {
-        int tierDifference = this.skill.tier() - other.skill.tier();
+        var tierDifference = this.skill.tier() - other.skill.tier();
 
         return tierDifference == 0 ? this.level() - other.level() : tierDifference;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public Text name() {
+    public ITextComponent name() {
         return this.skill.name();
     }
 
     @OnlyIn(Dist.CLIENT)
-    public List<Text> tooltip() {
+    public List<ITextComponent> tooltip() {
         return this.skill.tooltip();
     }
 
@@ -116,13 +116,13 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
+    public void serializeNBT(CompoundNBT tag) {
         tag.putBoolean("learned", this.learned);
         tag.putInt("level", this.level);
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
+    public void deserializeNBT(CompoundNBT tag) {
         this.learned = tag.getBoolean("learned");
         this.level = tag.getInt("level");
     }

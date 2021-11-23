@@ -5,13 +5,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundNBT;
 import net.auoeke.soulboundarmory.serial.CompoundSerializable;
+import net.minecraft.util.ResourceLocation;
 
 public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements CompoundSerializable, Iterable<Statistic> {
-    protected Statistics() {
-    }
+    protected Statistics() {}
 
     public static Builder create() {
         return new Builder(new Statistics());
@@ -22,8 +21,8 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     public Statistic get(StatisticType type) {
-        for (Map<StatisticType, Statistic> category : this.values()) {
-            Statistic statistic = category.get(type);
+        for (var category : this.values()) {
+            var statistic = category.get(type);
 
             if (statistic != null) {
                 return statistic;
@@ -38,7 +37,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     public void add(StatisticType type, Number value) {
-        Statistic statistic = this.get(type);
+        var statistic = this.get(type);
 
         if (statistic != null) {
             statistic.add(value);
@@ -50,13 +49,13 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     public void reset() {
-        for (Category category : this.keySet()) {
+        for (var category : this.keySet()) {
             this.reset(category);
         }
     }
 
     public void reset(Category category) {
-        for (Statistic statistic : this.get(category).values()) {
+        for (var statistic : this.get(category).values()) {
             statistic.reset();
         }
     }
@@ -65,7 +64,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     public Iterator<Statistic> iterator() {
         Set<Statistic> statistics = new HashSet<>();
 
-        for (Map<StatisticType, Statistic> category : this.values()) {
+        for (var category : this.values()) {
             statistics.addAll(category.values());
         }
 
@@ -73,16 +72,16 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
-        for (Category category : this.keySet()) {
+    public void serializeNBT(CompoundNBT tag) {
+        for (var category : this.keySet()) {
             tag.put(category.id().toString(), this.toTag(category));
         }
     }
 
-    public NbtCompound toTag(Category category) {
-        NbtCompound tag = new NbtCompound();
+    public CompoundNBT toTag(Category category) {
+        var tag = new CompoundNBT();
 
-        for (Statistic statistic : this.get(category).values()) {
+        for (var statistic : this.get(category).values()) {
             tag.put(statistic.type().id().toString(), statistic.serializeNBT());
         }
 
@@ -90,16 +89,16 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
-        for (String key : tag.getKeys()) {
-            this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(new Identifier(key)));
+    public void deserializeNBT(CompoundNBT tag) {
+        for (var key : tag.getAllKeys()) {
+            this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(new ResourceLocation(key)));
         }
     }
 
-    public void deserializeNBT(NbtCompound tag, Category category) {
+    public void deserializeNBT(CompoundNBT tag, Category category) {
         if (category != null) {
-            for (String identifier : tag.getKeys()) {
-                Statistic statistic = this.get(StatisticType.registry.getValue(new Identifier(identifier)));
+            for (var identifier : tag.getAllKeys()) {
+                var statistic = this.get(StatisticType.registry.getValue(new ResourceLocation(identifier)));
 
                 if (statistic != null) {
                     statistic.deserializeNBT(tag.getCompound(identifier));
@@ -116,10 +115,10 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
         }
 
         public Builder category(Category categoryType, StatisticType... statisticTypes) {
-            Map<StatisticType, Statistic> category = new HashMap<>();
-            Statistics statistics = this.statistics;
+            var category = new HashMap<StatisticType, Statistic>();
+            var statistics = this.statistics;
 
-            for (StatisticType statisticType : statisticTypes) {
+            for (var statisticType : statisticTypes) {
                 category.put(statisticType, new Statistic(categoryType, statisticType));
                 statistics.put(categoryType, category);
             }
@@ -128,7 +127,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
         }
 
         public Builder min(double min, Category category) {
-            for (StatisticType statistic : this.statistics.get(category).keySet()) {
+            for (var statistic : this.statistics.get(category).keySet()) {
                 this.min(min, statistic);
             }
 
@@ -136,9 +135,9 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
         }
 
         public Builder min(double min, StatisticType... types) {
-            Statistics statistics = this.statistics;
+            var statistics = this.statistics;
 
-            for (StatisticType type : types) {
+            for (var type : types) {
                 statistics.get(type).setMin(min);
             }
 
@@ -146,7 +145,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
         }
 
         public Builder max(double max, Category category) {
-            for (StatisticType type : this.statistics.get(category).keySet()) {
+            for (var type : this.statistics.get(category).keySet()) {
                 this.max(max, type);
             }
 
@@ -154,9 +153,9 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
         }
 
         public Builder max(double max, StatisticType... types) {
-            Statistics statistics = this.statistics;
+            var statistics = this.statistics;
 
-            for (StatisticType type : types) {
+            for (var type : types) {
                 statistics.get(type).setMax(max);
             }
 

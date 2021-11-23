@@ -2,10 +2,10 @@ package net.auoeke.soulboundarmory.skill.weapon.dagger;
 
 import net.auoeke.soulboundarmory.registry.Skills;
 import net.auoeke.soulboundarmory.skill.Skill;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 
 public class ShadowCloneSkill extends Skill {
-    public ShadowCloneSkill(Identifier identifier) {
+    public ShadowCloneSkill(ResourceLocation identifier) {
         super(identifier);
     }
 

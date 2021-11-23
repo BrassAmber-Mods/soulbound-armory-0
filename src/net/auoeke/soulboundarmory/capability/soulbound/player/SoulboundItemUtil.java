@@ -1,31 +1,32 @@
 package net.auoeke.soulboundarmory.capability.soulbound.player;
 
+import java.util.Optional;
+import net.auoeke.soulboundarmory.capability.soulbound.item.ItemStorage;
 import net.auoeke.soulboundarmory.item.SoulboundWeaponItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.auoeke.soulboundarmory.capability.soulbound.item.ItemStorage;
 
 public class SoulboundItemUtil {
-    public static ItemStorage<?> getFirstStorage(Entity entity) {
+    public static Optional<ItemStorage<?>> firstStorage(Entity entity) {
         if (entity == null) {
-            return null;
+            return Optional.empty();
         }
 
-        for (ItemStack itemStack : entity.getItemsHand()) {
-            ItemStorage<?> component = ItemStorage.get(entity, itemStack.getItem());
+        for (var itemStack : entity.getHandSlots()) {
+            var component = ItemStorage.get(entity, itemStack.getItem());
 
-            if (component != null) {
+            if (component.isPresent()) {
                 return component;
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public static boolean isSoulWeaponEquipped(PlayerEntity player) {
-        return player.getMainHandStack().getItem() instanceof SoulboundWeaponItem
-            || player.getOffHandStack().getItem() instanceof SoulboundWeaponItem;
+        return player.getMainHandItem().getItem() instanceof SoulboundWeaponItem
+            || player.getOffhandItem().getItem() instanceof SoulboundWeaponItem;
     }
 
     public static boolean addItemStack(ItemStack itemStack, PlayerEntity player) {
@@ -49,7 +50,7 @@ public class SoulboundItemUtil {
             }
 
              int size = inventory.main.size();
-             List<ItemStack> mergedInventory = CollectionUtil.merge(DefaultedList.of(), inventory.main, inventory.offHand);
+             List<ItemStack> mergedInventory = CollectionUtil.merge(NonNullList.of(), inventory.main, inventory.offHand);
 
             if (slot != -1) {
                  ItemStack slotStack = slot != 40 ? mergedInventory.get(slot) : mergedInventory.get(size);
@@ -106,11 +107,11 @@ public class SoulboundItemUtil {
     }
 
     public static boolean hasSoulWeapon(PlayerEntity player) {
-        int size = player.inventory.size();
-        ItemStack[] inventory = player.inventory.main.toArray(new ItemStack[size + 1]);
-        inventory[size] = player.getOffHandStack();
+        var size = player.inventory.getContainerSize();
+        var inventory = player.inventory.items.toArray(new ItemStack[size + 1]);
+        inventory[size] = player.getOffhandItem();
 
-        for (ItemStack itemStack : inventory) {
+        for (var itemStack : inventory) {
             if (itemStack != null && itemStack.getItem() instanceof SoulboundWeaponItem) {
                 return true;
             }

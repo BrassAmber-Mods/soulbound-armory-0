@@ -10,7 +10,7 @@ import net.auoeke.soulboundarmory.skill.Skill;
 public class C2SSkill implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        storage.upgrade(storage.skill(Skill.registry.getValue(SoulboundArmory.id(buffer.readString()))));
+        storage.upgrade(storage.skill(Skill.registry.getValue(SoulboundArmory.id(buffer.readUtf()))));
         // this.component.sync();
     }
 }

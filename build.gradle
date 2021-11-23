@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    minecraft("net.minecraftforge:forge:1.17.1-37.0.104")
+    minecraft("net.minecraftforge:forge:1.16.5-36.2.9")
     implementation("net.auoeke:reflect:latest.integration")
 
     if (!Boolean.getBoolean("idea.sync.active")) {
@@ -45,7 +45,7 @@ dependencies {
 }
 
 minecraft {
-    mappings("official", "1.17.1")
+    mappings("official", "1.16.5")
 
     runs {
         ["client", "server"].each {

@@ -2,6 +2,7 @@ package net.auoeke.soulboundarmory.capability;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -17,19 +18,15 @@ public class CapabilityContainer<T> {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public T get(ICapabilityProvider provider) {
-        return this.capabilities.computeIfAbsent(provider, provider2 -> provider2.getCapability(this.capability).orElse(null));
+    public Optional<T> get(ICapabilityProvider provider) {
+        return Optional.ofNullable(this.capabilities.computeIfAbsent(provider, provider2 -> provider2.getCapability(this.capability).orElse(null)));
     }
 
     public boolean has(Entity entity) {
-        return get(entity) != null;
+        return this.get(entity).isPresent();
     }
 
     public void ifPresent(ICapabilityProvider provider, NonNullConsumer<? super T> action) {
-        T capability = this.get(provider);
-
-        if (capability != null) {
-            action.accept(capability);
-        }
+        this.get(provider).ifPresent(action::accept);
     }
 }

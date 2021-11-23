@@ -36,7 +36,7 @@ public class Skills {
     public static final Skill vulnerability = new VulnerabilitySkill(SoulboundArmory.id("vulnerability"));
 
     static {
-        for (Skill skill : Skill.registry) {
+        for (var skill : Skill.registry) {
             if (skill.getRegistryName().getNamespace().equals(SoulboundArmory.ID)) {
                 skill.initDependencies();
             }

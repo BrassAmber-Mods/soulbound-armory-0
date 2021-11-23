@@ -18,9 +18,9 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.auoeke.reflect.Accessor;
 import net.auoeke.soulboundarmory.SoulboundArmory;
-import net.minecraft.command.CommandSource;
-import user11681.reflect.Accessor;
+import net.minecraft.command.ISuggestionProvider;
 
 public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     protected final Class<T> clazz;
@@ -31,16 +31,16 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
         this.validFields = new LinkedHashMap<>();
     }
 
-    public static <T> List<T> getConstants(CommandContext<?> context, String name, Class<T> clazz) {
+    public static <T> List<T> getConstants(CommandContext<?> context, String name, Class<T> type) {
         //noinspection unchecked
         return (List<T>) context.getArgument(name, List.class);
     }
 
     public static <T> ConstantArgumentType<T> allConstants(Class<T> clazz) {
-         ConstantArgumentType<T> type = new ConstantArgumentType<>(clazz);
+        var type = new ConstantArgumentType<>(clazz);
 
-        for (Field field : type.clazz.getDeclaredFields()) {
-             int modifiers = field.getModifiers();
+        for (var field : type.clazz.getDeclaredFields()) {
+            var modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
                 type.validFields.put(field.getName(), field);
@@ -51,10 +51,10 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     }
 
     public static <T, U> ConstantArgumentType<T> allConstants(Class<T> holderClass, Class<U> fieldClass) {
-         ConstantArgumentType<T> type = new ConstantArgumentType<>(holderClass);
+        var type = new ConstantArgumentType<>(holderClass);
 
-        for (Field field : type.clazz.getDeclaredFields()) {
-             int modifiers = field.getModifiers();
+        for (var field : type.clazz.getDeclaredFields()) {
+            var modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && fieldClass.isInstance(Accessor.get(field))) {
                 type.validFields.put(field.getName(), field);
@@ -87,13 +87,13 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     }
 
     public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, Predicate<T> include) {
-         ConstantArgumentType<T> type = new ConstantArgumentType<>(clazz);
+        var type = new ConstantArgumentType<>(clazz);
 
-        for (Field field : type.clazz.getDeclaredFields()) {
-             int modifiers = field.getModifiers();
+        for (var field : type.clazz.getDeclaredFields()) {
+            var modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                 String name = field.getName();
+                var name = field.getName();
 
                 try {
                     //noinspection unchecked
@@ -111,21 +111,20 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     @Override
     public List<T> parse(StringReader reader) throws CommandSyntaxException {
-         String input = reader.readString();
-         Map<String, Field> fields = this.validFields;
+        var input = reader.readString();
+        var fields = this.validFields;
 
         if (Pattern.compile(Pattern.quote("ALL"), Pattern.CASE_INSENSITIVE).matcher(input).find()) {
             //noinspection unchecked
-            return this.validFields.values().parallelStream().map((Field field) -> (T) Accessor.get(field)).collect(Collectors.toList());
+            return this.validFields.values().parallelStream().map(field -> (T) Accessor.get(field)).collect(Collectors.toList());
         }
 
-        for (String name : fields.keySet()) {
+        for (var name : fields.keySet()) {
             if (Pattern.compile(Pattern.quote(name), Pattern.CASE_INSENSITIVE).matcher(input).find()) {
                 try {
                     //noinspection unchecked
                     return Collections.singletonList((T) fields.get(name).get(null));
-                } catch (IllegalAccessException ignored) {
-                }
+                } catch (IllegalAccessException ignored) {}
             }
         }
 
@@ -134,6 +133,6 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
+        return ISuggestionProvider.suggest(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
     }
 }

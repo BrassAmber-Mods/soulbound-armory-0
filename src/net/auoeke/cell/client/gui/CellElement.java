@@ -1,26 +1,19 @@
 package net.auoeke.cell.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.auoeke.cell.client.gui.widget.Length;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Tickable;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CellElement extends DrawableHelper implements DrawableElement, Tickable, Cloneable {
-    public static final MinecraftClient client = MinecraftClient.getInstance();
-    public static final TextRenderer textRenderer = client.textRenderer;
-
+public abstract class CellElement extends AbstractGui implements DrawableElement, Cloneable {
     public int x;
     public int y;
 
@@ -32,7 +25,7 @@ public abstract class CellElement extends DrawableHelper implements DrawableElem
     }
 
     public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, float z, int color) {
-        fill(matrices.peek().getModel(), x1, y1, x2, y2, z, color);
+        fill(matrices.last().pose(), x1, y1, x2, y2, z, color);
     }
 
     public static void fill(Matrix4f matrix, int x1, int y1, int x2, int y2, float z, int color) {
@@ -50,31 +43,31 @@ public abstract class CellElement extends DrawableHelper implements DrawableElem
             y2 = i;
         }
 
-        float a = (color >> 24 & 255) / 255F;
-        float r = (color >> 16 & 255) / 255F;
-        float g = (color >> 8 & 255) / 255F;
-        float b = (color & 255) / 255F;
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        var a = (color >> 24 & 255) / 255F;
+        var r = (color >> 16 & 255) / 255F;
+        var g = (color >> 8 & 255) / 255F;
+        var b = (color & 255) / 255F;
+        var bufferBuilder = Tessellator.getInstance().getBuilder();
 
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
-        bufferBuilder.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
-        bufferBuilder.vertex(matrix, x1, y2, z).color(r, g, b, a).next();
-        bufferBuilder.vertex(matrix, x2, y2, z).color(r, g, b, a).next();
-        bufferBuilder.vertex(matrix, x2, y1, z).color(r, g, b, a).next();
-        bufferBuilder.vertex(matrix, x1, y1, z).color(r, g, b, a).next();
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        bufferBuilder.vertex(matrix, x1, y2, z).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(matrix, x2, y2, z).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(matrix, x2, y1, z).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(matrix, x1, y1, z).color(r, g, b, a).endVertex();
         bufferBuilder.end();
 
-        BufferRenderer.draw(bufferBuilder);
+        WorldVertexBufferUploader.end(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
     public static void drawHorizontalLine(MatrixStack matrices, int x1, int x2, int y, int z, int color) {
         if (x2 < x1) {
-            int i = x1;
+            var i = x1;
 
             x1 = x2;
             x2 = i;
@@ -85,7 +78,7 @@ public abstract class CellElement extends DrawableHelper implements DrawableElem
 
     public static void drawVerticalLine(MatrixStack matrices, int x, int y1, int y2, int z, int color) {
         if (y2 < y1) {
-            int i = y1;
+            var i = y1;
 
             y1 = y2;
             y2 = i;

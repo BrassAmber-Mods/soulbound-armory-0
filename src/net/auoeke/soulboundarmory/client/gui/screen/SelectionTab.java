@@ -1,15 +1,14 @@
 package net.auoeke.soulboundarmory.client.gui.screen;
 
-import net.minecraft.client.util.math.MatrixStack;
-import java.util.List;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.stream.Collectors;
-import net.minecraft.client.MinecraftClient;
 import net.auoeke.cell.client.gui.widget.callback.PressCallback;
 import net.auoeke.cell.client.gui.widget.scalable.ScalableWidget;
 import net.auoeke.soulboundarmory.capability.soulbound.item.ItemStorage;
 import net.auoeke.soulboundarmory.client.i18n.Translations;
 import net.auoeke.soulboundarmory.network.ExtendedPacketBuffer;
 import net.auoeke.soulboundarmory.registry.Packets;
+import net.minecraft.client.Minecraft;
 
 public class SelectionTab extends SoulboundTab {
     public SelectionTab() {
@@ -17,20 +16,20 @@ public class SelectionTab extends SoulboundTab {
     }
 
     @Override
-    public void init(MinecraftClient client, int width, int height) {
+    public void init(Minecraft client, int width, int height) {
         super.init(client, width, height);
 
-        int buttonWidth = 128;
-        int buttonHeight = 20;
-        int centerX = (this.width - buttonWidth) / 2;
-        int ySep = 32;
+        var buttonWidth = 128;
+        var buttonHeight = 20;
+        var centerX = (this.width - buttonWidth) / 2;
+        var ySep = 32;
 
-        List<ItemStorage<?>> selection = this.parent.capability.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
-        int top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
+        var selection = this.parent.capability.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
+        var top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
 
         for (int row = 0, size = selection.size(); row < size; row++) {
-            ItemStorage<?> storage = selection.get(row);
-            ScalableWidget button = this.add(
+            var storage = selection.get(row);
+            var button = this.add(
                 new ScalableWidget().button()
                     .x(centerX)
                     .y(top + (row * ySep))
@@ -51,7 +50,7 @@ public class SelectionTab extends SoulboundTab {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
         if (!this.parent.storage.itemEquipped()) {
-            drawCenteredText(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
+            drawCenteredString(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
         }
     }
 

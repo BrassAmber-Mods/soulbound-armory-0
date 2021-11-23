@@ -1,7 +1,7 @@
 package net.auoeke.soulboundarmory.capability.statistics;
 
 import java.math.BigDecimal;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.auoeke.soulboundarmory.serial.CompoundSerializable;
 
 public class Statistic extends Number implements CompoundSerializable {
@@ -147,8 +147,8 @@ public class Statistic extends Number implements CompoundSerializable {
     }
 
     public void add(Number number) {
-        double currentValue = this.value.doubleValue();
-        double addition = number.doubleValue();
+        var currentValue = this.value.doubleValue();
+        var addition = number.doubleValue();
 
         if (currentValue + addition < this.min) {
             this.setToMin();
@@ -165,7 +165,7 @@ public class Statistic extends Number implements CompoundSerializable {
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
+    public void serializeNBT(CompoundNBT tag) {
         tag.putDouble("min", this.min);
         tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
@@ -173,7 +173,7 @@ public class Statistic extends Number implements CompoundSerializable {
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
+    public void deserializeNBT(CompoundNBT tag) {
         this.min = tag.getDouble("min");
         this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));

@@ -9,7 +9,7 @@ import net.auoeke.soulboundarmory.network.ItemComponentPacket;
 public class S2CItemType implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        this.player().inventory.removeStack(this.player().inventory.selectedSlot);
+        this.player().inventory.removeItemNoUpdate(this.player().inventory.selected);
         storage.removeOtherItems();
         storage.unlocked(true);
 

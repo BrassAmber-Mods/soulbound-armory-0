@@ -2,7 +2,7 @@ package net.auoeke.soulboundarmory;
 
 import net.auoeke.soulboundarmory.enchantment.ImpactEnchantment;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -21,8 +21,8 @@ public class SoulboundArmory {
 
     public static final Enchantment impact = new ImpactEnchantment();
 
-    public static Identifier id(String path) {
-        return new Identifier(ID, path);
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(ID, path);
     }
 
     public SoulboundArmory() {

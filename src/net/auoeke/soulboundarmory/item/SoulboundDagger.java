@@ -1,19 +1,19 @@
 package net.auoeke.soulboundarmory.item;
 
 import net.auoeke.soulboundarmory.capability.Capabilities;
+import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
+import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.DaggerStorage;
 import net.auoeke.soulboundarmory.capability.statistics.StatisticType;
 import net.auoeke.soulboundarmory.entity.SoulboundDaggerEntity;
 import net.auoeke.soulboundarmory.registry.Skills;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
-import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.DaggerStorage;
 
 public class SoulboundDagger extends SoulboundMeleeWeapon {
     private static final int USE_TIME = 1200;
@@ -23,7 +23,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack) {
+    public int getUseDuration(ItemStack stack) {
         return USE_TIME;
     }
 
@@ -32,38 +32,38 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAction getUseAnimation(ItemStack stack) {
         return UseAction.SPEAR;
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        DaggerStorage component = Capabilities.weapon.get(player).storage(StorageType.dagger);
+    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        var component = Capabilities.weapon.get(player).get().storage(StorageType.dagger);
 
-        if (!world.isClient && component.hasSkill(Skills.throwing)) {
-            player.setCurrentHand(hand);
+        if (!world.isClientSide && component.hasSkill(Skills.throwing)) {
+            player.startUsingItem(hand);
 
-            return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
+            return new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand));
         }
 
-        return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
+        return new ActionResult<>(ActionResultType.FAIL, player.getItemInHand(hand));
     }
 
     @Override
-    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
-         PlayerEntity player = (PlayerEntity) entity;
-         DaggerStorage component = DaggerStorage.get(player);
+    public void releaseUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
+        var player = (PlayerEntity) entity;
+        var component = DaggerStorage.get(player);
 
-        if (!world.isClient) {
-             float attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
-             float velocity = this.getMaxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
-             float maxVelocity = velocity / attackSpeed;
-             SoulboundDaggerEntity dagger = new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity);
+        if (!world.isClientSide) {
+            var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
+            var velocity = this.getMaxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
+            var maxVelocity = velocity / attackSpeed;
+            var dagger = new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity);
 
-            world.spawnEntity(dagger);
+            world.addFreshEntity(dagger);
 
             if (!player.isCreative()) {
-                player.inventory.removeOne(itemStack);
+                player.inventory.removeItem(itemStack);
             }
         }
     }

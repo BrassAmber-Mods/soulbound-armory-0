@@ -2,8 +2,10 @@ package net.auoeke.soulboundarmory.capability.soulbound.item;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import net.auoeke.soulboundarmory.capability.Capabilities;
+import net.auoeke.soulboundarmory.capability.soulbound.item.tool.PickStorage;
 import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.DaggerStorage;
 import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.GreatswordStorage;
 import net.auoeke.soulboundarmory.capability.soulbound.item.weapon.StaffStorage;
@@ -13,10 +15,8 @@ import net.auoeke.soulboundarmory.registry.RegistryEntry;
 import net.auoeke.soulboundarmory.util.Util;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.auoeke.soulboundarmory.capability.soulbound.item.tool.PickStorage;
 
 @SuppressWarnings("unchecked")
 public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<StorageType<T>> {
@@ -34,12 +34,12 @@ public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<Storage
         return registry;
     }
 
-    public static StorageType<?> get(Identifier id) {
+    public static StorageType<?> get(ResourceLocation id) {
         return registry().getValue(id);
     }
 
     public static StorageType<?> get(String name) {
-        return get(new Identifier(name));
+        return get(new ResourceLocation(name));
     }
 
     public static List<ItemStorage<?>> storages(Entity entity) {
@@ -47,22 +47,25 @@ public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<Storage
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends ItemStorage<T>> ItemStorage<T> get(Entity entity, Item item) {
-        return (ItemStorage<T>) storages(entity).stream().filter(storage -> storage.getItem() == item).findAny().orElse(null);
+    public static <T extends ItemStorage<T>> Optional<ItemStorage<T>> get(Entity entity, Item item) {
+        return storages(entity).stream().filter(storage -> storage.getItem() == item).findAny().map(Util::cast);
     }
 
-    public static ItemStorage<?> firstMenuStorage(Entity entity) {
+    public static Optional<ItemStorage<?>> firstMenuStorage(Entity entity) {
         if (entity == null) {
-            return null;
+            return Optional.empty();
         }
 
-        for (ItemStack itemStack : entity.getItemsHand()) {
-            Item item = itemStack.getItem();
+        for (var itemStack : entity.getHandSlots()) {
+            var item = itemStack.getItem();
+            var storage = Capabilities.get(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.getItem() == item || storage1.canConsume(item)).findAny();
 
-            return Capabilities.get(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.getItem() == item || storage.canConsume(item)).findAny().orElse(null);
+            if (storage.isPresent()) {
+                return storage;
+            }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public T get(Entity entity) {

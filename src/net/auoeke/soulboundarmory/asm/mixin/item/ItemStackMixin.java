@@ -1,25 +1,25 @@
 package net.auoeke.soulboundarmory.asm.mixin.item;
 
 import com.google.common.collect.Multimap;
+import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
+import net.auoeke.soulboundarmory.item.SoulboundItem;
 import net.auoeke.soulboundarmory.util.AttributeModifierIdentifiers;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import net.auoeke.soulboundarmory.capability.soulbound.item.StorageType;
-import net.auoeke.soulboundarmory.item.SoulboundItem;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
-    private EntityAttributeModifier modifier;
+    private AttributeModifier modifier;
 
     @ModifyVariable(method = "getTooltip", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
-    private EntityAttributeModifier captureModifier(EntityAttributeModifier modifier) {
+    private AttributeModifier captureModifier(AttributeModifier modifier) {
         return this.modifier = modifier;
     }
 
@@ -35,8 +35,8 @@ abstract class ItemStackMixin {
     }
     */
 
-    @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlot;)Lcom/google/common/collect/Multimap;"))
-    private Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlot slot, PlayerEntity player) {
-        return stack.getItem() instanceof SoulboundItem && player != null ? StorageType.get(player, stack.getItem()).attributeModifiers(slot) : stack.getAttributeModifiers(slot);
+    @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"))
+    private Multimap<Attribute, AttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlotType slot, PlayerEntity player) {
+        return stack.getItem() instanceof SoulboundItem && player != null ? StorageType.get(player, stack.getItem()).get().attributeModifiers(slot) : stack.getAttributeModifiers(slot);
     }
 }

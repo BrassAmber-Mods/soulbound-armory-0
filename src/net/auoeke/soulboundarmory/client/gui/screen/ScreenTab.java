@@ -1,10 +1,10 @@
 package net.auoeke.soulboundarmory.client.gui.screen;
 
-import net.minecraft.text.Text;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.auoeke.cell.client.gui.screen.CellScreen;
 import net.auoeke.cell.client.gui.widget.Widget;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class ScreenTab extends CellScreen {
@@ -12,11 +12,11 @@ public abstract class ScreenTab extends CellScreen {
 
     protected Widget<?> tab;
 
-    public ScreenTab(Text title) {
+    public ScreenTab(ITextComponent title) {
         super(title);
     }
 
-    public Text label() {
+    public ITextComponent label() {
         return this.title;
     }
 

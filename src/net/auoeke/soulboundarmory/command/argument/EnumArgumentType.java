@@ -3,45 +3,36 @@ package net.auoeke.soulboundarmory.command.argument;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import net.auoeke.soulboundarmory.SoulboundArmory;
+import net.auoeke.reflect.Accessor;
 
 public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     protected final Class<T> clazz;
     protected final List<T> values;
 
-    protected EnumArgumentType(Class<T> enumClass, Predicate<T> include) {
-        this.clazz = enumClass;
+    protected EnumArgumentType(Class<T> type, Predicate<T> include) {
+        this.clazz = type;
 
-         List<T> values = this.values = new ArrayList<>();
+        var values = this.values = new ArrayList<>();
 
-        for (Field field : enumClass.getDeclaredFields()) {
-            try {
-                //noinspection unchecked
-                 T value = (T) field.get(null);
-                if (include.test(value)) {
-                    values.add(value);
-                }
-            } catch (IllegalAccessException exception) {
-                SoulboundArmory.logger.error(String.format("Cannot access enum %s:", field.getName()), exception);
+        for (var field : type.getDeclaredFields()) {
+            var value = (T) Accessor.getObject(field);
+
+            if (include.test(value)) {
+                values.add(value);
             }
         }
     }
 
     protected EnumArgumentType(Class<T> enumClass) {
         this.clazz = enumClass;
-         List<T> values = this.values = new ArrayList<>();
+        var values = this.values = new ArrayList<>();
 
-        for (Field field : enumClass.getDeclaredFields()) {
-            try {
-                //noinspection unchecked
-                values.add((T) field.get(null));
-            } catch (IllegalAccessException exception) {
-                SoulboundArmory.logger.error(String.format("Cannot access enum %s:", field.getName()), exception);
-            }
+        for (var field : enumClass.getDeclaredFields()) {
+            //noinspection unchecked
+            values.add((T) Accessor.getObject(field));
         }
     }
 
@@ -63,7 +54,6 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     }
 
     public List<T> getValues() {
-
-        return values;
+        return this.values;
     }
 }

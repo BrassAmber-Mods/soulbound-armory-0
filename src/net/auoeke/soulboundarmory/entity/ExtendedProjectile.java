@@ -1,27 +1,27 @@
 package net.auoeke.soulboundarmory.entity;
 
+import net.auoeke.soulboundarmory.asm.access.entity.AbstractArrowEntityAccess;
+import net.auoeke.soulboundarmory.util.MathUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.world.World;
-import net.auoeke.soulboundarmory.asm.access.entity.PersistentProjectileEntityAccess;
-import net.auoeke.soulboundarmory.util.MathUtil;
 
-public abstract class ExtendedProjectile extends PersistentProjectileEntity {
-    protected ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, double x, double y, double z, World world) {
+public abstract class ExtendedProjectile extends AbstractArrowEntity {
+    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, double x, double y, double z, World world) {
         super(type, x, y, z, world);
     }
 
-    protected ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, LivingEntity owner, World world) {
+    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, LivingEntity owner, World world) {
         super(type, owner, world);
     }
 
-    public ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, World world) {
+    public ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, World world) {
         super(type, world);
     }
 
-    public ExtendedProjectile(World world, EntityType<? extends PersistentProjectileEntity> type, double x, double y, double z) {
+    public ExtendedProjectile(World world, EntityType<? extends AbstractArrowEntity> type, double x, double y, double z) {
         super(type, x, y, z, world);
     }
 
@@ -34,7 +34,7 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     }
 
     public double distance(double x, double y, double z) {
-        return Math.sqrt(this.squaredDistanceTo(x, y, z));
+        return Math.sqrt(this.distanceToSqr(x, y, z));
     }
 
     public double getSpeed() {
@@ -46,22 +46,22 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     }
 
     public double velocityX() {
-        return this.getVelocity().x;
+        return this.getDeltaMovement().x;
     }
 
     public double velocityY() {
-        return this.getVelocity().y;
+        return this.getDeltaMovement().y;
     }
 
     public double velocityZ() {
-        return this.getVelocity().z;
+        return this.getDeltaMovement().z;
     }
 
     public double getVelocityD() {
         return this.getSpeed() * MathUtil.signum(this.velocityX(), this.velocityY(), this.velocityZ());
     }
 
-    protected int getLife() {
-        return ((PersistentProjectileEntityAccess) this).getLife();
+    protected int life() {
+        return ((AbstractArrowEntityAccess) this).life();
     }
 }

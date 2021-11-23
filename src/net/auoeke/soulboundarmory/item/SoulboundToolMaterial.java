@@ -1,10 +1,10 @@
 package net.auoeke.soulboundarmory.item;
 
-import net.minecraft.item.ToolMaterial;
-import net.minecraft.recipe.Ingredient;
+import net.minecraft.item.IItemTier;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraftforge.common.util.Lazy;
 
-public enum SoulboundToolMaterial implements ToolMaterial {
+public enum SoulboundToolMaterial implements IItemTier {
     SOULBOUND(0, 0, 0.5F, 0, 0, null);
 
     private final int miningLevel;
@@ -24,27 +24,27 @@ public enum SoulboundToolMaterial implements ToolMaterial {
     }
 
     @Override
-    public int getDurability() {
+    public int getUses() {
         return this.uses;
     }
 
     @Override
-    public float getMiningSpeedMultiplier() {
+    public float getSpeed() {
         return this.miningSpeed;
     }
 
     @Override
-    public float getAttackDamage() {
+    public float getAttackDamageBonus() {
         return this.attackDamage;
     }
 
     @Override
-    public int getMiningLevel() {
+    public int getLevel() {
         return this.miningLevel;
     }
 
     @Override
-    public int getEnchantability() {
+    public int getEnchantmentValue() {
         return this.enchantability;
     }
 

@@ -27,13 +27,13 @@ public class ReachModifierEntity {
     }
 
     public void tick() {
-         Vec3d pos = this.getPos();
+         Vector3d pos = this.getPos();
 
-        Vec3d newPos = new Vec3d(this.getX() + this.motionX, this.getY() + this.motionY, this.getZ() + this.velocityZ());
+        Vector3d newPos = new Vector3d(this.getX() + this.motionX, this.getY() + this.motionY, this.getZ() + this.velocityZ());
         RayTraceContext rayTraceResult = this.world.rayTraceBlocks(pos, newPos, false, true, false);
 
         if (rayTraceResult != null) {
-            newPos = new Vec3d(rayTraceResult.hitVec.x, rayTraceResult.hitVec.y, rayTraceResult.hitVec.z);
+            newPos = new Vector3d(rayTraceResult.hitVec.x, rayTraceResult.hitVec.y, rayTraceResult.hitVec.z);
         }
 
          Entity entity = this.findEntityOnPath(pos, newPos);
@@ -60,7 +60,7 @@ public class ReachModifierEntity {
 
     @Override
     protected void onHit(HitResult result) {
-        if (!this.world.isClient && result.entityHit != owner && owner instanceof PlayerEntity) {
+        if (!this.world.isClientSide && result.entityHit != owner && owner instanceof PlayerEntity) {
              Entity target = result.entityHit;
              PlayerEntity player = (PlayerEntity) owner;
              IWeaponComponent component = WeaponProvider.get(player);
@@ -69,7 +69,7 @@ public class ReachModifierEntity {
                 if (this.distanceToHit(result) <= this.reachDistance * this.reachDistance
                     && ForgeHooks.onPlayerAttackTarget(player, target) && target.canBeAttackedWithItem() && !target.hitByEntity(player)) {
 
-                    float attackDamageModifier = (float) player.getAttribute(EntityAttributes.GENERIC_ATTACK_DAMAGE).getAttributeValue();
+                    float attackDamageModifier = (float) player.getAttribute(Attributes.GENERIC_ATTACK_DAMAGE).getAttributeValue();
                     float attackDamageRatio = target instanceof LivingEntity
                         ? EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), ((LivingEntity) target).getCreatureAttribute())
                         : EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), EnumCreatureAttribute.UNDEFINED);
@@ -218,7 +218,7 @@ public class ReachModifierEntity {
     }
 
     private double distanceToHit(HitResult rayTraceResult) {
-         Vec3d pos = rayTraceResult.hitVec;
+         Vector3d pos = rayTraceResult.hitVec;
 
         return Math.pow(pos.x - this.getX(), 2) + Math.pow(pos.y - this.getY(), 2) + Math.pow(pos.z - this.getZ(), 2);
     }

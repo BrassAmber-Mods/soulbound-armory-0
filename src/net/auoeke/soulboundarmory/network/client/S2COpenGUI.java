@@ -10,7 +10,7 @@ import net.auoeke.soulboundarmory.network.ItemComponentPacket;
 public class S2COpenGUI implements ItemComponentPacket {
     @Override
     public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        if (SoulboundArmoryClient.client.currentScreen instanceof SoulboundTab) {
+        if (SoulboundArmoryClient.client.screen instanceof SoulboundTab) {
             storage.openGUI(buffer.readInt());
         }
     }
