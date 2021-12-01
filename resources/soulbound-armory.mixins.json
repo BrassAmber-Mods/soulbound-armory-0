@@ -1,9 +1,12 @@
 {
     "required": true,
-    "package": "net.auoeke.soulboundarmory.mixin.mixin",
-    "compatibilityLevel": "JAVA_16",
+    "package": "soulboundarmory.mixin.mixin",
+    "plugin": "soulboundarmory.Transformer",
+    "compatibilityLevel": "JAVA_17",
     "minVersion": "0.8",
     "mixins": [
+        "access.ColorAccess",
+        "access.TextFormattingAccess",
         "entity.EntityMixin",
         "entity.LightningEntityMixin",
         "entity.LivingEntityMixin",
@@ -13,10 +16,17 @@
         "entity.player.PlayerInventoryAccess",
         "entity.player.PlayerInventoryEntityMixin",
         "entity.projectile.AbstractArrowEntityMixin",
-        "item.ItemStackMixin"
+        "item.ItemStackMixin",
+        "roman.LanguageDummyMixin",
+        "roman.TranslationStorageMixin",
+        "text.ColorMixin",
+        "text.StyleMixin",
+        "text.StyleMixin$SerializerMixin",
+        "text.TextFormattingMixin"
     ],
     "injectors": {
         "defaultRequire": 1,
         "maxShiftBy": 5
-    }
+    },
+    "client": ["roman.I18nMixin", "text.FontRenderer$CharacterRendererMixin"]
 }
