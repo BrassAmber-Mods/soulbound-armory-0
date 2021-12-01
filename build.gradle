@@ -17,8 +17,8 @@ plugins.with {
 group = "net.auoeke"
 version = "3.0.0"
 
-sourceCompatibility = 16
-targetCompatibility = 16
+sourceCompatibility = 17
+targetCompatibility = 17
 
 sourceSets {
     main {
@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    minecraft("net.minecraftforge:forge:1.16.5-36.2.18")
+    minecraft("net.minecraftforge:forge:1.16.5-36.2.19")
     implementation("net.auoeke:reflect:latest.integration")
 
     if (!Boolean.getBoolean("idea.sync.active")) {
@@ -46,6 +46,8 @@ dependencies {
 
 minecraft {
     mappings("official", "1.16.5")
+
+    accessTransformer = file("resources/META-INF/access-transformer")
 
     runs {
         ["client", "server"].each {
