@@ -24,15 +24,15 @@ abstract class LivingEntityMixin extends Entity {
         super(p_i48580_1_, p_i48580_2_);
     }
 
-    @Inject(method = "createLivingAttributes", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "registerAttributes", at = @At("RETURN"), cancellable = true)
     private static void createSoulboundArmoryAttributes(CallbackInfoReturnable<AttributeModifierMap.MutableAttribute> cir) {
         // info.getReturnValue().add(SAAttributes.criticalStrikeRate, 0).add(SAAttributes.efficiency, 1);
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "pushEntities",
+    @Inject(method = "collideWithNearbyEntities",
             at = @At(value = "INVOKE_ASSIGN",
-                     target = "Lnet/minecraft/world/World;getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"),
+                     target = "Lnet/minecraft/world/World;getEntitiesInAABBexcluding(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
         if ((Object) this instanceof PlayerEntity player && !this.world.isRemote) {

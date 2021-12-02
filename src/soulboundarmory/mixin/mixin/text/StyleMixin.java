@@ -65,49 +65,49 @@ abstract class StyleMixin implements ExtendedStyle {
         this.formattings.add(formatting);
     }
 
-    @Inject(method = "withColor(Lnet/minecraft/util/text/Color;)Lnet/minecraft/util/text/Style;", at = @At("RETURN"))
+    @Inject(method = "setColor", at = @At("RETURN"))
     public void withColor(Color color, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "withBold", at = @At("RETURN"))
+    @Inject(method = "setBold", at = @At("RETURN"))
     public void withBold(Boolean bold, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "withItalic", at = @At("RETURN"))
+    @Inject(method = "setItalic", at = @At("RETURN"))
     public void withItalic(Boolean italic, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
     @OnlyIn(Dist.CLIENT)
-    @Inject(method = "withUnderlined", at = @At("RETURN"))
+    @Inject(method = "setUnderlined", at = @At("RETURN"))
     public void withUnderline(Boolean underline, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "withClickEvent", at = @At("RETURN"))
+    @Inject(method = "setClickEvent", at = @At("RETURN"))
     public void withClickEvent(ClickEvent clickEvent, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "withHoverEvent", at = @At("RETURN"))
+    @Inject(method = "setHoverEvent", at = @At("RETURN"))
     public void withHoverEvent(HoverEvent hoverEvent, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "withInsertion", at = @At("RETURN"))
+    @Inject(method = "setInsertion", at = @At("RETURN"))
     public void withInsertion(String insertion, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
     @OnlyIn(Dist.CLIENT)
-    @Inject(method = "withFont", at = @At("RETURN"))
+    @Inject(method = "setFontId", at = @At("RETURN"))
     public void withFont(ResourceLocation font, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = {"withColor(Lnet/minecraft/util/text/TextFormatting;)Lnet/minecraft/util/text/Style;", "applyLegacyFormat"}, at = @At(value = "TAIL"))
+    @Inject(method = {"applyFormatting", "forceFormatting"}, at = @At(value = "TAIL"))
     public void addFormatting(TextFormatting formatting, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
 
@@ -121,19 +121,19 @@ abstract class StyleMixin implements ExtendedStyle {
         return (Object) (switchFormatting = formatting) instanceof ExtendedFormatting && !formatting.isColor() ? TextFormatting.OBFUSCATED.ordinal() : formatting.ordinal();
     }
 
-    @ModifyVariable(method = {"applyLegacyFormat", "applyFormat", "applyFormats"},
+    @ModifyVariable(method = {"forceFormatting", "applyFormatting", "createStyleFromFormattings"},
                     at = @At(value = "CONSTANT", args = "intValue=1", ordinal = 0),
                     ordinal = 4)
     public Boolean saveObfuscated(Boolean previous) {
         return previousObfuscated = previous;
     }
 
-    @ModifyVariable(method = {"applyLegacyFormat", "applyFormat", "applyFormats"}, at = @At(value = "STORE", ordinal = 1), ordinal = 4)
+    @ModifyVariable(method = {"forceFormatting", "applyFormatting", "createStyleFromFormattings"}, at = @At(value = "STORE", ordinal = 1), ordinal = 4)
     public Boolean fixObfuscated(Boolean previous) {
         return switchFormatting == TextFormatting.OBFUSCATED || previousObfuscated == Boolean.TRUE;
     }
 
-    @Inject(method = "applyFormats", at = @At(value = "TAIL"))
+    @Inject(method = "createStyleFromFormattings", at = @At(value = "TAIL"))
     public void addFormatting(TextFormatting[] formattings, CallbackInfoReturnable<Style> info) {
         var style = (ExtendedStyle) info.getReturnValue();
 
@@ -144,7 +144,7 @@ abstract class StyleMixin implements ExtendedStyle {
         }
     }
 
-    @Inject(method = "applyTo", at = @At("TAIL"))
+    @Inject(method = "mergeStyle", at = @At("TAIL"))
     public void withParent(Style parent, CallbackInfoReturnable<Style> info) {
         if (parent != Style.EMPTY) {
             var child = (ExtendedStyle) info.getReturnValue();
