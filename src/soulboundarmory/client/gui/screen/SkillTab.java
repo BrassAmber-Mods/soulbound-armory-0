@@ -67,7 +67,7 @@ public class SkillTab extends SoulboundTab {
 
         this.window.width(512);
         this.window.height(288);
-        this.centerX = Math.max(this.tab.endX() + this.window.width() / 2 + 4, this.width / 2);
+        this.centerX = Math.max(this.button.endX() + this.window.width() / 2 + 4, this.width / 2);
         this.centerY = Math.min(this.parent.xpBar.y() - 16 - this.window.height() / 2, this.height / 2);
         // this.window.x(this.centerX - this.window.width() / 2);
         // this.window.y(this.centerY - this.window.height() / 2);

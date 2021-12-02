@@ -26,6 +26,7 @@ public class Packets {
     public static final PacketKey<ExtendedPacketBuffer> serverReset = server(C2SReset.class);
     public static final PacketKey<ExtendedPacketBuffer> serverSkill = server(C2SSkill.class);
     public static final PacketKey<ExtendedPacketBuffer> serverSync = server(C2SSync.class);
+
     public static final PacketKey<ExtendedPacketBuffer> clientEnchant = client(S2CEnchant.class);
     public static final PacketKey<ExtendedPacketBuffer> clientItemType = client(S2CItemType.class);
     public static final PacketKey<ExtendedPacketBuffer> clientOpenGUI = client(S2COpenGUI.class);

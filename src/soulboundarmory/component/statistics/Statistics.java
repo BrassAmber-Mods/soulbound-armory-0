@@ -138,7 +138,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
             var statistics = this.statistics;
 
             for (var type : types) {
-                statistics.get(type).setMin(min);
+                statistics.get(type).min(min);
             }
 
             return this;
@@ -156,7 +156,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
             var statistics = this.statistics;
 
             for (var type : types) {
-                statistics.get(type).setMax(max);
+                statistics.get(type).max(max);
             }
 
             return this;

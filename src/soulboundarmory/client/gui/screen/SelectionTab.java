@@ -1,14 +1,13 @@
 package soulboundarmory.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import java.util.stream.Collectors;
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import java.util.stream.Collectors;
 import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-import net.minecraft.client.Minecraft;
 
 public class SelectionTab extends SoulboundTab {
     public SelectionTab() {
@@ -16,9 +15,7 @@ public class SelectionTab extends SoulboundTab {
     }
 
     @Override
-    public void init(Minecraft client, int width, int height) {
-        super.init(client, width, height);
-
+    protected void init() {
         var buttonWidth = 128;
         var buttonHeight = 20;
         var centerX = (this.width - buttonWidth) / 2;
@@ -29,14 +26,13 @@ public class SelectionTab extends SoulboundTab {
 
         for (int row = 0, size = selection.size(); row < size; row++) {
             var storage = selection.get(row);
-            var button = this.add(
-                new ScalableWidget().button()
-                    .x(centerX)
-                    .y(top + (row * ySep))
-                    .width(buttonWidth)
-                    .height(buttonHeight)
-                    .text(storage.getName())
-                    .primaryAction(this.selectAction(storage))
+            var button = this.add(new ScalableWidget().button()
+                .x(centerX)
+                .y(top + (row * ySep))
+                .width(buttonWidth)
+                .height(buttonHeight)
+                .text(storage.getName())
+                .primaryAction(this.selectAction(storage))
             );
 
             if (this.parent.displayTabs()) {

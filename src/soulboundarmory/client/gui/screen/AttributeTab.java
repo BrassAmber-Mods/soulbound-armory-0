@@ -37,8 +37,8 @@ public class AttributeTab extends SoulboundTab {
             var add = this.add(this.squareButton((this.width + 182) / 2, start + index * this.height / 16 + 4, new StringTextComponent("+"), this.addPointAction(attribute)));
             var remove = this.add(this.squareButton((this.width + 182) / 2 - 20, start + index * this.height / 16 + 4, new StringTextComponent("-"), this.removePointAction(attribute)));
 
-            remove.active = attribute.isAboveMin();
-            add.active = this.parent.storage.datum(StatisticType.attributePoints) > 0 && attribute.isBelowMax();
+            remove.active = attribute.aboveMin();
+            add.active = this.parent.storage.datum(StatisticType.attributePoints) > 0 && attribute.belowMax();
         }
     }
 
@@ -71,7 +71,7 @@ public class AttributeTab extends SoulboundTab {
     protected PressCallback<ScalableWidget> removePointAction(Statistic statistic) {
         return button -> Packets.serverAttribute.send(new ExtendedPacketBuffer(this.parent.storage)
             .writeResourceLocation(statistic.type().id())
-            .writeInt(hasShiftDown() ? -statistic.getPoints() : -1)
+            .writeInt(hasShiftDown() ? -statistic.points() : -1)
         );
     }
 }

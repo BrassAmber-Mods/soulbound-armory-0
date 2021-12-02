@@ -15,14 +15,10 @@ public enum Style {
 
     public final int v;
 
-    private final ITextComponent text;
+    public final ITextComponent text;
 
     Style(int v, ITextComponent text) {
         this.v = v;
         this.text = text;
-    }
-
-    public ITextComponent getText() {
-        return this.text;
     }
 }

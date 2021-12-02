@@ -12,6 +12,6 @@ public class GUIKeyBinding extends KeyBindingBase {
 
     @Override
     protected void press() {
-        StorageType.firstMenuStorage(SoulboundArmoryClient.player()).ifPresent(ItemStorage::openGUI);
+        StorageType.firstSoulboundItem(SoulboundArmoryClient.player()).ifPresent(ItemStorage::openGUI);
     }
 }

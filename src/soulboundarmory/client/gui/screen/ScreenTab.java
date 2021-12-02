@@ -7,7 +7,7 @@ import net.minecraft.util.text.ITextComponent;
 public abstract class ScreenTab extends CellScreen {
     public int index;
 
-    protected Widget<?> tab;
+    protected Widget<?> button;
 
     public ScreenTab(ITextComponent title) {
         super(title);
