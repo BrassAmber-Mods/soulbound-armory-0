@@ -17,7 +17,7 @@ abstract class ColorMixin {
     @Final
     private int value;
 
-    @SuppressWarnings("FieldMayBeFinal") // mutated via ASM
+    @SuppressWarnings("FieldMayBeFinal") // mutated via handwritten bytecode
     private int phormat_previousColor = this.value;
 
     private boolean phormat_hasColorFunction;
