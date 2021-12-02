@@ -6,7 +6,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public class C2SBindSlot extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        var slot = this.buffer.readInt();
+        var slot = this.message.readInt();
 
         if (storage.boundSlot() == slot) {
             storage.unbindSlot();

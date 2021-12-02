@@ -6,20 +6,13 @@ import net.minecraft.network.PacketBuffer;
  * A packet whose message is an {@link ExtendedPacketBuffer}.
  */
 public abstract class BufferPacket extends Packet<ExtendedPacketBuffer> {
-    protected ExtendedPacketBuffer buffer;
-
-    @Override
-    public void store(ExtendedPacketBuffer message) {
-        this.buffer = message;
-    }
-
     @Override
     public void write(PacketBuffer buffer) {
-        buffer.writeBytes(this.buffer.array());
+        buffer.writeBytes(this.message.array());
     }
 
     @Override
     public void read(PacketBuffer buffer) {
-        this.buffer = new ExtendedPacketBuffer(buffer.copy());
+        this.message = new ExtendedPacketBuffer(buffer.copy());
     }
 }

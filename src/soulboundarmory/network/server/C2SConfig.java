@@ -9,6 +9,6 @@ import soulboundarmory.network.BufferPacket;
 public class C2SConfig extends BufferPacket {
     @Override
     public void execute() {
-        Components.config.of(this.player()).levelupNotifications = this.buffer.readBoolean();
+        Components.config.of(this.player()).levelupNotifications = this.message.readBoolean();
     }
 }

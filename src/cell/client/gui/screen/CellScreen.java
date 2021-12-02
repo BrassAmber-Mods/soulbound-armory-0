@@ -1,5 +1,7 @@
 package cell.client.gui.screen;
 
+import cell.client.gui.CellElement;
+import cell.client.gui.DrawableElement;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -7,8 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import cell.client.gui.CellElement;
-import cell.client.gui.DrawableElement;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -20,12 +20,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
 
-@SuppressWarnings("unchecked")
-@OnlyIn(Dist.CLIENT)
 public abstract class CellScreen extends Screen implements DrawableElement {
     public final ReferenceArrayList<DrawableElement> elements = new ReferenceArrayList<>();
 

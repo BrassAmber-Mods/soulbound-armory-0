@@ -8,7 +8,7 @@ import soulboundarmory.skill.Skill;
 public class C2SSkill extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        storage.upgrade(storage.skill(Skill.registry.getValue(SoulboundArmory.id(this.buffer.readUtf()))));
+        storage.upgrade(storage.skill(Skill.registry.getValue(SoulboundArmory.id(this.message.readUtf()))));
         // this.component.sync();
     }
 }
