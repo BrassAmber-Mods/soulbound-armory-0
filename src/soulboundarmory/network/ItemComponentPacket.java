@@ -8,6 +8,6 @@ public abstract class ItemComponentPacket extends BufferPacket {
 
     @Override
     public void execute() {
-        this.execute(StorageType.get(this.buffer.readResourceLocation()).get(this.player()));
+        this.execute(StorageType.get(this.message.readResourceLocation()).get(this.player()));
     }
 }

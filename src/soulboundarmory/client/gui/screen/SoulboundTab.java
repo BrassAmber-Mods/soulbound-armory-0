@@ -14,7 +14,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class SoulboundTab extends ScreenTab {
     protected static final NumberFormat format = DecimalFormat.getInstance();
 

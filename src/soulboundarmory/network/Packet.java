@@ -14,6 +14,14 @@ import soulboundarmory.SoulboundArmoryClient;
  */
 public abstract class Packet<T> {
     protected NetworkEvent.Context context;
+    protected T message;
+
+    /**
+     Store a message in this packet for later use in writing to a buffer.
+     */
+    public final void store(T message) {
+        this.message = message;
+    }
 
     public final void execute(NetworkEvent.Context context) {
         this.context = context;
@@ -27,11 +35,6 @@ public abstract class Packet<T> {
     protected final PlayerEntity player() {
         return this.context.getDirection().getReceptionSide().isClient() ? SoulboundArmoryClient.client.player : this.context.getSender();
     }
-
-    /**
-     Store a message in this packet for later use in writing to a buffer.
-     */
-    public abstract void store(T message);
 
     /**
      Write this packet's message to a buffer.

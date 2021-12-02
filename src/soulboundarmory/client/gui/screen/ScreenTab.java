@@ -3,10 +3,7 @@ package soulboundarmory.client.gui.screen;
 import cell.client.gui.screen.CellScreen;
 import cell.client.gui.widget.Widget;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class ScreenTab extends CellScreen {
     public int index;
 

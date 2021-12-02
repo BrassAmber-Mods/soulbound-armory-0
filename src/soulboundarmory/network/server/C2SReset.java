@@ -7,7 +7,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public class C2SReset extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        var identifier = this.buffer.readResourceLocation();
+        var identifier = this.message.readResourceLocation();
 
         if (identifier != null) {
             storage.reset(Category.registry.getValue(identifier));
