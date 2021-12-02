@@ -11,7 +11,7 @@ public class ItemData implements CompoundSerializable {
     public void serializeNBT(CompoundNBT tag) {
         if (this.storage != null) {
             tag.putUUID("player", this.storage.player.getUUID());
-            tag.putString("storageType", this.storage.type().toString());
+            tag.putString("storageType", this.storage.type().id().toString());
         }
     }
 

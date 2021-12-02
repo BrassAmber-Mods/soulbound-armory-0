@@ -116,11 +116,11 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     @Override
     public void serialize(CompoundNBT tag) {
         if (this.currentItem != null) {
-            tag.putString("storage", this.currentItem.type().string());
+            tag.putString("storage", this.currentItem.type().id().toString());
         }
 
         for (var storage : this.storages.values()) {
-            tag.put(storage.type().toString(), storage.serializeNBT());
+            tag.put(storage.type().id().toString(), storage.serializeNBT());
         }
     }
 
@@ -133,7 +133,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
         }
 
         for (var storage : this.storages.values()) {
-            storage.deserializeNBT(tag.getCompound(storage.type().toString()));
+            storage.deserializeNBT(tag.getCompound(storage.type().id().toString()));
         }
     }
 }

@@ -31,9 +31,7 @@ public final class PacketKey<T> {
      Send a message from the server to a client.
      */
     public void send(Entity player, T message) {
-        var packet = this.instantiate();
-        packet.store(message);
-        SoulboundArmory.channel.sendTo(packet, ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     /**
@@ -41,6 +39,13 @@ public final class PacketKey<T> {
      */
     @OnlyIn(Dist.CLIENT)
     public void send(T message) {
-        SoulboundArmory.channel.sendToServer(message);
+        SoulboundArmory.channel.sendToServer(this.store(message));
+    }
+
+    private Packet<T> store(T message) {
+        var packet = this.instantiate();
+        packet.store(message);
+
+        return packet;
     }
 }

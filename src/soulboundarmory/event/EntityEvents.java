@@ -1,5 +1,6 @@
 package soulboundarmory.event;
 
+import java.util.Objects;
 import java.util.function.Function;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -10,6 +11,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -57,11 +59,16 @@ public class EntityEvents {
     }
 
     @SubscribeEvent
+    public static void login(ClientPlayerNetworkEvent.LoggedInEvent event) {
+        Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(Components.config.of(event.getPlayer()).levelupNotifications));
+    }
+
+    @SubscribeEvent
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         var player = event.getPlayer();
 
         if (!player.level.isClientSide) {
-            Packets.serverConfig.send(player, new ExtendedPacketBuffer().writeBoolean(Components.config.of(player).levelupNotifications));
+            Components.soulbound(player).map(SoulboundComponent::storage).filter(Objects::nonNull).forEach(ItemStorage::sync);
         }
     }
 
@@ -180,7 +187,7 @@ public class EntityEvents {
             } else if (source instanceof SoulboundFireballEntity) {
                 storage = instance.storage(StorageType.staff);
             } else {
-                storage = null;
+                return;
             }
 
             if (storage != null) {
@@ -214,7 +221,6 @@ public class EntityEvents {
         if (attacker instanceof PlayerEntity player && !player.level.isClientSide) {
             var damageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
             var damage = damageAttribute == null ? 0 : damageAttribute.getValue();
-            var armor = entity.getAttributeValue(Attributes.ARMOR);
             var immediateSource = event.getSource().getDirectEntity();
             var component = Components.weapon.of(player);
             ItemStorage<?> storage;
@@ -236,7 +242,7 @@ public class EntityEvents {
 
                 var xp = entity.getMaxHealth()
                     * player.level.getDifficulty().getId() * configuration.difficultyMultiplier
-                    * (1 + armor * configuration.armorMultiplier);
+                    * (1 + entity.getAttributeValue(Attributes.ARMOR) * configuration.armorMultiplier);
 
                 xp *= damage <= 0 ? configuration.passiveMultiplier : 1 + damage * configuration.attackDamageMultiplier;
 
@@ -252,10 +258,8 @@ public class EntityEvents {
                     xp *= configuration.babyMultiplier;
                 }
 
-                var configCapability = Components.config.of(player);
-
-                if (storage.incrementStatistic(StatisticType.experience, Math.round(xp)) && configCapability.levelupNotifications) {
-                    ((PlayerEntity) attacker).displayClientMessage(Translations.messageLevelUp.format(displayName, storage.datum(StatisticType.level)), true);
+                if (storage.incrementStatistic(StatisticType.experience, Math.round(xp)) && Components.config.of(player).levelupNotifications) {
+                    player.displayClientMessage(Translations.messageLevelUp.format(displayName, storage.datum(StatisticType.level)), true);
                 }
             }
         }
