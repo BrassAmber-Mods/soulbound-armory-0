@@ -29,8 +29,4 @@ public class SoulboundArmory {
         // ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, );
         // ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, (minecaft, parent) -> );
     }
-
-    static {
-        // Unsafe.ensureClassInitialized(Packets.class);
-    }
 }
