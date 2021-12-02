@@ -51,14 +51,14 @@ public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<S
         return storages(entity).stream().filter(storage -> storage.item() == item).findAny().map(Util::cast);
     }
 
-    public static Optional<ItemStorage<?>> firstMenuStorage(Entity entity) {
+    public static Optional<ItemStorage<?>> firstSoulboundItem(Entity entity) {
         if (entity == null) {
             return Optional.empty();
         }
 
         for (var itemStack : entity.getHandSlots()) {
             var item = itemStack.getItem();
-            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findAny();
+            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findFirst();
 
             if (storage.isPresent()) {
                 return storage;

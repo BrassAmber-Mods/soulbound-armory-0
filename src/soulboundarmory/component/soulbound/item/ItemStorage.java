@@ -7,30 +7,6 @@ import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.Category;
-import soulboundarmory.component.statistics.EnchantmentStorage;
-import soulboundarmory.component.statistics.SkillStorage;
-import soulboundarmory.component.statistics.Statistic;
-import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.component.statistics.Statistics;
-import soulboundarmory.client.gui.screen.AttributeTab;
-import soulboundarmory.client.gui.screen.EnchantmentTab;
-import soulboundarmory.client.gui.screen.SelectionTab;
-import soulboundarmory.client.gui.screen.SkillTab;
-import soulboundarmory.client.gui.screen.SoulboundScreen;
-import soulboundarmory.client.gui.screen.SoulboundTab;
-import soulboundarmory.client.gui.screen.StatisticEntry;
-import soulboundarmory.config.Configuration;
-import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.network.Packets;
-import soulboundarmory.serial.CompoundSerializable;
-import soulboundarmory.skill.Skill;
-import soulboundarmory.skill.SkillContainer;
-import soulboundarmory.util.ItemUtil;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
@@ -43,6 +19,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import soulboundarmory.SoulboundArmoryClient;
+import soulboundarmory.client.gui.screen.AttributeTab;
+import soulboundarmory.client.gui.screen.EnchantmentTab;
+import soulboundarmory.client.gui.screen.SelectionTab;
+import soulboundarmory.client.gui.screen.SkillTab;
+import soulboundarmory.client.gui.screen.SoulboundScreen;
+import soulboundarmory.client.gui.screen.StatisticEntry;
+import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.statistics.Category;
+import soulboundarmory.component.statistics.EnchantmentStorage;
+import soulboundarmory.component.statistics.SkillStorage;
+import soulboundarmory.component.statistics.Statistic;
+import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.component.statistics.Statistics;
+import soulboundarmory.config.Configuration;
+import soulboundarmory.item.SoulboundItem;
+import soulboundarmory.network.ExtendedPacketBuffer;
+import soulboundarmory.network.Packets;
+import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.skill.Skill;
+import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.util.ItemUtil;
 
 public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundSerializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
@@ -225,7 +224,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         var statistic = this.statistic(type);
 
         for (var i = 0; i < Math.abs(points); i++) {
-            if (sign > 0 && this.datum(StatisticType.attributePoints) > 0 || sign < 0 && statistic.isAboveMin()) {
+            if (sign > 0 && this.datum(StatisticType.attributePoints) > 0 || sign < 0 && statistic.aboveMin()) {
                 this.statistic(StatisticType.attributePoints).add(-sign);
                 this.statistic(StatisticType.spentAttributePoints).add(sign);
 
@@ -243,7 +242,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     public double increase(StatisticType statisticType) {
         var statistic = this.statistic(statisticType);
 
-        return statistic == null ? 0 : this.increase(statisticType, statistic.getPoints());
+        return statistic == null ? 0 : this.increase(statisticType, statistic.points());
     }
 
     public void set(StatisticType statistic, Number value) {
@@ -356,7 +355,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             this.statistics.reset(Category.datum);
         } else if (category == Category.attribute) {
             for (var type : this.statistics.get(Category.attribute).values()) {
-                this.incrementStatistic(StatisticType.attributePoints, type.getPoints());
+                this.incrementStatistic(StatisticType.attributePoints, type.points());
                 type.reset();
             }
 
@@ -414,11 +413,11 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     @SuppressWarnings("VariableUseSideOnly")
     public void refresh() {
         if (this.client) {
-            if (SoulboundArmoryClient.client.screen instanceof SoulboundTab) {
+            if (SoulboundArmoryClient.client.screen instanceof SoulboundScreen) {
                 var handItems = ItemUtil.handItems(this.player);
 
                 if (handItems.contains(this.item())) {
-                    this.openGUI();
+                    this.openGUI(this.currentTab);
                 } else if (handItems.contains(this.getConsumableItem())) {
                     this.openGUI(0);
                 }
@@ -432,12 +431,9 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.openGUI(ItemUtil.equippedStack(this.player.inventory, this.itemClass()) == null ? 0 : this.currentTab);
     }
 
-    @SuppressWarnings({"LocalVariableDeclarationSideOnly", "VariableUseSideOnly", "MethodCallSideOnly"})
     public void openGUI(int tab) {
         if (this.client) {
-            var currentScreen = SoulboundArmoryClient.client.screen;
-
-            if (currentScreen instanceof SoulboundScreen screen && this.currentTab == tab) {
+            if (SoulboundArmoryClient.client.screen instanceof SoulboundScreen screen && this.currentTab == tab) {
                 screen.refresh();
             } else {
                 SoulboundArmoryClient.client.setScreen(new SoulboundScreen(this.component, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));

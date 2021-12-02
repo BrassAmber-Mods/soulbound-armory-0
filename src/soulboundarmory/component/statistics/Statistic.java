@@ -14,18 +14,16 @@ public class Statistic extends Number implements CompoundSerializable {
     protected int points;
 
     public Statistic(Category category, StatisticType statistic) {
-        super();
-
         this.type = statistic;
         this.category = category;
-        this.value = BigDecimal.valueOf(0);
+        this.value = BigDecimal.ZERO;
         this.min = 0;
         this.max = Double.MAX_VALUE;
     }
 
     @Override
     public String toString() {
-        return String.format("Statistic{name: %s, type: %s, min: %.3f, max: %.3f, value: %s}", this.type, this.category, this.min, this.max, this.value.toString());
+        return String.format("Statistic {name: %s, type: %s, min: %.3f, max: %.3f, value: %s}", this.type, this.category, this.min, this.max, this.value.toString());
     }
 
     public StatisticType type() {
@@ -36,15 +34,15 @@ public class Statistic extends Number implements CompoundSerializable {
         return this.category;
     }
 
-    public boolean isAboveMin() {
+    public boolean aboveMin() {
         return this.greaterThan(this.min);
     }
 
-    public double getMin() {
+    public double min() {
         return this.min;
     }
 
-    public void setMin(double min) {
+    public void min(double min) {
         this.min = min;
 
         if (this.doubleValue() < min) {
@@ -56,15 +54,15 @@ public class Statistic extends Number implements CompoundSerializable {
         this.setValue(this.min);
     }
 
-    public boolean isBelowMax() {
+    public boolean belowMax() {
         return this.lessThan(this.max);
     }
 
-    public double getMax() {
+    public double max() {
         return this.max;
     }
 
-    public void setMax(double max) {
+    public void max(double max) {
         this.max = max;
 
         if (this.doubleValue() > max) {
@@ -76,11 +74,11 @@ public class Statistic extends Number implements CompoundSerializable {
         this.setValue(this.max);
     }
 
-    public int getPoints() {
+    public int points() {
         return this.points;
     }
 
-    public void setPoints(int points) {
+    public void points(int points) {
         this.points = points;
     }
 
@@ -161,7 +159,7 @@ public class Statistic extends Number implements CompoundSerializable {
 
     public void reset() {
         this.setToMin();
-        this.setPoints(0);
+        this.points(0);
     }
 
     @Override

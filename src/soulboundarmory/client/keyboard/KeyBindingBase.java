@@ -5,10 +5,8 @@ import net.minecraft.client.settings.KeyBinding;
 
 public abstract class KeyBindingBase extends KeyBinding {
     public KeyBindingBase(String name, int key) {
-        super(String.format("key.%s.%s", SoulboundArmory.ID, name), key, String.format("key.categories.%s", SoulboundArmory.NAME));
+        super("key.%s.%s".formatted(SoulboundArmory.ID, name), key, String.format("key.categories.%s", SoulboundArmory.ID));
     }
-
-    protected abstract void press();
 
     @Override
     public void setDown(boolean pressed) {
@@ -18,4 +16,6 @@ public abstract class KeyBindingBase extends KeyBinding {
 
         super.setDown(pressed);
     }
+
+    protected abstract void press();
 }

@@ -19,15 +19,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.auoeke.reflect.Accessor;
-import soulboundarmory.SoulboundArmory;
 import net.minecraft.command.ISuggestionProvider;
 
 public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
-    protected final Class<T> clazz;
+    protected final Class<T> type;
     protected final Map<String, Field> validFields;
 
-    protected ConstantArgumentType(Class<T> clazz) {
-        this.clazz = clazz;
+    protected ConstantArgumentType(Class<T> type) {
+        this.type = type;
         this.validFields = new LinkedHashMap<>();
     }
 
@@ -36,24 +35,24 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
         return (List<T>) context.getArgument(name, List.class);
     }
 
-    public static <T> ConstantArgumentType<T> allConstants(Class<T> clazz) {
-        var type = new ConstantArgumentType<>(clazz);
+    public static <T> ConstantArgumentType<T> allConstants(Class<T> type) {
+        var argumentType = new ConstantArgumentType<>(type);
 
-        for (var field : type.clazz.getDeclaredFields()) {
+        for (var field : type.getDeclaredFields()) {
             var modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                type.validFields.put(field.getName(), field);
+                argumentType.validFields.put(field.getName(), field);
             }
         }
 
-        return type;
+        return argumentType;
     }
 
     public static <T, U> ConstantArgumentType<T> allConstants(Class<T> holderClass, Class<U> fieldClass) {
         var type = new ConstantArgumentType<>(holderClass);
 
-        for (var field : type.clazz.getDeclaredFields()) {
+        for (var field : type.type.getDeclaredFields()) {
             var modifiers = field.getModifiers();
 
             if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && fieldClass.isInstance(Accessor.get(field))) {
@@ -65,48 +64,39 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     }
 
     @SafeVarargs
-    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, T... values) {
-        return excludeConstants(clazz, Arrays.asList(values));
+    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> type, T... values) {
+        return excludeConstants(type, Arrays.asList(values));
     }
 
     @SafeVarargs
-    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, T... values) {
-        return includeConstants(clazz, Arrays.asList(values));
+    public static <T> ConstantArgumentType<T> includeConstants(Class<T> type, T... values) {
+        return includeConstants(type, Arrays.asList(values));
     }
 
-    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, List<T> values) {
-        return excludeConstants(clazz, values::contains);
+    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> type, List<T> values) {
+        return excludeConstants(type, values::contains);
     }
 
-    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, List<T> values) {
-        return includeConstants(clazz, values::contains);
+    public static <T> ConstantArgumentType<T> includeConstants(Class<T> type, List<T> values) {
+        return includeConstants(type, values::contains);
     }
 
-    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> clazz, Predicate<T> exclude) {
-        return includeConstants(clazz, exclude.negate());
+    public static <T> ConstantArgumentType<T> excludeConstants(Class<T> type, Predicate<T> exclude) {
+        return includeConstants(type, exclude.negate());
     }
 
-    public static <T> ConstantArgumentType<T> includeConstants(Class<T> clazz, Predicate<T> include) {
-        var type = new ConstantArgumentType<>(clazz);
+    public static <T> ConstantArgumentType<T> includeConstants(Class<T> type, Predicate<T> include) {
+        var argumentType = new ConstantArgumentType<>(type);
 
-        for (var field : type.clazz.getDeclaredFields()) {
+        for (var field : type.getDeclaredFields()) {
             var modifiers = field.getModifiers();
 
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                var name = field.getName();
-
-                try {
-                    //noinspection unchecked
-                    if (include.test((T) field.get(null))) {
-                        type.validFields.put(name, field);
-                    }
-                } catch (IllegalAccessException exception) {
-                    SoulboundArmory.logger.warn(String.format("Unable to access public static final field %s.", name), exception);
-                }
+            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && include.test((T) Accessor.get(field))) {
+                argumentType.validFields.put(field.getName(), field);
             }
         }
 
-        return type;
+        return argumentType;
     }
 
     @Override
