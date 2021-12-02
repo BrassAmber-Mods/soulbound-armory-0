@@ -22,7 +22,7 @@ public abstract class SoulboundMeleeWeapon extends SwordItem implements Soulboun
 
     @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
-        Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
+        var modifiers = HashMultimap.<Attribute, AttributeModifier>create();
 
         if (slot == EquipmentSlotType.MAINHAND) {
             modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", this.attackSpeed, AttributeModifier.Operation.ADDITION));
