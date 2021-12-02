@@ -19,7 +19,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @SuppressWarnings("unchecked")
-public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<StorageType<T>> {
+public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<StorageType<T>> {
     @SuppressWarnings("rawtypes")
     public static final IForgeRegistry registry = Util.<StorageType>registry("storage");
 
@@ -74,5 +74,10 @@ public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<Storage
 
     public T get(SoulboundComponent component) {
         return component.storage(this);
+    }
+
+    @Override
+    public String toString() {
+        return "storage type " + this.getRegistryName();
     }
 }

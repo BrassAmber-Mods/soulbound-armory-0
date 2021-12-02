@@ -40,7 +40,7 @@ public class SelectionTab extends SoulboundTab {
             );
 
             if (this.parent.displayTabs()) {
-                button.active = storage.type().id() != this.parent.storage.type().id();
+                button.active = storage.type() != this.parent.storage.type();
             }
         }
     }
