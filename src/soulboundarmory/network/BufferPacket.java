@@ -2,14 +2,24 @@ package soulboundarmory.network;
 
 import net.minecraft.network.PacketBuffer;
 
-public interface BufferPacket extends Packet<ExtendedPacketBuffer> {
+/**
+ * A packet whose message is an {@link ExtendedPacketBuffer}.
+ */
+public abstract class BufferPacket extends Packet<ExtendedPacketBuffer> {
+    protected ExtendedPacketBuffer buffer;
+
     @Override
-    default void write(ExtendedPacketBuffer message, PacketBuffer buffer) {
-        buffer.writeBytes(message.readBytes(message.readableBytes()));
+    public void store(ExtendedPacketBuffer message) {
+        this.buffer = message;
     }
 
     @Override
-    default ExtendedPacketBuffer read(PacketBuffer buffer) {
-        return new ExtendedPacketBuffer(buffer.copy());
+    public void write(PacketBuffer buffer) {
+        buffer.writeBytes(this.buffer.array());
+    }
+
+    @Override
+    public void read(PacketBuffer buffer) {
+        this.buffer = new ExtendedPacketBuffer(buffer.copy());
     }
 }

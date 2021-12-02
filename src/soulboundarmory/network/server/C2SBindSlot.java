@@ -1,14 +1,12 @@
 package soulboundarmory.network.server;
 
-import soulboundarmory.network.ExtendedPacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.network.ItemComponentPacket;
 
-public class C2SBindSlot implements ItemComponentPacket {
+public class C2SBindSlot extends ItemComponentPacket {
     @Override
-    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        var slot = buffer.readInt();
+    public void execute(ItemStorage<?> storage) {
+        var slot = this.buffer.readInt();
 
         if (storage.boundSlot() == slot) {
             storage.unbindSlot();

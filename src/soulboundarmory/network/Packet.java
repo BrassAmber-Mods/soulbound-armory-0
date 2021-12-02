@@ -1,38 +1,49 @@
 package soulboundarmory.network;
 
-import soulboundarmory.SoulboundArmory;
-import soulboundarmory.SoulboundArmoryClient;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
+import soulboundarmory.SoulboundArmoryClient;
 
-public interface Packet<T> {
-    void execute(T message, NetworkEvent.Context context);
+/**
+ The base packet type.
 
-    void write(T message, PacketBuffer buffer);
+ Packets are message containers and handlers. They are constructed internally when sending and receiving messages.
 
-    T read(PacketBuffer buffer);
+ @param <T> the type of the message that may be stored in this packet.
+ */
+public abstract class Packet<T> {
+    protected NetworkEvent.Context context;
 
-    default PlayerEntity player(NetworkEvent.Context context) {
-        return context.getDirection().getReceptionSide().isClient() ? SoulboundArmoryClient.client.player : context.getSender();
+    public final void execute(NetworkEvent.Context context) {
+        this.context = context;
+        this.execute();
     }
 
-    default void send(Entity player, T message) {
-        SoulboundArmory.channel.sendTo(message, ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+    /**
+     If this method is invoked by the server, then return the sender of this packet; otherwise, return the player.
+     */
+    protected final PlayerEntity player() {
+        return this.context.getDirection().getReceptionSide().isClient() ? SoulboundArmoryClient.client.player : this.context.getSender();
     }
 
-    @OnlyIn(Dist.CLIENT)
-    default PlayerEntity player() {
-        return SoulboundArmoryClient.client.player;
-    }
+    /**
+     Store a message in this packet for later use in writing to a buffer.
+     */
+    public abstract void store(T message);
 
-    @OnlyIn(Dist.CLIENT)
-    default void send(T message) {
-        SoulboundArmory.channel.sendToServer(message);
-    }
+    /**
+     Write this packet's message to a buffer.
+     */
+    public abstract void write(PacketBuffer buffer);
+
+    /**
+     Read the message in a buffer.
+     */
+    public abstract void read(PacketBuffer buffer);
+
+    /**
+     After the message has been read, perform some action with it.
+     */
+    protected abstract void execute();
 }

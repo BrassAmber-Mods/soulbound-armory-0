@@ -43,12 +43,12 @@ public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<Storage
     }
 
     public static List<ItemStorage<?>> storages(Entity entity) {
-        return Components.soulbound(entity).flatMap(capability -> capability.storages().values().stream()).collect(Collectors.toList());
+        return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends ItemStorage<T>> Optional<ItemStorage<T>> get(Entity entity, Item item) {
-        return storages(entity).stream().filter(storage -> storage.getItem() == item).findAny().map(Util::cast);
+        return storages(entity).stream().filter(storage -> storage.item() == item).findAny().map(Util::cast);
     }
 
     public static Optional<ItemStorage<?>> firstMenuStorage(Entity entity) {
@@ -58,7 +58,7 @@ public class StorageType<T extends ItemStorage<T>> extends RegistryEntry<Storage
 
         for (var itemStack : entity.getHandSlots()) {
             var item = itemStack.getItem();
-            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.getItem() == item || storage1.canConsume(item)).findAny();
+            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findAny();
 
             if (storage.isPresent()) {
                 return storage;

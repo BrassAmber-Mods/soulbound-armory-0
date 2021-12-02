@@ -7,7 +7,7 @@ import cell.client.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import net.minecraft.client.Minecraft;
 
 public class SelectionTab extends SoulboundTab {
@@ -24,7 +24,7 @@ public class SelectionTab extends SoulboundTab {
         var centerX = (this.width - buttonWidth) / 2;
         var ySep = 32;
 
-        var selection = this.parent.capability.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
+        var selection = this.parent.component.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
         var top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
 
         for (int row = 0, size = selection.size(); row < size; row++) {

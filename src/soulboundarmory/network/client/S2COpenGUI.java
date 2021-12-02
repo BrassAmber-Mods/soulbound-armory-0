@@ -1,17 +1,15 @@
 package soulboundarmory.network.client;
 
-import soulboundarmory.client.gui.screen.SoulboundTab;
-import net.minecraftforge.fml.network.NetworkEvent;
 import soulboundarmory.SoulboundArmoryClient;
+import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.ItemComponentPacket;
 
-public class S2COpenGUI implements ItemComponentPacket {
+public class S2COpenGUI extends ItemComponentPacket {
     @Override
-    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
+    public void execute(ItemStorage<?> storage) {
         if (SoulboundArmoryClient.client.screen instanceof SoulboundTab) {
-            storage.openGUI(buffer.readInt());
+            storage.openGUI(this.buffer.readInt());
         }
     }
 }

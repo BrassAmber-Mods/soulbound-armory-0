@@ -8,7 +8,7 @@ import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 

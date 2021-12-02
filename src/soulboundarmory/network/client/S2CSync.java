@@ -1,13 +1,14 @@
 package soulboundarmory.network.client;
 
-import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.network.ItemComponentPacket;
-import net.minecraftforge.fml.network.NetworkEvent;
 import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.network.ItemComponentPacket;
 
-public class S2CSync implements ItemComponentPacket {
+/**
+ * A server-to-client packet for updating the client's information about a soulbound item.
+ */
+public class S2CSync extends ItemComponentPacket {
     @Override
-    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        storage.deserializeNBT(buffer.readNbt());
+    public void execute(ItemStorage<?> storage) {
+        storage.deserializeNBT(this.buffer.readNbt());
     }
 }

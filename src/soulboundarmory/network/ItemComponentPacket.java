@@ -1,14 +1,13 @@
 package soulboundarmory.network;
 
-import net.minecraftforge.fml.network.NetworkEvent;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.StorageType;
 
-public interface ItemComponentPacket extends BufferPacket {
-    void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage);
+public abstract class ItemComponentPacket extends BufferPacket {
+    public abstract void execute(ItemStorage<?> storage);
 
     @Override
-    default void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context) {
-        this.execute(buffer, context, StorageType.get(buffer.readResourceLocation()).get(this.player(context)));
+    public void execute() {
+        this.execute(StorageType.get(this.buffer.readResourceLocation()).get(this.player()));
     }
 }

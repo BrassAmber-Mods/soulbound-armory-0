@@ -26,7 +26,7 @@ import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import soulboundarmory.serial.CompoundSerializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
@@ -49,7 +49,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public EnchantmentStorage enchantments;
 
-    protected final SoulboundComponent capability;
+    protected final SoulboundComponent component;
     protected final PlayerEntity player;
     protected final Item item;
     protected final boolean client;
@@ -61,10 +61,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     protected int boundSlot;
     protected int currentTab;
 
-    public ItemStorage(SoulboundComponent capability, Item item) {
-        this.capability = capability;
-        this.player = capability.entity;
-        this.client = capability.entity.level.isClientSide;
+    public ItemStorage(SoulboundComponent component, Item item) {
+        this.component = component;
+        this.player = component.entity;
+        this.client = component.entity.level.isClientSide;
         this.item = item;
         this.itemStack = this.newItemStack();
     }
@@ -88,30 +88,30 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     public abstract Multimap<Attribute, AttributeModifier> attributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot);
 
     public static Optional<ItemStorage<?>> get(Entity entity, Item item) {
-        return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.player == entity && storage.getItem() == item).findAny();
+        return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.player == entity && storage.item() == item).findAny();
     }
 
     public static ItemStorage<?> get(Entity entity, StorageType<?> type) {
         return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.type() == type).findAny().orElse(null);
     }
 
-    public PlayerEntity getPlayer() {
+    public PlayerEntity player() {
         return this.player;
     }
 
-    public SoulboundComponent getCapability() {
-        return this.capability;
+    public SoulboundComponent component() {
+        return this.component;
     }
 
-    public Item getItem() {
+    public Item item() {
         return this.item;
     }
 
-    public ItemStack getMenuEquippedStack() {
+    public ItemStack menuEquippedStack() {
         for (var itemStack : this.player.getHandSlots()) {
             var item = itemStack.getItem();
 
-            if (item == this.getItem() || item == this.getConsumableItem()) {
+            if (item == this.item() || item == this.getConsumableItem()) {
                 return itemStack;
             }
         }
@@ -417,7 +417,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             if (SoulboundArmoryClient.client.screen instanceof SoulboundTab) {
                 var handItems = ItemUtil.handItems(this.player);
 
-                if (handItems.contains(this.getItem())) {
+                if (handItems.contains(this.item())) {
                     this.openGUI();
                 } else if (handItems.contains(this.getConsumableItem())) {
                     this.openGUI(0);
@@ -440,7 +440,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             if (currentScreen instanceof SoulboundScreen screen && this.currentTab == tab) {
                 screen.refresh();
             } else {
-                SoulboundArmoryClient.client.setScreen(new SoulboundScreen(this.capability, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
+                SoulboundArmoryClient.client.setScreen(new SoulboundScreen(this.component, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
             }
         } else {
             Packets.clientOpenGUI.send(this.player, new ExtendedPacketBuffer(this).writeInt(tab));
@@ -448,20 +448,20 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public boolean itemEquipped() {
-        return ItemUtil.isEquipped(this.player, this.getItem());
+        return ItemUtil.isEquipped(this.player, this.item());
     }
 
     public boolean anyItemEquipped() {
-        return this.getMenuEquippedStack() != null;
+        return this.menuEquippedStack() != null;
     }
 
     public void removeOtherItems() {
-        for (var storage : this.capability.storages().values()) {
+        for (var storage : this.component.storages().values()) {
             if (storage != this) {
                 var player = this.player;
 
                 for (var itemStack : ItemUtil.inventory(player)) {
-                    if (itemStack.getItem() == storage.getItem()) {
+                    if (itemStack.getItem() == storage.item()) {
                         player.inventory.removeItem(itemStack);
                     }
                 }
@@ -508,7 +508,6 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     protected String formatStatistic(StatisticType statistic) {
         var value = this.attributeTotal(statistic);
-
         return statisticFormat.format(statistic == StatisticType.criticalStrikeRate ? value * 100 : value);
     }
 
