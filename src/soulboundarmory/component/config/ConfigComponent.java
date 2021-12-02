@@ -12,12 +12,12 @@ public class ConfigComponent extends EntityComponent<PlayerEntity> {
     }
 
     @Override
-    public void deserialize(CompoundNBT tag) {
-        this.levelupNotifications = tag.getBoolean("levelupNotifications");
+    public void serialize(CompoundNBT tag) {
+        tag.putBoolean("levelupNotifications", this.levelupNotifications);
     }
 
     @Override
-    public void serialize(CompoundNBT tag) {
-        tag.putBoolean("levelupNotifications", this.levelupNotifications);
+    public void deserialize(CompoundNBT tag) {
+        this.levelupNotifications = tag.getBoolean("levelupNotifications");
     }
 }

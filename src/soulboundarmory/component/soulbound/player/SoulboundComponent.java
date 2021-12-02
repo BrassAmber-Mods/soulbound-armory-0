@@ -114,7 +114,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     }
 
     @Override
-    public void deserialize(CompoundNBT tag) {
+    public void serialize(CompoundNBT tag) {
         if (this.currentItem != null) {
             tag.putString("storage", this.currentItem.type().string());
         }
@@ -125,7 +125,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     }
 
     @Override
-    public void serialize(CompoundNBT tag) {
+    public void deserialize(CompoundNBT tag) {
         var type = StorageType.get(tag.getString("storage"));
 
         if (type != null) {

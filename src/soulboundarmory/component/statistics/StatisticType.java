@@ -22,4 +22,9 @@ public class StatisticType extends RegistryEntry<StatisticType> {
     public static final StatisticType attackDamage = register("attack_damage");
     public static final StatisticType criticalStrikeRate = register("critical_strike_rate");
     public static final StatisticType attackRange = register("attack_range");
+
+    @Override
+    public String toString() {
+        return "statistic type " + this.getRegistryName();
+    }
 }
