@@ -111,17 +111,17 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
-        super.deserializeNBT(tag);
-
-        this.spell = tag.getInt("spell");
-    }
-
-    @Override
     public CompoundNBT serializeNBT() {
         var tag = super.serializeNBT();
         tag.putInt("spell", this.spell);
 
         return tag;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT tag) {
+        super.deserializeNBT(tag);
+
+        this.spell = tag.getInt("spell");
     }
 }

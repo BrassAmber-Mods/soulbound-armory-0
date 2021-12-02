@@ -33,19 +33,6 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        var registry = Registry.ENCHANTMENT;
-
-        for (var key : nbt.getAllKeys()) {
-            var enchantment = registry.get(new ResourceLocation(key));
-
-            if (this.containsKey(enchantment)) {
-                this.put(enchantment, nbt.getInt(key));
-            }
-        }
-    }
-
-    @Override
     public void serializeNBT(CompoundNBT tag) {
         var registry = ForgeRegistries.ENCHANTMENTS;
 
@@ -58,6 +45,19 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
                 if (identifier != null) {
                     tag.putInt(identifier.toString(), this.get(enchantment));
                 }
+            }
+        }
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        var registry = Registry.ENCHANTMENT;
+
+        for (var key : nbt.getAllKeys()) {
+            var enchantment = registry.get(new ResourceLocation(key));
+
+            if (this.containsKey(enchantment)) {
+                this.put(enchantment, nbt.getInt(key));
             }
         }
     }

@@ -512,6 +512,16 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     @Override
+    public void serializeNBT(CompoundNBT tag) {
+        tag.put("statistics", this.statistics.serializeNBT());
+        tag.put("enchantments", this.enchantments.serializeNBT());
+        tag.put("skills", this.skills.serializeNBT());
+        tag.putBoolean("unlocked", this.unlocked);
+        tag.putInt("slot", this.boundSlot());
+        tag.putInt("tab", this.tab());
+    }
+
+    @Override
     public void deserializeNBT(CompoundNBT tag) {
         this.statistics.deserializeNBT(tag.getCompound("statistics"));
         this.enchantments.deserializeNBT(tag.getCompound("enchantments"));
@@ -521,16 +531,6 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.tab(tag.getInt("tab"));
 
         this.updateItemStack();
-    }
-
-    @Override
-    public void serializeNBT(CompoundNBT tag) {
-        tag.put("statistics", this.statistics.serializeNBT());
-        tag.put("enchantments", this.enchantments.serializeNBT());
-        tag.put("skills", this.skills.serializeNBT());
-        tag.putBoolean("unlocked", this.unlocked);
-        tag.putInt("slot", this.boundSlot());
-        tag.putInt("tab", this.tab());
     }
 
     public CompoundNBT clientTag() {
@@ -544,7 +544,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         if (this.client) {
             Packets.serverSync.send(new ExtendedPacketBuffer(this).writeNbt(this.clientTag()));
         } else {
-            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.tag()));
+            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serializeNBT()));
         }
     }
 

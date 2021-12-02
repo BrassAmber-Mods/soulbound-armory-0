@@ -254,11 +254,9 @@ public class EntityEvents {
 
                 var configCapability = Components.config.of(player);
 
-                if (storage.incrementStatistic(StatisticType.experience, (int) Math.round(xp)) && configCapability.levelupNotifications) {
+                if (storage.incrementStatistic(StatisticType.experience, Math.round(xp)) && configCapability.levelupNotifications) {
                     ((PlayerEntity) attacker).displayClientMessage(Translations.messageLevelUp.format(displayName, storage.datum(StatisticType.level)), true);
                 }
-
-                storage.sync();
             }
         }
     }

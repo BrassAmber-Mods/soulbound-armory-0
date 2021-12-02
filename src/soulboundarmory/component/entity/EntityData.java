@@ -84,13 +84,13 @@ public class EntityData extends EntityComponent<Entity> {
 
     @Override
     public void serialize(CompoundNBT tag) {
-        this.freezeTicks = tag.getInt("freezeTicks");
-        this.blockTeleportTicks = tag.getInt("blockTeleportTicks");
+        tag.putInt("freezeTicks", this.freezeTicks);
+        tag.putInt("blockTeleportTicks", this.blockTeleportTicks);
     }
 
     @Override
     public void deserialize(CompoundNBT tag) {
-        tag.putInt("freezeTicks", this.freezeTicks);
-        tag.putInt("blockTeleportTicks", this.blockTeleportTicks);
+        this.freezeTicks = tag.getInt("freezeTicks");
+        this.blockTeleportTicks = tag.getInt("blockTeleportTicks");
     }
 }
