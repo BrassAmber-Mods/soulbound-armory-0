@@ -25,7 +25,7 @@ abstract class ItemStackMixin {
 
     @ModifyVariable(method = "getTooltipLines", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
     private boolean normalizeCustomAttributes(boolean green) {
-        return AttributeModifierIdentifiers.isReserved(this.modifier.getId()) || green;
+        return AttributeModifierIdentifiers.isReserved(this.modifier.getID()) || green;
     }
 
     /*

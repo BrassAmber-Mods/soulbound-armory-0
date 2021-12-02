@@ -1,18 +1,16 @@
 package soulboundarmory.client.gui.screen;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
-import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.component.statistics.Category;
-import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.network.Packets;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.SoulboundArmoryClient;
+import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.component.statistics.Category;
+import soulboundarmory.network.ExtendedPacketBuffer;
+import soulboundarmory.network.Packets;
 
 public abstract class SoulboundTab extends ScreenTab {
     protected static final NumberFormat format = DecimalFormat.getInstance();
@@ -29,7 +27,7 @@ public abstract class SoulboundTab extends ScreenTab {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (SoulboundArmoryClient.guiKeyBinding.matches(keyCode, scanCode)) {
+        if (SoulboundArmoryClient.guiKeyBinding.matchesKey(keyCode, scanCode)) {
             this.onClose();
         }
 

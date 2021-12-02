@@ -31,7 +31,7 @@ public final class PacketKey<T> {
      Send a message from the server to a client.
      */
     public void send(Entity player, T message) {
-        SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     /**

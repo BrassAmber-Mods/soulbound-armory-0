@@ -24,15 +24,15 @@ public class ItemUtil {
     }
 
     public static List<Item> handItems(LivingEntity entity) {
-        return Arrays.asList(entity.getMainHandItem().getItem(), entity.getOffhandItem().getItem());
+        return Arrays.asList(entity.getHeldItemMainhand().getItem(), entity.getHeldItemOffhand().getItem());
     }
 
     public static Stream<ItemStack> handStacks(LivingEntity entity) {
-        return StreamSupport.stream(entity.getHandSlots().spliterator(), false);
+        return StreamSupport.stream(entity.getHeldEquipment().spliterator(), false);
     }
 
     public static Stream<ItemStack> handStacks(PlayerInventory inventory) {
-        return Stream.of(inventory.getSelected(), inventory.offhand.get(0));
+        return Stream.of(inventory.getCurrentItem(), inventory.offHandInventory.get(0));
     }
 
     public static ItemStack equippedStack(PlayerEntity player, Item... validItems) {
@@ -44,7 +44,7 @@ public class ItemUtil {
     }
 
     public static ItemStack getRequiredItemStack(PlayerEntity player, Class<?>... types) {
-        var itemStack = player.getMainHandItem();
+        var itemStack = player.getHeldItemMainhand();
         var item = itemStack.getItem();
 
         for (var type : types) {
@@ -57,8 +57,8 @@ public class ItemUtil {
     }
 
     public static int matchingSlot(PlayerInventory inventory, ItemStack itemStack) {
-        return IntStream.range(0, inventory.items.size())
-            .filter(slot -> !inventory.items.get(slot).isEmpty() && ItemStack.isSameIgnoreDurability(itemStack, inventory.items.get(slot)))
+        return IntStream.range(0, inventory.mainInventory.size())
+            .filter(slot -> !inventory.mainInventory.get(slot).isEmpty() && ItemStack.areItemsEqualIgnoreDurability(itemStack, inventory.mainInventory.get(slot)))
             .findFirst()
             .orElse(-1);
     }

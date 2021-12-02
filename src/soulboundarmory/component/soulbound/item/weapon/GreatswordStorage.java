@@ -51,9 +51,9 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
             .max(1, StatisticType.criticalStrikeRate).build();
 
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getDescriptionId().toLowerCase(Locale.ROOT);
+            var name = enchantment.getName().toLowerCase(Locale.ROOT);
 
-            return enchantment.canEnchant(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
+            return enchantment.canApply(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
                 && !name.contains("mending");
         });
@@ -106,13 +106,13 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
 
     public void freeze(Entity entity, int ticks, double damage) {
         var component = Components.entityData.of(entity);
-        var id = entity.getUUID();
+        var id = entity.getUniqueID();
         var key = id.toString();
 
         if (!this.cannotFreeze.contains(key) && component.canBeFrozen()) {
             component.freeze(this.player, ticks, (float) damage);
 
-            this.cannotFreeze.putUUID(key, id);
+            this.cannotFreeze.putUniqueId(key, id);
         }
     }
 

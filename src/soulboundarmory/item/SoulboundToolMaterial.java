@@ -24,32 +24,32 @@ public enum SoulboundToolMaterial implements IItemTier {
     }
 
     @Override
-    public int getUses() {
+    public int getMaxUses() {
         return this.uses;
     }
 
     @Override
-    public float getSpeed() {
+    public float getEfficiency() {
         return this.miningSpeed;
     }
 
     @Override
-    public float getAttackDamageBonus() {
+    public float getAttackDamage() {
         return this.attackDamage;
     }
 
     @Override
-    public int getLevel() {
+    public int getHarvestLevel() {
         return this.miningLevel;
     }
 
     @Override
-    public int getEnchantmentValue() {
+    public int getEnchantability() {
         return this.enchantability;
     }
 
     @Override
-    public Ingredient getRepairIngredient() {
+    public Ingredient getRepairMaterial() {
         return this.repairIngredient.get();
     }
 }

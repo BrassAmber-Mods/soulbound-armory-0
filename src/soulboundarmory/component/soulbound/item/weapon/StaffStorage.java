@@ -46,9 +46,9 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
             .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
             .max(1, StatisticType.criticalStrikeRate).build();
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getFullname(1).getContents().toLowerCase();
+            var name = enchantment.getName().toLowerCase();
 
-            return enchantment.canEnchant(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
+            return enchantment.canApply(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
                 && !name.contains("mending");
         });

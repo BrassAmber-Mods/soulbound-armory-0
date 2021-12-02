@@ -35,7 +35,7 @@ abstract class LivingEntityMixin extends Entity {
                      target = "Lnet/minecraft/world/World;getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
-        if ((Object) this instanceof PlayerEntity player && !this.level.isClientSide) {
+        if ((Object) this instanceof PlayerEntity player && !this.world.isRemote) {
             var greatsword = Components.weapon.of(player).storage(StorageType.greatsword);
             var leapForce = greatsword.leapForce();
 
@@ -46,7 +46,7 @@ abstract class LivingEntityMixin extends Entity {
                     }
                 }
 
-                if (greatsword.leapDuration() <= 0 && player.isOnGround() && (player.getDeltaMovement().y <= 0.01 || player.isCreative())) {
+                if (greatsword.leapDuration() <= 0 && player.isOnGround() && (player.getMotion().y <= 0.01 || player.isCreative())) {
                     greatsword.leapDuration(7);
                 }
 

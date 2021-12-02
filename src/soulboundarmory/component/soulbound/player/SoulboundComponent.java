@@ -37,7 +37,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     }
 
     public ItemStorage<?> heldItemStorage() {
-        for (var itemStack : this.entity.getHandSlots()) {
+        for (var itemStack : this.entity.getHeldEquipment()) {
             for (var component : this.storages.values()) {
                 if (itemStack.getItem() == component.item()) {
                     return component;
@@ -95,13 +95,13 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
                             }
 
                             var tag = newItemStack.getTag();
-                            newItemStack.setHoverName(stack.getHoverName());
+                            newItemStack.setDisplayName(stack.getDisplayName());
 
                             if (tag != null && !tag.equals(stack.getTag())) {
-                                inventory.setItem(firstSlot, newItemStack);
+                                inventory.setInventorySlotContents(firstSlot, newItemStack);
                             }
                         } else if (!(this.entity.isCreative() || index == firstSlot && firstSlot == -1)) {
-                            inventory.removeItem(stack);
+                            inventory.deleteStack(stack);
                         }
                     }
                 }

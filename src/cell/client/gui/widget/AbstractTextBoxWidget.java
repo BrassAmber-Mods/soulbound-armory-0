@@ -72,16 +72,16 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
 
         for (int i = 0, size = lines.size(); i < size; i++) {
             var line = lines.get(i);
-            textRenderer.draw(matrices, line.getString(), this.textX, this.getY(i), 0xFFFFFF);
+            textRenderer.drawString(matrices, line.getString(), this.textX, this.getPosY(i), 0xFFFFFF);
         }
     }
 
     protected void renderCaret(MatrixStack matrices) {
-        textRenderer.draw(matrices, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
+        textRenderer.func_243246_a(matrices, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
     }
 
-    protected int getY(int line) {
-        return this.textY + line * (textRenderer.lineHeight + 3);
+    protected int getPosY(int line) {
+        return this.textY + line * (textRenderer.FONT_HEIGHT + 3);
     }
 
     @Override
@@ -167,7 +167,7 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
             }
         }
 
-        this.lines = textHandler.splitLines(this.text.toString(), this.insideWidth - 4, Style.EMPTY);
+        this.lines = textHandler.func_238365_g_(this.text.toString(), this.insideWidth - 4, Style.EMPTY);
         this.updateCaret();
 
         return false;
@@ -180,8 +180,8 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
             this.caretX = this.textX;
             this.caretY = this.textY;
         } else {
-            this.caretX = this.textX + textRenderer.width(this.lines.get(size - 1).getString().substring(0, this.index));
-            this.caretY = this.getY(this.column);
+            this.caretX = this.textX + textRenderer.getStringWidth(this.lines.get(size - 1).getString().substring(0, this.index));
+            this.caretY = this.getPosY(this.column);
         }
     }
 

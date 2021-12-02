@@ -10,6 +10,6 @@ public interface TextProvider<T extends Widget<T>> extends TooltipRenderer<T> {
 
     @Override
     default void render(T widget, MatrixStack matrices, int mouseX, int mouseY) {
-        CellElement.client.screen.renderTooltip(matrices, this.get(widget, mouseX, mouseY), mouseX, mouseY);
+        CellElement.client.currentScreen.renderTooltip(matrices, this.get(widget, mouseX, mouseY), mouseX, mouseY);
     }
 }

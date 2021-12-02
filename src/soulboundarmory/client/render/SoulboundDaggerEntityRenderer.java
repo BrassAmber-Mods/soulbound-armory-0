@@ -17,7 +17,7 @@ public class SoulboundDaggerEntityRenderer extends ArrowRenderer<SoulboundDagger
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SoulboundDaggerEntity entity) {
+    public ResourceLocation getEntityTexture(SoulboundDaggerEntity entity) {
         return id;
     }
 }

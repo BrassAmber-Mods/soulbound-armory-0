@@ -49,9 +49,9 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
             .max(1, StatisticType.criticalStrikeRate)
             .build();
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getFullname(1).getContents().toLowerCase();
+            var name = enchantment.getName().toLowerCase();
 
-            return enchantment.canEnchant(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
+            return enchantment.canApply(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
                 && !name.contains("mending");
         });
@@ -97,7 +97,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     @Override
     public List<StatisticEntry> screenAttributes() {
         return Arrays.asList(
-            new StatisticEntry(this.statistic(StatisticType.attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(StatisticType.attackSpeed)).withStyle(TextFormatting.GOLD)),
+            new StatisticEntry(this.statistic(StatisticType.attackSpeed), new Translation("%s%s: %s", Translations.attackSpeedFormat, Translations.attackSpeedName, this.formatStatistic(StatisticType.attackSpeed)).mergeStyle(TextFormatting.GOLD)),
             new StatisticEntry(this.statistic(StatisticType.attackDamage), new Translation("%s%s: %s", Translations.attackDamageFormat, Translations.attackDamageName, this.formatStatistic(StatisticType.attackDamage))),
             new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), new Translation("%s%s: %s%%", Translations.criticalStrikeRateFormat, Translations.criticalStrikeRateName, this.formatStatistic(StatisticType.criticalStrikeRate))),
             new StatisticEntry(this.statistic(StatisticType.efficiency), new Translation("%s%s: %s", Translations.weaponEfficiencyFormat, Translations.weaponEfficiencyName, this.formatStatistic(StatisticType.efficiency)))

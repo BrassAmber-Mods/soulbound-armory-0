@@ -79,14 +79,14 @@ public abstract class Skill extends RegistryEntry<Skill> {
 
     @OnlyIn(Dist.CLIENT)
     public ITextComponent name() {
-        var name = I18n.get(String.format("skill.%s.%s.name", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
+        var name = I18n.format(String.format("skill.%s.%s.name", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
 
         return new StringTextComponent(name.substring(0, 1).toUpperCase() + name.substring(1));
     }
 
     @OnlyIn(Dist.CLIENT)
     public List<? extends ITextComponent> tooltip() {
-        return Stream.of(I18n.get("skill.%s.%s.desc".formatted(this.getRegistryName().getNamespace(), this.getRegistryName().getPath())).split("\\\\n")).map(Translation::new).toList();
+        return Stream.of(I18n.format("skill.%s.%s.desc".formatted(this.getRegistryName().getNamespace(), this.getRegistryName().getPath())).split("\\\\n")).map(Translation::new).toList();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -96,7 +96,7 @@ public abstract class Skill extends RegistryEntry<Skill> {
 
     @OnlyIn(Dist.CLIENT)
     public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
-        CellScreen.textureManager.bind(this.texture());
+        CellScreen.textureManager.bindTexture(this.texture());
         screen.withZ(zOffset, () -> AbstractGui.blit(matrices, x, y, 0, 0, 16, 16, 16, 16));
     }
 }
