@@ -8,7 +8,7 @@ import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;

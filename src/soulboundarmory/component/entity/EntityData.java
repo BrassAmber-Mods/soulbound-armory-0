@@ -11,7 +11,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.server.ServerWorld;
 import soulboundarmory.component.EntityComponent;
-import soulboundarmory.util.Util;
 
 public class EntityData extends EntityComponent<Entity> {
     protected int freezeTicks;
@@ -58,7 +57,7 @@ public class EntityData extends EntityComponent<Entity> {
     }
 
     public boolean canBeFrozen() {
-        return (!(this.entity instanceof PlayerEntity) || Util.server().isPvpAllowed()) && this.entity.isAlive();
+        return (!(this.entity instanceof PlayerEntity) || this.entity.getServer().isPvpAllowed()) && this.entity.isAlive();
     }
 
     public boolean isFrozen() {

@@ -1,15 +1,13 @@
 package soulboundarmory.network.server;
 
-import net.minecraftforge.fml.network.NetworkEvent;
 import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.ItemComponentPacket;
 
-public class C2SItemType implements ItemComponentPacket {
+public class C2SItemType extends ItemComponentPacket {
     @Override
-    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        this.player(context).inventory.setItem(buffer.readInt(), storage.stack());
-        storage.getCapability().currentItem(storage);
+    public void execute(ItemStorage<?> storage) {
+        this.player().inventory.setItem(this.buffer.readInt(), storage.stack());
+        storage.component().currentItem(storage);
         storage.removeOtherItems();
         storage.sync();
     }

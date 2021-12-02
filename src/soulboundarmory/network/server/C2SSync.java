@@ -2,14 +2,12 @@ package soulboundarmory.network.server;
 
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
-import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.ItemComponentPacket;
-import net.minecraftforge.fml.network.NetworkEvent;
 
-public class C2SSync implements ItemComponentPacket {
+public class C2SSync extends ItemComponentPacket {
     @Override
-    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        var tag = buffer.readNbt();
+    public void execute(ItemStorage<?> storage) {
+        var tag = this.buffer.readNbt();
 
         if (tag.contains("tab")) {
             storage.tab(tag.getInt("tab"));

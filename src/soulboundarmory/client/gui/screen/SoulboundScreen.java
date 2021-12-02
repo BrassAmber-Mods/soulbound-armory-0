@@ -20,7 +20,7 @@ import soulboundarmory.client.gui.bar.Style;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
@@ -29,11 +29,15 @@ import net.minecraft.util.text.ITextComponent;
 import static soulboundarmory.component.statistics.StatisticType.experience;
 import static soulboundarmory.component.statistics.StatisticType.level;
 
+/**
+ * The main menu of this mod.
+ * It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
+ */
 public class SoulboundScreen extends CellScreen {
     protected final PlayerEntity player = SoulboundArmoryClient.player();
     protected final List<DrawableElement> options = new ReferenceArrayList<>(5);
     protected final List<Slider> sliders = new ReferenceArrayList<>(4);
-    protected final SoulboundComponent capability;
+    protected final SoulboundComponent component;
     protected ItemStorage<?> storage;
     protected ItemStack stack;
     protected ScalableWidget xpBar;
@@ -45,8 +49,8 @@ public class SoulboundScreen extends CellScreen {
     private SoulboundTab tab;
     private ScalableWidget button;
 
-    public SoulboundScreen(SoulboundComponent capability, int currentIndex, SoulboundTab... tabs) {
-        this.capability = capability;
+    public SoulboundScreen(SoulboundComponent component, int currentIndex, SoulboundTab... tabs) {
+        this.component = component;
         this.tabs = List.of(tabs);
 
         for (var index = 0; index < this.tabs.size(); index++) {
@@ -60,8 +64,8 @@ public class SoulboundScreen extends CellScreen {
 
     @Override
     protected void init() {
-        this.storage = this.capability.menuStorage();
-        this.stack = this.capability.menuStorage().stack();
+        this.storage = this.component.menuStorage();
+        this.stack = this.component.menuStorage().stack();
 
         for (var itemStack : this.player.getHandSlots()) {
             if (itemStack.equals(this.stack)) {

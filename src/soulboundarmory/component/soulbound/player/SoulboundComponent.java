@@ -39,7 +39,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     public ItemStorage<?> heldItemStorage() {
         for (var itemStack : this.entity.getHandSlots()) {
             for (var component : this.storages.values()) {
-                if (itemStack.getItem() == component.getItem()) {
+                if (itemStack.getItem() == component.item()) {
                     return component;
                 }
             }
@@ -87,7 +87,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
                     if (baseItemClass.isInstance(stack.getItem())) {
                         var index = combinedInventory.indexOf(stack);
 
-                        if (stack.getItem() == storage.getItem() && (firstSlot == -1 || index == 36)) {
+                        if (stack.getItem() == storage.item() && (firstSlot == -1 || index == 36)) {
                             firstSlot = index == 36 ? 40 : index;
 
                             if (storage.boundSlot() != -1) {

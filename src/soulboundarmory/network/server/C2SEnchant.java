@@ -1,20 +1,18 @@
 package soulboundarmory.network.server;
 
+import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.ItemComponentPacket;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
-public class C2SEnchant implements ItemComponentPacket {
+public class C2SEnchant extends ItemComponentPacket {
     @Override
-    public void execute(ExtendedPacketBuffer buffer, NetworkEvent.Context context, ItemStorage<?> storage) {
-        var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(buffer.readResourceLocation());
-        var add = buffer.readBoolean();
+    public void execute(ItemStorage<?> storage) {
+        var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(this.buffer.readResourceLocation());
+        var add = this.buffer.readBoolean();
         var change = add ? 1 : -1;
 
-        if (buffer.readBoolean()) {
+        if (this.buffer.readBoolean()) {
             change *= add ? storage.datum(StatisticType.enchantmentPoints) : storage.enchantment(enchantment);
         }
 

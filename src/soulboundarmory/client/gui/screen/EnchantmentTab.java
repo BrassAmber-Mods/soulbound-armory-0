@@ -7,7 +7,7 @@ import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import soulboundarmory.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.Enchantment;

@@ -38,11 +38,10 @@ import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.mixin.access.entity.EntityAccess;
 import soulboundarmory.network.ExtendedPacketBuffer;
-import soulboundarmory.registry.Packets;
+import soulboundarmory.network.Packets;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.ItemUtil;
-import soulboundarmory.util.Util;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public class EntityEvents {
@@ -58,7 +57,7 @@ public class EntityEvents {
     }
 
     @SubscribeEvent
-    public static void spawn(PlayerEvent.PlayerLoggedInEvent event) {
+    public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         var player = event.getPlayer();
 
         if (!player.level.isClientSide) {
@@ -68,27 +67,21 @@ public class EntityEvents {
 
     @SubscribeEvent
     public static void onPlayerDrops(LivingDropsEvent event) {
-        var entity = event.getEntity();
+        if (event.getEntity() instanceof PlayerEntity player && !player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+            Components.soulbound(player)
+                .map(SoulboundComponent::storage)
+                .filter(storage -> storage != null && storage.datum(StatisticType.level) >= Configuration.instance().preservationLevel)
+                .forEach(storage -> {
+                    var drops = event.getDrops();
 
-        if (entity instanceof PlayerEntity) {
-            var player = (PlayerEntity) event.getEntity();
+                    for (var item : drops) {
+                        var itemStack = item.getItem();
 
-            if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
-                Components.soulbound(player)
-                    .map(SoulboundComponent::storage)
-                    .filter(storage -> storage != null && storage.datum(StatisticType.level) >= Configuration.instance().preservationLevel)
-                    .forEach(storage -> {
-                        var drops = event.getDrops();
-
-                        for (var item : drops) {
-                            var itemStack = item.getItem();
-
-                            if (storage.itemClass().isInstance(itemStack.getItem()) && player.addItem(itemStack)) {
-                                drops.remove(item);
-                            }
+                        if (storage.itemClass().isInstance(itemStack.getItem()) && player.addItem(itemStack)) {
+                            drops.remove(item);
                         }
-                    });
-            }
+                    }
+                });
         }
     }
 
@@ -136,14 +129,14 @@ public class EntityEvents {
 
     @SubscribeEvent
     public static void onBlockDrop(BlockEvent.BreakEvent event) {
-        var entity = event.getPlayer();
-        var tool = entity.getMainHandItem();
+        var player = event.getPlayer();
+        var tool = player.getMainHandItem();
 
-        if (tool.getItem() == SoulboundItems.pick && Components.tool.of(entity).storage().hasSkill(Skills.enderPull)) {
+        if (tool.getItem() == SoulboundItems.pick && Components.tool.of(player).storage().hasSkill(Skills.enderPull)) {
             event.setCanceled(true);
             event.getWorld().removeBlock(event.getPos(), false);
 
-            Block.dropResources(event.getState(), event.getWorld(), entity.blockPosition(), null);
+            Block.dropResources(event.getState(), event.getWorld(), player.blockPosition(), null);
         }
     }
 
@@ -173,9 +166,9 @@ public class EntityEvents {
             }
         }
 
-        if (entity instanceof PlayerEntity && !entity.level.isClientSide) {
+        if (entity instanceof PlayerEntity player && !player.level.isClientSide) {
             var source = event.getSource().getDirectEntity();
-            var instance = Components.weapon.of(entity);
+            var instance = Components.weapon.of(player);
             ItemStorage<?> storage;
 
             if (source instanceof SoulboundDaggerEntity) {
@@ -191,7 +184,7 @@ public class EntityEvents {
             }
 
             if (storage != null) {
-                var random = entity.level.random;
+                var random = player.level.random;
                 var attackDamage = storage.attribute(StatisticType.criticalStrikeRate) > random.nextDouble() ? 2 * event.getAmount() : event.getAmount();
 
                 if (storage.hasSkill(Skills.nourishment)) {
@@ -199,7 +192,7 @@ public class EntityEvents {
                     var saturation = (1 + leeching.level()) * attackDamage / 20F;
                     var food = random.nextInt((int) Math.ceil(saturation) + 1);
 
-                    ((PlayerEntity) entity).getFoodData().eat(food, 2 * saturation);
+                    player.getFoodData().eat(food, 2 * saturation);
                 }
 
                 event.setAmount(attackDamage);
@@ -218,23 +211,23 @@ public class EntityEvents {
             throw new RuntimeException();
         }
 
-        if ((attacker instanceof PlayerEntity player) && !attacker.level.isClientSide) {
+        if (attacker instanceof PlayerEntity player && !player.level.isClientSide) {
             var damageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
             var damage = damageAttribute == null ? 0 : damageAttribute.getValue();
             var armor = entity.getAttributeValue(Attributes.ARMOR);
             var immediateSource = event.getSource().getDirectEntity();
-            var capability = Components.weapon.of(player);
+            var component = Components.weapon.of(player);
             ItemStorage<?> storage;
             ITextComponent displayName;
 
-            if (immediateSource instanceof SoulboundDaggerEntity) {
-                storage = capability.storage(StorageType.dagger);
-                displayName = ((SoulboundDaggerEntity) immediateSource).itemStack.getDisplayName();
+            if (immediateSource instanceof SoulboundDaggerEntity dagger) {
+                storage = component.storage(StorageType.dagger);
+                displayName = dagger.itemStack.getDisplayName();
             } else if (immediateSource instanceof SoulboundLightningEntity) {
-                storage = capability.storage(StorageType.sword);
+                storage = component.storage(StorageType.sword);
                 displayName = ItemUtil.equippedStack(player, SoulboundItems.sword).getDisplayName();
             } else {
-                storage = capability.storage();
+                storage = component.storage();
                 displayName = player.getMainHandItem().getDisplayName();
             }
 
@@ -242,7 +235,7 @@ public class EntityEvents {
                 var configuration = Configuration.instance();
 
                 var xp = entity.getMaxHealth()
-                    * attacker.level.getDifficulty().getId() * configuration.difficultyMultiplier
+                    * player.level.getDifficulty().getId() * configuration.difficultyMultiplier
                     * (1 + armor * configuration.armorMultiplier);
 
                 xp *= damage <= 0 ? configuration.passiveMultiplier : 1 + damage * configuration.attackDamageMultiplier;
@@ -251,7 +244,7 @@ public class EntityEvents {
                     xp *= configuration.bossMultiplier;
                 }
 
-                if (Util.server().isHardcore()) {
+                if (player.level.getServer().isHardcore()) {
                     xp *= configuration.hardcoreMultiplier;
                 }
 
@@ -293,33 +286,30 @@ public class EntityEvents {
                     for (var entity : nearbyEntities) {
                         if (entity.distanceToSqr(entity) <= radiusXZ * radiusXZ) {
                             storage.freeze(entity, (int) Math.min(60, 12 * event.getDistance()), 0.4F * event.getDistance());
-
                             froze = true;
                         }
                     }
 
-                    if (froze) {
-                        if (!nearbyEntities.isEmpty()) {
-                            var world = (ServerWorld) player.level;
+                    if (froze && !nearbyEntities.isEmpty()) {
+                        var world = (ServerWorld) player.level;
 
-                            for (double i = 0; i <= 2 * radiusXZ; i += radiusXZ / 48D) {
-                                var x = radiusXZ - i;
-                                var z = Math.sqrt((radiusXZ * radiusXZ - x * x));
-                                var particles = 1;
+                        for (double i = 0; i <= 2 * radiusXZ; i += radiusXZ / 48D) {
+                            var x = radiusXZ - i;
+                            var z = Math.sqrt((radiusXZ * radiusXZ - x * x));
+                            var particles = 1;
 
-                                world.sendParticles(ParticleTypes.ITEM_SNOWBALL,
-                                    player.getX() + x,
-                                    player.getEyeY(),
-                                    player.getZ() + z,
-                                    particles, 0, 0, 0, 0D
-                                );
-                                world.sendParticles(ParticleTypes.ITEM_SNOWBALL,
-                                    player.getX() + x,
-                                    player.getEyeY(),
-                                    player.getZ() - z,
-                                    particles, 0, 0, 0, 0D
-                                );
-                            }
+                            world.sendParticles(ParticleTypes.ITEM_SNOWBALL,
+                                player.getX() + x,
+                                player.getEyeY(),
+                                player.getZ() + z,
+                                particles, 0, 0, 0, 0D
+                            );
+                            world.sendParticles(ParticleTypes.ITEM_SNOWBALL,
+                                player.getX() + x,
+                                player.getEyeY(),
+                                player.getZ() - z,
+                                particles, 0, 0, 0, 0D
+                            );
                         }
                     }
                 }
