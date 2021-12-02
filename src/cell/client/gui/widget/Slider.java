@@ -39,7 +39,7 @@ public class Slider extends AbstractSlider implements DrawableElement {
         this.scaledValue = value;
         this.discrete = true;
 
-        this.updateMessage();
+        this.func_230972_a_();
     }
 
     public Slider x(int x) {
@@ -99,9 +99,9 @@ public class Slider extends AbstractSlider implements DrawableElement {
     }
 
     public Slider value(double value) {
-        this.value = (value - this.min) / this.range;
+        this.sliderValue = (value - this.min) / this.range;
         this.scaledValue = value;
-        this.updateMessage();
+        this.func_230972_a_();
 
         return this;
     }
@@ -135,15 +135,15 @@ public class Slider extends AbstractSlider implements DrawableElement {
     }
 
     @Override
-    protected void updateMessage() {
+    protected void func_230972_a_() {
         Object formattedValue = this.discrete || Math.abs(this.scaledValue) >= 100 ? (long) this.scaledValue : floatFormat.format(this.scaledValue);
 
         this.setMessage(this.label == StringTextComponent.EMPTY ? new StringTextComponent(String.valueOf(formattedValue)) : new StringTextComponent(String.format("%s:%s", this.label, formattedValue)));
     }
 
     @Override
-    protected void applyValue() {
-        this.scaledValue = this.min + this.value * this.range;
+    protected void func_230979_b_() {
+        this.scaledValue = this.min + this.sliderValue * this.range;
 
         if (this.onScroll != null) {
             this.onScroll.accept(this);

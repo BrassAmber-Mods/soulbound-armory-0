@@ -19,31 +19,31 @@ import net.minecraft.world.World;
 
 public class SoulboundStaffItem extends TieredItem implements SoulboundWeaponItem {
     public SoulboundStaffItem() {
-        super(SoulboundToolMaterial.SOULBOUND, new Properties().tab(ItemGroup.TAB_COMBAT));
+        super(SoulboundToolMaterial.SOULBOUND, new Properties().group(ItemGroup.COMBAT));
     }
 
     @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         return true;
     }
 
     @Override
-    public ActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!world.isClientSide) {
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity user, Hand hand) {
+        if (!world.isRemote) {
             var component = StaffStorage.get(user);
 
             if (component.getFireballCooldown() <= 0) {
-                world.addFreshEntity(new SoulboundFireballEntity(world, user, component.spell()));
+                world.addEntity(new SoulboundFireballEntity(world, user, component.spell()));
 
                 if (!user.isCreative()) {
                     component.resetFireballCooldown();
                 }
 
-                return new ActionResult<>(ActionResultType.SUCCESS, user.getItemInHand(hand));
+                return new ActionResult<>(ActionResultType.SUCCESS, user.getHeldItem(hand));
             }
         }
 
-        return super.use(world, user, hand);
+        return super.onItemRightClick(world, user, hand);
     }
 
     @Override

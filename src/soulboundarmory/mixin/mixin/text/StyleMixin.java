@@ -198,7 +198,7 @@ abstract class StyleMixin implements ExtendedStyle {
 
             if (object.has("format")) {
                 for (var phormat : object.getAsJsonArray("format")) {
-                    style.add(TextFormatting.getByName(phormat.getAsString()));
+                    style.add(TextFormatting.getValueByName(phormat.getAsString()));
                 }
             }
         }
@@ -215,7 +215,7 @@ abstract class StyleMixin implements ExtendedStyle {
 
             for (var phormat : ((ExtendedStyle) style).formattings()) {
                 if ((Object) phormat instanceof ExtendedFormatting) {
-                    formatting.add(phormat.getName());
+                    formatting.add(phormat.getFriendlyName());
                 }
             }
 

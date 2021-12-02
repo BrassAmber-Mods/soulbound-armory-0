@@ -90,14 +90,14 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
 
     @Override
     public void deserializeNBT(CompoundNBT tag) {
-        for (var key : tag.getAllKeys()) {
+        for (var key : tag.keySet()) {
             this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(new ResourceLocation(key)));
         }
     }
 
     public void deserializeNBT(CompoundNBT tag, Category category) {
         if (category != null) {
-            for (var identifier : tag.getAllKeys()) {
+            for (var identifier : tag.keySet()) {
                 var statistic = this.get(StatisticType.registry.getValue(new ResourceLocation(identifier)));
 
                 if (statistic != null) {

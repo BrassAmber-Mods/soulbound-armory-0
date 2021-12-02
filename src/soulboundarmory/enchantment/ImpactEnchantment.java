@@ -18,22 +18,22 @@ public class ImpactEnchantment extends Enchantment {
     }
 
     @Override
-    public int getMinCost(int level) {
+    public int getMinEnchantability(int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public int getMaxCost(int level) {
+    public int getMaxEnchantability(int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public float getDamageBonus(int level, CreatureAttribute group) {
+    public float calcDamageByCreature(int level, CreatureAttribute group) {
         return 1 + Math.max(0, level - 1) / 2F;
     }
 
     @Override
-    public boolean canEnchant(ItemStack stack) {
+    public boolean canApply(ItemStack stack) {
         return stack.getItem() instanceof SoulboundStaffItem;
     }
 }

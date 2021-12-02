@@ -1,17 +1,6 @@
-buildscript {
-    dependencies {
-        classpath("net.minecraftforge.gradle:ForgeGradle:5.+")
-        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
-    }
-}
-
 plugins {
     id("maven-publish")
-}
-
-plugins.with {
-    apply("net.minecraftforge.gradle")
-    apply("org.spongepowered.mixin")
+    id("dev.architectury.loom").version("latest.release")
 }
 
 group = "net.auoeke"
@@ -22,10 +11,10 @@ targetCompatibility = 17
 
 sourceSets {
     main {
-        java.srcDir("src")
+        java.srcDirs = ["src"]
 
         resources {
-            srcDir("resources")
+            srcDirs = ["resources"]
             include("assets/", "META-INF/", "pack.mcmeta", "*.json")
         }
     }
@@ -35,61 +24,31 @@ repositories {
     maven {url = "https://maven.auoeke.net"}
 }
 
+loom {
+    silentMojangMappingsLicense()
+}
+
 dependencies {
-    minecraft("net.minecraftforge:forge:1.16.5-36.2.19")
+    minecraft("com.mojang:minecraft:1.16.5")
+    mappings("de.oceanlabs.mcp:mcp_snapshot:20201028-1.16.3")
+    forge("net.minecraftforge:forge:1.16.5-36.2.19")
+    modImplementation("net.fabricmc:fabric-loader:0.10.+")
+
     implementation("net.auoeke:reflect:latest.integration")
-
-    if (!Boolean.getBoolean("idea.sync.active")) {
-        annotationProcessor("org.spongepowered:mixin:0.8.+:processor")
-    }
 }
 
-minecraft {
-    mappings("official", "1.16.5")
-
-    accessTransformer = file("resources/META-INF/access-transformer")
-
-    runs {
-        ["client", "server"].each {
-            create(it) {
-                properties("mixin.env.remapRefMap": "true")
-                property("mixin.env.refMapRemappingFile", "${project.buildDir}/createSrgToMcp/output.srg")
-                workingDirectory(project.file("run"))
-                arg("-mixin.config=${project.name}.mixins.json" as String)
-
-                property("forge.logging.console.level", "debug")
-
-                mods {
-                    soulboundarmory {
-                        source(sourceSets.main)
-                    }
-                }
-            }
-        }
-    }
+java {
+    withSourcesJar()
 }
 
-mixin {
-    add(sourceSets.main, "${project.name}.refmap.json")
-}
+processResources {
 
-jar {
-    manifest.attributes(MixinConfigs: "${project.name}.mixins.json")
-}
-
-// Example configuration to allow publishing using the maven-publish task
-// we define a custom artifact that is sourced from the reobfJar output task
-// and then declare that to be published
-// Note you'll need to add a repository here
-def reobfArtifact = artifacts.add("default", file("$buildDir/reobfJar/output.jar")) {
-    type("jar")
-    builtBy("reobfJar")
 }
 
 publishing {
     publications {
         maven(MavenPublication) {
-            artifact(reobfArtifact)
+            from(components.java)
         }
     }
 

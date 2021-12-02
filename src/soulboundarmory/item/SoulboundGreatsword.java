@@ -26,31 +26,31 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public UseAction getUseAnimation(ItemStack stack) {
+    public UseAction getUseAction(ItemStack stack) {
         return UseAction.BOW;
     }
 
     @Override
-        public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        if (!world.isClientSide && GreatswordStorage.get(player).hasSkill(Skills.leaping)) {
-            player.startUsingItem(hand);
+        public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+        if (!world.isRemote && GreatswordStorage.get(player).hasSkill(Skills.leaping)) {
+            player.setActiveHand(hand);
 
-            return new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand));
+            return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
         }
 
-        return new ActionResult<>(ActionResultType.FAIL, player.getItemInHand(hand));
+        return new ActionResult<>(ActionResultType.FAIL, player.getHeldItem(hand));
     }
 
     @Override
-    public void releaseUsing(ItemStack itemStack, World world, LivingEntity player, int timeLeft) {
+    public void onPlayerStoppedUsing(ItemStack itemStack, World world, LivingEntity player, int timeLeft) {
         var timeTaken = 200 - timeLeft;
 
         if (timeTaken > 5) {
-            var look = player.getLookAngle();
+            var look = player.getLookVec();
             var maxSpeed = 1.25F;
             var speed = Math.min(maxSpeed, timeTaken / 20F * maxSpeed);
 
-            player.push(look.x * speed, look.y * speed / 4 + 0.2, look.z * speed);
+            player.addVelocity(look.x * speed, look.y * speed / 4 + 0.2, look.z * speed);
             player.setSprinting(true);
             GreatswordStorage.get(player).leapForce(speed / maxSpeed);
         }
@@ -59,12 +59,12 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     @OnlyIn(Dist.CLIENT)
     @Override
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int itemSlot, boolean isSelected) {
-        if (world.isClientSide && isSelected) {
+        if (world.isRemote && isSelected) {
             var player = (ClientPlayerEntity) entity;
 
-            if (player.getUseItem().getItem() == this) {
-                player.zza *= 4.5;
-                player.xxa *= 4.5;
+            if (player.getActiveItemStack().getItem() == this) {
+                player.moveForward *= 4.5;
+                player.moveStrafing *= 4.5;
             }
         }
     }

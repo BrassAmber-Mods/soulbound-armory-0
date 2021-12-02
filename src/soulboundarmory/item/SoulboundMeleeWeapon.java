@@ -14,19 +14,19 @@ public abstract class SoulboundMeleeWeapon extends SwordItem implements Soulboun
     protected final float attackSpeed;
 
     public SoulboundMeleeWeapon(int attackDamage, float attackSpeed, float reach) {
-        super(SoulboundToolMaterial.SOULBOUND, attackDamage, attackSpeed, new Properties().tab(ItemGroup.TAB_COMBAT));
+        super(SoulboundToolMaterial.SOULBOUND, attackDamage, attackSpeed, new Properties().group(ItemGroup.COMBAT));
 
         this.reach = reach;
         this.attackSpeed = attackSpeed;
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlotType slot) {
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
         Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
 
         if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", this.attackSpeed, AttributeModifier.Operation.ADDITION));
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", this.getDamage(), AttributeModifier.Operation.ADDITION));
+            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(ATTACK_SPEED_MODIFIER, "Weapon modifier", this.attackSpeed, AttributeModifier.Operation.ADDITION));
+            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Weapon modifier", this.getAttackDamage(), AttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;

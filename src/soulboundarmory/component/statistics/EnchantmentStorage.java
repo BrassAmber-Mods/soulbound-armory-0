@@ -53,8 +53,8 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     public void deserializeNBT(CompoundNBT nbt) {
         var registry = Registry.ENCHANTMENT;
 
-        for (var key : nbt.getAllKeys()) {
-            var enchantment = registry.get(new ResourceLocation(key));
+        for (var key : nbt.keySet()) {
+            var enchantment = registry.getOrDefault(new ResourceLocation(key));
 
             if (this.containsKey(enchantment)) {
                 this.put(enchantment, nbt.getInt(key));

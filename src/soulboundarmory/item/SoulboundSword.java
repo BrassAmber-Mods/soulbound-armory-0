@@ -19,26 +19,26 @@ public class SoulboundSword extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public UseAction getUseAnimation(ItemStack p_77661_1_) {
+    public UseAction getUseAction(ItemStack stack) {
         return UseAction.BLOCK;
     }
 
     @Override
-    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         var component = (SwordStorage) PickStorage.get(player, this).get();
 
-        if (!world.isClientSide && component.hasSkill(Skills.summonLightning) && component.getLightningCooldown() <= 0) {
-            var pos = player.position();
-            var result = world.clip(new RayTraceContext(pos, pos.add(player.getLookAngle()).multiply(512, 512, 512), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, player));
+        if (!world.isRemote && component.hasSkill(Skills.summonLightning) && component.getLightningCooldown() <= 0) {
+            var pos = player.getPositionVec();
+            var result = world.rayTraceBlocks(new RayTraceContext(pos, pos.add(player.getLookVec()).mul(512, 512, 512), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, player));
 
             if (result != null) {
-                player.level.addFreshEntity(new SoulboundLightningEntity(player.level, result.getLocation(), player.getUUID()));
+                player.world.addEntity(new SoulboundLightningEntity(player.world, result.getHitVec(), player.getUniqueID()));
                 component.resetLightningCooldown();
 
-                return new ActionResult<>(ActionResultType.SUCCESS, player.getItemInHand(hand));
+                return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
             }
         }
 
-        return new ActionResult<>(ActionResultType.FAIL, player.getItemInHand(hand));
+        return new ActionResult<>(ActionResultType.FAIL, player.getHeldItem(hand));
     }
 }

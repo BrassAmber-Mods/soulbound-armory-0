@@ -21,19 +21,18 @@ public class RGBASlider extends Slider {
         this.id = id;
 
         this.value(colors.get(id));
-        this.applyValue();
-        this.updateMessage();
+        this.func_230979_b_();
+        this.func_230979_b_();
     }
 
     @Override
-    protected void updateMessage() {
+    protected void func_230972_a_() {
         this.setMessage(new Translation("%s: %s", this.text, this.componentValue));
     }
 
     @Override
-    public void applyValue() {
-        this.componentValue = (int) (0xFF * this.value);
-
+    protected void func_230979_b_() {
+        this.componentValue = (int) (0xFF * this.sliderValue);
         colors.set(this.id, this.componentValue);
     }
 }

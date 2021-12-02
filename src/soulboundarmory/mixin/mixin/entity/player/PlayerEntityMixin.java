@@ -18,7 +18,7 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAcc
         super(entityType, world);
     }
 
-    @ModifyArg(method = "attack", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;hurt(Lnet/minecraft/util/DamageSource;F)Z"))
+    @ModifyArg(method = "attack", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private float applyCriticalStrikeRate(float damage) {
         // AttributeInstance instance = self.getAttributeInstance(SoulboundArmoryAttributes.GENERIC_CRITICAL_STRIKE_PROBABILITY);
         //
@@ -34,7 +34,7 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAcc
 
         var instance = this.getAttribute(SAAttributes.criticalStrikeRate);
 
-        return instance != null && instance.getValue() > this.random.nextDouble() ? 2 * damage : damage;
+        return instance != null && instance.getValue() > this.rand.nextDouble() ? 2 * damage : damage;
     }
 
     @Inject(method = "tick", at = @At("RETURN"))

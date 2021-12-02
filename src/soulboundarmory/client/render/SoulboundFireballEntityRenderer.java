@@ -13,7 +13,7 @@ public class SoulboundFireballEntityRenderer extends EntityRenderer<SoulboundFir
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SoulboundFireballEntity entity) {
+    public ResourceLocation getEntityTexture(SoulboundFireballEntity entity) {
         return id;
     }
 }

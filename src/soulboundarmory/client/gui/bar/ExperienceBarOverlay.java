@@ -107,14 +107,14 @@ public class ExperienceBarOverlay extends ScalableWidget {
 
             if (level > 0) {
                 var levelString = String.valueOf(level);
-                var levelX = this.middleX() - textRenderer.width(levelString) / 2;
+                var levelX = this.middleX() - textRenderer.getStringWidth(levelString) / 2;
                 var levelY = this.y() - 8;
 
-                textRenderer.draw(matrixes, levelString, levelX + 1, levelY, 0);
-                textRenderer.draw(matrixes, levelString, levelX - 1, levelY, 0);
-                textRenderer.draw(matrixes, levelString, levelX, levelY + 1, 0);
-                textRenderer.draw(matrixes, levelString, levelX, levelY - 1, 0);
-                textRenderer.draw(matrixes, levelString, levelX, levelY, color.getRGB());
+                textRenderer.drawString(matrixes, levelString, levelX + 1, levelY, 0);
+                textRenderer.drawString(matrixes, levelString, levelX - 1, levelY, 0);
+                textRenderer.drawString(matrixes, levelString, levelX, levelY + 1, 0);
+                textRenderer.drawString(matrixes, levelString, levelX, levelY - 1, 0);
+                textRenderer.drawString(matrixes, levelString, levelX, levelY, color.getRGB());
             }
 
             RenderSystem.disableLighting();
@@ -124,7 +124,7 @@ public class ExperienceBarOverlay extends ScalableWidget {
     public boolean render(MatrixStack matrixes, MainWindow window) {
         var player = SoulboundArmoryClient.player();
         var item = ItemUtil.handItems(player).stream().filter(i -> this.update(StorageType.get(player, i))).findAny();
-        item.ifPresent(stack -> this.x(window.getGuiScaledWidth() / 2).y(window.getGuiScaledHeight() - 27).render(matrixes));
+        item.ifPresent(stack -> this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes));
 
         return item.isPresent();
     }
@@ -146,14 +146,14 @@ public class ExperienceBarOverlay extends ScalableWidget {
 
             if (level > 0) {
                 var levelString = String.valueOf(level);
-                var levelX = x - textRenderer.width(levelString) / 2;
+                var levelX = x - textRenderer.getStringWidth(levelString) / 2;
                 var levelY = y - 8;
 
-                textRenderer.draw(stack, levelString, levelX + 1, levelY, 0);
-                textRenderer.draw(stack, levelString, levelX - 1, levelY, 0);
-                textRenderer.draw(stack, levelString, levelX, levelY + 1, 0);
-                textRenderer.draw(stack, levelString, levelX, levelY - 1, 0);
-                textRenderer.draw(stack, levelString, levelX, levelY, color.getRGB());
+                textRenderer.drawString(stack, levelString, levelX + 1, levelY, 0);
+                textRenderer.drawString(stack, levelString, levelX - 1, levelY, 0);
+                textRenderer.drawString(stack, levelString, levelX, levelY + 1, 0);
+                textRenderer.drawString(stack, levelString, levelX, levelY - 1, 0);
+                textRenderer.drawString(stack, levelString, levelX, levelY, color.getRGB());
             }
 
             RenderSystem.disableLighting();

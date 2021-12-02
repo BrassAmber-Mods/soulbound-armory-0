@@ -10,7 +10,7 @@ public class ItemData implements CompoundSerializable {
     @Override
     public void serializeNBT(CompoundNBT tag) {
         if (this.storage != null) {
-            tag.putUUID("player", this.storage.player.getUUID());
+            tag.putUniqueId("player", this.storage.player.getUniqueID());
             tag.putString("storageType", this.storage.type().id().toString());
         }
     }
@@ -20,7 +20,7 @@ public class ItemData implements CompoundSerializable {
         var server = Util.server();
 
         if (server != null && tag.contains("player") && tag.contains("storage_type")) {
-            var entity = server.getPlayerList().getPlayer(tag.getUUID("player"));
+            var entity = server.getPlayerList().getPlayerByUUID(tag.getUniqueId("player"));
             var type = StorageType.get(tag.getString("storage_type"));
 
             if (type != null && entity != null) {

@@ -21,7 +21,7 @@ import org.lwjgl.glfw.GLFW;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class Widget<T extends Widget<T>> extends CellElement {
-    protected static final SoundHandler soundManager = client.getSoundManager();
+    protected static final SoundHandler soundManager = client.getSoundHandler();
 
     public List<CellElement> children = new ReferenceArrayList<>();
     public ITextComponent text = StringTextComponent.EMPTY;
@@ -238,7 +238,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     public void renderForeground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (this.text != null) {
-            drawString(matrices, textRenderer, this.text, this.middleX() - textRenderer.width(this.text) / 2, this.y() + this.height() / 2 - textRenderer.lineHeight / 2, this.active ? 0xFFFFFFFF : 0xA0FFFFFF);
+            drawString(matrices, textRenderer, this.text, this.middleX() - textRenderer.getStringPropertyWidth(this.text) / 2, this.y() + this.height() / 2 - textRenderer.FONT_HEIGHT / 2, this.active ? 0xFFFFFFFF : 0xA0FFFFFF);
         }
     }
 
@@ -353,6 +353,6 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
     }
 
     public void playSound() {
-        soundManager.play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1));
+        soundManager.play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1));
     }
 }

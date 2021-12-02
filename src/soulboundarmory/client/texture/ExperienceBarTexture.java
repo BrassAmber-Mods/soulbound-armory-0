@@ -20,11 +20,11 @@ public class ExperienceBarTexture extends SimpleTexture {
     private ExperienceBarTexture() {
         super(SoulboundArmory.id("gui/experience_bar"));
 
-        CellElement.textureManager.register(this.location, this);
+        CellElement.textureManager.loadTexture(this.textureLocation, this);
     }
 
     @Override
-    protected TextureData getTextureImage(IResourceManager manager) {
+    protected TextureData getTextureData(IResourceManager manager) {
         var image = Resources.readTexture(AbstractGui.GUI_ICONS_LOCATION);
         var raster = image.getRaster();
         var styles = Style.styles;

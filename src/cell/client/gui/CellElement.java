@@ -25,7 +25,7 @@ public abstract class CellElement extends AbstractGui implements DrawableElement
     }
 
     public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, float z, int color) {
-        fill(matrices.last().pose(), x1, y1, x2, y2, z, color);
+        fill(matrices.getLast().getMatrix(), x1, y1, x2, y2, z, color);
     }
 
     public static void fill(Matrix4f matrix, int x1, int y1, int x2, int y2, float z, int color) {
@@ -47,20 +47,20 @@ public abstract class CellElement extends AbstractGui implements DrawableElement
         var r = (color >> 16 & 255) / 255F;
         var g = (color >> 8 & 255) / 255F;
         var b = (color & 255) / 255F;
-        var bufferBuilder = Tessellator.getInstance().getBuilder();
+        var bufferBuilder = Tessellator.getInstance().getBuffer();
 
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
         bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        bufferBuilder.vertex(matrix, x1, y2, z).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(matrix, x2, y2, z).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(matrix, x2, y1, z).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(matrix, x1, y1, z).color(r, g, b, a).endVertex();
-        bufferBuilder.end();
+        bufferBuilder.pos(matrix, x1, y2, z).color(r, g, b, a).endVertex();
+        bufferBuilder.pos(matrix, x2, y2, z).color(r, g, b, a).endVertex();
+        bufferBuilder.pos(matrix, x2, y1, z).color(r, g, b, a).endVertex();
+        bufferBuilder.pos(matrix, x1, y1, z).color(r, g, b, a).endVertex();
+        bufferBuilder.finishDrawing();
 
-        WorldVertexBufferUploader.end(bufferBuilder);
+        WorldVertexBufferUploader.draw(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }

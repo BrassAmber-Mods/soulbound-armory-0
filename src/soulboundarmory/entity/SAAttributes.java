@@ -7,8 +7,8 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 
 public final class SAAttributes {
-    public static final Attribute efficiency = generic("efficiency", 0, Double.MAX_VALUE).setSyncable(true);
-    public static final Attribute criticalStrikeRate = generic("critical_strike_rate", 1, 1).setSyncable(true);
+    public static final Attribute efficiency = generic("efficiency", 0, Double.MAX_VALUE).setShouldWatch(true);
+    public static final Attribute criticalStrikeRate = generic("critical_strike_rate", 1, 1).setShouldWatch(true);
 
     public static final UUID attackRangeUUID = AttributeModifierIdentifiers.reserve("F136C871-E55A-4DB5-A8FE-8EA49D9B5B81");
     public static final UUID criticalStrikeRateUUID = AttributeModifierIdentifiers.reserve("B6030C26-AEB4-4AF4-8770-4B365BD1CEB9");

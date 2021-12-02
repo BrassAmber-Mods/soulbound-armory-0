@@ -44,11 +44,11 @@ public class EnchantmentTab extends SoulboundTab {
             drawCenteredString(matrices, this.textRenderer, String.format("%s: %d", Translations.menuUnspentPoints, points), Math.round(this.width / 2F), 4, 0xFFFFFF);
         }
 
-        Util.enumerate(enchantments, (enchantment, level, row) -> this.textRenderer.draw(
+        Util.enumerate(enchantments, (enchantment, level, row) -> this.textRenderer.func_243246_a(
             matrices,
-            enchantment.getFullname(level),
+            enchantment.getDisplayName(level),
             (this.width - 182) / 2F,
-            this.height(enchantments.size(), row) - this.textRenderer.lineHeight / 2F,
+            this.height(enchantments.size(), row) - this.textRenderer.FONT_HEIGHT / 2F,
             0xFFFFFF
         ));
     }

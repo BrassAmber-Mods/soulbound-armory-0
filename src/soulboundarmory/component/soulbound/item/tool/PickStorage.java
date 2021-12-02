@@ -43,9 +43,9 @@ public class PickStorage extends ToolStorage<PickStorage> {
             .build();
 
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getFullname(1).getString().toLowerCase();
+            var name = enchantment.getDisplayName(1).getString().toLowerCase();
 
-            return enchantment.canEnchant(this.itemStack)
+            return enchantment.canApply(this.itemStack)
                 && !Arrays.asList(UNBREAKING, VANISHING_CURSE, MENDING).contains(enchantment)
                 && !Stream.of("soulbound", "holding", "smelt").map(name::contains).reduce(false, (contains, value) -> value || contains);
         });

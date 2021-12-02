@@ -58,7 +58,7 @@ public class AttributeTab extends SoulboundTab {
     }
 
     public void drawAttribute(MatrixStack stack, ITextComponent format, int row, int rows) {
-        this.font.draw(stack, format, (this.width - 182) / 2F, this.height(rows, row), 0xFFFFFF);
+        this.font.func_243246_a(stack, format, (this.width - 182) / 2F, this.height(rows, row), 0xFFFFFF);
     }
 
     protected PressCallback<ScalableWidget> addPointAction(Statistic statistic) {

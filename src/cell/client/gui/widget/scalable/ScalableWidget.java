@@ -48,7 +48,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
 
         if (texture == null) {
             texture = new SimpleTexture(id);
-            DrawableElement.textureManager.register(id, texture);
+            DrawableElement.textureManager.loadTexture(id, texture);
         }
 
         return this.texture(texture);
@@ -275,7 +275,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
 
     @Override
     public void renderBackground(MatrixStack matrixes, int mouseX, int mouseY, float delta) {
-        this.texture.bind();
+        this.texture.bindTexture();
         this.resetColor();
 
         RenderSystem.enableBlend();

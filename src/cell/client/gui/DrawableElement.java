@@ -14,9 +14,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public interface DrawableElement extends IRenderable, IGuiEventListener, ITickable {
     Minecraft client = Minecraft.getInstance();
-    FontRenderer textRenderer = client.font;
+    FontRenderer textRenderer = client.fontRenderer;
     TextureManager textureManager = client.textureManager;
-    CharacterManager textHandler = textRenderer.getSplitter();
+    CharacterManager textHandler = textRenderer.getCharacterManager();
     IResourceManager resourceManager = client.getResourceManager();
 
     @Override

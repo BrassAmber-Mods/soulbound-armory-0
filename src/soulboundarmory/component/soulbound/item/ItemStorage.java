@@ -63,7 +63,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     public ItemStorage(SoulboundComponent component, Item item) {
         this.component = component;
         this.player = component.entity;
-        this.client = component.entity.level.isClientSide;
+        this.client = component.entity.world.isRemote;
         this.item = item;
         this.itemStack = this.newItemStack();
     }
@@ -107,7 +107,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public ItemStack menuEquippedStack() {
-        for (var itemStack : this.player.getHandSlots()) {
+        for (var itemStack : this.player.getHeldEquipment()) {
             var item = itemStack.getItem();
 
             if (item == this.item() || item == this.getConsumableItem()) {
@@ -150,7 +150,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
                 var enchantment = entry.getKey();
 
                 if (entry.getValue() > 0) {
-                    attackDamage += enchantment.getDamageBonus(this.enchantment(enchantment), CreatureAttribute.UNDEFINED);
+                    attackDamage += enchantment.calcDamageByCreature(this.enchantment(enchantment), CreatureAttribute.UNDEFINED);
                 }
             }
 
@@ -299,7 +299,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void upgrade(SkillContainer skill) {
-        //        if (this.isClientSide) {
+        //        if (this.isRemote) {
         //            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_SKILL, new ExtendedPacketBuffer(this, item).writeString(skill.toString()));
         //        } else {
         var points = this.datum(StatisticType.skillPoints);
@@ -413,7 +413,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     @SuppressWarnings("VariableUseSideOnly")
     public void refresh() {
         if (this.client) {
-            if (SoulboundArmoryClient.client.screen instanceof SoulboundScreen) {
+            if (SoulboundArmoryClient.client.currentScreen instanceof SoulboundScreen) {
                 var handItems = ItemUtil.handItems(this.player);
 
                 if (handItems.contains(this.item())) {
@@ -433,10 +433,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public void openGUI(int tab) {
         if (this.client) {
-            if (SoulboundArmoryClient.client.screen instanceof SoulboundScreen screen && this.currentTab == tab) {
+            if (SoulboundArmoryClient.client.currentScreen instanceof SoulboundScreen screen && this.currentTab == tab) {
                 screen.refresh();
             } else {
-                SoulboundArmoryClient.client.setScreen(new SoulboundScreen(this.component, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
+                SoulboundArmoryClient.client.displayGuiScreen(new SoulboundScreen(this.component, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
             }
         } else {
             Packets.clientOpenGUI.send(this.player, new ExtendedPacketBuffer(this).writeInt(tab));
@@ -458,7 +458,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
                 for (var itemStack : ItemUtil.inventory(player)) {
                     if (itemStack.getItem() == storage.item()) {
-                        player.inventory.removeItem(itemStack);
+                        player.inventory.deleteStack(itemStack);
                     }
                 }
             }
@@ -486,7 +486,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             int level = entry.getValue();
 
             if (level > 0) {
-                itemStack.enchant(entry.getKey(), level);
+                itemStack.addEnchantment(entry.getKey(), level);
             }
         }
     }
@@ -538,9 +538,9 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public void sync() {
         if (this.client) {
-            Packets.serverSync.send(new ExtendedPacketBuffer(this).writeNbt(this.clientTag()));
+            Packets.serverSync.send(new ExtendedPacketBuffer(this).writeCompoundTag(this.clientTag()));
         } else {
-            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serializeNBT()));
+            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeCompoundTag(this.serializeNBT()));
         }
     }
 

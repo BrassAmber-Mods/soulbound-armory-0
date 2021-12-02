@@ -67,7 +67,7 @@ public class SoulboundScreen extends CellScreen {
         this.storage = this.component.menuStorage();
         this.stack = this.component.menuStorage().stack();
 
-        for (var itemStack : this.player.getHandSlots()) {
+        for (var itemStack : this.player.getHeldEquipment()) {
             if (itemStack.equals(this.stack)) {
                 this.stack = itemStack;
 
@@ -92,7 +92,7 @@ public class SoulboundScreen extends CellScreen {
             this.button = this.button(this.tab);
 
             var text = this.slot != this.storage.boundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
-            var buttonWidth = Math.max(this.button.width(), this.textRenderer.width(text) + 8);
+            var buttonWidth = Math.max(this.button.width(), this.textRenderer.getStringPropertyWidth(text) + 8);
 
             this.add(new ScalableWidget().button()
                 .x(this.button.endX() - buttonWidth)
@@ -186,7 +186,7 @@ public class SoulboundScreen extends CellScreen {
 
     protected Slider sliderMousedOver(double x, double y) {
         for (var slider : this.sliders) {
-            if (CellElement.contains(x, y, slider.x, slider.y, slider.getWidth(), slider.getHeight())) {
+            if (CellElement.contains(x, y, slider.x, slider.y, slider.getWidth(), slider.getHeightRealms())) {
                 return slider;
             }
         }
@@ -227,10 +227,10 @@ public class SoulboundScreen extends CellScreen {
 
     protected boolean hoveringLevel(int mouseX, int mouseY) {
         var levelString = String.valueOf(this.storage.datum(level));
-        var levelLeftX = (this.width - this.textRenderer.width(levelString)) / 2;
+        var levelLeftX = (this.width - this.textRenderer.getStringWidth(levelString)) / 2;
         var levelTopY = this.height - 35;
 
-        return CellElement.contains(mouseX, mouseY, levelLeftX, levelTopY, this.textRenderer.width(levelString), this.textRenderer.lineHeight);
+        return CellElement.contains(mouseX, mouseY, levelLeftX, levelTopY, this.textRenderer.getStringWidth(levelString), this.textRenderer.FONT_HEIGHT);
     }
 
     public ScalableWidget optionButton(int row, ITextComponent text, PressCallback<ScalableWidget> primaryAction, PressCallback<ScalableWidget> secondaryAction) {

@@ -35,21 +35,21 @@ public class ExtendedPacketBuffer extends PacketBuffer {
 
     @Override
     public ResourceLocation readResourceLocation() {
-        return new ResourceLocation(this.readUtf());
+        return new ResourceLocation(this.readString());
     }
 
     @Override
     public ExtendedPacketBuffer writeResourceLocation(ResourceLocation identifier) {
-        return this.writeUtf(identifier.toString());
+        return this.writeString(identifier.toString());
     }
 
     @Override
-    public String readUtf() {
+    public String readString() {
         return this.readCharSequence(this.readInt(), StandardCharsets.UTF_8).toString();
     }
 
     @Override
-    public ExtendedPacketBuffer writeUtf(String string) {
+    public ExtendedPacketBuffer writeString(String string) {
         this.writeInt(string.length());
         this.writeCharSequence(string, StandardCharsets.UTF_8);
 
@@ -57,13 +57,13 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     @Override
-    public ExtendedPacketBuffer writeItem(ItemStack itemStack) {
+    public ExtendedPacketBuffer writeItemStack(ItemStack itemStack) {
         return (ExtendedPacketBuffer) super.writeItemStack(itemStack, false);
     }
 
     @Override
-    public ExtendedPacketBuffer writeUUID(UUID id) {
-        return (ExtendedPacketBuffer) super.writeUUID(id);
+    public ExtendedPacketBuffer writeUniqueId(UUID id) {
+        return (ExtendedPacketBuffer) super.writeUniqueId(id);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     public ExtendedPacketBuffer writeEntity(Entity entity) {
-        return this.writeUUID(entity.getUUID());
+        return this.writeUniqueId(entity.getUniqueID());
     }
 
     //    public Entity readEntity() {
@@ -90,8 +90,8 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     //    }
 
     @Override
-    public ExtendedPacketBuffer writeNbt(CompoundNBT tag) {
-        super.writeNbt(tag);
+    public ExtendedPacketBuffer writeCompoundTag(CompoundNBT tag) {
+        super.writeCompoundTag(tag);
 
         return this;
     }

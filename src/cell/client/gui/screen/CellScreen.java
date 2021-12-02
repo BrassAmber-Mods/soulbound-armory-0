@@ -34,7 +34,7 @@ public abstract class CellScreen extends Screen implements DrawableElement {
     }
 
     public static List<ITextProperties> wrap(List<? extends ITextProperties> lines, int width) {
-        return lines.stream().map(line -> textHandler.splitLines(line, width, Style.EMPTY)).flatMap(List::stream).collect(Collectors.toList());
+        return lines.stream().map(line -> textHandler.func_238362_b_(line, width, Style.EMPTY)).flatMap(List::stream).collect(Collectors.toList());
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class CellScreen extends Screen implements DrawableElement {
     }
 
     @Override
-    public List<? extends IGuiEventListener> children() {
+    public List<? extends IGuiEventListener> getEventListeners() {
         return this.elements;
     }
 
@@ -114,37 +114,37 @@ public abstract class CellScreen extends Screen implements DrawableElement {
 
     public void renderBackground(ResourceLocation identifier, int x, int y, int width, int height, int chroma, int alpha) {
         var tessellator = Tessellator.getInstance();
-        var builder = tessellator.getBuilder();
+        var builder = tessellator.getBuffer();
         float f = 1 << 5;
         float endX = x + width;
         float endY = y + height;
 
-        CellElement.textureManager.bind(identifier);
+        CellElement.textureManager.bindTexture(identifier);
         RenderSystem.color4f(1, 1, 1, 1);
 
         builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
-        builder.vertex(x, endY, 0).color(chroma, chroma, chroma, 255).uv(0, endY / f + alpha).endVertex();
-        builder.vertex(endX, endY, 0).color(chroma, chroma, chroma, 255).uv(endX / f, endY / f + alpha).endVertex();
-        builder.vertex(endX, y, 0).color(chroma, chroma, chroma, 255).uv(endX / f, alpha).endVertex();
-        builder.vertex(x, y, 0).color(chroma, chroma, chroma, 255).uv(0, alpha).endVertex();
+        builder.pos(x, endY, 0).color(chroma, chroma, chroma, 255).tex(0, endY / f + alpha).endVertex();
+        builder.pos(endX, endY, 0).color(chroma, chroma, chroma, 255).tex(endX / f, endY / f + alpha).endVertex();
+        builder.pos(endX, y, 0).color(chroma, chroma, chroma, 255).tex(endX / f, alpha).endVertex();
+        builder.pos(x, y, 0).color(chroma, chroma, chroma, 255).tex(0, alpha).endVertex();
 
-        tessellator.end();
+        tessellator.draw();
     }
 
     public void renderGuiItem(ItemStack itemStack, int x, int y, int z) {
-        this.withZ(z, () -> this.itemRenderer.renderGuiItem(itemStack, x, y));
+        this.withZ(z, () -> this.itemRenderer.renderItemIntoGUI(itemStack, x, y));
     }
 
     public void withZ(int z, Runnable runnable) {
         this.addZOffset(z);
-        this.itemRenderer.blitOffset = this.getBlitOffset();
+        this.itemRenderer.zLevel = this.getBlitOffset();
         runnable.run();
         this.addZOffset(-z);
-        this.itemRenderer.blitOffset = this.getBlitOffset();
+        this.itemRenderer.zLevel = this.getBlitOffset();
     }
 
     public void addZOffset(int z) {
         this.setBlitOffset(this.getBlitOffset() + z);
-        this.itemRenderer.blitOffset += z;
+        this.itemRenderer.zLevel += z;
     }
 }

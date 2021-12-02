@@ -33,7 +33,7 @@ public class SoulboundArmoryCommand {
 
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(
-            literal("sa").requires(source -> source.hasPermission(2))
+            literal("sa").requires(source -> source.hasPermissionLevel(2))
                 .then(literal("add")
                     .then(argument("storage", StorageArgumentType.storages())
                         .then(argument("statistic", statisticTypes())

@@ -6,13 +6,13 @@ import net.minecraft.entity.Entity;
 
 public class EntityUtil {
     public static double speed(Entity entity) {
-        var velocity = entity.getDeltaMovement();
+        var velocity = entity.getMotion();
         return Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
     }
 
     public static Entity entity(UUID id) {
-        for (var world : Util.server().getAllLevels()) {
-            var entity = world.getEntity(id);
+        for (var world : Util.server().getWorlds()) {
+            var entity = world.getEntityByUuid(id);
 
             if (entity != null) {
                 return entity;

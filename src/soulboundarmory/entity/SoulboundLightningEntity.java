@@ -28,11 +28,11 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
     public SoulboundLightningEntity(World world, double x, double y, double z, UUID caster) {
         super(EntityType.LIGHTNING_BOLT, world);
 
-        this.setVisualOnly(true);
+        this.setEffectOnly(true);
         this.caster = caster;
-        this.setPos(x, y, z);
+        this.setPosition(x, y, z);
 
-        PortalSize.findEmptyPortalShape(world, this.blockPosition(), null).ifPresent(PortalSize::createPortalBlocks);
+        PortalSize.func_242964_a(world, this.getPosition(), null).ifPresent(PortalSize::placePortalBlocks);
     }
 
     public SoulboundLightningEntity(World world, Vector3d pos, UUID caster) {
@@ -41,15 +41,15 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
 
     @Override
     public void tick() {
-        if (!this.level.isClientSide) {
-            this.setSharedFlag(6, this.isGlowing());
+        if (!this.world.isRemote) {
+            this.setFlag(6, this.isGlowing());
         }
 
         this.baseTick();
 
         if (this.life() == 2) {
-            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 15, 0.8F + this.random.nextFloat() * 0.2F);
-            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2, 0.5F + this.random.nextFloat() * 0.2F);
+            this.world.playSound(null, this.getPosX(), this.getPosY(), this.getPosZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 15, 0.8F + this.rand.nextFloat() * 0.2F);
+            this.world.playSound(null, this.getPosX(), this.getPosY(), this.getPosZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2, 0.5F + this.rand.nextFloat() * 0.2F);
         }
 
         this.life(this.life() - 1);
@@ -57,87 +57,87 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
         if (this.life() < 0) {
             if (this.flashes() == 0) {
                 this.remove();
-            } else if (this.life() < -this.random.nextInt(10)) {
+            } else if (this.life() < -this.rand.nextInt(10)) {
                 this.flashes(this.flashes() - 1);
                 this.life(1);
-                this.seed = this.random.nextLong();
+                this.boltVertex = this.rand.nextLong();
             }
         }
 
         if (this.life() >= 0) {
-            if (this.level.isClientSide) {
-                this.level.setSkyFlashTime(2);
+            if (this.world.isRemote) {
+                this.world.setTimeLightningFlash(2);
             } else {
                 var radius = 3D;
 
-                for (var entity : this.level.getEntities(this, new AxisAlignedBB(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
+                for (var entity : this.world.getEntitiesWithinAABBExcludingEntity(this, new AxisAlignedBB(this.getPosX() - radius, this.getPosY() - radius, this.getPosZ() - radius, this.getPosX() + radius, this.getPosY() + 6 + radius, this.getPosZ() + radius))) {
                     var caster = this.caster();
                     var attackDamage = caster instanceof PlayerEntity
                             ? (float) SwordStorage.get(caster).attributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {
-                        entity.thunderHit((ServerWorld) this.level, this);
-                        entity.setRemainingFireTicks(1);
+                        entity.func_241841_a((ServerWorld) this.world, this);
+                        entity.forceFireTicks(1);
 
-                        if (!entity.isOnFire()) {
-                            this.setRemainingFireTicks(160);
+                        if (!entity.isBurning()) {
+                            this.forceFireTicks(160);
                         }
 
                         if (caster instanceof PlayerEntity) {
                             var target = (LivingEntity) entity;
-                            var itemStack = caster.getMainHandItem();
-                            var damageSource = DamageSource.explosion(caster);
-                            var attackDamageModifier = EnchantmentHelper.getDamageBonus(itemStack, target.getMobType());
+                            var itemStack = caster.getHeldItemMainhand();
+                            var damageSource = DamageSource.causeExplosionDamage(caster);
+                            var attackDamageModifier = EnchantmentHelper.getModifierForCreature(itemStack, target.getCreatureAttribute());
                             var burnTime = 0;
 
                             if (attackDamage > 0 || attackDamageModifier > 0) {
-                                var knockbackModifier = EnchantmentHelper.getKnockbackBonus(caster);
+                                var knockbackModifier = EnchantmentHelper.getKnockbackModifier(caster);
                                 var initialHealth = target.getHealth();
 
-                                burnTime += 4 * EnchantmentHelper.getFireAspect(caster);
+                                burnTime += 4 * EnchantmentHelper.getFireAspectModifier(caster);
 
-                                if (!caster.isOnFire()) {
+                                if (!caster.isBurning()) {
                                     burnTime += 5;
                                 }
 
-                                if (burnTime > 0 && !entity.isOnFire()) {
-                                    entity.setRemainingFireTicks(20);
+                                if (burnTime > 0 && !entity.isBurning()) {
+                                    entity.forceFireTicks(20);
                                 }
 
-                                if (entity.hurt(damageSource, attackDamage)) {
+                                if (entity.attackEntityFrom(damageSource, attackDamage)) {
                                     var player = (PlayerEntity) caster;
 
                                     if (knockbackModifier > 0) {
-                                        target.knockback(knockbackModifier * 0.5F, MathHelper.sin(caster.yRot * 0.017453292F), -MathHelper.cos(caster.yRot * 0.017453292F));
+                                        target.applyKnockback(knockbackModifier * 0.5F, MathHelper.sin(caster.rotationYaw * 0.017453292F), -MathHelper.cos(caster.rotationYaw * 0.017453292F));
                                     }
 
                                     if (attackDamageModifier > 0) {
-                                        player.crit(entity);
+                                        player.onCriticalHit(entity);
                                     }
 
-                                    ((LivingEntity) entity).setLastHurtByMob(caster);
+                                    target.setRevengeTarget(caster);
 
-                                    EnchantmentHelper.doPostDamageEffects(caster, target);
+                                    EnchantmentHelper.applyThornEnchantments(caster, target);
 
                                     var damageDealt = initialHealth - target.getHealth();
 
                                     if (burnTime > 0) {
-                                        entity.setSecondsOnFire(burnTime);
+                                        entity.setFire(burnTime);
                                     }
 
-                                    if (caster.level instanceof ServerWorld && damageDealt > 2) {
+                                    if (caster.world instanceof ServerWorld && damageDealt > 2) {
                                         var particles = (int) (damageDealt * 0.5);
 
-                                        ((ServerWorld) caster.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), particles, 0.1, 0, 0.1, 0.2);
+                                        ((ServerWorld) caster.world).spawnParticle(ParticleTypes.DAMAGE_INDICATOR, entity.getPosX(), entity.getPosY() + entity.getHeight() * 0.5, entity.getPosZ(), particles, 0.1, 0, 0.1, 0.2);
                                     }
                                 }
                             }
                         } else {
-                            entity.hurt(DamageSource.explosion(caster), attackDamage);
+                            entity.attackEntityFrom(DamageSource.causeExplosionDamage(caster), attackDamage);
                         }
 
-                        entity.thunderHit((ServerWorld) this.level, this);
+                        entity.func_241841_a((ServerWorld) this.world, this);
                     }
                 }
             }
@@ -145,17 +145,17 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
     }
 
     public LivingEntity caster() {
-        return this.level.getPlayerByUUID(this.caster);
+        return this.world.getPlayerByUuid(this.caster);
     }
 
     public void caster(LivingEntity caster) {
-        this.caster = caster.getUUID();
+        this.caster = caster.getUniqueID();
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         var tag = super.serializeNBT();
-        tag.putUUID("casterUUID", this.caster);
+        tag.putUniqueId("casterUUID", this.caster);
 
         return tag;
     }
@@ -164,6 +164,6 @@ public class SoulboundLightningEntity extends LightningBoltEntity implements Lig
     public void deserializeNBT(CompoundNBT tag) {
         super.deserializeNBT(tag);
 
-        this.caster = tag.getUUID("casterUUID");
+        this.caster = tag.getUniqueId("casterUUID");
     }
 }

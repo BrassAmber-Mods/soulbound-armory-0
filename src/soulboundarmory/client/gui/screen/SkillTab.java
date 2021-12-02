@@ -112,12 +112,12 @@ public class SkillTab extends SoulboundTab {
         var color = 0x404040;
         var points = this.parent.storage.datum(StatisticType.skillPoints);
 
-        this.textRenderer.draw(stack, Translations.menuSkills, this.x + 8, this.y + 6, color);
+        this.textRenderer.func_243246_a(stack, Translations.menuSkills, this.x + 8, this.y + 6, color);
 
         if (points > 0) {
             var text = new Translation("%s: %s", Translations.menuUnspentPoints, points);
 
-            this.textRenderer.draw(stack, text, this.insideEndX - this.textRenderer.width(text), this.y + 6, color);
+            this.textRenderer.func_243246_a(stack, text, this.insideEndX - this.textRenderer.getStringPropertyWidth(text), this.y + 6, color);
         }
 
         var delta = 20F * tickDelta / 255F;
@@ -163,7 +163,7 @@ public class SkillTab extends SoulboundTab {
                 chroma = this.chroma;
             }
 
-            textureManager.bind(WIDGETS);
+            textureManager.bindTexture(WIDGETS);
             this.blit(matrices, x - 4, y - 4, 1, 155 - offsetV, 24, 24);
 
             RenderSystem.color3f(chroma, chroma, chroma);
@@ -177,7 +177,7 @@ public class SkillTab extends SoulboundTab {
     protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY, int offsetV) {
         var name = skill.name();
         List<? extends ITextProperties> tooltip = skill.tooltip();
-        var barWidth = 36 + this.textRenderer.width(name);
+        var barWidth = 36 + this.textRenderer.getStringPropertyWidth(name);
         var size = tooltip.size();
 
         if (size > 0) {
@@ -195,11 +195,11 @@ public class SkillTab extends SoulboundTab {
                 string = Translations.menuLevel.format(skill.level());
             }
 
-            barWidth = 12 + Math.max(barWidth, 8 + this.textRenderer.width(string));
+            barWidth = 12 + Math.max(barWidth, 8 + this.textRenderer.getStringPropertyWidth(string));
             tooltip = wrap(tooltip, barWidth);
             size = tooltip.size();
-            barWidth = Math.max(barWidth, 8 + this.textRenderer.width(tooltip.stream().max(Comparator.comparingInt(this.textRenderer::width)).get()));
-            var offset = (1 + size) * this.textRenderer.lineHeight;
+            barWidth = Math.max(barWidth, 8 + this.textRenderer.getStringPropertyWidth(tooltip.stream().max(Comparator.comparingInt(this.textRenderer::getStringPropertyWidth)).get()));
+            var offset = (1 + size) * this.textRenderer.FONT_HEIGHT;
             var tooltipHeight = 1 + offset;
 
             if (!learned || skill.canUpgrade()) {
@@ -209,7 +209,7 @@ public class SkillTab extends SoulboundTab {
                 grayRectangle.x(centerX - 8).y(levelY).width(barWidth).height(20).render(stack);
                 // this.drawHorizontallyInterpolatedTexture(stack, centerX - 8, levelY, 0, 55, 2, 198, 200, barWidth, 20);
 
-                this.textRenderer.draw(stack, string, centerX - 3, textY + offset, 0x999999);
+                this.textRenderer.func_243246_a(stack, string, centerX - 3, textY + offset, 0x999999);
             }
 
             this.chroma(1);
@@ -218,7 +218,7 @@ public class SkillTab extends SoulboundTab {
             // this.drawInterpolatedTexture(stack, centerX - 8, y, 0, 55, 2, 57, 198, 73, 200, 75, barWidth, tooltipHeight);
 
             for (var i = 0; i < size; i++) {
-                this.textRenderer.draw(stack, tooltip.get(i).getString(), centerX - 3, textY - 1 + i * this.textRenderer.lineHeight, 0x999999);
+                this.textRenderer.drawString(stack, tooltip.get(i).getString(), centerX - 3, textY - 1 + i * this.textRenderer.FONT_HEIGHT, 0x999999);
             }
         }
 
@@ -228,7 +228,7 @@ public class SkillTab extends SoulboundTab {
         blueRectangle.x(centerX - 8).y(centerY - 2).width(barWidth).height(20).render(stack);
         // this.drawHorizontallyInterpolatedTexture(stack, centerX - 8, centerY - 2, 0, 29 - offsetV, 2, 198, 200, barWidth, 20);
 
-        this.textRenderer.draw(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
+        this.textRenderer.func_243246_a(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
     }
 
     protected boolean isSkillSelected(int mouseX, int mouseY) {

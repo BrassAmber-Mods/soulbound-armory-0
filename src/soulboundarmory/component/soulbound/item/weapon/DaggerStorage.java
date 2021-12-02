@@ -46,9 +46,9 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
             .max(1, StatisticType.criticalStrikeRate).build();
 
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getFullname(1).getContents().toLowerCase();
+            var name = enchantment.getName().toLowerCase();
 
-            return enchantment.canEnchant(this.itemStack)
+            return enchantment.canApply(this.itemStack)
                 && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
                 && !name.contains("holding")
@@ -83,7 +83,7 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
     public List<ITextComponent> tooltip() {
         var format = DecimalFormat.getInstance();
         var tooltip = new ArrayList<ITextComponent>(List.of(
-            new Translation(" %s%s %s", format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName).withStyle(style -> style.withColor(TextFormatting.getByCode(Translations.attackSpeedFormat.getKey().charAt(1)))),
+            new Translation(" %s%s %s", format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName).modifyStyle(style -> style.applyFormatting(TextFormatting.fromFormattingCode(Translations.attackSpeedFormat.getKey().charAt(1)))),
             new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName),
             new Translation(""),
             new Translation("")

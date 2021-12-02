@@ -23,7 +23,7 @@ import net.minecraftforge.common.ToolType;
 
 public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem {
     public SoulboundPickItem() {
-        super(SoulboundToolMaterial.SOULBOUND, 0, -2.4F, new Properties().tab(ItemGroup.TAB_TOOLS));
+        super(SoulboundToolMaterial.SOULBOUND, 0, -2.4F, new Properties().group(ItemGroup.TOOLS));
     }
 
     @Override
@@ -32,13 +32,13 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
     }
 
     @Override
-    public boolean mineBlock(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
-        if (miner instanceof PlayerEntity player && this.canAttackBlock(state, world, pos, (PlayerEntity) miner)) {
+    public boolean onBlockDestroyed(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
+        if (miner instanceof PlayerEntity player && this.canPlayerBreakBlockWhileHolding(state, world, pos, (PlayerEntity) miner)) {
             var component = StorageType.pick.get(miner);
-            var xp = Math.min(5, (int) state.getDestroySpeed(world, pos)) + state.getHarvestLevel();
+            var xp = Math.min(5, (int) state.getBlockHardness(world, pos)) + state.getHarvestLevel();
 
-            if (!world.isClientSide && component.incrementStatistic(StatisticType.experience, xp) && Components.config.of(miner).levelupNotifications) {
-                player.displayClientMessage(new Translation(Translations.messageLevelUp.getKey(), stack.getDisplayName(), component.datum(StatisticType.level)), true);
+            if (!world.isRemote && component.incrementStatistic(StatisticType.experience, xp) && Components.config.of(miner).levelupNotifications) {
+                player.sendStatusMessage(new Translation(Translations.messageLevelUp.getKey(), stack.getDisplayName(), component.datum(StatisticType.level)), true);
             }
         }
 
@@ -46,7 +46,7 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlotType slot) {
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot) {
         return HashMultimap.create();
     }
 }

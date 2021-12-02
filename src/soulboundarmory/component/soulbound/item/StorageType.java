@@ -56,7 +56,7 @@ public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<S
             return Optional.empty();
         }
 
-        for (var itemStack : entity.getHandSlots()) {
+        for (var itemStack : entity.getHeldEquipment()) {
             var item = itemStack.getItem();
             var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findFirst();
 

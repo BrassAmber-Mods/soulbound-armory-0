@@ -26,15 +26,15 @@ public abstract class ExtendedProjectile extends AbstractArrowEntity {
     }
 
     public double displacement(Entity entity) {
-        return this.displacement(entity.getX(), entity.getY(), entity.getZ());
+        return this.displacement(entity.getPosX(), entity.getPosY(), entity.getPosZ());
     }
 
     public double displacement(double x, double y, double z) {
-        return this.distance(x, y, z) * MathUtil.signum(x - this.getX(), y - this.getY(), z - this.getZ());
+        return this.distance(x, y, z) * MathUtil.signum(x - this.getPosX(), y - this.getPosY(), z - this.getPosZ());
     }
 
     public double distance(double x, double y, double z) {
-        return Math.sqrt(this.distanceToSqr(x, y, z));
+        return Math.sqrt(this.getDistanceSq(x, y, z));
     }
 
     public double getSpeed() {
@@ -46,15 +46,15 @@ public abstract class ExtendedProjectile extends AbstractArrowEntity {
     }
 
     public double velocityX() {
-        return this.getDeltaMovement().x;
+        return this.getMotion().x;
     }
 
     public double velocityY() {
-        return this.getDeltaMovement().y;
+        return this.getMotion().y;
     }
 
     public double velocityZ() {
-        return this.getDeltaMovement().z;
+        return this.getMotion().z;
     }
 
     public double getVelocityD() {

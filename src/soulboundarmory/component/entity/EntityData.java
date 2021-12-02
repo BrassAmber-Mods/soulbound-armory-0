@@ -29,43 +29,43 @@ public class EntityData extends EntityComponent<Entity> {
     }
 
     public void freeze(PlayerEntity freezer, int ticks, float damage) {
-        if (!freezer.level.isClientSide) {
-            ((ServerWorld) freezer.level).sendParticles(
+        if (!freezer.world.isRemote) {
+            ((ServerWorld) freezer.world).spawnParticle(
                 ParticleTypes.ITEM_SNOWBALL,
-                this.entity.getX(), this.entity.getEyeY(), this.entity.getZ(), 32, 0.1, 0, 0.1, 2D
+                this.entity.getPosX(), this.entity.getEyeHeight(), this.entity.getPosZ(), 32, 0.1, 0, 0.1, 2D
             );
 
-            this.entity.playSound(SoundEvents.SNOW_HIT, 1, 1.2F / (this.entity.level.random.nextFloat() * 0.2F + 0.9F));
-            this.entity.clearFire();
+            this.entity.playSound(SoundEvents.BLOCK_SNOW_HIT, 1, 1.2F / (this.entity.world.rand.nextFloat() * 0.2F + 0.9F));
+            this.entity.extinguish();
 
             if (ticks > this.freezeTicks) {
                 this.freezeTicks = ticks;
             }
 
             if (this.entity instanceof LivingEntity) {
-                this.entity.hurt(DamageSource.playerAttack(freezer), damage);
+                this.entity.attackEntityFrom(DamageSource.causePlayerDamage(freezer), damage);
             }
 
             if (this.entity instanceof CreeperEntity) {
-                ((CreeperEntity) this.entity).setSwellDir(-1);
+                ((CreeperEntity) this.entity).setCreeperState(-1);
             }
 
             if (this.entity instanceof ProjectileEntity) {
-                this.entity.setDeltaMovement(0, this.entity.getDeltaMovement().y, 0);
+                this.entity.setMotion(0, this.entity.getMotion().y, 0);
             }
         }
     }
 
     public boolean canBeFrozen() {
-        return (!(this.entity instanceof PlayerEntity) || this.entity.getServer().isPvpAllowed()) && this.entity.isAlive();
+        return (!(this.entity instanceof PlayerEntity) || this.entity.getServer().isPVPEnabled()) && this.entity.isAlive();
     }
 
     public boolean isFrozen() {
-        return this.freezeTicks > 0 && this.entity.isAlive() && !this.entity.isOnFire();
+        return this.freezeTicks > 0 && this.entity.isAlive() && !this.entity.isBurning();
     }
 
     public void tick() {
-        if (!this.entity.level.isClientSide) {
+        if (!this.entity.world.isRemote) {
             if (this.isFrozen() && this.entity instanceof LivingEntity entity) {
                 if (entity.hurtTime > 0) {
                     entity.hurtTime--;

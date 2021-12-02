@@ -40,7 +40,7 @@ public class ClientEvents {
         if (Screen.hasAltDown()) {
             PlayerEntity player = SoulboundArmoryClient.client.player;
 
-            if (player != null && player.level != null) {
+            if (player != null && player.world != null) {
                 var storage = Components.weapon.of(player).heldItemStorage();
 
                 if (storage instanceof StaffStorage) {
@@ -50,7 +50,7 @@ public class ClientEvents {
                         var staffStorage = (StaffStorage) storage;
 
                         staffStorage.cycleSpells(-dY);
-                        SoulboundArmoryClient.client.gui.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
+                        SoulboundArmoryClient.client.ingameGUI.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
 
                         event.setCanceled(true);
                     }
@@ -99,7 +99,7 @@ public class ClientEvents {
                 // tooltip.addAll(posterior);
 
                 var row = insertion.lastIndexOf(StringTextComponent.EMPTY) + prior.size();
-                tooltipBar.data(row, CellElement.textRenderer.width(tooltip.get(row - 2)) - 4);
+                tooltipBar.data(row, CellElement.textRenderer.getStringPropertyWidth(tooltip.get(row - 2)) - 4);
             });
         }
     }

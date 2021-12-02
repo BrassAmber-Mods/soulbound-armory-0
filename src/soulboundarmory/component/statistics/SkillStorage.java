@@ -48,7 +48,7 @@ public class SkillStorage extends Object2ObjectLinkedOpenHashMap<Skill, SkillCon
 
     @Override
     public void deserializeNBT(CompoundNBT tag) {
-        for (var identifier : tag.getAllKeys()) {
+        for (var identifier : tag.keySet()) {
             var skill = this.get(Skill.registry.getValue(new ResourceLocation(identifier)));
 
             if (skill != null) {

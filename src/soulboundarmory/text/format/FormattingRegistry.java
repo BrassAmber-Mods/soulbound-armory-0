@@ -38,12 +38,12 @@ public class FormattingRegistry {
             throw new IllegalArgumentException(String.format("%s; uppercase codes are not allowed.", code));
         }
 
-        if (TextFormatting.getByCode(code) != null) {
+        if (TextFormatting.fromFormattingCode(code) != null) {
             throw new IllegalArgumentException(String.format("a Formatting with the code %s already exists.", code));
         }
 
-        if (TextFormatting.getByName(formatting.cast().getName()) != null) {
-            throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", formatting.cast().getName()));
+        if (TextFormatting.getValueByName(formatting.cast().getFriendlyName()) != null) {
+            throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", formatting.cast().getFriendlyName()));
         }
 
         var oldValues = (TextFormatting[]) values.getObject();
@@ -57,7 +57,7 @@ public class FormattingRegistry {
         pattern.putObject(Pattern.compile(TextFormattingAccess.pattern().toString().replace("]", code + "]")));
 
         if (formatting.cast().isColor()) {
-            colorMap.put(formatting.cast(), ColorAccess.instantiate(formatting.cast().getColor(), formatting.cast().getName()));
+            colorMap.put(formatting.cast(), ColorAccess.instantiate(formatting.cast().getColor(), formatting.cast().getFriendlyName()));
         }
 
         return formatting;
