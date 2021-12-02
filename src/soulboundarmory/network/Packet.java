@@ -10,7 +10,7 @@ import soulboundarmory.SoulboundArmoryClient;
 
  Packets are message containers and handlers. They are constructed internally when sending and receiving messages.
 
- @param <T> the type of the message that may be stored in this packet.
+ @param <T> the type of the message that may be stored in this packet
  */
 public abstract class Packet<T> {
     protected NetworkEvent.Context context;
@@ -18,6 +18,7 @@ public abstract class Packet<T> {
     public final void execute(NetworkEvent.Context context) {
         this.context = context;
         this.execute();
+        context.setPacketHandled(true);
     }
 
     /**
