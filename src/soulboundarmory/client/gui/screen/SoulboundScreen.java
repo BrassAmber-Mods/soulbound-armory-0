@@ -7,18 +7,18 @@ import cell.client.gui.widget.Slider;
 import cell.client.gui.widget.Widget;
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.RGBASlider;
 import soulboundarmory.client.gui.bar.ExperienceBarOverlay;
-import soulboundarmory.client.gui.bar.Style;
+import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
@@ -67,7 +67,7 @@ public class SoulboundScreen extends CellScreen {
         this.storage = this.component.menuStorage();
         this.stack = this.component.menuStorage().stack();
 
-        for (var itemStack : this.player.getHeldEquipment()) {
+        for (var itemStack : this.player.getItemsHand()) {
             if (itemStack.equals(this.stack)) {
                 this.stack = itemStack;
 
@@ -92,7 +92,7 @@ public class SoulboundScreen extends CellScreen {
             this.button = this.button(this.tab);
 
             var text = this.slot != this.storage.boundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
-            var buttonWidth = Math.max(this.button.width(), this.textRenderer.getStringPropertyWidth(text) + 8);
+            var buttonWidth = Math.max(this.button.width(), this.textRenderer.getWidth(text) + 8);
 
             this.add(new ScalableWidget().button()
                 .x(this.button.endX() - buttonWidth)
@@ -186,7 +186,7 @@ public class SoulboundScreen extends CellScreen {
 
     protected Slider sliderMousedOver(double x, double y) {
         for (var slider : this.sliders) {
-            if (CellElement.contains(x, y, slider.x, slider.y, slider.getWidth(), slider.getHeightRealms())) {
+            if (CellElement.contains(x, y, slider.x, slider.y, slider.getWidth(), slider.getHeight())) {
                 return slider;
             }
         }
@@ -227,13 +227,13 @@ public class SoulboundScreen extends CellScreen {
 
     protected boolean hoveringLevel(int mouseX, int mouseY) {
         var levelString = String.valueOf(this.storage.datum(level));
-        var levelLeftX = (this.width - this.textRenderer.getStringWidth(levelString)) / 2;
+        var levelLeftX = (this.width - this.textRenderer.getWidth(levelString)) / 2;
         var levelTopY = this.height - 35;
 
-        return CellElement.contains(mouseX, mouseY, levelLeftX, levelTopY, this.textRenderer.getStringWidth(levelString), this.textRenderer.FONT_HEIGHT);
+        return CellElement.contains(mouseX, mouseY, levelLeftX, levelTopY, this.textRenderer.getWidth(levelString), this.textRenderer.fontHeight);
     }
 
-    public ScalableWidget optionButton(int row, ITextComponent text, PressCallback<ScalableWidget> primaryAction, PressCallback<ScalableWidget> secondaryAction) {
+    public ScalableWidget optionButton(int row, Text text, PressCallback<ScalableWidget> primaryAction, PressCallback<ScalableWidget> secondaryAction) {
         return new ScalableWidget().button()
             .x(this.optionX())
             .y(this.optionY(row))
@@ -244,7 +244,7 @@ public class SoulboundScreen extends CellScreen {
             .secondaryAction(secondaryAction);
     }
 
-    public Slider colorSlider(double currentValue, ITextComponent text, int id) {
+    public Slider colorSlider(double currentValue, Text text, int id) {
         return new RGBASlider(id, text)
             .x(this.optionX())
             .y(this.optionY(id))
@@ -297,12 +297,12 @@ public class SoulboundScreen extends CellScreen {
     }
 
     private void cycleStyle(int change) {
-        var index = (Configuration.instance().client.style.ordinal() + change) % Style.count;
+        var index = (Configuration.instance().client.style.ordinal() + change) % BarStyle.count;
 
         if (index < 0) {
-            this.cycleStyle(Style.count + index);
+            this.cycleStyle(BarStyle.count + index);
         } else {
-            Configuration.instance().client.style = Style.styles.get(index);
+            Configuration.instance().client.style = BarStyle.styles.get(index);
             this.refresh();
         }
     }

@@ -37,7 +37,7 @@ public class Packets {
 
     @SuppressWarnings("SameParameterValue")
     private static <T, P extends Packet<T>> PacketKey<T> register(Class<P> type) {
-        var key = new PacketKey<>(type);
+        PacketKey key = new PacketKey<>(type);
 
         SoulboundArmory.channel.registerMessage(
             id++,

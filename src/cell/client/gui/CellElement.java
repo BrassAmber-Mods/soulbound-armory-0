@@ -1,19 +1,19 @@
 package cell.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import cell.client.gui.widget.Length;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CellElement extends AbstractGui implements DrawableElement, Cloneable {
+public abstract class CellElement extends DrawableHelper implements DrawableElement, Cloneable {
     public int x;
     public int y;
 
@@ -25,7 +25,7 @@ public abstract class CellElement extends AbstractGui implements DrawableElement
     }
 
     public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, float z, int color) {
-        fill(matrices.getLast().getMatrix(), x1, y1, x2, y2, z, color);
+        fill(matrices.peek().getModel(), x1, y1, x2, y2, z, color);
     }
 
     public static void fill(Matrix4f matrix, int x1, int y1, int x2, int y2, float z, int color) {
@@ -53,14 +53,14 @@ public abstract class CellElement extends AbstractGui implements DrawableElement
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
-        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        bufferBuilder.pos(matrix, x1, y2, z).color(r, g, b, a).endVertex();
-        bufferBuilder.pos(matrix, x2, y2, z).color(r, g, b, a).endVertex();
-        bufferBuilder.pos(matrix, x2, y1, z).color(r, g, b, a).endVertex();
-        bufferBuilder.pos(matrix, x1, y1, z).color(r, g, b, a).endVertex();
-        bufferBuilder.finishDrawing();
+        bufferBuilder.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+        bufferBuilder.vertex(matrix, x1, y2, z).color(r, g, b, a).next();
+        bufferBuilder.vertex(matrix, x2, y2, z).color(r, g, b, a).next();
+        bufferBuilder.vertex(matrix, x2, y1, z).color(r, g, b, a).next();
+        bufferBuilder.vertex(matrix, x1, y1, z).color(r, g, b, a).next();
+        bufferBuilder.end();
 
-        WorldVertexBufferUploader.draw(bufferBuilder);
+        BufferRenderer.draw(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }

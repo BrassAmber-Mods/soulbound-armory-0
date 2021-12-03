@@ -1,24 +1,15 @@
 package soulboundarmory.event;
 
+import cell.client.gui.CellElement;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
-import cell.client.gui.CellElement;
-import soulboundarmory.SoulboundArmory;
-import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
-import soulboundarmory.client.gui.bar.ExperienceBarOverlay;
-import soulboundarmory.config.Configuration;
-import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.text.Translation;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.SinglePreparationResourceReloader;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
@@ -28,6 +19,15 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import soulboundarmory.SoulboundArmory;
+import soulboundarmory.SoulboundArmoryClient;
+import soulboundarmory.client.gui.bar.ExperienceBarOverlay;
+import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
+import soulboundarmory.config.Configuration;
+import soulboundarmory.item.SoulboundItem;
+import soulboundarmory.text.Translation;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = SoulboundArmory.ID)
@@ -50,7 +50,7 @@ public class ClientEvents {
                         var staffStorage = (StaffStorage) storage;
 
                         staffStorage.cycleSpells(-dY);
-                        SoulboundArmoryClient.client.ingameGUI.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
+                        SoulboundArmoryClient.client.inGameHud.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
 
                         event.setCanceled(true);
                     }
@@ -81,7 +81,7 @@ public class ClientEvents {
                 for (int index = 0, size = tooltip.size(); index < size; index++) {
                     var entry = tooltip.get(index);
 
-                    if (entry instanceof TranslationTextComponent translation && translation.getKey().equals("item.modifiers.mainhand")) {
+                    if (entry instanceof TranslatableText translation && translation.getKey().equals("item.modifiers.mainhand")) {
                         startIndex += index;
                     }
                 }
@@ -98,8 +98,8 @@ public class ClientEvents {
                 tooltip.addAll(insertion);
                 // tooltip.addAll(posterior);
 
-                var row = insertion.lastIndexOf(StringTextComponent.EMPTY) + prior.size();
-                tooltipBar.data(row, CellElement.textRenderer.getStringPropertyWidth(tooltip.get(row - 2)) - 4);
+                var row = insertion.lastIndexOf(LiteralText.EMPTY) + prior.size();
+                tooltipBar.data(row, CellElement.textDrawer.getWidth(tooltip.get(row - 2)) - 4);
             });
         }
     }
@@ -116,14 +116,14 @@ public class ClientEvents {
         event.addListener(new ExperienceBarReloader());
     }
 
-    private static class ExperienceBarReloader extends ReloadListener<Void> {
+    private static class ExperienceBarReloader extends SinglePreparationResourceReloader<Void> {
         @Override
-        protected Void prepare(IResourceManager manager, IProfiler profiler) {
+        protected Void prepare(ResourceManager manager, Profiler profiler) {
             return null;
         }
 
         @Override
-        protected void apply(Void nothing, IResourceManager manager, IProfiler profiler) {
+        protected void apply(Void nothing, ResourceManager manager, Profiler profiler) {
             RenderSystem.recordRenderCall(() -> {
                 overlayBar = new ExperienceBarOverlay();
                 tooltipBar = new ExperienceBarOverlay();

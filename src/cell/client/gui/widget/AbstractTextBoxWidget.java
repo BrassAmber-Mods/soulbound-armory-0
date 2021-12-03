@@ -1,15 +1,15 @@
 package cell.client.gui.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
@@ -43,7 +43,7 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
 
     protected final StringBuffer text = new StringBuffer();
 
-    protected List<ITextProperties> lines = new ArrayList<>();
+    protected List<StringVisitable> lines = new ArrayList<>();
 
     protected int insideWidth;
     protected int textX;
@@ -72,16 +72,16 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
 
         for (int i = 0, size = lines.size(); i < size; i++) {
             var line = lines.get(i);
-            textRenderer.drawString(matrices, line.getString(), this.textX, this.getPosY(i), 0xFFFFFF);
+            textDrawer.draw(matrices, line.getString(), this.textX, this.getY(i), 0xFFFFFF);
         }
     }
 
     protected void renderCaret(MatrixStack matrices) {
-        textRenderer.func_243246_a(matrices, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
+        textDrawer.drawWithShadow(matrices, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
     }
 
-    protected int getPosY(int line) {
-        return this.textY + line * (textRenderer.FONT_HEIGHT + 3);
+    protected int getY(int line) {
+        return this.textY + line * (textDrawer.fontHeight + 3);
     }
 
     @Override
@@ -167,7 +167,7 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
             }
         }
 
-        this.lines = textHandler.func_238365_g_(this.text.toString(), this.insideWidth - 4, Style.EMPTY);
+        this.lines = textHandler.wrapLines(this.text.toString(), this.insideWidth - 4, Style.EMPTY);
         this.updateCaret();
 
         return false;
@@ -180,8 +180,8 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
             this.caretX = this.textX;
             this.caretY = this.textY;
         } else {
-            this.caretX = this.textX + textRenderer.getStringWidth(this.lines.get(size - 1).getString().substring(0, this.index));
-            this.caretY = this.getPosY(this.column);
+            this.caretX = this.textX + textDrawer.getWidth(this.lines.get(size - 1).getString().substring(0, this.index));
+            this.caretY = this.getY(this.column);
         }
     }
 
@@ -192,13 +192,13 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
     public enum Caret {
         UNDERSCORE("_");
 
-        ITextComponent character;
+        Text character;
 
         Caret(String character) {
-            this(new StringTextComponent(character));
+            this(Text.of(character));
         }
 
-        Caret(ITextComponent character) {
+        Caret(Text character) {
             this.character = character;
         }
     }

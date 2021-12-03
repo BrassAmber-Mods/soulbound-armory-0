@@ -6,11 +6,11 @@ import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.registry.Skills;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
 public class SoulboundSword extends SoulboundMeleeWeapon {
@@ -24,21 +24,21 @@ public class SoulboundSword extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         var component = (SwordStorage) PickStorage.get(player, this).get();
 
-        if (!world.isRemote && component.hasSkill(Skills.summonLightning) && component.getLightningCooldown() <= 0) {
-            var pos = player.getPositionVec();
-            var result = world.rayTraceBlocks(new RayTraceContext(pos, pos.add(player.getLookVec()).mul(512, 512, 512), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, player));
+        if (!world.isClient && component.hasSkill(Skills.summonLightning) && component.lightningCooldown() <= 0) {
+            var pos = player.getPos();
+            var result = world.raycast(new RaycastContext(pos, pos.add(player.getRotationVector()).multiply(512, 512, 512), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player));
 
             if (result != null) {
-                player.world.addEntity(new SoulboundLightningEntity(player.world, result.getHitVec(), player.getUniqueID()));
+                player.world.spawnEntity(new SoulboundLightningEntity(player.world, result.getPos(), player.getUuid()));
                 component.resetLightningCooldown();
 
-                return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
+                return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
             }
         }
 
-        return new ActionResult<>(ActionResultType.FAIL, player.getHeldItem(hand));
+        return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
     }
 }

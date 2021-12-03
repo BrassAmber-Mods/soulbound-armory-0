@@ -1,7 +1,7 @@
 package soulboundarmory.network;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 import soulboundarmory.SoulboundArmoryClient;
 
@@ -39,12 +39,12 @@ public abstract class Packet<T> {
     /**
      Write this packet's message to a buffer.
      */
-    public abstract void write(PacketBuffer buffer);
+    public abstract void write(PacketByteBuf buffer);
 
     /**
      Read the message in a buffer.
      */
-    public abstract void read(PacketBuffer buffer);
+    public abstract void read(PacketByteBuf buffer);
 
     /**
      After the message has been read, perform some action with it.

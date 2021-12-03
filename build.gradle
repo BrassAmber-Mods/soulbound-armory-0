@@ -25,12 +25,20 @@ repositories {
 }
 
 loom {
-    silentMojangMappingsLicense()
+    forge {
+        mixinConfig("soulbound-armory.mixins.json")
+    }
+
+    runConfigs {
+        client {
+            environment("client")
+        }
+    }
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:1.16.5")
-    mappings("de.oceanlabs.mcp:mcp_snapshot:20201028-1.16.3")
+    mappings("net.fabricmc:yarn:1.16.5+build.10:v2")
     forge("net.minecraftforge:forge:1.16.5-36.2.19")
 
     implementation("net.auoeke:reflect:latest.integration")

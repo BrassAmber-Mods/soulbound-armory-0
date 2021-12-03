@@ -1,15 +1,15 @@
 package soulboundarmory.skill.weapon.staff;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import cell.client.gui.screen.CellScreen;
 import soulboundarmory.skill.Skill;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 public class FireballSkill extends Skill {
-    public FireballSkill(ResourceLocation identifier) {
+    public FireballSkill(Identifier identifier) {
         super(identifier);
     }
 

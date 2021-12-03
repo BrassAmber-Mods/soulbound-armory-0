@@ -1,13 +1,13 @@
 package soulboundarmory.skill;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.List;
 import java.util.Set;
 import cell.client.gui.screen.CellScreen;
 import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.serial.CompoundSerializable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -101,12 +101,12 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
     }
 
     @OnlyIn(Dist.CLIENT)
-    public ITextComponent name() {
+    public Text name() {
         return this.skill.name();
     }
 
     @OnlyIn(Dist.CLIENT)
-    public List<? extends ITextComponent> tooltip() {
+    public List<? extends Text> tooltip() {
         return this.skill.tooltip();
     }
 
@@ -116,13 +116,13 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         tag.putBoolean("learned", this.learned);
         tag.putInt("level", this.level);
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         this.learned = tag.getBoolean("learned");
         this.level = tag.getInt("level");
     }

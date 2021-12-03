@@ -3,7 +3,7 @@ package soulboundarmory.event;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -11,7 +11,9 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.component.Components;
@@ -50,7 +52,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        var registry = event.getRegistry();
+        IForgeRegistry registry = event.getRegistry();
         registry.register(SoulboundItems.dagger.setRegistryName("dagger"));
         registry.register(SoulboundItems.sword.setRegistryName("sword"));
         registry.register(SoulboundItems.greatsword.setRegistryName("greatsword"));
@@ -66,7 +68,7 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void registerAttributes(RegistryEvent.Register<Attribute> event) {
+    public static void registerAttributes(RegistryEvent.Register<EntityAttribute> event) {
         event.getRegistry().register(SAAttributes.efficiency.setRegistryName("efficiency"));
         event.getRegistry().register(SAAttributes.criticalStrikeRate.setRegistryName("critical_strike_rate"));
     }

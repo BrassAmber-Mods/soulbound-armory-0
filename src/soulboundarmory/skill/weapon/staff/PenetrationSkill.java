@@ -1,10 +1,10 @@
 package soulboundarmory.skill.weapon.staff;
 
+import net.minecraft.util.Identifier;
 import soulboundarmory.skill.Skill;
-import net.minecraft.util.ResourceLocation;
 
 public class PenetrationSkill extends Skill {
-    public PenetrationSkill(ResourceLocation identifier) {
+    public PenetrationSkill(Identifier identifier) {
         super(identifier);
     }
 

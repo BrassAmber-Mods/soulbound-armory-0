@@ -1,10 +1,10 @@
 package soulboundarmory.item;
 
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.ToolMaterial;
+import net.minecraft.recipe.Ingredient;
 import net.minecraftforge.common.util.Lazy;
 
-public enum SoulboundToolMaterial implements IItemTier {
+public enum SoulboundToolMaterial implements ToolMaterial {
     SOULBOUND(0, 0, 0.5F, 0, 0, null);
 
     private final int miningLevel;
@@ -24,12 +24,12 @@ public enum SoulboundToolMaterial implements IItemTier {
     }
 
     @Override
-    public int getMaxUses() {
+    public int getDurability() {
         return this.uses;
     }
 
     @Override
-    public float getEfficiency() {
+    public float getMiningSpeedMultiplier() {
         return this.miningSpeed;
     }
 
@@ -39,7 +39,7 @@ public enum SoulboundToolMaterial implements IItemTier {
     }
 
     @Override
-    public int getHarvestLevel() {
+    public int getMiningLevel() {
         return this.miningLevel;
     }
 
@@ -49,7 +49,7 @@ public enum SoulboundToolMaterial implements IItemTier {
     }
 
     @Override
-    public Ingredient getRepairMaterial() {
+    public Ingredient getRepairIngredient() {
         return this.repairIngredient.get();
     }
 }

@@ -2,7 +2,7 @@ package soulboundarmory.network;
 
 import net.auoeke.reflect.Constructors;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -31,7 +31,7 @@ public final class PacketKey<T> {
      Send a message from the server to a client.
      */
     public void send(Entity player, T message) {
-        SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+        SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     /**
@@ -43,7 +43,7 @@ public final class PacketKey<T> {
     }
 
     private Packet<T> store(T message) {
-        var packet = this.instantiate();
+        Packet packet = this.instantiate();
         packet.store(message);
 
         return packet;

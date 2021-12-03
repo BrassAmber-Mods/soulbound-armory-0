@@ -8,17 +8,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.screen.AttributeTab;
 import soulboundarmory.client.gui.screen.EnchantmentTab;
@@ -63,18 +63,18 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     public ItemStorage(SoulboundComponent component, Item item) {
         this.component = component;
         this.player = component.entity;
-        this.client = component.entity.world.isRemote;
+        this.client = component.entity.world.isClient;
         this.item = item;
         this.itemStack = this.newItemStack();
     }
 
-    public abstract ITextComponent getName();
+    public abstract Text name();
 
     public abstract List<StatisticEntry> screenAttributes();
 
-    public abstract List<ITextComponent> tooltip();
+    public abstract List<Text> tooltip();
 
-    public abstract Item getConsumableItem();
+    public abstract Item consumableItem();
 
     public abstract double increase(StatisticType statistic, int points);
 
@@ -84,7 +84,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public abstract Class<? extends SoulboundItem> itemClass();
 
-    public abstract Multimap<Attribute, AttributeModifier> attributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot);
+    public abstract Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot);
 
     public static Optional<ItemStorage<?>> get(Entity entity, Item item) {
         return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.player == entity && storage.item() == item).findAny();
@@ -107,10 +107,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public ItemStack menuEquippedStack() {
-        for (var itemStack : this.player.getHeldEquipment()) {
+        for (var itemStack : this.player.getItemsHand()) {
             var item = itemStack.getItem();
 
-            if (item == this.item() || item == this.getConsumableItem()) {
+            if (item == this.item() || item == this.consumableItem()) {
                 return itemStack;
             }
         }
@@ -150,7 +150,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
                 var enchantment = entry.getKey();
 
                 if (entry.getValue() > 0) {
-                    attackDamage += enchantment.calcDamageByCreature(this.enchantment(enchantment), CreatureAttribute.UNDEFINED);
+                    attackDamage += enchantment.getAttackDamage(this.enchantment(enchantment), EntityGroup.DEFAULT);
                 }
             }
 
@@ -278,7 +278,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return this.skills.values();
     }
 
-    public SkillContainer skill(ResourceLocation identifier) {
+    public SkillContainer skill(Identifier identifier) {
         return this.skill(Skill.registry.getValue(identifier));
     }
 
@@ -286,7 +286,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return this.skills.get(skill);
     }
 
-    public boolean hasSkill(ResourceLocation identifier) {
+    public boolean hasSkill(Identifier identifier) {
         return this.hasSkill(Skill.registry.getValue(identifier));
     }
 
@@ -299,7 +299,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void upgrade(SkillContainer skill) {
-        //        if (this.isRemote) {
+        //        if (this.isClient) {
         //            MainClient.PACKET_REGISTRY.sendToServer(Packets.C2S_SKILL, new ExtendedPacketBuffer(this, item).writeString(skill.toString()));
         //        } else {
         var points = this.datum(StatisticType.skillPoints);
@@ -379,11 +379,11 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public boolean canUnlock() {
-        return !this.unlocked && ItemUtil.isEquipped(this.player, this.getConsumableItem());
+        return !this.unlocked && ItemUtil.isEquipped(this.player, this.consumableItem());
     }
 
     public boolean canConsume(Item item) {
-        return this.getConsumableItem() == item;
+        return this.consumableItem() == item;
     }
 
     public int boundSlot() {
@@ -418,7 +418,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
                 if (handItems.contains(this.item())) {
                     this.openGUI(this.currentTab);
-                } else if (handItems.contains(this.getConsumableItem())) {
+                } else if (handItems.contains(this.consumableItem())) {
                     this.openGUI(0);
                 }
             }
@@ -436,7 +436,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             if (SoulboundArmoryClient.client.currentScreen instanceof SoulboundScreen screen && this.currentTab == tab) {
                 screen.refresh();
             } else {
-                SoulboundArmoryClient.client.displayGuiScreen(new SoulboundScreen(this.component, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
+                SoulboundArmoryClient.client.openScreen(new SoulboundScreen(this.component, tab, new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab()));
             }
         } else {
             Packets.clientOpenGUI.send(this.player, new ExtendedPacketBuffer(this).writeInt(tab));
@@ -458,7 +458,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
                 for (var itemStack : ItemUtil.inventory(player)) {
                     if (itemStack.getItem() == storage.item()) {
-                        player.inventory.deleteStack(itemStack);
+                        player.inventory.removeOne(itemStack);
                     }
                 }
             }
@@ -472,12 +472,12 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     protected void updateItemStack() {
         var itemStack = this.itemStack = this.newItemStack();
 
-        for (var slot : EquipmentSlotType.values()) {
+        for (var slot : EquipmentSlot.values()) {
             var attributeModifiers = this.attributeModifiers(slot);
 
             for (var attribute : attributeModifiers.keySet()) {
                 for (var modifier : attributeModifiers.get(attribute)) {
-                    itemStack.addAttributeModifier(attribute, modifier, EquipmentSlotType.MAINHAND);
+                    itemStack.addAttributeModifier(attribute, modifier, EquipmentSlot.MAINHAND);
                 }
             }
         }
@@ -498,7 +498,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return itemStack;
     }
 
-    public Multimap<Attribute, AttributeModifier> attributeModifiers(EquipmentSlotType slot) {
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
         return this.attributeModifiers(LinkedHashMultimap.create(), slot);
     }
 
@@ -508,7 +508,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         tag.put("statistics", this.statistics.serializeNBT());
         tag.put("enchantments", this.enchantments.serializeNBT());
         tag.put("skills", this.skills.serializeNBT());
@@ -518,7 +518,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         this.statistics.deserializeNBT(tag.getCompound("statistics"));
         this.enchantments.deserializeNBT(tag.getCompound("enchantments"));
         this.skills.deserializeNBT(tag.getCompound("skills"));
@@ -529,19 +529,19 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.updateItemStack();
     }
 
-    public CompoundNBT clientTag() {
-        var tag = new CompoundNBT();
+    public void sync() {
+        if (this.client) {
+            Packets.serverSync.send(new ExtendedPacketBuffer(this).writeNbt(this.clientTag()));
+        } else {
+            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serializeNBT()));
+        }
+    }
+
+    protected NbtCompound clientTag() {
+        var tag = new NbtCompound();
         tag.putInt("tab", this.currentTab);
 
         return tag;
-    }
-
-    public void sync() {
-        if (this.client) {
-            Packets.serverSync.send(new ExtendedPacketBuffer(this).writeCompoundTag(this.clientTag()));
-        } else {
-            Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeCompoundTag(this.serializeNBT()));
-        }
     }
 
     public void tick() {}

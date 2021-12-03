@@ -2,11 +2,14 @@ package soulboundarmory.component.soulbound.item.weapon;
 
 import com.google.common.collect.Multimap;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.component.Components;
+import soulboundarmory.component.entity.EntityData;
 import soulboundarmory.component.soulbound.item.StorageType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
@@ -22,22 +25,22 @@ import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.Util;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
 
 public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
-    protected CompoundNBT cannotFreeze;
+    protected NbtCompound cannotFreeze;
     public int leapDuration;
     public double leapForce;
 
@@ -51,15 +54,15 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
             .max(1, StatisticType.criticalStrikeRate).build();
 
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getName().toLowerCase(Locale.ROOT);
+            var name = enchantment.getTranslationKey().toLowerCase(Locale.ROOT);
 
-            return enchantment.canApply(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
+            return enchantment.isAcceptableItem(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
                 && !name.contains("mending");
         });
 
         this.skills = new SkillStorage(Skills.nourishment, Skills.leaping, Skills.freezing);
-        this.cannotFreeze = new CompoundNBT();
+        this.cannotFreeze = new NbtCompound();
     }
 
     public static GreatswordStorage get(Entity entity) {
@@ -67,7 +70,7 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     }
 
     @Override
-    public ITextComponent getName() {
+    public Text name() {
         return Translations.soulboundGreatsword;
     }
 
@@ -77,7 +80,7 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     }
 
     @Override
-    public Item getConsumableItem() {
+    public Item consumableItem() {
         return Items.IRON_SWORD;
     }
 
@@ -93,7 +96,7 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     public void resetLeapForce() {
         this.leapForce = 0;
         this.leapDuration = 0;
-        this.cannotFreeze = new CompoundNBT();
+        this.cannotFreeze = new NbtCompound();
     }
 
     public int leapDuration() {
@@ -106,23 +109,23 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
 
     public void freeze(Entity entity, int ticks, double damage) {
         var component = Components.entityData.of(entity);
-        var id = entity.getUniqueID();
+        var id = entity.getUuid();
         var key = id.toString();
 
         if (!this.cannotFreeze.contains(key) && component.canBeFrozen()) {
             component.freeze(this.player, ticks, (float) damage);
 
-            this.cannotFreeze.putUniqueId(key, id);
+            this.cannotFreeze.putUuid(key, id);
         }
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> attributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
-        if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), AttributeModifier.Operation.ADDITION));
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), AttributeModifier.Operation.ADDITION));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.attackRangeUUID, "Weapon modifier", this.attributeRelative(StatisticType.attackRange), AttributeModifier.Operation.ADDITION));
-//            modifiers.put(ReachAttributes.REACH, new AttributeModifier(SAAttributes.reachUUID, "Weapon modifier", this.getAttributeRelative(reach), ADDITION));
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.attackRangeUUID, "Weapon modifier", this.attributeRelative(StatisticType.attackRange), EntityAttributeModifier.Operation.ADDITION));
+//            modifiers.put(ReachAttributes.REACH, new EntityAttributeModifier(SAAttributes.reachUUID, "Weapon modifier", this.getAttributeRelative(reach), ADDITION));
         }
 
         return modifiers;
@@ -139,21 +142,21 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     }
 
     @Override
-    public List<ITextComponent> tooltip() {
+    public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
-        var tooltip = new ArrayList<>(List.of(
-            new StringTextComponent(String.format(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName)),
-            new StringTextComponent(String.format(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName)),
-            StringTextComponent.EMPTY,
-            StringTextComponent.EMPTY
+        ArrayList tooltip = new ArrayList<>(List.of(
+            Text.of(String.format(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName)),
+            Text.of(String.format(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName)),
+            LiteralText.EMPTY,
+            LiteralText.EMPTY
         ));
 
         if (this.attribute(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
+            tooltip.add(Text.of(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
         }
 
         if (this.attribute(StatisticType.efficiency) > 0) {
-            tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(StatisticType.efficiency)), Translations.toolEfficiencyName)));
+            tooltip.add(Text.of(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(StatisticType.efficiency)), Translations.toolEfficiencyName)));
         }
 
         return tooltip;
@@ -179,7 +182,7 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         super.serializeNBT(tag);
 
         tag.putInt("leapDuration", this.leapDuration());
@@ -188,7 +191,7 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         super.deserializeNBT(tag);
 
         this.cannotFreeze = tag.getCompound("cannotFreeze");

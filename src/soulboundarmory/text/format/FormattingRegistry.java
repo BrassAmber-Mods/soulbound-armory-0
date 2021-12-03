@@ -7,19 +7,19 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.auoeke.reflect.Pointer;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.TextFormatting;
-import soulboundarmory.mixin.mixin.access.TextFormattingAccess;
-import soulboundarmory.mixin.mixin.access.ColorAccess;
+import net.minecraft.util.Formatting;
+import net.minecraft.text.TextColor;
+import soulboundarmory.mixin.mixin.access.TextColorAccess;
+import soulboundarmory.mixin.mixin.access.FormattingAccess;
 import soulboundarmory.util.Util;
 
 public class FormattingRegistry {
-    private static final Pointer pattern = new Pointer().staticField(TextFormatting.class, Util.mapField("field_96330_y"));
-    private static final Pointer values = new Pointer().staticField(TextFormatting.class, "$VALUES");
-    private static final Pointer colors = new Pointer().staticField(Color.class, Util.mapField("field_240738_a_"));
+    private static final Pointer pattern = new Pointer().staticField(Formatting.class, Util.mapField("field_96330_y"));
+    private static final Pointer values = new Pointer().staticField(Formatting.class, ExtendedFormatting.VALUES);
+    private static final Pointer colors = new Pointer().staticField(TextColor.class, Util.mapField("field_240738_a_"));
 
-    private static final Map<String, TextFormatting> nameMap = TextFormattingAccess.nameMap();
-    private static final Reference2ObjectOpenHashMap<TextFormatting, Color> colorMap = new Reference2ObjectOpenHashMap<>(ColorAccess.formattingColors());
+    private static final Map<String, Formatting> nameMap = FormattingAccess.nameMap();
+    private static final Reference2ObjectOpenHashMap<Formatting, TextColor> colorMap = new Reference2ObjectOpenHashMap<>(TextColorAccess.formattingColors());
 
     public static ExtendedFormatting register(String name, char code, int colorIndex, @Nullable Integer color) {
         return register(new ExtendedFormatting(name, code, colorIndex, color), code);
@@ -38,26 +38,26 @@ public class FormattingRegistry {
             throw new IllegalArgumentException(String.format("%s; uppercase codes are not allowed.", code));
         }
 
-        if (TextFormatting.fromFormattingCode(code) != null) {
+        if (Formatting.byCode(code) != null) {
             throw new IllegalArgumentException(String.format("a Formatting with the code %s already exists.", code));
         }
 
-        if (TextFormatting.getValueByName(formatting.cast().getFriendlyName()) != null) {
-            throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", formatting.cast().getFriendlyName()));
+        if (Formatting.byName(formatting.cast().getName()) != null) {
+            throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", formatting.cast().getName()));
         }
 
-        var oldValues = (TextFormatting[]) values.getObject();
+        var oldValues = (Formatting[]) values.getObject();
         var valueCount = oldValues.length;
         var newValues = Arrays.copyOf(oldValues, valueCount + 1);
         newValues[valueCount] = formatting.cast();
         values.putObject(newValues);
 
-        nameMap.put(TextFormattingAccess.sanitize(formatting.cast().name()), formatting.cast());
+        nameMap.put(FormattingAccess.sanitize(formatting.cast().name()), formatting.cast());
 
-        pattern.putObject(Pattern.compile(TextFormattingAccess.pattern().toString().replace("]", code + "]")));
+        pattern.putObject(Pattern.compile(pattern.getObject().toString().replace("]", code + "]")));
 
         if (formatting.cast().isColor()) {
-            colorMap.put(formatting.cast(), ColorAccess.instantiate(formatting.cast().getColor(), formatting.cast().getFriendlyName()));
+            colorMap.put(formatting.cast(), TextColorAccess.instantiate(formatting.cast().getColorValue(), formatting.cast().getName()));
         }
 
         return formatting;

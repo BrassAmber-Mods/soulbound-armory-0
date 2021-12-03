@@ -15,7 +15,8 @@ import soulboundarmory.registry.RegistryEntry;
 import soulboundarmory.util.Util;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @SuppressWarnings("unchecked")
@@ -34,12 +35,12 @@ public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<S
         return registry;
     }
 
-    public static StorageType<?> get(ResourceLocation id) {
+    public static StorageType<?> get(Identifier id) {
         return registry().getValue(id);
     }
 
     public static StorageType<?> get(String name) {
-        return get(new ResourceLocation(name));
+        return get(new Identifier(name));
     }
 
     public static List<ItemStorage<?>> storages(Entity entity) {
@@ -56,9 +57,9 @@ public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<S
             return Optional.empty();
         }
 
-        for (var itemStack : entity.getHeldEquipment()) {
+        for (var itemStack : entity.getItemsHand()) {
             var item = itemStack.getItem();
-            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findFirst();
+            Optional storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findFirst();
 
             if (storage.isPresent()) {
                 return storage;

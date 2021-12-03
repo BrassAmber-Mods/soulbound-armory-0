@@ -33,10 +33,10 @@ public final class AttributeModifierIdentifiers {
     }
 
     public static class ItemAccess extends Item {
-        public static final UUID attackDamageModifier = ATTACK_DAMAGE_MODIFIER;
-        public static final UUID attackSpeedModifier = ATTACK_SPEED_MODIFIER;
+        public static final UUID attackDamageModifier = ATTACK_DAMAGE_MODIFIER_ID;
+        public static final UUID attackSpeedModifier = ATTACK_SPEED_MODIFIER_ID;
 
-        public ItemAccess(Properties __) {
+        public ItemAccess(Settings __) {
             super(__);
         }
     }

@@ -1,9 +1,12 @@
 package soulboundarmory.component.soulbound.player;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import soulboundarmory.component.EntityComponent;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.StorageType;
@@ -37,7 +40,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     }
 
     public ItemStorage<?> heldItemStorage() {
-        for (var itemStack : this.entity.getHeldEquipment()) {
+        for (var itemStack : this.entity.getItemsHand()) {
             for (var component : this.storages.values()) {
                 if (itemStack.getItem() == component.item()) {
                     return component;
@@ -95,13 +98,13 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
                             }
 
                             var tag = newItemStack.getTag();
-                            newItemStack.setDisplayName(stack.getDisplayName());
+                            newItemStack.setCustomName(stack.getName());
 
                             if (tag != null && !tag.equals(stack.getTag())) {
-                                inventory.setInventorySlotContents(firstSlot, newItemStack);
+                                inventory.setStack(firstSlot, newItemStack);
                             }
                         } else if (!(this.entity.isCreative() || index == firstSlot && firstSlot == -1)) {
-                            inventory.deleteStack(stack);
+                            inventory.removeOne(stack);
                         }
                     }
                 }
@@ -114,7 +117,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     }
 
     @Override
-    public void serialize(CompoundNBT tag) {
+    public void serialize(NbtCompound tag) {
         if (this.currentItem != null) {
             tag.putString("storage", this.currentItem.type().id().toString());
         }
@@ -125,7 +128,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
     }
 
     @Override
-    public void deserialize(CompoundNBT tag) {
+    public void deserialize(NbtCompound tag) {
         var type = StorageType.get(tag.getString("storage"));
 
         if (type != null) {

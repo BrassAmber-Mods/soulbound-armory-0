@@ -1,11 +1,11 @@
 package cell;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class Cell {
     public static final String ID = "cell";
 
-    public static ResourceLocation id(String path) {
-        return new ResourceLocation(ID, path);
+    public static Identifier id(String path) {
+        return new Identifier(ID, path);
     }
 }

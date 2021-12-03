@@ -1,7 +1,7 @@
 package soulboundarmory.client.keyboard;
 
+import net.minecraft.client.option.KeyBinding;
 import soulboundarmory.SoulboundArmory;
-import net.minecraft.client.settings.KeyBinding;
 
 public abstract class KeyBindingBase extends KeyBinding {
     public KeyBindingBase(String name, int key) {
@@ -10,7 +10,7 @@ public abstract class KeyBindingBase extends KeyBinding {
 
     @Override
     public void setPressed(boolean pressed) {
-        if (pressed && !super.isPressed()) {
+        if (pressed && !super.wasPressed()) {
             this.press();
         }
 

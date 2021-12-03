@@ -3,12 +3,12 @@ package soulboundarmory.component.statistics;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Iterator;
 import java.util.function.Predicate;
-import soulboundarmory.serial.CompoundSerializable;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
+import soulboundarmory.serial.CompoundSerializable;
 
 public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, Integer> implements Iterable<Enchantment>, CompoundSerializable {
     public EnchantmentStorage(Predicate<Enchantment> predicate) {
@@ -33,14 +33,12 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
-        var registry = ForgeRegistries.ENCHANTMENTS;
-
+    public void serializeNBT(NbtCompound tag) {
         for (var enchantment : this) {
             var level = this.get(enchantment);
 
             if (level != null) {
-                var identifier = registry.getKey(enchantment);
+                var identifier = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
 
                 if (identifier != null) {
                     tag.putInt(identifier.toString(), this.get(enchantment));
@@ -50,11 +48,9 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        var registry = Registry.ENCHANTMENT;
-
-        for (var key : nbt.keySet()) {
-            var enchantment = registry.getOrDefault(new ResourceLocation(key));
+    public void deserializeNBT(NbtCompound nbt) {
+        for (var key : nbt.getKeys()) {
+            var enchantment = Registry.ENCHANTMENT.get(new Identifier(key));
 
             if (this.containsKey(enchantment)) {
                 this.put(enchantment, nbt.getInt(key));

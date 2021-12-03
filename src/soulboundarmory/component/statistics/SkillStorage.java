@@ -1,11 +1,11 @@
 package soulboundarmory.component.statistics;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import soulboundarmory.serial.CompoundSerializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
 
 public class SkillStorage extends Object2ObjectLinkedOpenHashMap<Skill, SkillContainer> implements CompoundSerializable {
     public SkillStorage(Skill... skills) {
@@ -38,7 +38,7 @@ public class SkillStorage extends Object2ObjectLinkedOpenHashMap<Skill, SkillCon
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         for (var skill : this.values()) {
             if (skill != null) {
                 tag.put(skill.skill().getRegistryName().toString(), skill.serializeNBT());
@@ -47,9 +47,9 @@ public class SkillStorage extends Object2ObjectLinkedOpenHashMap<Skill, SkillCon
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
-        for (var identifier : tag.keySet()) {
-            var skill = this.get(Skill.registry.getValue(new ResourceLocation(identifier)));
+    public void deserializeNBT(NbtCompound tag) {
+        for (var identifier : tag.getKeys()) {
+            var skill = this.get(Skill.registry.getValue(new Identifier(identifier)));
 
             if (skill != null) {
                 skill.deserializeNBT(tag.getCompound(identifier));

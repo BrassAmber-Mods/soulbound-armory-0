@@ -7,7 +7,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public class S2CItemType extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        this.player().inventory.removeStackFromSlot(this.player().inventory.currentItem);
+        this.player().inventory.removeStack(this.player().inventory.selectedSlot);
         storage.removeOtherItems();
         storage.unlocked(true);
 

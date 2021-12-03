@@ -1,23 +1,23 @@
 package cell.client.gui;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.IRenderable;
-import net.minecraft.client.renderer.texture.ITickable;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.text.CharacterManager;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextHandler;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.texture.TextureTickListener;
+import net.minecraft.resource.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public interface DrawableElement extends IRenderable, IGuiEventListener, ITickable {
-    Minecraft client = Minecraft.getInstance();
-    FontRenderer textRenderer = client.fontRenderer;
-    TextureManager textureManager = client.textureManager;
-    CharacterManager textHandler = textRenderer.getCharacterManager();
-    IResourceManager resourceManager = client.getResourceManager();
+public interface DrawableElement extends Drawable, Element, TextureTickListener {
+    MinecraftClient minecraft = MinecraftClient.getInstance();
+    TextRenderer textDrawer = minecraft.textRenderer;
+    TextureManager textureManager = minecraft.textureManager;
+    TextHandler textHandler = textDrawer.getTextHandler();
+    ResourceManager resourceManager = minecraft.getResourceManager();
 
     @Override
     default void tick() {}

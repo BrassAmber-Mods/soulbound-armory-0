@@ -7,7 +7,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public class C2SAttribute extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        storage.incrementPoints(StatisticType.registry.getValue(this.message.readResourceLocation()), this.message.readInt());
+        storage.incrementPoints(StatisticType.registry.getValue(this.message.readIdentifier()), this.message.readInt());
         storage.refresh();
     }
 }

@@ -4,13 +4,13 @@ import java.util.Objects;
 import java.util.function.Function;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -69,7 +69,7 @@ public class CommonEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         var player = event.getPlayer();
 
-        if (!player.world.isRemote) {
+        if (!player.world.isClient) {
             Components.soulbound(player).map(SoulboundComponent::storage).filter(Objects::nonNull).forEach(ItemStorage::sync);
         }
     }
@@ -84,9 +84,9 @@ public class CommonEvents {
                     var drops = event.getDrops();
 
                     for (var item : drops) {
-                        var itemStack = item.getItem();
+                        var itemStack = item.getStack();
 
-                        if (storage.itemClass().isInstance(itemStack.getItem()) && player.addItemStackToInventory(itemStack)) {
+                        if (storage.itemClass().isInstance(itemStack.getItem()) && player.giveItemStack(itemStack)) {
                             drops.remove(item);
                         }
                     }
@@ -109,7 +109,7 @@ public class CommonEvents {
                 var storage = currentComponent.storage();
 
                 if (storage != null && storage.datum(StatisticType.level) >= Configuration.instance().preservationLevel) {
-                    player.addItemStackToInventory(storage.stack());
+                    player.giveItemStack(storage.stack());
                 }
             }
         }
@@ -139,13 +139,13 @@ public class CommonEvents {
     @SubscribeEvent
     public static void onBlockDrop(BlockEvent.BreakEvent event) {
         var player = event.getPlayer();
-        var tool = player.getHeldItemMainhand();
+        var tool = player.getMainHandStack();
 
         if (tool.getItem() == SoulboundItems.pick && Components.tool.of(player).storage().hasSkill(Skills.enderPull)) {
             event.setCanceled(true);
             event.getWorld().removeBlock(event.getPos(), false);
 
-            Block.spawnDrops(event.getState(), event.getWorld(), player.getPosition(), null);
+            Block.dropStacks(event.getState(), event.getWorld(), player.getBlockPos(), null);
         }
     }
 
@@ -167,16 +167,16 @@ public class CommonEvents {
     public static void damage(LivingDamageEvent event) {
         var entity = event.getEntity();
 
-        if (entity instanceof PlayerEntity && !entity.world.isRemote && Components.weapon.of(entity).storage(StorageType.greatsword).leapForce() > 0) {
+        if (entity instanceof PlayerEntity && !entity.world.isClient && Components.weapon.of(entity).storage(StorageType.greatsword).leapForce() > 0) {
             var damageSource = event.getSource();
 
-            if (!damageSource.isExplosion() && !damageSource.isProjectile()) {
+            if (!damageSource.isExplosive() && !damageSource.isProjectile()) {
                 event.setCanceled(true);
             }
         }
 
-        if (entity instanceof PlayerEntity player && !player.world.isRemote) {
-            var source = event.getSource().getImmediateSource();
+        if (entity instanceof PlayerEntity player && !player.world.isClient) {
+            var source = event.getSource().getSource();
             var instance = Components.weapon.of(player);
             ItemStorage<?> storage;
 
@@ -193,7 +193,7 @@ public class CommonEvents {
             }
 
             if (storage != null) {
-                var random = player.world.rand;
+                var random = player.world.random;
                 var attackDamage = storage.attribute(StatisticType.criticalStrikeRate) > random.nextDouble() ? 2 * event.getAmount() : event.getAmount();
 
                 if (storage.hasSkill(Skills.nourishment)) {
@@ -201,7 +201,7 @@ public class CommonEvents {
                     var saturation = (1 + leeching.level()) * attackDamage / 20F;
                     var food = random.nextInt((int) Math.ceil(saturation) + 1);
 
-                    player.getFoodStats().addStats(food, 2 * saturation);
+                    player.getHungerManager().add(food, 2 * saturation);
                 }
 
                 event.setAmount(attackDamage);
@@ -212,31 +212,31 @@ public class CommonEvents {
     @SubscribeEvent
     public static void death(LivingDeathEvent event) {
         var entity = event.getEntityLiving();
-        var attacker = event.getSource().getTrueSource();
+        var attacker = event.getSource().getAttacker();
 
         if (attacker == null) {
-            attacker = entity.getCombatTracker().getBestAttacker();
-        } else if (attacker != entity.getCombatTracker().getBestAttacker()) {
+            attacker = entity.getDamageTracker().getBiggestAttacker();
+        } else if (attacker != entity.getDamageTracker().getBiggestAttacker()) {
             throw new RuntimeException();
         }
 
-        if (attacker instanceof PlayerEntity player && !player.world.isRemote) {
-            var damageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (attacker instanceof PlayerEntity player && !player.world.isClient) {
+            var damageAttribute = entity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
             var damage = damageAttribute == null ? 0 : damageAttribute.getValue();
-            var immediateSource = event.getSource().getImmediateSource();
+            var immediateSource = event.getSource().getSource();
             var component = Components.weapon.of(player);
             ItemStorage<?> storage;
-            ITextComponent displayName;
+            Text displayName;
 
             if (immediateSource instanceof SoulboundDaggerEntity dagger) {
                 storage = component.storage(StorageType.dagger);
-                displayName = dagger.itemStack.getDisplayName();
+                displayName = dagger.itemStack.getName();
             } else if (immediateSource instanceof SoulboundLightningEntity) {
                 storage = component.storage(StorageType.sword);
-                displayName = ItemUtil.equippedStack(player, SoulboundItems.sword).getDisplayName();
+                displayName = ItemUtil.equippedStack(player, SoulboundItems.sword).getName();
             } else {
                 storage = component.storage();
-                displayName = player.getHeldItemMainhand().getDisplayName();
+                displayName = player.getMainHandStack().getName();
             }
 
             if (storage != null) {
@@ -244,7 +244,7 @@ public class CommonEvents {
 
                 var xp = entity.getMaxHealth()
                     * player.world.getDifficulty().getId() * configuration.difficultyMultiplier
-                    * (1 + entity.getAttributeValue(Attributes.ARMOR) * configuration.armorMultiplier);
+                    * (1 + entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR) * configuration.armorMultiplier);
 
                 xp *= damage <= 0 ? configuration.passiveMultiplier : 1 + damage * configuration.attackDamageMultiplier;
 
@@ -256,12 +256,12 @@ public class CommonEvents {
                     xp *= configuration.hardcoreMultiplier;
                 }
 
-                if (damage > 0 && entity.isChild()) {
+                if (damage > 0 && entity.isBaby()) {
                     xp *= configuration.babyMultiplier;
                 }
 
                 if (storage.incrementStatistic(StatisticType.experience, Math.round(xp)) && Components.config.of(player).levelupNotifications) {
-                    player.sendStatusMessage(Translations.messageLevelUp.format(displayName, storage.datum(StatisticType.level)), true);
+                    player.sendMessage(Translations.messageLevelUp.format(displayName, storage.datum(StatisticType.level)), true);
                 }
             }
         }
@@ -271,7 +271,7 @@ public class CommonEvents {
     public static void fall(LivingFallEvent event) {
         var fallen = event.getEntity();
 
-        if (!fallen.world.isRemote && fallen instanceof PlayerEntity player) {
+        if (!fallen.world.isClient && fallen instanceof PlayerEntity player) {
             var component = Components.weapon.of(player);
             var storage = component.storage(StorageType.greatsword);
             var leapForce = storage.leapForce();
@@ -280,15 +280,15 @@ public class CommonEvents {
                 if (storage.hasSkill(Skills.freezing)) {
                     var radiusXZ = Math.min(4, event.getDistance());
                     var radiusY = Math.min(2, 0.5F * event.getDistance());
-                    var nearbyEntities = player.world.getEntitiesWithinAABBExcludingEntity(player, new AxisAlignedBB(
-                        player.getPosX() - radiusXZ, player.getPosY() - radiusY, player.getPosZ() - radiusXZ,
-                        player.getPosX() + radiusXZ, player.getPosY() + radiusY, player.getPosZ() + radiusXZ
+                    var nearbyEntities = player.world.getOtherEntities(player, new Box(
+                        player.getX() - radiusXZ, player.getY() - radiusY, player.getZ() - radiusXZ,
+                        player.getX() + radiusXZ, player.getY() + radiusY, player.getZ() + radiusXZ
                     ));
 
                     var froze = false;
 
                     for (var entity : nearbyEntities) {
-                        if (entity.getDistanceSq(entity) <= radiusXZ * radiusXZ) {
+                        if (entity.squaredDistanceTo(entity) <= radiusXZ * radiusXZ) {
                             storage.freeze(entity, (int) Math.min(60, 12 * event.getDistance()), 0.4F * event.getDistance());
                             froze = true;
                         }
@@ -302,16 +302,16 @@ public class CommonEvents {
                             var z = Math.sqrt((radiusXZ * radiusXZ - x * x));
                             var particles = 1;
 
-                            world.spawnParticle(ParticleTypes.ITEM_SNOWBALL,
-                                player.getPosX() + x,
-                                player.getEyeHeight(),
-                                player.getPosZ() + z,
+                            world.spawnParticles(ParticleTypes.ITEM_SNOWBALL,
+                                player.getX() + x,
+                                player.getEyeY(),
+                                player.getZ() + z,
                                 particles, 0, 0, 0, 0D
                             );
-                            world.spawnParticle(ParticleTypes.ITEM_SNOWBALL,
-                                player.getPosX() + x,
-                                player.getEyeHeight(),
-                                player.getPosZ() - z,
+                            world.spawnParticles(ParticleTypes.ITEM_SNOWBALL,
+                                player.getX() + x,
+                                player.getEyeY(),
+                                player.getZ() - z,
                                 particles, 0, 0, 0, 0D
                             );
                         }
@@ -321,9 +321,7 @@ public class CommonEvents {
                 if (event.getDistance() <= 16 * leapForce) {
                     event.setCanceled(true);
                 } else {
-                    var multiplier = event.getDistance() / (float) (Math.max(1, Math.log(4 * leapForce) / Math.log(2)));
-
-                    event.setDamageMultiplier(multiplier);
+                    event.setDamageMultiplier(event.getDistance() / (float) (Math.max(1, Math.log(4 * leapForce) / Math.log(2))));
                 }
 
                 storage.leapDuration(4);

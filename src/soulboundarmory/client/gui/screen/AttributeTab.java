@@ -1,7 +1,9 @@
 package soulboundarmory.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.List;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.component.statistics.Statistic;
@@ -9,8 +11,6 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 
 import static soulboundarmory.component.statistics.Category.attribute;
 
@@ -34,8 +34,8 @@ public class AttributeTab extends SoulboundTab {
 
         for (var index = 0; index < size; index++) {
             var attribute = this.attributes.get(index).statistic;
-            var add = this.add(this.squareButton((this.width + 182) / 2, start + index * this.height / 16 + 4, new StringTextComponent("+"), this.addPointAction(attribute)));
-            var remove = this.add(this.squareButton((this.width + 182) / 2 - 20, start + index * this.height / 16 + 4, new StringTextComponent("-"), this.removePointAction(attribute)));
+            var add = this.add(this.squareButton((this.width + 182) / 2, start + index * this.height / 16 + 4, Text.of("+"), this.addPointAction(attribute)));
+            var remove = this.add(this.squareButton((this.width + 182) / 2 - 20, start + index * this.height / 16 + 4, Text.of("-"), this.removePointAction(attribute)));
 
             remove.active = attribute.aboveMin();
             add.active = this.parent.storage.datum(StatisticType.attributePoints) > 0 && attribute.belowMax();
@@ -49,7 +49,7 @@ public class AttributeTab extends SoulboundTab {
         var points = this.parent.storage.datum(StatisticType.attributePoints);
 
         if (points > 0) {
-            drawCenteredString(matrices, this.font, String.format("%s: %s", Translations.menuUnspentPoints, points), Math.round(this.width / 2F), 4, 0xFFFFFF);
+            drawCenteredText(matrices, this.textRenderer, String.format("%s: %s", Translations.menuUnspentPoints, points), Math.round(this.width / 2F), 4, 0xFFFFFF);
         }
 
         for (int row = 0, size = this.attributes.size(); row < size; row++) {
@@ -57,20 +57,20 @@ public class AttributeTab extends SoulboundTab {
         }
     }
 
-    public void drawAttribute(MatrixStack stack, ITextComponent format, int row, int rows) {
-        this.font.func_243246_a(stack, format, (this.width - 182) / 2F, this.height(rows, row), 0xFFFFFF);
+    public void drawAttribute(MatrixStack stack, Text format, int row, int rows) {
+        this.textRenderer.drawWithShadow(stack, format, (this.width - 182) / 2F, this.height(rows, row), 0xFFFFFF);
     }
 
     protected PressCallback<ScalableWidget> addPointAction(Statistic statistic) {
         return button -> Packets.serverAttribute.send(new ExtendedPacketBuffer(this.parent.storage)
-            .writeResourceLocation(statistic.type().id())
+            .writeIdentifier(statistic.type().id())
             .writeInt(hasShiftDown() ? this.parent.storage.datum(StatisticType.attributePoints) : 1)
         );
     }
 
     protected PressCallback<ScalableWidget> removePointAction(Statistic statistic) {
         return button -> Packets.serverAttribute.send(new ExtendedPacketBuffer(this.parent.storage)
-            .writeResourceLocation(statistic.type().id())
+            .writeIdentifier(statistic.type().id())
             .writeInt(hasShiftDown() ? -statistic.points() : -1)
         );
     }

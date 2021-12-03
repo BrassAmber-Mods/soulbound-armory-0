@@ -1,8 +1,8 @@
 package soulboundarmory.text;
 
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.text.TranslatableText;
 
-public class Translation extends TranslationTextComponent {
+public class Translation extends TranslatableText {
     public Translation(String key) {
         super(key);
     }

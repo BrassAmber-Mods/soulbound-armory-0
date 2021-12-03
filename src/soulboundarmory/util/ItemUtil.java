@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.collection.DefaultedList;
 
 public class ItemUtil {
     public static List<ItemStack> inventory(PlayerEntity player) {
@@ -20,19 +20,19 @@ public class ItemUtil {
     }
 
     public static Stream<ItemStack> inventoryStream(PlayerEntity player) {
-        return ((PlayerInventoryAccess) player.inventory).compartments().stream().flatMap(NonNullList::stream);
+        return ((PlayerInventoryAccess) player.inventory).compartments().stream().flatMap(DefaultedList::stream);
     }
 
     public static List<Item> handItems(LivingEntity entity) {
-        return Arrays.asList(entity.getHeldItemMainhand().getItem(), entity.getHeldItemOffhand().getItem());
+        return Arrays.asList(entity.getMainHandStack().getItem(), entity.getOffHandStack().getItem());
     }
 
     public static Stream<ItemStack> handStacks(LivingEntity entity) {
-        return StreamSupport.stream(entity.getHeldEquipment().spliterator(), false);
+        return StreamSupport.stream(entity.getItemsHand().spliterator(), false);
     }
 
     public static Stream<ItemStack> handStacks(PlayerInventory inventory) {
-        return Stream.of(inventory.getCurrentItem(), inventory.offHandInventory.get(0));
+        return Stream.of(inventory.getMainHandStack(), inventory.offHand.get(0));
     }
 
     public static ItemStack equippedStack(PlayerEntity player, Item... validItems) {
@@ -44,10 +44,10 @@ public class ItemUtil {
     }
 
     public static ItemStack getRequiredItemStack(PlayerEntity player, Class<?>... types) {
-        var itemStack = player.getHeldItemMainhand();
+        var itemStack = player.getMainHandStack();
         var item = itemStack.getItem();
 
-        for (var type : types) {
+        for (Class type : types) {
             if (type.isInstance(item)) {
                 return itemStack;
             }
@@ -57,8 +57,8 @@ public class ItemUtil {
     }
 
     public static int matchingSlot(PlayerInventory inventory, ItemStack itemStack) {
-        return IntStream.range(0, inventory.mainInventory.size())
-            .filter(slot -> !inventory.mainInventory.get(slot).isEmpty() && ItemStack.areItemsEqualIgnoreDurability(itemStack, inventory.mainInventory.get(slot)))
+        return IntStream.range(0, inventory.main.size())
+            .filter(slot -> !inventory.main.get(slot).isEmpty() && ItemStack.areItemsEqual(itemStack, inventory.main.get(slot)))
             .findFirst()
             .orElse(-1);
     }

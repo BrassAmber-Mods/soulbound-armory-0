@@ -5,36 +5,36 @@ import soulboundarmory.util.MathUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.world.World;
 
-public abstract class ExtendedProjectile extends AbstractArrowEntity {
-    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, double x, double y, double z, World world) {
+public abstract class ExtendedProjectile extends PersistentProjectileEntity {
+    protected ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, double x, double y, double z, World world) {
         super(type, x, y, z, world);
     }
 
-    protected ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, LivingEntity owner, World world) {
+    protected ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, LivingEntity owner, World world) {
         super(type, owner, world);
     }
 
-    public ExtendedProjectile(EntityType<? extends AbstractArrowEntity> type, World world) {
+    public ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, World world) {
         super(type, world);
     }
 
-    public ExtendedProjectile(World world, EntityType<? extends AbstractArrowEntity> type, double x, double y, double z) {
+    public ExtendedProjectile(World world, EntityType<? extends PersistentProjectileEntity> type, double x, double y, double z) {
         super(type, x, y, z, world);
     }
 
     public double displacement(Entity entity) {
-        return this.displacement(entity.getPosX(), entity.getPosY(), entity.getPosZ());
+        return this.displacement(entity.getX(), entity.getY(), entity.getZ());
     }
 
     public double displacement(double x, double y, double z) {
-        return this.distance(x, y, z) * MathUtil.signum(x - this.getPosX(), y - this.getPosY(), z - this.getPosZ());
+        return this.distance(x, y, z) * MathUtil.signum(x - this.getX(), y - this.getY(), z - this.getZ());
     }
 
     public double distance(double x, double y, double z) {
-        return Math.sqrt(this.getDistanceSq(x, y, z));
+        return Math.sqrt(this.squaredDistanceTo(x, y, z));
     }
 
     public double getSpeed() {
@@ -46,15 +46,15 @@ public abstract class ExtendedProjectile extends AbstractArrowEntity {
     }
 
     public double velocityX() {
-        return this.getMotion().x;
+        return this.getVelocity().x;
     }
 
     public double velocityY() {
-        return this.getMotion().y;
+        return this.getVelocity().y;
     }
 
     public double velocityZ() {
-        return this.getMotion().z;
+        return this.getVelocity().z;
     }
 
     public double getVelocityD() {

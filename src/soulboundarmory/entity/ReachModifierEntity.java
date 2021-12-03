@@ -13,7 +13,7 @@ public class ReachModifierEntity {
     }
 
     public ReachModifierEntity(World world, LivingEntity shooter, float reachDistance) {
-        this(world, shooter.getPosX(), shooter.getEyeY() - 0.1, shooter.getPosZ());
+        this(world, shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ());
 
         this.world = world;
         this.ownerUuid = shooter.getUniqueID();
@@ -29,7 +29,7 @@ public class ReachModifierEntity {
     public void tick() {
          Vector3d pos = this.getPos();
 
-        Vector3d newPos = new Vector3d(this.getPosX() + this.motionX, this.getPosY() + this.motionY, this.getPosZ() + this.velocityZ());
+        Vector3d newPos = new Vector3d(this.getX() + this.motionX, this.getY() + this.motionY, this.getZ() + this.velocityZ());
         RayTraceContext rayTraceResult = this.world.rayTraceBlocks(pos, newPos, false, true, false);
 
         if (rayTraceResult != null) {
@@ -54,13 +54,13 @@ public class ReachModifierEntity {
             this.onHit(rayTraceResult);
         }
 
-        this.setPosition(this.getPosX(), this.getPosY(), this.getPosZ());
+        this.setPosition(this.getX(), this.getY(), this.getZ());
         this.doBlockCollisions();
     }
 
     @Override
     protected void onHit(HitResult result) {
-        if (!this.world.isRemote && result.entityHit != owner && owner instanceof PlayerEntity) {
+        if (!this.world.isClient && result.entityHit != owner && owner instanceof PlayerEntity) {
              Entity target = result.entityHit;
              PlayerEntity player = (PlayerEntity) owner;
              IWeaponComponent component = WeaponProvider.get(player);
@@ -69,10 +69,10 @@ public class ReachModifierEntity {
                 if (this.distanceToHit(result) <= this.reachDistance * this.reachDistance
                     && ForgeHooks.onPlayerAttackTarget(player, target) && target.canBeAttackedWithItem() && !target.hitByEntity(player)) {
 
-                    float attackDamageModifier = (float) player.getAttribute(Attributes.GENERIC_ATTACK_DAMAGE).getAttributeValue();
+                    float attackDamageModifier = (float) player.getAttribute(EntityAttributes.GENERIC_ATTACK_DAMAGE).getAttributeValue();
                     float attackDamageRatio = target instanceof LivingEntity
-                        ? EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), ((LivingEntity) target).getCreatureAttribute())
-                        : EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), EnumCreatureAttribute.UNDEFINED);
+                        ? EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), ((LivingEntity) target).getEntityGroup())
+                        : EnchantmentHelper.getModifierForCreature(player.getMainHandStack(), EnumEntityGroup.UNDEFINED);
 
                      double cooldownRatio = component.getAttackRatio(component.getItemType());
                     attackDamageModifier *= 0.2 + cooldownRatio * cooldownRatio * 0.8;
@@ -84,7 +84,7 @@ public class ReachModifierEntity {
                         int knockbackModifier = EnchantmentHelper.getKnockbackModifier(player);
 
                         if (knockback) {
-                            player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, player.getSoundCategory(), 1, 1);
+                            player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, player.getSoundCategory(), 1, 1);
                             knockbackModifier++;
                         }
 
@@ -119,7 +119,7 @@ public class ReachModifierEntity {
                          double motionY = target.motionY;
                          double velocityZ() = target.velocityZ();
 
-                        if (target.attackEntityFrom(DamageSource.causePlayerDamage(player), attackDamageModifier)) {
+                        if (target.damage(DamageSource.player(player), attackDamageModifier)) {
                             if (knockbackModifier > 0) {
                                 if (target instanceof LivingEntity) {
                                     ((LivingEntity) target).knockBack(player, knockbackModifier * 0.5F, MathHelper.sin(player.yaw * 0.017453292F), -MathHelper.cos(player.yaw * 0.017453292F));
@@ -136,13 +136,13 @@ public class ReachModifierEntity {
                                 float attackDamage = 1.0F + EnchantmentHelper.getSweepingDamageRatio(player) * attackDamageModifier;
 
                                 for (LivingEntity entity : player.world.getEntitiesWithinAABB(LivingEntity.class, target.getEntityBoundingBox())) {
-                                    if (entity != player && entity != target && !player.isOnSameTeam(entity) && player.getDistanceSq(entity) < this.reachDistance * this.reachDistance) {
+                                    if (entity != player && entity != target && !player.isOnSameTeam(entity) && player.distanceToSq(entity) < this.reachDistance * this.reachDistance) {
                                         entity.knockBack(player, 0.4F, MathHelper.sin(player.yaw * 0.017453292F), -MathHelper.cos(player.yaw * 0.017453292F));
-                                        entity.attackEntityFrom(DamageSource.causePlayerDamage(player), attackDamage);
+                                        entity.damage(DamageSource.player(player), attackDamage);
                                     }
                                 }
 
-                                player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1, 1);
+                                player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1, 1);
                                 player.spawnSweepParticles();
                             }
 
@@ -155,15 +155,15 @@ public class ReachModifierEntity {
                             }
 
                             if (critical) {
-                                player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, player.getSoundCategory(), 1, 1);
-                                player.onCriticalHit(target);
+                                player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, player.getSoundCategory(), 1, 1);
+                                player.addCritParticles(target);
                             }
 
                             if (!critical && !sweep) {
                                 if (strong) {
-                                    player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, player.getSoundCategory(), 1, 1);
+                                    player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, player.getSoundCategory(), 1, 1);
                                 } else {
-                                    player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, player.getSoundCategory(), 1, 1);
+                                    player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, player.getSoundCategory(), 1, 1);
                                 }
                             }
 
@@ -174,7 +174,7 @@ public class ReachModifierEntity {
                             player.setLastAttackedEntity(target);
 
                             if (target instanceof LivingEntity) {
-                                EnchantmentHelper.applyThornEnchantments((LivingEntity) target, player);
+                                EnchantmentHelper.onTargetDamaged((LivingEntity) target, player);
                             }
 
                             EnchantmentHelper.applyArthropodEnchantments(player, target);
@@ -189,13 +189,13 @@ public class ReachModifierEntity {
 
                                 if (player.world instanceof WorldServer && damageDealt > 2.0F) {
                                     int k = (int) ((double) damageDealt * 0.5D);
-                                    ((WorldServer) player.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, target.getPosX(), target.getPosY() + (double) (target.height * 0.5F), target.getPosZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
+                                    ((WorldServer) player.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY() + (double) (target.height * 0.5F), target.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
                                 }
                             }
 
                             player.addExhaustion(0.1F);
                         } else {
-                            player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, player.getSoundCategory(), 1.0F, 1.0F);
+                            player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, player.getSoundCategory(), 1.0F, 1.0F);
 
                             if (burn) {
                                 target.extinguish();
@@ -220,7 +220,7 @@ public class ReachModifierEntity {
     private double distanceToHit(HitResult rayTraceResult) {
          Vector3d pos = rayTraceResult.hitVec;
 
-        return Math.pow(pos.x - this.getPosX(), 2) + Math.pow(pos.y - this.getPosY(), 2) + Math.pow(pos.z - this.getPosZ(), 2);
+        return Math.pow(pos.x - this.getX(), 2) + Math.pow(pos.y - this.getY(), 2) + Math.pow(pos.z - this.getZ(), 2);
     }
 */
 }

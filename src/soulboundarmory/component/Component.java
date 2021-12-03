@@ -1,17 +1,17 @@
 package soulboundarmory.component;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NbtCompound;
 
 public interface Component {
-    void serialize(CompoundNBT tag);
+    void serialize(NbtCompound tag);
 
     /**
      Invoked only if this component has been previously serialized with the entity to which it belongs.
      */
-    void deserialize(CompoundNBT tag);
+    void deserialize(NbtCompound tag);
 
-    default CompoundNBT serialize() {
-        var tag = new CompoundNBT();
+    default NbtCompound serialize() {
+        var tag = new NbtCompound();
         this.serialize(tag);
 
         return tag;

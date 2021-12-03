@@ -3,6 +3,7 @@ package soulboundarmory.component.soulbound.item.tool;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -18,13 +19,13 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.entity.SAAttributes;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.text.Translation;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
 
 import static net.minecraft.enchantment.Enchantments.MENDING;
@@ -43,9 +44,9 @@ public class PickStorage extends ToolStorage<PickStorage> {
             .build();
 
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getDisplayName(1).getString().toLowerCase();
+            var name = enchantment.getName(1).getString().toLowerCase();
 
-            return enchantment.canApply(this.itemStack)
+            return enchantment.isAcceptableItem(this.itemStack)
                 && !Arrays.asList(UNBREAKING, VANISHING_CURSE, MENDING).contains(enchantment)
                 && !Stream.of("soulbound", "holding", "smelt").map(name::contains).reduce(false, (contains, value) -> value || contains);
         });
@@ -54,12 +55,12 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public Item getConsumableItem() {
+    public Item consumableItem() {
         return Items.WOODEN_PICKAXE;
     }
 
     @Override
-    public ITextComponent getName() {
+    public Text name() {
         return Translations.soulboundPick;
     }
 
@@ -69,11 +70,11 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> attributeModifiers(EquipmentSlotType slot) {
-        var modifiers = HashMultimap.<Attribute, AttributeModifier>create();
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
+        HashMultimap modifiers = HashMultimap.<EntityAttribute, EntityAttributeModifier>create();
 
-        if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(StatisticType.reach), AttributeModifier.Operation.ADDITION));
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(StatisticType.reach), EntityAttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;
@@ -89,15 +90,15 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public List<ITextComponent> tooltip() {
+    public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
 
         return List.of(
             new Translation(" %s%s %s", Translations.reachFormat, format.format(this.attribute(StatisticType.reach)), Translations.attackRangeName),
             new Translation(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(StatisticType.efficiency)), Translations.toolEfficiencyName),
             new Translation(" %s%s %s", Translations.miningLevelFormat, format.format(this.attribute(StatisticType.miningLevel)), Translations.miningLevelName),
-            StringTextComponent.EMPTY,
-            StringTextComponent.EMPTY
+            LiteralText.EMPTY,
+            LiteralText.EMPTY
         );
     }
 

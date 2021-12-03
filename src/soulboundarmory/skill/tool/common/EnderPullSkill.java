@@ -1,15 +1,15 @@
 package soulboundarmory.skill.tool.common;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import cell.client.gui.screen.CellScreen;
 import soulboundarmory.skill.Skill;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class EnderPullSkill extends Skill {
-    public EnderPullSkill(ResourceLocation identifier) {
+    public EnderPullSkill(Identifier identifier) {
         super(identifier);
     }
 
@@ -21,6 +21,6 @@ public class EnderPullSkill extends Skill {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
-        screen.renderGuiItem(Items.ENDER_PEARL.getDefaultInstance(), x, y, zOffset);
+        screen.renderGuiItem(Items.ENDER_PEARL.getDefaultStack(), x, y, zOffset);
     }
 }
