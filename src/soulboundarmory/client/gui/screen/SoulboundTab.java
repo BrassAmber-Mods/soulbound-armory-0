@@ -22,7 +22,7 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     public void open(int width, int height) {
-        this.init(this.client, width, height);
+        this.init(minecraft, width, height);
     }
 
     @Override
