@@ -8,7 +8,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public class C2SEnchant extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(this.message.readResourceLocation());
+        var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(this.message.readIdentifier());
         var add = this.message.readBoolean();
         var change = add ? 1 : -1;
 

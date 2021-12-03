@@ -9,10 +9,10 @@ import soulboundarmory.registry.Skills;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 
 public class SoulboundDagger extends SoulboundMeleeWeapon {
@@ -23,7 +23,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getMaxUseTime(ItemStack stack) {
         return USE_TIME;
     }
 
@@ -37,33 +37,33 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         var component = Components.weapon.of(player).storage(StorageType.dagger);
 
-        if (!world.isRemote && component.hasSkill(Skills.throwing)) {
-            player.setActiveHand(hand);
+        if (!world.isClient && component.hasSkill(Skills.throwing)) {
+            player.setCurrentHand(hand);
 
-            return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
+            return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
         }
 
-        return new ActionResult<>(ActionResultType.FAIL, player.getHeldItem(hand));
+        return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
     }
 
     @Override
-    public void onPlayerStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
+    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
         var player = (PlayerEntity) entity;
         var component = DaggerStorage.get(player);
 
-        if (!world.isRemote) {
+        if (!world.isClient) {
             var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
             var velocity = this.getMaxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
             var maxVelocity = velocity / attackSpeed;
             var dagger = new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity);
 
-            world.addEntity(dagger);
+            world.spawnEntity(dagger);
 
             if (!player.isCreative()) {
-                player.inventory.deleteStack(itemStack);
+                player.inventory.removeOne(itemStack);
             }
         }
     }

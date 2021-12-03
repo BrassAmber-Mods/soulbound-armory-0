@@ -7,7 +7,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public class C2SSync extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
-        var tag = this.message.readCompoundTag();
+        var tag = this.message.readNbt();
 
         if (tag.contains("tab")) {
             storage.tab(tag.getInt("tab"));

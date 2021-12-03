@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.auoeke.reflect.Accessor;
-import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.CommandSource;
 
 public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
     protected final Class<T> type;
@@ -111,10 +111,7 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
         for (var name : fields.keySet()) {
             if (Pattern.compile(Pattern.quote(name), Pattern.CASE_INSENSITIVE).matcher(input).find()) {
-                try {
-                    //noinspection unchecked
-                    return Collections.singletonList((T) fields.get(name).get(null));
-                } catch (IllegalAccessException ignored) {}
+                return Collections.singletonList((T) Accessor.getObject(fields.get(name)));
             }
         }
 
@@ -123,6 +120,6 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ISuggestionProvider.suggest(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
+        return CommandSource.suggestMatching(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
     }
 }

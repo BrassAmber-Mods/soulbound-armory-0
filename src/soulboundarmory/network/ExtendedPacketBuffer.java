@@ -7,11 +7,11 @@ import java.util.UUID;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 
-public class ExtendedPacketBuffer extends PacketBuffer {
+public class ExtendedPacketBuffer extends PacketByteBuf {
     public ExtendedPacketBuffer() {
         super(Unpooled.buffer());
     }
@@ -23,7 +23,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     public ExtendedPacketBuffer(ItemStorage<?> component) {
         this();
 
-        this.writeResourceLocation(component.type().id());
+        this.writeIdentifier(component.type().id());
     }
 
     @Override
@@ -34,12 +34,12 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     @Override
-    public ResourceLocation readResourceLocation() {
-        return new ResourceLocation(this.readString());
+    public Identifier readIdentifier() {
+        return new Identifier(this.readString());
     }
 
     @Override
-    public ExtendedPacketBuffer writeResourceLocation(ResourceLocation identifier) {
+    public ExtendedPacketBuffer writeIdentifier(Identifier identifier) {
         return this.writeString(identifier.toString());
     }
 
@@ -62,8 +62,8 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     @Override
-    public ExtendedPacketBuffer writeUniqueId(UUID id) {
-        return (ExtendedPacketBuffer) super.writeUniqueId(id);
+    public ExtendedPacketBuffer writeUuid(UUID id) {
+        return (ExtendedPacketBuffer) super.writeUuid(id);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     }
 
     public ExtendedPacketBuffer writeEntity(Entity entity) {
-        return this.writeUniqueId(entity.getUniqueID());
+        return this.writeUuid(entity.getUuid());
     }
 
     //    public Entity readEntity() {
@@ -90,8 +90,8 @@ public class ExtendedPacketBuffer extends PacketBuffer {
     //    }
 
     @Override
-    public ExtendedPacketBuffer writeCompoundTag(CompoundNBT tag) {
-        super.writeCompoundTag(tag);
+    public ExtendedPacketBuffer writeNbt(NbtCompound tag) {
+        super.writeNbt(tag);
 
         return this;
     }

@@ -3,32 +3,32 @@ package soulboundarmory.client.texture;
 import java.util.Arrays;
 import cell.client.gui.CellElement;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.client.gui.bar.Style;
+import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.util.MathUtil;
 import soulboundarmory.util.Resources;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.resources.IResourceManager;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.ResourceTexture;
+import net.minecraft.resource.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ExperienceBarTexture extends SimpleTexture {
+public class ExperienceBarTexture extends ResourceTexture {
     public static final ExperienceBarTexture instance = new ExperienceBarTexture();
 
     private ExperienceBarTexture() {
         super(SoulboundArmory.id("gui/experience_bar"));
 
-        CellElement.textureManager.loadTexture(this.textureLocation, this);
+        CellElement.textureManager.registerTexture(this.location, this);
     }
 
     @Override
-    protected TextureData getTextureData(IResourceManager manager) {
-        var image = Resources.readTexture(AbstractGui.GUI_ICONS_LOCATION);
+    protected TextureData loadTextureData(ResourceManager manager) {
+        var image = Resources.readTexture(DrawableHelper.GUI_ICONS_TEXTURE);
         var raster = image.getRaster();
-        var styles = Style.styles;
-        var amount = Style.count;
+        var styles = BarStyle.styles;
+        var amount = BarStyle.count;
         var scale = image.getWidth() / 256F;
         var scaledWidth = (int) (182 * scale);
         var scaledHeight = (int) (5 * scale);
@@ -70,7 +70,7 @@ public class ExperienceBarTexture extends SimpleTexture {
                         var color = (int) (multipliers[bar] * Math.round(Math.sqrt(0.299F * pixel[0] * pixel[0] + 0.587F * pixel[1] * pixel[1] + 0.114F * pixel[2] * pixel[2])));
 
                         if (pixel[3] > 0) {
-                            nativeImage.setPixelRGBA(u, v, MathUtil.pack(color, color, color));
+                            nativeImage.setPixelColor(u, v, MathUtil.pack(color, color, color));
                         }
                     }
                 }

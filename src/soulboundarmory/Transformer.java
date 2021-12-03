@@ -5,6 +5,7 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -22,6 +23,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import soulboundarmory.text.format.ExtendedFormatting;
 import soulboundarmory.util.Util;
 
 public class Transformer implements ITransformer<ClassNode>, ITransformationService, IMixinConfigPlugin {
@@ -51,19 +53,19 @@ public class Transformer implements ITransformer<ClassNode>, ITransformationServ
     @Override
     public ClassNode transform(ClassNode type, ITransformerVotingContext context) {
         switch (type.name) {
-            case "net/minecraft/util/text/TextFormatting" -> {
+            case "net/minecraft/util/Formatting" -> {
                 type.access &= ~Opcodes.ACC_FINAL;
 
                 type.fields.forEach(field -> {
                     switch (field.name) {
-                        case "$VALUES", "code" -> field.access = field.access & ~Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC;
+                        case ExtendedFormatting.VALUES, "code" -> field.access = field.access & ~Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC;
                     }
                 });
 
                 type.methods.stream().filter(method -> method.name.equals("<init>")).forEach(method -> method.access = method.access & ~Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC);
             }
             case "soulboundarmory/text/format/ExtendedFormatting" -> {
-                type.superName = "net/minecraft/util/text/TextFormatting";
+                type.superName = "net/minecraft/util/Formatting";
 
                 type.methods.forEach(method -> {
                     switch (method.name) {
@@ -79,7 +81,7 @@ public class Transformer implements ITransformer<ClassNode>, ITransformationServ
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
                             method.visitVarInsn(Opcodes.ALOAD, 1);
-                            method.visitFieldInsn(Opcodes.GETSTATIC, type.superName, "$VALUES", "[Lnet/minecraft/util/text/TextFormatting;");
+                            method.visitFieldInsn(Opcodes.GETSTATIC, type.superName, ExtendedFormatting.VALUES, "[Lnet/minecraft/util/Formatting;");
                             method.visitInsn(Opcodes.ARRAYLENGTH);
                             IntStream.range(1, parameterTypes.length + 1).forEach(index -> method.visitVarInsn(parameterTypes[index - 1].getOpcode(Opcodes.ILOAD), index));
                             method.visitMethodInsn(Opcodes.INVOKESPECIAL, type.superName, method.name, Type.getMethodDescriptor(Type.VOID_TYPE, actualTypes), false);
@@ -96,7 +98,7 @@ public class Transformer implements ITransformer<ClassNode>, ITransformationServ
                             method.access &= ~Opcodes.ACC_NATIVE;
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
-                            method.visitFieldInsn(Opcodes.GETFIELD, type.superName, "getColor", "C");
+                            method.visitFieldInsn(Opcodes.GETFIELD, type.superName, "code", "C");
                             method.visitInsn(Opcodes.IRETURN);
                         }
                     }
@@ -116,7 +118,7 @@ public class Transformer implements ITransformer<ClassNode>, ITransformationServ
     @Nonnull
     @Override
     public Set<Target> targets() {
-        return Set.of(Target.targetClass("net.minecraft.util.text.TextFormatting"), Target.targetClass("soulboundarmory.text.format.ExtendedFormatting"));
+        return Set.of(Target.targetClass("net.minecraft.util.Formatting"), Target.targetClass("soulboundarmory.text.format.ExtendedFormatting"));
     }
 
     @Override
@@ -143,8 +145,8 @@ public class Transformer implements ITransformer<ClassNode>, ITransformationServ
     @Override
     public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
         switch (mixinClassName) {
-            case "soulboundarmory.text.format.asm.mixin.StyleMixin" -> {
-                var methodNames = Set.of(Util.mapMethod("func_240720_a_"), Util.mapMethod("func_240721_b_"), Util.mapMethod("func_240723_c_"));
+            case "soulboundarmory.mixin.mixin.text.StyleMixin" -> {
+                var methodNames = new ObjectOpenHashSet<>(new String[]{Util.mapMethod("func_240720_a_"), Util.mapMethod("func_240721_b_"), Util.mapMethod("func_240723_c_")});
 
                 for (var method : targetClass.methods) {
                     var name = method.name;
@@ -168,11 +170,11 @@ public class Transformer implements ITransformer<ClassNode>, ITransformationServ
                     }
                 }
             }
-            case "soulboundarmory.text.format.asm.mixin.ColorMixin" -> {
-                var getValue = Util.mapMethod("func_240746_a_");
+            case "soulboundarmory.mixin.mixin.text.TextColorMixin" -> {
+                var getRgb = Util.mapMethod("func_240742_a_");
 
                 for (var method : targetClass.methods) {
-                    if (getValue.equals(method.name)) {
+                    if (getRgb.equals(method.name)) {
                         var internalName = targetClassName.replace('.', '/');
                         var value = Util.mapField("field_240740_c_");
 

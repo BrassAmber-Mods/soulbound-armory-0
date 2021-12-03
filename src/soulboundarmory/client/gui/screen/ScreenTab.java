@@ -2,18 +2,18 @@ package soulboundarmory.client.gui.screen;
 
 import cell.client.gui.screen.CellScreen;
 import cell.client.gui.widget.Widget;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public abstract class ScreenTab extends CellScreen {
     public int index;
 
     protected Widget<?> button;
 
-    public ScreenTab(ITextComponent title) {
+    public ScreenTab(Text title) {
         super(title);
     }
 
-    public ITextComponent label() {
+    public Text label() {
         return this.title;
     }
 

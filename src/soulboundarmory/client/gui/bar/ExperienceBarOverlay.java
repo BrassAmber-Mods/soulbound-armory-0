@@ -1,6 +1,5 @@
 package soulboundarmory.client.gui.bar;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import java.util.Optional;
@@ -13,7 +12,8 @@ import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.ItemUtil;
-import net.minecraft.client.MainWindow;
+import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -90,7 +90,7 @@ public class ExperienceBarOverlay extends ScalableWidget {
             var style = configuration.style;
 
             if (style == null) {
-                style = Style.EXPERIENCE;
+                style = BarStyle.EXPERIENCE;
             }
 
             this.v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]);
@@ -107,21 +107,21 @@ public class ExperienceBarOverlay extends ScalableWidget {
 
             if (level > 0) {
                 var levelString = String.valueOf(level);
-                var levelX = this.middleX() - textRenderer.getStringWidth(levelString) / 2;
+                var levelX = this.middleX() - textDrawer.getWidth(levelString) / 2;
                 var levelY = this.y() - 8;
 
-                textRenderer.drawString(matrixes, levelString, levelX + 1, levelY, 0);
-                textRenderer.drawString(matrixes, levelString, levelX - 1, levelY, 0);
-                textRenderer.drawString(matrixes, levelString, levelX, levelY + 1, 0);
-                textRenderer.drawString(matrixes, levelString, levelX, levelY - 1, 0);
-                textRenderer.drawString(matrixes, levelString, levelX, levelY, color.getRGB());
+                textDrawer.draw(matrixes, levelString, levelX + 1, levelY, 0);
+                textDrawer.draw(matrixes, levelString, levelX - 1, levelY, 0);
+                textDrawer.draw(matrixes, levelString, levelX, levelY + 1, 0);
+                textDrawer.draw(matrixes, levelString, levelX, levelY - 1, 0);
+                textDrawer.draw(matrixes, levelString, levelX, levelY, color.getRGB());
             }
 
             RenderSystem.disableLighting();
         }
     }
 
-    public boolean render(MatrixStack matrixes, MainWindow window) {
+    public boolean render(MatrixStack matrixes, Window window) {
         var player = SoulboundArmoryClient.player();
         var item = ItemUtil.handItems(player).stream().filter(i -> this.update(StorageType.get(player, i))).findAny();
         item.ifPresent(stack -> this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes));
@@ -136,7 +136,7 @@ public class ExperienceBarOverlay extends ScalableWidget {
             var style = configuration.style;
 
             if (style == null) {
-                style = Style.EXPERIENCE;
+                style = BarStyle.EXPERIENCE;
             }
 
             this.x(x).y(y).v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]).render(stack);
@@ -146,14 +146,14 @@ public class ExperienceBarOverlay extends ScalableWidget {
 
             if (level > 0) {
                 var levelString = String.valueOf(level);
-                var levelX = x - textRenderer.getStringWidth(levelString) / 2;
+                var levelX = x - textDrawer.getWidth(levelString) / 2;
                 var levelY = y - 8;
 
-                textRenderer.drawString(stack, levelString, levelX + 1, levelY, 0);
-                textRenderer.drawString(stack, levelString, levelX - 1, levelY, 0);
-                textRenderer.drawString(stack, levelString, levelX, levelY + 1, 0);
-                textRenderer.drawString(stack, levelString, levelX, levelY - 1, 0);
-                textRenderer.drawString(stack, levelString, levelX, levelY, color.getRGB());
+                textDrawer.draw(stack, levelString, levelX + 1, levelY, 0);
+                textDrawer.draw(stack, levelString, levelX - 1, levelY, 0);
+                textDrawer.draw(stack, levelString, levelX, levelY + 1, 0);
+                textDrawer.draw(stack, levelString, levelX, levelY - 1, 0);
+                textDrawer.draw(stack, levelString, levelX, levelY, color.getRGB());
             }
 
             RenderSystem.disableLighting();

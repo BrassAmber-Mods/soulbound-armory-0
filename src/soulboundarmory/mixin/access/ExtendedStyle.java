@@ -2,15 +2,15 @@ package soulboundarmory.mixin.access;
 
 import java.util.Set;
 import java.util.stream.Stream;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.text.Style;
+import net.minecraft.util.Formatting;
 
 public interface ExtendedStyle {
-    Set<TextFormatting> formattings();
+    Set<Formatting> formattings();
 
-    boolean has(TextFormatting formatting);
+    boolean has(Formatting formatting);
 
-    void add(TextFormatting formatting);
+    void add(Formatting formatting);
 
     void add(Style to);
 
@@ -18,11 +18,11 @@ public interface ExtendedStyle {
         return (Style) this;
     }
 
-    default void add(Iterable<TextFormatting> formattings) {
+    default void add(Iterable<Formatting> formattings) {
         formattings.forEach(this::add);
     }
 
-    default void add(TextFormatting... formattings) {
+    default void add(Formatting... formattings) {
         Stream.of(formattings).forEach(this::add);
     }
 }

@@ -3,6 +3,7 @@ package soulboundarmory.component.soulbound.item.weapon;
 import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import soulboundarmory.SoulboundArmory;
@@ -22,14 +23,14 @@ import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.Util;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
@@ -40,18 +41,21 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
 
     public StaffStorage(SoulboundComponent component, Item item) {
         super(component, item);
+
         this.statistics = Statistics.create()
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
             .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
             .max(1, StatisticType.criticalStrikeRate).build();
-        this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getName().toLowerCase();
 
-            return enchantment.canApply(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
+        this.enchantments = new EnchantmentStorage(enchantment -> {
+            var name = enchantment.getTranslationKey().toLowerCase();
+
+            return enchantment.isAcceptableItem(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
                 && !name.contains("mending");
         });
+
         this.skills = new SkillStorage(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 
@@ -60,7 +64,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public ITextComponent getName() {
+    public Text name() {
         return Translations.soulboundStaff;
     }
 
@@ -96,10 +100,10 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> attributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
-        if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), AttributeModifier.Operation.ADDITION));
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), AttributeModifier.Operation.ADDITION));
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), EntityAttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;
@@ -115,40 +119,32 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public List<ITextComponent> tooltip() {
+    public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
         var tooltip = new ArrayList<>(List.of(
             new Translation(" %s%s %s", Translations.attackSpeedFormat, format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName),
             new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName),
-            StringTextComponent.EMPTY,
-            StringTextComponent.EMPTY
+            LiteralText.EMPTY,
+            LiteralText.EMPTY
         ));
 
         if (this.attribute(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
+            tooltip.add(Text.of(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
         }
 
         return tooltip;
     }
 
     @Override
-    public Item getConsumableItem() {
+    public Item consumableItem() {
         return SoulboundItems.staff;
     }
 
     @Override
     public double increase(StatisticType statistic, int points) {
-        if (statistic == StatisticType.attackSpeed) {
-            return 0.08;
-        }
-
-        if (statistic == StatisticType.attackDamage) {
-            return 0.2;
-        }
-
-        if (statistic == StatisticType.criticalStrikeRate) {
-            return 0.04;
-        }
+        if (statistic == StatisticType.attackSpeed) return 0.08;
+        if (statistic == StatisticType.attackDamage) return 0.2;
+        if (statistic == StatisticType.criticalStrikeRate) return 0.04;
 
         return 0;
     }
@@ -161,21 +157,21 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         super.serializeNBT(tag);
 
         tag.putInt("spell", this.spell);
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
+    public void deserializeNBT(NbtCompound tag) {
         super.deserializeNBT(tag);
 
         this.setSpell(tag.getInt("spell"));
     }
 
     @Override
-    public CompoundNBT clientTag() {
+    public NbtCompound clientTag() {
         var tag = super.clientTag();
         tag.putInt("spell", this.spell);
 

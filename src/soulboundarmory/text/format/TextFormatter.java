@@ -1,11 +1,12 @@
 package soulboundarmory.text.format;
 
-import net.minecraft.client.gui.fonts.Font;
-import net.minecraft.client.gui.fonts.IGlyph;
-import net.minecraft.client.gui.fonts.TexturedGlyph;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.Style;
-import soulboundarmory.mixin.access.FontRenderer$CharacterRendererAccess;
+import net.minecraft.client.font.FontStorage;
+import net.minecraft.client.font.Glyph;
+import net.minecraft.client.font.GlyphRenderer;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
+import soulboundarmory.mixin.access.FontRenderer$DrawerAccess;
 
 /**
  A callback for applying custom formatting on each glyph in a text styled with a custom {@link Formatting}.
@@ -29,5 +30,5 @@ public interface TextFormatter {
      @param blue          the blue component of this glyph's color.
      @param advance       the width of this character.
      */
-    void format(FontRenderer$CharacterRendererAccess drawer, Style style, int charIndex, int character, Font font, IGlyph glyph, TexturedGlyph glyphRenderer, Color color, float red, float green, float blue, float advance);
+    void format(FontRenderer$DrawerAccess drawer, Style style, int charIndex, int character, FontStorage font, Glyph glyph, GlyphRenderer glyphRenderer, TextColor color, float red, float green, float blue, float advance);
 }

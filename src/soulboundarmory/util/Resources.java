@@ -9,9 +9,9 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import cell.client.gui.CellElement;
 import net.gudenau.lib.unsafe.Unsafe;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.resource.Resource;
+import net.minecraft.util.Identifier;
 
 public class Resources {
     public static ByteArrayInputStream inputStream(Raster raster) {
@@ -26,7 +26,7 @@ public class Resources {
         }
     }
 
-    public static BufferedImage readTexture(ResourceLocation identifier) {
+    public static BufferedImage readTexture(Identifier identifier) {
         try {
             return ImageIO.read(inputStream(identifier));
         } catch (IOException exception) {
@@ -34,28 +34,23 @@ public class Resources {
         }
     }
 
-    public static byte[] bytes(ResourceLocation resource) {
+    public static byte[] bytes(Identifier resource) {
         return bytes(inputStream(resource));
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     public static byte[] bytes(InputStream input) {
         try {
-            var content = new byte[input.available()];
-
-            while (input.read(content) > -1) {}
-
-            return content;
+            return input.readAllBytes();
         } catch (IOException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static InputStream inputStream(ResourceLocation resource) {
+    public static InputStream inputStream(Identifier resource) {
         return resource(resource).getInputStream();
     }
 
-    public static IResource resource(ResourceLocation identifier) {
+    public static Resource resource(Identifier identifier) {
         try {
             return CellElement.resourceManager.getResource(identifier);
         } catch (IOException exception) {
@@ -63,7 +58,7 @@ public class Resources {
         }
     }
 
-    public static int[][][] pixels(ResourceLocation texture) {
+    public static int[][][] pixels(Identifier texture) {
         return pixels(readTexture(texture));
     }
 

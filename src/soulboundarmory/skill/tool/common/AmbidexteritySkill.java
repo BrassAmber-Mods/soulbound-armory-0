@@ -1,10 +1,10 @@
 package soulboundarmory.skill.tool.common;
 
+import net.minecraft.util.Identifier;
 import soulboundarmory.skill.Skill;
-import net.minecraft.util.ResourceLocation;
 
 public class AmbidexteritySkill extends Skill {
-    public AmbidexteritySkill(ResourceLocation identifier) {
+    public AmbidexteritySkill(Identifier identifier) {
         super(identifier);
     }
 

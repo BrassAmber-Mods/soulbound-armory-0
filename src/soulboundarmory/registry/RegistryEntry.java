@@ -6,9 +6,9 @@ import javax.annotation.Nullable;
 import net.auoeke.reflect.Accessor;
 import net.auoeke.reflect.Constructors;
 import net.auoeke.reflect.Fields;
+import net.minecraft.util.Identifier;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.util.Util;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -16,13 +16,13 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public abstract class RegistryEntry<T extends RegistryEntry<T>> implements IForgeRegistryEntry<T> {
     private static final Map<Class<? extends RegistryEntry<?>>, IForgeRegistry<? extends RegistryEntry<?>>> registries = new Reference2ReferenceOpenHashMap<>();
 
-    private ResourceLocation id;
+    private Identifier id;
 
     protected static <T extends RegistryEntry<T>> T register(String name, T... dummy) {
         return register(SoulboundArmory.id(name), dummy);
     }
 
-    protected static <T extends RegistryEntry<T>> T register(ResourceLocation name, T... dummy) {
+    protected static <T extends RegistryEntry<T>> T register(Identifier name, T... dummy) {
         var entry = Constructors.construct(Util.componentType(dummy)).setRegistryName(name);
 
         ((IForgeRegistry<T>) registries.computeIfAbsent((Class<T>) entry.getClass(), type -> (IForgeRegistry<T>) Accessor.getObject(
@@ -41,7 +41,7 @@ public abstract class RegistryEntry<T extends RegistryEntry<T>> implements IForg
     }
 
     @Override
-    public T setRegistryName(ResourceLocation id) {
+    public T setRegistryName(Identifier id) {
         this.id = id;
 
         return (T) this;
@@ -49,11 +49,11 @@ public abstract class RegistryEntry<T extends RegistryEntry<T>> implements IForg
 
     @Nullable
     @Override
-    public ResourceLocation getRegistryName() {
+    public Identifier getRegistryName() {
         return this.id;
     }
 
-    public ResourceLocation id() {
+    public Identifier id() {
         return this.id;
     }
 

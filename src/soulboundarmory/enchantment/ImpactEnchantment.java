@@ -2,14 +2,14 @@ package soulboundarmory.enchantment;
 
 import soulboundarmory.item.SoulboundStaffItem;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.enchantment.EnchantmentTarget;
+import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 
 public class ImpactEnchantment extends Enchantment {
     public ImpactEnchantment() {
-        super(Rarity.COMMON, EnchantmentType.WEAPON, new EquipmentSlotType[]{EquipmentSlotType.MAINHAND});
+        super(Rarity.COMMON, EnchantmentTarget.WEAPON, new EquipmentSlot[]{EquipmentSlot.MAINHAND});
     }
 
     @Override
@@ -18,22 +18,22 @@ public class ImpactEnchantment extends Enchantment {
     }
 
     @Override
-    public int getMinEnchantability(int level) {
+    public int getMinPower(int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public int getMaxEnchantability(int level) {
+    public int getMaxPower(int level) {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public float calcDamageByCreature(int level, CreatureAttribute group) {
+    public float getAttackDamage(int level, EntityGroup group) {
         return 1 + Math.max(0, level - 1) / 2F;
     }
 
     @Override
-    public boolean canApply(ItemStack stack) {
+    public boolean isAcceptableItem(ItemStack stack) {
         return stack.getItem() instanceof SoulboundStaffItem;
     }
 }

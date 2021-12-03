@@ -5,7 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import net.auoeke.reflect.Accessor;
-import soulboundarmory.client.gui.bar.Style;
+import soulboundarmory.client.gui.bar.BarStyle;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -141,7 +141,7 @@ public class Configuration {
         public boolean overlayExperienceBar = true;
 
         // @EnumHandler(option = EnumDisplayOption.BUTTON)
-        public Style style = Style.EXPERIENCE;
+        public BarStyle style = BarStyle.EXPERIENCE;
 
         @Comment("the colors of this mod's XP bar")
         // @CollapsibleObject(startExpanded = true)

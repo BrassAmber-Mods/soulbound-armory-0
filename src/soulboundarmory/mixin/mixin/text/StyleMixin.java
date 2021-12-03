@@ -9,12 +9,12 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Set;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,22 +31,22 @@ import soulboundarmory.text.format.ExtendedFormatting;
 @Mixin(Style.class)
 abstract class StyleMixin implements ExtendedStyle {
     @Unique
-    private final ReferenceOpenHashSet<TextFormatting> formattings = new ReferenceOpenHashSet<>();
+    private final ReferenceOpenHashSet<Formatting> formattings = new ReferenceOpenHashSet<>();
 
     @Unique
-    private static TextFormatting switchFormatting;
+    private static Formatting switchFormatting;
 
     @Unique
     private static Boolean previousObfuscated;
 
     @Override
     @Unique
-    public Set<TextFormatting> formattings() {
+    public Set<Formatting> formattings() {
         return this.formattings;
     }
 
     @Override
-    public boolean has(TextFormatting formatting) {
+    public boolean has(Formatting formatting) {
         return this.formattings.contains(formatting);
     }
 
@@ -61,54 +61,54 @@ abstract class StyleMixin implements ExtendedStyle {
     }
 
     @Override
-    public void add(TextFormatting formatting) {
+    public void add(Formatting formatting) {
         this.formattings.add(formatting);
     }
 
-    @Inject(method = "setColor", at = @At("RETURN"))
-    public void withColor(Color color, CallbackInfoReturnable<Style> info) {
+    @Inject(method = "withColor(Lnet/minecraft/text/TextColor;)Lnet/minecraft/text/Style;", at = @At("RETURN"))
+    public void withColor(TextColor color, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "setBold", at = @At("RETURN"))
+    @Inject(method = "withBold", at = @At("RETURN"))
     public void withBold(Boolean bold, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "setItalic", at = @At("RETURN"))
+    @Inject(method = "withItalic", at = @At("RETURN"))
     public void withItalic(Boolean italic, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
     @OnlyIn(Dist.CLIENT)
-    @Inject(method = "setUnderlined", at = @At("RETURN"))
+    @Inject(method = "withUnderline", at = @At("RETURN"))
     public void withUnderline(Boolean underline, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "setClickEvent", at = @At("RETURN"))
+    @Inject(method = "withClickEvent", at = @At("RETURN"))
     public void withClickEvent(ClickEvent clickEvent, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "setHoverEvent", at = @At("RETURN"))
+    @Inject(method = "withHoverEvent", at = @At("RETURN"))
     public void withHoverEvent(HoverEvent hoverEvent, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = "setInsertion", at = @At("RETURN"))
+    @Inject(method = "withInsertion", at = @At("RETURN"))
     public void withInsertion(String insertion, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
     @OnlyIn(Dist.CLIENT)
-    @Inject(method = "setFontId", at = @At("RETURN"))
-    public void withFont(ResourceLocation font, CallbackInfoReturnable<Style> info) {
+    @Inject(method = "withFont", at = @At("RETURN"))
+    public void withFont(Identifier font, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
     }
 
-    @Inject(method = {"applyFormatting", "forceFormatting"}, at = @At(value = "TAIL"))
-    public void addFormatting(TextFormatting formatting, CallbackInfoReturnable<Style> info) {
+    @Inject(method = {"withFormatting(Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/Style;", "withExclusiveFormatting"}, at = @At(value = "TAIL"))
+    public void addFormatting(Formatting formatting, CallbackInfoReturnable<Style> info) {
         this.add(info.getReturnValue());
 
         if ((Object) formatting instanceof ExtendedFormatting) {
@@ -117,24 +117,26 @@ abstract class StyleMixin implements ExtendedStyle {
     }
 
     @SuppressWarnings({"unused", "RedundantSuppression"}) // invoked by handwritten bytecode
-    private static int phormat_hackOrdinal(TextFormatting formatting) {
-        return (Object) (switchFormatting = formatting) instanceof ExtendedFormatting && !formatting.isColor() ? TextFormatting.OBFUSCATED.ordinal() : formatting.ordinal();
+    private static int phormat_hackOrdinal(Formatting formatting) {
+        return (Object) (switchFormatting = formatting) instanceof ExtendedFormatting && !formatting.isColor() ? Formatting.OBFUSCATED.ordinal() : formatting.ordinal();
     }
 
-    @ModifyVariable(method = {"forceFormatting", "applyFormatting", "createStyleFromFormattings"},
+    @ModifyVariable(method = {"withExclusiveFormatting", "withFormatting(Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/Style;", "withFormatting([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/Style;"},
                     at = @At(value = "CONSTANT", args = "intValue=1", ordinal = 0),
                     ordinal = 4)
     public Boolean saveObfuscated(Boolean previous) {
         return previousObfuscated = previous;
     }
 
-    @ModifyVariable(method = {"forceFormatting", "applyFormatting", "createStyleFromFormattings"}, at = @At(value = "STORE", ordinal = 1), ordinal = 4)
+    @ModifyVariable(method = {"withExclusiveFormatting", "withFormatting(Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/Style;", "withFormatting([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/Style;"},
+                    at = @At(value = "STORE", ordinal = 1),
+                    ordinal = 4)
     public Boolean fixObfuscated(Boolean previous) {
-        return switchFormatting == TextFormatting.OBFUSCATED || previousObfuscated == Boolean.TRUE;
+        return switchFormatting == Formatting.OBFUSCATED || previousObfuscated == Boolean.TRUE;
     }
 
-    @Inject(method = "createStyleFromFormattings", at = @At(value = "TAIL"))
-    public void addFormatting(TextFormatting[] formattings, CallbackInfoReturnable<Style> info) {
+    @Inject(method = "withFormatting([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/Style;", at = @At(value = "TAIL"))
+    public void addFormatting(Formatting[] formattings, CallbackInfoReturnable<Style> info) {
         var style = (ExtendedStyle) info.getReturnValue();
 
         for (var formatting : formattings) {
@@ -144,7 +146,7 @@ abstract class StyleMixin implements ExtendedStyle {
         }
     }
 
-    @Inject(method = "mergeStyle", at = @At("TAIL"))
+    @Inject(method = "withParent", at = @At("TAIL"))
     public void withParent(Style parent, CallbackInfoReturnable<Style> info) {
         if (parent != Style.EMPTY) {
             var child = (ExtendedStyle) info.getReturnValue();
@@ -159,7 +161,7 @@ abstract class StyleMixin implements ExtendedStyle {
 
     @Inject(method = "toString", at = @At("RETURN"), cancellable = true)
     public void appendFormatting(CallbackInfoReturnable<String> info) {
-        info.setReturnValue(info.getReturnValue().replace("}", ", phormat:formatting=" + Arrays.toString(this.formattings.toArray(new TextFormatting[0])) + '}'));
+        info.setReturnValue(info.getReturnValue().replace("}", ", phormat:formatting=" + Arrays.toString(this.formattings.toArray(new Formatting[0])) + '}'));
     }
 
     @Inject(method = "equals", at = @At(value = "RETURN", ordinal = 1), cancellable = true)
@@ -191,14 +193,14 @@ abstract class StyleMixin implements ExtendedStyle {
 
     @Mixin(Style.Serializer.class)
     abstract static class SerializerMixin {
-        @Inject(method = "deserialize*", at = @At(value = "NEW", target = "net/minecraft/util/text/Style"))
+        @Inject(method = "deserialize*", at = @At(value = "NEW", target = "net/minecraft/text/Style"))
         public void deserializeCustomFormatting(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext, CallbackInfoReturnable<Style> info) {
             var style = (ExtendedStyle) info.getReturnValue();
             var object = jsonElement.getAsJsonObject();
 
             if (object.has("format")) {
                 for (var phormat : object.getAsJsonArray("format")) {
-                    style.add(TextFormatting.getValueByName(phormat.getAsString()));
+                    style.add(Formatting.byName(phormat.getAsString()));
                 }
             }
         }
@@ -215,7 +217,7 @@ abstract class StyleMixin implements ExtendedStyle {
 
             for (var phormat : ((ExtendedStyle) style).formattings()) {
                 if ((Object) phormat instanceof ExtendedFormatting) {
-                    formatting.add(phormat.getFriendlyName());
+                    formatting.add(phormat.getName());
                 }
             }
 

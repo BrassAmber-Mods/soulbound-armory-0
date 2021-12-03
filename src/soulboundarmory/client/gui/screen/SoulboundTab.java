@@ -4,8 +4,8 @@ import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
@@ -17,12 +17,12 @@ public abstract class SoulboundTab extends ScreenTab {
 
     protected SoulboundScreen parent;
 
-    public SoulboundTab(ITextComponent title) {
+    public SoulboundTab(Text title) {
         super(title);
     }
 
     public void open(int width, int height) {
-        this.init(client, width, height);
+        this.init(this.client, width, height);
     }
 
     @Override
@@ -34,7 +34,7 @@ public abstract class SoulboundTab extends ScreenTab {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    public ScalableWidget centeredButton(int y, int buttonWidth, ITextComponent text, PressCallback<ScalableWidget> action) {
+    public ScalableWidget centeredButton(int y, int buttonWidth, Text text, PressCallback<ScalableWidget> action) {
         return new ScalableWidget().button()
             .centerX()
             .x(this.width)
@@ -45,7 +45,7 @@ public abstract class SoulboundTab extends ScreenTab {
             .primaryAction(action);
     }
 
-    public ScalableWidget squareButton(int x, int y, ITextComponent text, PressCallback<ScalableWidget> action) {
+    public ScalableWidget squareButton(int x, int y, Text text, PressCallback<ScalableWidget> action) {
         return new ScalableWidget().button()
             .x(x - 10)
             .y(y - 10)
@@ -70,7 +70,7 @@ public abstract class SoulboundTab extends ScreenTab {
         var start = (this.height - (rows - 1) * this.height / 16) / 2;
 
         for (var row = 0; row < rows; row++) {
-            buttons[row] = this.squareButton((this.width + 162) / 2, start + row * this.height / 16 + 4, new StringTextComponent("+"), action);
+            buttons[row] = this.squareButton((this.width + 162) / 2, start + row * this.height / 16 + 4, Text.of("+"), action);
             buttons[row].active = points > 0;
         }
 
@@ -82,13 +82,13 @@ public abstract class SoulboundTab extends ScreenTab {
         var start = (this.height - (rows - 1) * this.height / 16) / 2;
 
         for (var row = 0; row < rows; row++) {
-            buttons[row] = this.squareButton((this.width + 162) / 2 - 20, start + row * this.height / 16 + 4, new StringTextComponent("-"), action);
+            buttons[row] = this.squareButton((this.width + 162) / 2 - 20, start + row * this.height / 16 + 4, Text.of("-"), action);
         }
 
         return buttons;
     }
 
     protected PressCallback<ScalableWidget> resetAction(Category category) {
-        return button -> Packets.serverReset.send(new ExtendedPacketBuffer(this.parent.storage).writeResourceLocation(category.id()));
+        return button -> Packets.serverReset.send(new ExtendedPacketBuffer(this.parent.storage).writeIdentifier(category.id()));
     }
 }

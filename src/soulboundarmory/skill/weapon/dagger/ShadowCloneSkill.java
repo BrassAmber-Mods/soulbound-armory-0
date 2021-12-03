@@ -1,11 +1,11 @@
 package soulboundarmory.skill.weapon.dagger;
 
+import net.minecraft.util.Identifier;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.skill.Skill;
-import net.minecraft.util.ResourceLocation;
 
 public class ShadowCloneSkill extends Skill {
-    public ShadowCloneSkill(ResourceLocation identifier) {
+    public ShadowCloneSkill(Identifier identifier) {
         super(identifier);
     }
 

@@ -3,6 +3,7 @@ package soulboundarmory.command.argument;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -15,7 +16,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     protected EnumArgumentType(Class<T> type, Predicate<T> include) {
         this.clazz = type;
 
-        var values = this.values = new ArrayList<>();
+        List values = this.values = new ArrayList<>();
 
         for (var field : type.getDeclaredFields()) {
             var value = (T) Accessor.getObject(field);
@@ -28,7 +29,7 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
 
     protected EnumArgumentType(Class<T> enumClass) {
         this.clazz = enumClass;
-        var values = this.values = new ArrayList<>();
+        List values = this.values = new ArrayList<>();
 
         for (var field : enumClass.getDeclaredFields()) {
             //noinspection unchecked

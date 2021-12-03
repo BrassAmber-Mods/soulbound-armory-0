@@ -1,28 +1,28 @@
 package cell.client.gui.widget.scalable;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import cell.client.gui.CellElement;
 import cell.client.gui.DrawableElement;
 import cell.client.gui.widget.Length;
 import cell.client.gui.widget.Widget;
-import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.Texture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.texture.ResourceTexture;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 @OnlyIn(Dist.CLIENT)
 public class ScalableWidget extends Widget<ScalableWidget> {
-    private static final ResourceLocation advancementWidgets = new ResourceLocation("textures/gui/advancements/widgets.png");
-    private static final ResourceLocation window = new ResourceLocation("textures/gui/advancements/window.png");
+    private static final Identifier advancementWidgets = new Identifier("textures/gui/advancements/widgets.png");
+    private static final Identifier window = new Identifier("textures/gui/advancements/window.png");
 
     public final int[][][] middles = new int[5][4][2];
     public final int[][][] corners = new int[4][4][2];
     public final int[][] border = new int[4][2];
 
-    public Texture texture;
+    public AbstractTexture texture;
 
     public int u, v;
 
@@ -37,25 +37,25 @@ public class ScalableWidget extends Widget<ScalableWidget> {
     protected Length widthLimit = new Length();
     protected Length heightLimit = new Length();
 
-    public ScalableWidget texture(Texture texture) {
+    public ScalableWidget texture(AbstractTexture texture) {
         this.texture = texture;
 
         return this;
     }
 
-    public ScalableWidget texture(ResourceLocation id) {
+    public ScalableWidget texture(Identifier id) {
         var texture = DrawableElement.textureManager.getTexture(id);
 
         if (texture == null) {
-            texture = new SimpleTexture(id);
-            DrawableElement.textureManager.loadTexture(id, texture);
+            texture = new ResourceTexture(id);
+            DrawableElement.textureManager.registerTexture(id, texture);
         }
 
         return this.texture(texture);
     }
 
     public ScalableWidget texture(String id) {
-        return this.texture(new ResourceLocation(id));
+        return this.texture(new Identifier(id));
     }
 
     public ScalableWidget u(int u) {
@@ -266,11 +266,11 @@ public class ScalableWidget extends Widget<ScalableWidget> {
     }
 
     public ScalableWidget button(int index) {
-        return this.texture(net.minecraft.client.gui.widget.Widget.WIDGETS_LOCATION).v(46 + index * 20).slice(2, 198, 200, 2, 17, 20);
+        return this.texture(net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE).v(46 + index * 20).slice(2, 198, 200, 2, 17, 20);
     }
 
     public ScalableWidget experienceBar() {
-        return this.texture(GUI_ICONS_LOCATION).v(64).slice(1, 172, 182, 1, 4, 5);
+        return this.texture(GUI_ICONS_TEXTURE).v(64).slice(1, 172, 182, 1, 4, 5);
     }
 
     @Override
@@ -300,7 +300,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
             var width = corner[1][0] - u;
             var height = corner[2][1] - v;
 
-            blit(matrices, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.getBlitOffset(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
+            drawTexture(matrices, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.getZOffset(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
         }
     }
 
@@ -336,7 +336,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
                 for (int drawnWidth; remainingWidth > 0; remainingWidth -= drawnWidth) {
                     drawnWidth = Math.min(remainingWidth, maxWidth);
 
-                    blit(matrices, endX - remainingWidth, y, this.getBlitOffset(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
+                    drawTexture(matrices, endX - remainingWidth, y, this.getZOffset(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
                 }
             }
         }
@@ -354,10 +354,10 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         var endX = this.x() + this.width() - 1;
         var endY = this.y() + this.height();
 
-        CellElement.drawHorizontalLine(matrices, this.x(), endX, this.y(), this.getBlitOffset(), -1);
-        CellElement.drawVerticalLine(matrices, this.x(), this.y(), endY, this.getBlitOffset(), -1);
-        CellElement.drawVerticalLine(matrices, endX, this.y(), endY, this.getBlitOffset(), -1);
-        CellElement.drawHorizontalLine(matrices, this.x(), endX, endY - 1, this.getBlitOffset(), -1);
+        CellElement.drawHorizontalLine(matrices, this.x(), endX, this.y(), this.getZOffset(), -1);
+        CellElement.drawVerticalLine(matrices, this.x(), this.y(), endY, this.getZOffset(), -1);
+        CellElement.drawVerticalLine(matrices, endX, this.y(), endY, this.getZOffset(), -1);
+        CellElement.drawHorizontalLine(matrices, this.x(), endX, endY - 1, this.getZOffset(), -1);
     }
 
     protected void detectBorder() {}

@@ -1,30 +1,34 @@
 package soulboundarmory.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import cell.client.gui.widget.Slider;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
 import soulboundarmory.text.Translation;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillTab extends SoulboundTab {
-    protected static final ResourceLocation background = new ResourceLocation("textures/block/andesite.png");
-    protected static final ResourceLocation windowID = new ResourceLocation("textures/gui/advancements/window.png");
-    protected static final ResourceLocation WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
+    protected static final Identifier background = new Identifier("textures/block/andesite.png");
+    protected static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
+    protected static final Identifier WIDGETS = new Identifier("textures/gui/advancements/widgets.png");
     protected static final ScalableWidget grayRectangle = new ScalableWidget().grayRectangle();
     protected static final ScalableWidget blueRectangle = new ScalableWidget().blueRectangle();
 
@@ -112,12 +116,12 @@ public class SkillTab extends SoulboundTab {
         var color = 0x404040;
         var points = this.parent.storage.datum(StatisticType.skillPoints);
 
-        this.textRenderer.func_243246_a(stack, Translations.menuSkills, this.x + 8, this.y + 6, color);
+        this.textRenderer.drawWithShadow(stack, Translations.menuSkills, this.x + 8, this.y + 6, color);
 
         if (points > 0) {
             var text = new Translation("%s: %s", Translations.menuUnspentPoints, points);
 
-            this.textRenderer.func_243246_a(stack, text, this.insideEndX - this.textRenderer.getStringPropertyWidth(text), this.y + 6, color);
+            this.textRenderer.drawWithShadow(stack, text, this.insideEndX - this.textRenderer.getWidth(text), this.y + 6, color);
         }
 
         var delta = 20F * tickDelta / 255F;
@@ -164,20 +168,20 @@ public class SkillTab extends SoulboundTab {
             }
 
             textureManager.bindTexture(WIDGETS);
-            this.blit(matrices, x - 4, y - 4, 1, 155 - offsetV, 24, 24);
+            this.drawTexture(matrices, x - 4, y - 4, 1, 155 - offsetV, 24, 24);
 
             RenderSystem.color3f(chroma, chroma, chroma);
 
-            skill.render(this, matrices, x, y, this.getBlitOffset());
+            skill.render(this, matrices, x, y, this.getZOffset());
 
-            this.setBlitOffset(0);
+            this.setZOffset(0);
         }
     }
 
     protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY, int offsetV) {
         var name = skill.name();
-        List<? extends ITextProperties> tooltip = skill.tooltip();
-        var barWidth = 36 + this.textRenderer.getStringPropertyWidth(name);
+        List<? extends StringVisitable> tooltip = skill.tooltip();
+        var barWidth = 36 + this.textRenderer.getWidth(name);
         var size = tooltip.size();
 
         if (size > 0) {
@@ -185,21 +189,21 @@ public class SkillTab extends SoulboundTab {
             var belowCenter = centerY > this.insideCenterY;
             var y = centerY + (belowCenter ? -56 : 14);
             var textY = y + 7;
-            ITextComponent string = null;
+            Text string = null;
 
             if (!learned) {
                 var cost = skill.cost();
-                ITextComponent plural = cost == 1 ? Translations.menuPoint : Translations.menuPoints;
+                Text plural = cost == 1 ? Translations.menuPoint : Translations.menuPoints;
                 string = Translations.menuSkillLearnCost.format(cost, plural);
             } else if (skill.canUpgrade()) {
                 string = Translations.menuLevel.format(skill.level());
             }
 
-            barWidth = 12 + Math.max(barWidth, 8 + this.textRenderer.getStringPropertyWidth(string));
+            barWidth = 12 + Math.max(barWidth, 8 + this.textRenderer.getWidth(string));
             tooltip = wrap(tooltip, barWidth);
             size = tooltip.size();
-            barWidth = Math.max(barWidth, 8 + this.textRenderer.getStringPropertyWidth(tooltip.stream().max(Comparator.comparingInt(this.textRenderer::getStringPropertyWidth)).get()));
-            var offset = (1 + size) * this.textRenderer.FONT_HEIGHT;
+            barWidth = Math.max(barWidth, 8 + this.textRenderer.getWidth(tooltip.stream().max(Comparator.comparingInt(this.textRenderer::getWidth)).get()));
+            var offset = (1 + size) * this.textRenderer.fontHeight;
             var tooltipHeight = 1 + offset;
 
             if (!learned || skill.canUpgrade()) {
@@ -209,7 +213,7 @@ public class SkillTab extends SoulboundTab {
                 grayRectangle.x(centerX - 8).y(levelY).width(barWidth).height(20).render(stack);
                 // this.drawHorizontallyInterpolatedTexture(stack, centerX - 8, levelY, 0, 55, 2, 198, 200, barWidth, 20);
 
-                this.textRenderer.func_243246_a(stack, string, centerX - 3, textY + offset, 0x999999);
+                this.textRenderer.drawWithShadow(stack, string, centerX - 3, textY + offset, 0x999999);
             }
 
             this.chroma(1);
@@ -218,7 +222,7 @@ public class SkillTab extends SoulboundTab {
             // this.drawInterpolatedTexture(stack, centerX - 8, y, 0, 55, 2, 57, 198, 73, 200, 75, barWidth, tooltipHeight);
 
             for (var i = 0; i < size; i++) {
-                this.textRenderer.drawString(stack, tooltip.get(i).getString(), centerX - 3, textY - 1 + i * this.textRenderer.FONT_HEIGHT, 0x999999);
+                this.textRenderer.draw(stack, tooltip.get(i).getString(), centerX - 3, textY - 1 + i * this.textRenderer.fontHeight, 0x999999);
             }
         }
 
@@ -228,7 +232,7 @@ public class SkillTab extends SoulboundTab {
         blueRectangle.x(centerX - 8).y(centerY - 2).width(barWidth).height(20).render(stack);
         // this.drawHorizontallyInterpolatedTexture(stack, centerX - 8, centerY - 2, 0, 29 - offsetV, 2, 198, 200, barWidth, 20);
 
-        this.textRenderer.func_243246_a(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
+        this.textRenderer.drawWithShadow(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
     }
 
     protected boolean isSkillSelected(int mouseX, int mouseY) {
@@ -271,7 +275,7 @@ public class SkillTab extends SoulboundTab {
     protected void updateIcons() {
         this.skills.clear();
 
-        Map<Integer, List<Integer>> tierOrders = new LinkedHashMap<>();
+        var tierOrders = new LinkedHashMap<Integer, List<Integer>>();
         var skills = this.parent.storage.skills();
 
         for (var skill : skills) {

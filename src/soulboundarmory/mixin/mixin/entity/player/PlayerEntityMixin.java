@@ -1,7 +1,5 @@
 package soulboundarmory.mixin.mixin.entity.player;
 
-import soulboundarmory.mixin.access.entity.PlayerEntityAccess;
-import soulboundarmory.entity.SAAttributes;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -11,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import soulboundarmory.entity.SAAttributes;
+import soulboundarmory.mixin.access.entity.PlayerEntityAccess;
 
 @Mixin(PlayerEntity.class)
 abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAccess {
@@ -18,12 +18,12 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAcc
         super(entityType, world);
     }
 
-    @ModifyArg(method = "attack", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    @ModifyArg(method = "attack", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"))
     private float applyCriticalStrikeRate(float damage) {
-        // AttributeInstance instance = self.getAttributeInstance(SoulboundArmoryAttributes.GENERIC_CRITICAL_STRIKE_PROBABILITY);
+        // EntityAttributeInstance instance = self.getAttributeInstance(SoulboundArmoryAttributes.GENERIC_CRITICAL_STRIKE_PROBABILITY);
         //
         // if (instance != null) {
-        //      AttributeModifier modifier = instance.getModifier(SoulboundArmoryAttributes.CRITICAL_STRIKE_PROBABILITY_MODIFIER_ID);
+        //      EntityAttributeModifier modifier = instance.getModifier(SoulboundArmoryAttributes.CRITICAL_STRIKE_PROBABILITY_MODIFIER_ID);
         //
         //     if (modifier != null) {
         //         return modifier.getValue() > self.getRandom().nextDouble() ? 2 * damage : damage;
@@ -32,9 +32,9 @@ abstract class PlayerEntityMixin extends LivingEntity implements PlayerEntityAcc
         //
         // return damage;
 
-        var instance = this.getAttribute(SAAttributes.criticalStrikeRate);
+        var instance = this.getAttributeInstance(SAAttributes.criticalStrikeRate);
 
-        return instance != null && instance.getValue() > this.rand.nextDouble() ? 2 * damage : damage;
+        return instance != null && instance.getValue() > this.random.nextDouble() ? 2 * damage : damage;
     }
 
     @Inject(method = "tick", at = @At("RETURN"))

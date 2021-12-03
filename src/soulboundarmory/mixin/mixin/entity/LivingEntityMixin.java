@@ -1,14 +1,10 @@
 package soulboundarmory.mixin.mixin.entity;
 
 import java.util.List;
-import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.registry.Skills;
-import soulboundarmory.util.EntityUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +13,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.registry.Skills;
+import soulboundarmory.util.EntityUtil;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin extends Entity {
@@ -24,18 +24,18 @@ abstract class LivingEntityMixin extends Entity {
         super(p_i48580_1_, p_i48580_2_);
     }
 
-    @Inject(method = "registerAttributes", at = @At("RETURN"), cancellable = true)
-    private static void createSoulboundArmoryAttributes(CallbackInfoReturnable<AttributeModifierMap.MutableAttribute> cir) {
+    @Inject(method = "createLivingAttributes", at = @At("RETURN"), cancellable = true)
+    private static void createSoulboundArmoryAttributes(CallbackInfoReturnable<DefaultAttributeContainer.Builder> cir) {
         // info.getReturnValue().add(SAAttributes.criticalStrikeRate, 0).add(SAAttributes.efficiency, 1);
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "collideWithNearbyEntities",
+    @Inject(method = "tickCramming",
             at = @At(value = "INVOKE_ASSIGN",
-                     target = "Lnet/minecraft/world/World;getEntitiesInAABBexcluding(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;)Ljava/util/List;"),
+                     target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;)Ljava/util/List;"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
-        if ((Object) this instanceof PlayerEntity player && !this.world.isRemote) {
+        if ((Object) this instanceof PlayerEntity player && !this.world.isClient) {
             var greatsword = Components.weapon.of(player).storage(StorageType.greatsword);
             var leapForce = greatsword.leapForce();
 
@@ -46,7 +46,7 @@ abstract class LivingEntityMixin extends Entity {
                     }
                 }
 
-                if (greatsword.leapDuration() <= 0 && player.isOnGround() && (player.getMotion().y <= 0.01 || player.isCreative())) {
+                if (greatsword.leapDuration() <= 0 && player.isOnGround() && (player.getVelocity().y <= 0.01 || player.isCreative())) {
                     greatsword.leapDuration(7);
                 }
 

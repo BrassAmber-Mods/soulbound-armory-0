@@ -1,11 +1,11 @@
 package soulboundarmory.skill.weapon.dagger;
 
+import net.minecraft.util.Identifier;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.skill.Skill;
-import net.minecraft.util.ResourceLocation;
 
 public class ReturnSkill extends Skill {
-    public ReturnSkill(ResourceLocation identifier) {
+    public ReturnSkill(Identifier identifier) {
         super(identifier);
     }
 

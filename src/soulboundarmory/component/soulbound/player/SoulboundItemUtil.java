@@ -13,7 +13,7 @@ public class SoulboundItemUtil {
             return Optional.empty();
         }
 
-        for (var itemStack : entity.getHeldEquipment()) {
+        for (var itemStack : entity.getItemsHand()) {
             var component = ItemStorage.get(entity, itemStack.getItem());
 
             if (component.isPresent()) {
@@ -25,8 +25,8 @@ public class SoulboundItemUtil {
     }
 
     public static boolean isSoulWeaponEquipped(PlayerEntity player) {
-        return player.getHeldItemMainhand().getItem() instanceof SoulboundWeaponItem
-            || player.getHeldItemOffhand().getItem() instanceof SoulboundWeaponItem;
+        return player.getMainHandStack().getItem() instanceof SoulboundWeaponItem
+            || player.getOffHandStack().getItem() instanceof SoulboundWeaponItem;
     }
 
     public static boolean addItemStack(ItemStack itemStack, PlayerEntity player) {
@@ -107,9 +107,9 @@ public class SoulboundItemUtil {
     }
 
     public static boolean hasSoulWeapon(PlayerEntity player) {
-        var size = player.inventory.getSizeInventory();
-        var inventory = player.inventory.mainInventory.toArray(new ItemStack[size + 1]);
-        inventory[size] = player.getHeldItemOffhand();
+        var size = player.inventory.size();
+        var inventory = player.inventory.main.toArray(new ItemStack[size + 1]);
+        inventory[size] = player.getOffHandStack();
 
         for (var itemStack : inventory) {
             if (itemStack != null && itemStack.getItem() instanceof SoulboundWeaponItem) {

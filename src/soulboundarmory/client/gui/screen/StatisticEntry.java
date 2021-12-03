@@ -1,13 +1,13 @@
 package soulboundarmory.client.gui.screen;
 
+import net.minecraft.text.Text;
 import soulboundarmory.component.statistics.Statistic;
-import net.minecraft.util.text.ITextComponent;
 
 public class StatisticEntry {
     public final Statistic statistic;
-    public final ITextComponent text;
+    public final Text text;
 
-    public StatisticEntry(Statistic statistic, ITextComponent text) {
+    public StatisticEntry(Statistic statistic, Text text) {
         this.statistic = statistic;
         this.text = text;
     }

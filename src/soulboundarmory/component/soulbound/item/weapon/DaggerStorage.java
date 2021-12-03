@@ -2,6 +2,7 @@ package soulboundarmory.component.soulbound.item.weapon;
 
 import com.google.common.collect.Multimap;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +13,7 @@ import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.EnchantmentStorage;
 import soulboundarmory.component.statistics.SkillStorage;
+import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
 import soulboundarmory.client.gui.screen.StatisticEntry;
@@ -21,15 +23,15 @@ import soulboundarmory.registry.Skills;
 import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraftforge.common.ForgeMod;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
@@ -46,9 +48,9 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
             .max(1, StatisticType.criticalStrikeRate).build();
 
         this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getName().toLowerCase();
+            var name = enchantment.getTranslationKey().toLowerCase();
 
-            return enchantment.canApply(this.itemStack)
+            return enchantment.isAcceptableItem(this.itemStack)
                 && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
                 && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
                 && !name.contains("holding")
@@ -63,7 +65,7 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
     }
 
     @Override
-    public ITextComponent getName() {
+    public Text name() {
         return Translations.soulboundDagger;
     }
 
@@ -80,29 +82,29 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
     }
 
     @Override
-    public List<ITextComponent> tooltip() {
+    public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
-        var tooltip = new ArrayList<ITextComponent>(List.of(
-            new Translation(" %s%s %s", format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName).modifyStyle(style -> style.applyFormatting(TextFormatting.fromFormattingCode(Translations.attackSpeedFormat.getKey().charAt(1)))),
+        var tooltip = new ArrayList<Text>(List.of(
+            new Translation(" %s%s %s", format.format(this.attribute(StatisticType.attackSpeed)), Translations.attackSpeedName).styled(style -> style.withFormatting(Formatting.byCode(Translations.attackSpeedFormat.getKey().charAt(1)))),
             new Translation(" %s%s %s", Translations.attackDamageFormat, format.format(this.attributeTotal(StatisticType.attackDamage)), Translations.attackDamageName),
-            new Translation(""),
-            new Translation("")
+            LiteralText.EMPTY,
+            LiteralText.EMPTY
         ));
 
 
         if (this.attribute(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(new StringTextComponent(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
+            tooltip.add(Text.of(String.format(" %s%s%% %s", Translations.criticalStrikeRateFormat, format.format(this.attribute(StatisticType.criticalStrikeRate) * 100), Translations.criticalStrikeRateName)));
         }
 
         if (this.attribute(StatisticType.efficiency) > 0) {
-            tooltip.add(new StringTextComponent(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(StatisticType.efficiency)), Translations.toolEfficiencyName)));
+            tooltip.add(Text.of(String.format(" %s%s %s", Translations.toolEfficiencyFormat, format.format(this.attribute(StatisticType.efficiency)), Translations.toolEfficiencyName)));
         }
 
         return tooltip;
     }
 
     @Override
-    public Item getConsumableItem() {
+    public Item consumableItem() {
         return Items.STONE_SWORD;
     }
 
@@ -122,12 +124,12 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> attributeModifiers(Multimap<Attribute, AttributeModifier> modifiers, EquipmentSlotType slot) {
-        if (slot == EquipmentSlotType.MAINHAND) {
-            modifiers.put(Attributes.ATTACK_SPEED, new AttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), AttributeModifier.Operation.ADDITION));
-            modifiers.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), AttributeModifier.Operation.ADDITION));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.attackRangeUUID, "Weapon modifier", this.attributeRelative(StatisticType.attackRange), AttributeModifier.Operation.ADDITION));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(StatisticType.reach), AttributeModifier.Operation.ADDITION));
+    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.attackRangeUUID, "Weapon modifier", this.attributeRelative(StatisticType.attackRange), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(StatisticType.reach), EntityAttributeModifier.Operation.ADDITION));
         }
 
         return modifiers;

@@ -1,16 +1,16 @@
 package soulboundarmory.skill.weapon.common;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import cell.client.gui.screen.CellScreen;
 import soulboundarmory.skill.Skill;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class NourishmentSkill extends Skill {
-    public NourishmentSkill(ResourceLocation identifier) {
+    public NourishmentSkill(Identifier identifier) {
         super(identifier);
     }
 

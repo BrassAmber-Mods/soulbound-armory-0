@@ -2,8 +2,8 @@ package soulboundarmory.client.gui.screen;
 
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.stream.Collectors;
+import net.minecraft.client.util.math.MatrixStack;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.network.ExtendedPacketBuffer;
@@ -31,7 +31,7 @@ public class SelectionTab extends SoulboundTab {
                 .y(top + (row * ySep))
                 .width(buttonWidth)
                 .height(buttonHeight)
-                .text(storage.getName())
+                .text(storage.name())
                 .primaryAction(this.selectAction(storage))
             );
 
@@ -46,14 +46,14 @@ public class SelectionTab extends SoulboundTab {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
         if (!this.parent.storage.itemEquipped()) {
-            drawCenteredString(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
+            drawCenteredText(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
         }
     }
 
     protected PressCallback<ScalableWidget> selectAction(ItemStorage<?> storage) {
         return button -> {
             Packets.serverItemType.send(new ExtendedPacketBuffer(storage).writeInt(this.parent.slot));
-            this.onClose();
+            this.removed();
         };
     }
 }

@@ -3,16 +3,18 @@ package soulboundarmory.util;
 import java.util.UUID;
 import soulboundarmory.mixin.access.entity.EntityAccess;
 import net.minecraft.entity.Entity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.Vec3d;
 
 public class EntityUtil {
     public static double speed(Entity entity) {
-        var velocity = entity.getMotion();
+        var velocity = entity.getVelocity();
         return Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
     }
 
     public static Entity entity(UUID id) {
         for (var world : Util.server().getWorlds()) {
-            var entity = world.getEntityByUuid(id);
+            var entity = world.getEntity(id);
 
             if (entity != null) {
                 return entity;

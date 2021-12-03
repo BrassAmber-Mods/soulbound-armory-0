@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import soulboundarmory.serial.CompoundSerializable;
-import net.minecraft.util.ResourceLocation;
 
 public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements CompoundSerializable, Iterable<Statistic> {
     protected Statistics() {}
@@ -62,7 +61,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
 
     @Override
     public Iterator<Statistic> iterator() {
-        Set<Statistic> statistics = new HashSet<>();
+        var statistics = new HashSet<Statistic>();
 
         for (var category : this.values()) {
             statistics.addAll(category.values());
@@ -72,14 +71,14 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     @Override
-    public void serializeNBT(CompoundNBT tag) {
+    public void serializeNBT(NbtCompound tag) {
         for (var category : this.keySet()) {
             tag.put(category.id().toString(), this.toTag(category));
         }
     }
 
-    public CompoundNBT toTag(Category category) {
-        var tag = new CompoundNBT();
+    public NbtCompound toTag(Category category) {
+        var tag = new NbtCompound();
 
         for (var statistic : this.get(category).values()) {
             tag.put(statistic.type().id().toString(), statistic.serializeNBT());
@@ -89,16 +88,16 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT tag) {
-        for (var key : tag.keySet()) {
-            this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(new ResourceLocation(key)));
+    public void deserializeNBT(NbtCompound tag) {
+        for (var key : tag.getKeys()) {
+            this.deserializeNBT(tag.getCompound(key), Category.registry.getValue(new Identifier(key)));
         }
     }
 
-    public void deserializeNBT(CompoundNBT tag, Category category) {
+    public void deserializeNBT(NbtCompound tag, Category category) {
         if (category != null) {
-            for (var identifier : tag.keySet()) {
-                var statistic = this.get(StatisticType.registry.getValue(new ResourceLocation(identifier)));
+            for (var identifier : tag.getKeys()) {
+                var statistic = this.get(StatisticType.registry.getValue(new Identifier(identifier)));
 
                 if (statistic != null) {
                     statistic.deserializeNBT(tag.getCompound(identifier));

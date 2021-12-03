@@ -1,20 +1,17 @@
 package cell.client.gui.widget;
 
-import java.text.NumberFormat;
 import cell.client.gui.DrawableElement;
+import java.text.NumberFormat;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractSlider;
+import net.minecraft.client.gui.widget.SliderWidget;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
-public class Slider extends AbstractSlider implements DrawableElement {
+public class Slider extends SliderWidget implements DrawableElement {
     protected static final NumberFormat floatFormat = NumberFormat.getNumberInstance();
 
-    public ITextComponent label;
+    public Text label;
     public ScrollCallback onScroll;
 
     protected double min;
@@ -26,10 +23,10 @@ public class Slider extends AbstractSlider implements DrawableElement {
     public boolean discrete;
 
     public Slider() {
-        super(0, 0, 0, 0, StringTextComponent.EMPTY, 0);
+        super(0, 0, 0, 0, LiteralText.EMPTY, 0);
     }
 
-    public Slider(int x, int y, int width, int height, double value, double min, double max, ITextComponent label) {
+    public Slider(int x, int y, int width, int height, double value, double min, double max, Text label) {
         super(x, y, width, height, label, (value - min) / (max - min));
 
         this.label = label;
@@ -39,7 +36,7 @@ public class Slider extends AbstractSlider implements DrawableElement {
         this.scaledValue = value;
         this.discrete = true;
 
-        this.func_230972_a_();
+        this.applyValue();
     }
 
     public Slider x(int x) {
@@ -66,7 +63,7 @@ public class Slider extends AbstractSlider implements DrawableElement {
         return this;
     }
 
-    public Slider label(ITextComponent label) {
+    public Slider label(Text label) {
         this.label = label;
 
         return this;
@@ -99,9 +96,9 @@ public class Slider extends AbstractSlider implements DrawableElement {
     }
 
     public Slider value(double value) {
-        this.sliderValue = (value - this.min) / this.range;
+        this.value = (value - this.min) / this.range;
         this.scaledValue = value;
-        this.func_230972_a_();
+        this.applyValue();
 
         return this;
     }
@@ -135,15 +132,14 @@ public class Slider extends AbstractSlider implements DrawableElement {
     }
 
     @Override
-    protected void func_230972_a_() {
-        Object formattedValue = this.discrete || Math.abs(this.scaledValue) >= 100 ? (long) this.scaledValue : floatFormat.format(this.scaledValue);
-
-        this.setMessage(this.label == StringTextComponent.EMPTY ? new StringTextComponent(String.valueOf(formattedValue)) : new StringTextComponent(String.format("%s:%s", this.label, formattedValue)));
+    protected void applyValue() {
+        var formattedValue = this.discrete || Math.abs(this.scaledValue) >= 100 ? (long) this.scaledValue : floatFormat.format(this.scaledValue);
+        this.setMessage(this.label == LiteralText.EMPTY ? Text.of(String.valueOf(formattedValue)) : Text.of("%s:%s".formatted(this.label, formattedValue)));
     }
 
     @Override
-    protected void func_230979_b_() {
-        this.scaledValue = this.min + this.sliderValue * this.range;
+    protected void updateMessage() {
+        this.scaledValue = this.min + this.value * this.range;
 
         if (this.onScroll != null) {
             this.onScroll.accept(this);

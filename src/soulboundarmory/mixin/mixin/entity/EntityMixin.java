@@ -7,8 +7,8 @@ import java.util.Map;
 import net.auoeke.reflect.Fields;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.BossInfo;
+import net.minecraft.entity.boss.BossBar;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +21,6 @@ import soulboundarmory.component.Component;
 import soulboundarmory.component.ComponentKey;
 import soulboundarmory.mixin.access.entity.EntityAccess;
 
-@SuppressWarnings("ConstantConditions")
 @Mixin(Entity.class)
 abstract class EntityMixin implements EntityAccess {
     private static final Reference2BooleanMap<EntityType<?>> bosses = new Reference2BooleanOpenHashMap<>();
@@ -41,7 +40,7 @@ abstract class EntityMixin implements EntityAccess {
 
             while (klass != null) {
                 for (var field : Fields.fields(klass)) {
-                    if (BossInfo.class.isAssignableFrom(field.getType())) {
+                    if (BossBar.class.isAssignableFrom(field.getType())) {
                         bosses.put(type, true);
 
                         break;
@@ -63,15 +62,15 @@ abstract class EntityMixin implements EntityAccess {
         return this.components;
     }
 
-    @Inject(method = "saveWithoutId", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addAdditionalSaveData(Lnet/minecraft/nbt/CompoundNBT;)V"))
-    public void serializeComponents(CompoundNBT tag, CallbackInfoReturnable<CompoundNBT> info) {
+    @Inject(method = "writeNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V"))
+    public void serializeComponents(NbtCompound tag, CallbackInfoReturnable<NbtCompound> info) {
         this.components.forEach((key, component) -> tag.put(key.id.toString(), component.serialize()));
     }
 
-    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readAdditionalSaveData(Lnet/minecraft/nbt/CompoundNBT;)V"))
-    public void deserializeComponents(CompoundNBT tag, CallbackInfo info) {
+    @Inject(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V"))
+    public void deserializeComponents(NbtCompound tag, CallbackInfo info) {
         this.components.forEach((key, component) -> {
-            var componentTag = (CompoundNBT) tag.get(key.id.toString());
+            var componentTag = (NbtCompound) tag.get(key.id.toString());
 
             if (componentTag != null) {
                 component.deserialize(componentTag);
