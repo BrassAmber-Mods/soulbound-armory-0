@@ -2,7 +2,7 @@ package soulboundarmory.util;
 
 import java.util.Random;
 
-public class MathUtil {
+public class Math2 {
     public static double signum(double first, double... others) {
         var sign = Math.signum(first);
 

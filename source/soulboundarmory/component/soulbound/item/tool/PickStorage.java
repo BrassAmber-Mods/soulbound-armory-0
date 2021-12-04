@@ -101,18 +101,10 @@ public class PickStorage extends ToolStorage<PickStorage> {
     }
 
     @Override
-    public double increase(StatisticType statistic, int points) {
-        if (statistic == StatisticType.efficiency) {
-            return 0.5;
-        }
-
-        if (statistic == StatisticType.reach) {
-            return 0.1;
-        }
-
-        if (statistic == StatisticType.miningLevel) {
-            return 0.2;
-        }
+    public double increase(StatisticType statistic) {
+        if (statistic == StatisticType.efficiency) return 0.5;
+        if (statistic == StatisticType.reach) return 0.1;
+        if (statistic == StatisticType.miningLevel) return 0.2;
 
         return 0;
     }

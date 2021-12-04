@@ -159,7 +159,7 @@ public class GreatswordStorage extends WeaponStorage<GreatswordStorage> {
     }
 
     @Override
-    public double increase(StatisticType statistic, int points) {
+    public double increase(StatisticType statistic) {
         if (statistic == StatisticType.attackSpeed) return 0.02;
         if (statistic == StatisticType.attackDamage) return 0.1;
         if (statistic == StatisticType.criticalStrikeRate) return 0.01;

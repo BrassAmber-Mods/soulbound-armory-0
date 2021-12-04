@@ -139,7 +139,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public double increase(StatisticType statistic, int points) {
+    public double increase(StatisticType statistic) {
         if (statistic == StatisticType.attackSpeed) return 0.08;
         if (statistic == StatisticType.attackDamage) return 0.2;
         if (statistic == StatisticType.criticalStrikeRate) return 0.04;

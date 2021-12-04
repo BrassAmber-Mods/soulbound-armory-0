@@ -1,7 +1,7 @@
 package soulboundarmory.entity;
 
 import soulboundarmory.mixin.access.entity.AbstractArrowEntityAccess;
-import soulboundarmory.util.MathUtil;
+import soulboundarmory.util.Math2;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -30,7 +30,7 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     }
 
     public double displacement(double x, double y, double z) {
-        return this.distance(x, y, z) * MathUtil.signum(x - this.getX(), y - this.getY(), z - this.getZ());
+        return this.distance(x, y, z) * Math2.signum(x - this.getX(), y - this.getY(), z - this.getZ());
     }
 
     public double distance(double x, double y, double z) {
@@ -58,7 +58,7 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     }
 
     public double getVelocityD() {
-        return this.getSpeed() * MathUtil.signum(this.velocityX(), this.velocityY(), this.velocityZ());
+        return this.getSpeed() * Math2.signum(this.velocityX(), this.velocityY(), this.velocityZ());
     }
 
     protected int life() {

@@ -2,6 +2,8 @@ package soulboundarmory.component.soulbound.item;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -42,7 +44,6 @@ import soulboundarmory.serial.CompoundSerializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
 import soulboundarmory.util.ItemUtil;
-import soulboundarmory.util.MathUtil;
 
 public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundSerializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
@@ -77,7 +78,7 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public abstract Item consumableItem();
 
-    public abstract double increase(StatisticType statistic, int points);
+    public abstract double increase(StatisticType statistic);
 
     public abstract int getLevelXP(int level);
 
@@ -213,26 +214,45 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     }
 
     public void incrementPoints(StatisticType type, int points) {
-        var sign = MathUtil.signum(points);
+        if (points == 0) {
+            return;
+        }
+
         var statistic = this.statistic(type);
+        BigDecimal change;
 
-        for (var c = 0; c < Math.abs(points); c++) {
-            if (sign > 0 && this.intValue(StatisticType.attributePoints) > 0 || sign < 0 && statistic.aboveMin()) {
-                this.statistic(StatisticType.attributePoints).add(-sign);
-                this.statistic(StatisticType.spentAttributePoints).add(sign);
+        if (points > 0) {
+            change = BigDecimal.valueOf(statistic.max()).subtract(statistic.value());
+            var newPoints = change.divide(BigDecimal.valueOf(this.increase(type)), RoundingMode.CEILING);
+            var bigPoints = BigDecimal.valueOf(points);
 
-                statistic.add(sign * this.increase(type));
-                statistic.incrementPoints(sign);
+            if (newPoints.compareTo(bigPoints) < 0) {
+                points = newPoints.intValue();
+            } else {
+                change = BigDecimal.valueOf(this.increase(type)).multiply(bigPoints);
+            }
+        } else {
+            change = BigDecimal.valueOf(statistic.min()).subtract(statistic.value());
+            var newPoints = change.divide(BigDecimal.valueOf(this.increase(type)), RoundingMode.CEILING);
+            var bigPoints = BigDecimal.valueOf(points);
+
+            if (newPoints.compareTo(bigPoints) > 0) {
+                points = newPoints.intValue();
+            } else {
+                change = BigDecimal.valueOf(this.increase(type)).multiply(bigPoints);
             }
         }
 
+        var attributePoints = this.statistic(StatisticType.attributePoints);
+        var spentAttributePoints = this.statistic(StatisticType.spentAttributePoints);
+
+        attributePoints.add(-points);
+        spentAttributePoints.add(points);
+        statistic.add(change);
+        statistic.incrementPoints(points);
+
         this.updateItemStack();
         this.sync();
-    }
-
-    public double increase(StatisticType statisticType) {
-        var statistic = this.statistic(statisticType);
-        return statistic == null ? 0 : this.increase(statisticType, statistic.points());
     }
 
     public void set(StatisticType statistic, Number value) {

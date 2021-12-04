@@ -164,6 +164,9 @@ public class CommonEvents {
 */
     }
 
+    /**
+     Cancel damage to leaping players, determine whether player hits are critical and apply {@link Skills#nourishment}.
+     */
     @SubscribeEvent
     public static void damage(LivingDamageEvent event) {
         var damage = event.getSource();
@@ -195,8 +198,7 @@ public class CommonEvents {
                     var amount = event.getAmount();
 
                     if (((WeaponStorage<?>) storage).hit()) {
-                        amount *= 2;
-                        event.setAmount(amount);
+                        event.setAmount(amount *= 2);
                         player.addCritParticles(target);
                     }
 
