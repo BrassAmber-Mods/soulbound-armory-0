@@ -17,12 +17,13 @@
         "entity.player.PlayerInventoryEntityMixin",
         "entity.projectile.AbstractArrowEntityMixin",
         "item.ItemStackMixin",
-        "roman.LanguageDummyMixin",
         "roman.TranslationStorageMixin",
         "text.TextColorMixin",
         "text.StyleMixin",
         "text.StyleMixin$SerializerMixin",
-        "text.FormattingMixin"
+        "text.FormattingMixin",
+        "dummy.ExtendedFormattingDummyMixin",
+        "dummy.LanguageDummyMixin"
     ],
     "injectors": {
         "defaultRequire": 1,

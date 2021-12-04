@@ -11,7 +11,7 @@ targetCompatibility = 17
 
 sourceSets {
     main {
-        java.srcDirs = ["src"]
+        java.srcDirs = ["source"]
 
         resources {
             srcDirs = ["resources"]
@@ -42,6 +42,10 @@ dependencies {
     forge("net.minecraftforge:forge:1.16.5-36.2.19")
 
     implementation("net.auoeke:reflect:latest.integration")
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add("-nowarn")
 }
 
 java {
