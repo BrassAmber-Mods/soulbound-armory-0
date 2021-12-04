@@ -90,6 +90,10 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
         ++this.points;
     }
 
+    public BigDecimal value() {
+        return this.value;
+    }
+
     public void value(BigDecimal value) {
         this.value = value;
     }

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import cell.client.gui.CellElement;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.bar.BarStyle;
-import soulboundarmory.util.MathUtil;
+import soulboundarmory.util.Math2;
 import soulboundarmory.util.Resources;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.texture.NativeImage;
@@ -70,7 +70,7 @@ public class ExperienceBarTexture extends ResourceTexture {
                         var color = (int) (multipliers[bar] * Math.round(Math.sqrt(0.299F * pixel[0] * pixel[0] + 0.587F * pixel[1] * pixel[1] + 0.114F * pixel[2] * pixel[2])));
 
                         if (pixel[3] > 0) {
-                            nativeImage.setPixelColor(u, v, MathUtil.pack(color, color, color));
+                            nativeImage.setPixelColor(u, v, Math2.pack(color, color, color));
                         }
                     }
                 }

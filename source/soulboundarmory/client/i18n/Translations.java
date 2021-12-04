@@ -31,14 +31,14 @@ public class Translations {
     public static final Translation green = new Translation("gui.soulbound-armory.green");
     public static final Translation blue = new Translation("gui.soulbound-armory.blue");
     public static final Translation alpha = new Translation("gui.soulbound-armory.alpha");
-    public static final Translation guiToolEfficiency = new Translation("soulbound-armory.menu.efficiency.format");
-    public static final Translation guiWeaponEfficiency = new Translation("soulbound-armory.menu.efficiency.format");
-    public static final Translation guiReach = new Translation("soulbound-armory.menu.reach");
-    public static final Translation guiMiningLevel = new Translation("soulbound-armory.menu.mining_level");
-    public static final Translation guiAttackSpeed = new Translation("soulbound-armory.tooltip.attack_speed");
-    public static final Translation guiAttackDamage = new Translation("soulbound-armory.menu.attack_damage");
-    public static final Translation guiCriticalStrikeRate = new Translation("soulbound-armory.menu.critical_strike_rate");
-    public static final Translation guiAttackRange = new Translation("soulbound-armory.menu.attack_range");
+    public static final Translation guiToolEfficiency = new Translation("gui.soulbound-armory.tool_efficiency");
+    public static final Translation guiWeaponEfficiency = new Translation("gui.soulbound-armory.weapon_efficiency");
+    public static final Translation guiReach = new Translation("gui.soulbound-armory.reach");
+    public static final Translation guiMiningLevel = new Translation("gui.soulbound-armory.mining_level");
+    public static final Translation guiAttackSpeed = new Translation("gui.soulbound-armory.attack_speed");
+    public static final Translation guiAttackDamage = new Translation("gui.soulbound-armory.attack_damage");
+    public static final Translation guiCriticalStrikeRate = new Translation("gui.soulbound-armory.critical_strike_rate");
+    public static final Translation guiAttackRange = new Translation("gui.soulbound-armory.attack_range");
 
     public static final Translation barLevel = new Translation("gui.soulbound-armory.bar.world");
     public static final Translation barXP = new Translation("gui.soulbound-armory.bar.xp");

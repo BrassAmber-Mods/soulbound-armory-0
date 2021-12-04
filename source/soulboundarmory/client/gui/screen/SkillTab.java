@@ -12,17 +12,15 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.skill.SkillContainer;
 
-@OnlyIn(Dist.CLIENT)
 public class SkillTab extends SoulboundTab {
     protected static final Identifier background = new Identifier("textures/block/andesite.png");
     protected static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
-    protected static final Identifier WIDGETS = new Identifier("textures/gui/advancements/widgets.png");
+    protected static final Identifier widgets = new Identifier("textures/gui/advancements/widgets.png");
+
     protected static final ScalableWidget grayRectangle = new ScalableWidget().grayRectangle();
     protected static final ScalableWidget blueRectangle = new ScalableWidget().blueRectangle();
 
@@ -153,7 +151,7 @@ public class SkillTab extends SoulboundTab {
                 chroma = this.chroma;
             }
 
-            textureManager.bindTexture(WIDGETS);
+            textureManager.bindTexture(widgets);
             this.drawTexture(matrices, x - 4, y - 4, 1, 155 - offsetV, 24, 24);
 
             RenderSystem.color3f(chroma, chroma, chroma);

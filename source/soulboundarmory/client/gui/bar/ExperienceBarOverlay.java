@@ -1,24 +1,21 @@
 package soulboundarmory.client.gui.bar;
 
+import cell.client.gui.widget.scalable.ScalableWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
 import java.util.Optional;
-import cell.client.gui.widget.scalable.ScalableWidget;
-import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.client.texture.ExperienceBarTexture;
-import soulboundarmory.config.Configuration;
-import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.util.ItemUtil;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.SoulboundArmoryClient;
+import soulboundarmory.client.texture.ExperienceBarTexture;
+import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.config.Configuration;
+import soulboundarmory.item.SoulboundItem;
+import soulboundarmory.util.ItemUtil;
 
-@OnlyIn(Dist.CLIENT)
 public class ExperienceBarOverlay extends ScalableWidget {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Colors colors = configuration.colors;
@@ -61,7 +58,7 @@ public class ExperienceBarOverlay extends ScalableWidget {
     }
 
     private boolean update(ItemStack itemStack) {
-        if (this.update(ItemStorage.get(SoulboundArmoryClient.player(), itemStack.getItem()))) {
+        if (this.update(ItemStorage.get(minecraft.player, itemStack.getItem()))) {
             if (itemStack.getItem() instanceof SoulboundItem && this.itemStack != itemStack) {
                 this.itemStack = itemStack;
             }

@@ -40,7 +40,6 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
             case 3 -> Translations.miningLevelObsidian;
             default -> Text.of("unknown");
         };
-
     }
 
     @Override
