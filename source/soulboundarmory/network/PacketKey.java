@@ -11,12 +11,13 @@ import soulboundarmory.SoulboundArmory;
 /**
  A key to a registered packet type; used for sending packets.
 
- @param <T> the message type of packets of the type to which this key corresponds.
+ @param <T> the message type of {@link P}.
+ @param <P> the packet type to which this key corresponds
  */
 public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey.Client, PacketKey.Server {
     public final Class<P> type;
 
-    PacketKey(Class<P> type) {
+    protected PacketKey(Class<P> type) {
         this.type = type;
     }
 
@@ -34,6 +35,9 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
         return Constructors.instantiate(this.type);
     }
 
+    /**
+     A server-to-client packet key.
+     */
     public static final class Client<T, P extends Packet<T>> extends PacketKey<T, P> {
         Client(Class<P> type) {
             super(type);
@@ -47,6 +51,9 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
         }
     }
 
+    /**
+     A client-to-server packet key.
+     */
     public static final class Server<T, P extends Packet<T>> extends PacketKey<T, P> {
         Server(Class<P> type) {
             super(type);
