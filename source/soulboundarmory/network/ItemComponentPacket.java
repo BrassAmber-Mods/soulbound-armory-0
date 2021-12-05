@@ -4,7 +4,7 @@ import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.StorageType;
 
 public abstract class ItemComponentPacket extends BufferPacket {
-    public abstract void execute(ItemStorage<?> storage);
+    protected abstract void execute(ItemStorage<?> storage);
 
     @Override
     public void execute() {

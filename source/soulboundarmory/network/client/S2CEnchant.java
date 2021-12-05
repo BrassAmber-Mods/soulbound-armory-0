@@ -1,6 +1,5 @@
 package soulboundarmory.network.client;
 
-import net.minecraft.enchantment.Enchantment;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.network.ItemComponentPacket;
