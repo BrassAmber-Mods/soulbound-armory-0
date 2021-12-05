@@ -13,39 +13,51 @@ import soulboundarmory.SoulboundArmory;
 
  @param <T> the message type of packets of the type to which this key corresponds.
  */
-public final class PacketKey<T> {
-    public final Class<? extends Packet<T>> type;
+public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey.Client, PacketKey.Server {
+    public final Class<P> type;
 
-    PacketKey(Class<? extends Packet<T>> type) {
+    PacketKey(Class<P> type) {
         this.type = type;
+    }
+
+    protected P store(T message) {
+        var packet = this.instantiate();
+        packet.store(message);
+
+        return packet;
     }
 
     /**
      Instantiate a packet of the registered type.
      */
-    Packet<T> instantiate() {
+    P instantiate() {
         return Constructors.instantiate(this.type);
     }
 
-    /**
-     Send a message from the server to a client.
-     */
-    public void send(Entity player, T message) {
-        SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    public static final class Client<T, P extends Packet<T>> extends PacketKey<T, P> {
+        Client(Class<P> type) {
+            super(type);
+        }
+
+        /**
+         Send a message from the server to a client.
+         */
+        public void send(Entity player, T message) {
+            SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+        }
     }
 
-    /**
-     Send a message from the client to the server.
-     */
-    @OnlyIn(Dist.CLIENT)
-    public void send(T message) {
-        SoulboundArmory.channel.sendToServer(this.store(message));
-    }
+    public static final class Server<T, P extends Packet<T>> extends PacketKey<T, P> {
+        Server(Class<P> type) {
+            super(type);
+        }
 
-    private Packet<T> store(T message) {
-        var packet = this.instantiate();
-        packet.store(message);
-
-        return packet;
+        /**
+         Send a message from the client to the server.
+         */
+        @OnlyIn(Dist.CLIENT)
+        public void send(T message) {
+            SoulboundArmory.channel.sendToServer(this.store(message));
+        }
     }
 }

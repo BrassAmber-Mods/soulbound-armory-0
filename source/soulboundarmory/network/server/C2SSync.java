@@ -10,11 +10,11 @@ public class C2SSync extends ItemComponentPacket {
         var tag = this.message.readNbt();
 
         if (tag.contains("tab")) {
-            storage.tab(tag.getInt("tab"));
+            storage.component().tab(tag.getInt("tab"));
         }
 
         if (storage instanceof StaffStorage staff && tag.contains("spell")) {
-            staff.setSpell((tag.getInt("spell")));
+            staff.spell((tag.getInt("spell")));
         }
     }
 }
