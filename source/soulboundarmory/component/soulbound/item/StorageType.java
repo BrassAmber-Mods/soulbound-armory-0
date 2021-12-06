@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
+import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.tool.PickStorage;
 import soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
@@ -13,11 +17,6 @@ import soulboundarmory.component.soulbound.item.weapon.SwordStorage;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.registry.RegistryEntry;
 import soulboundarmory.util.Util;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraftforge.registries.IForgeRegistry;
 
 @SuppressWarnings("unchecked")
 public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<StorageType<T>> {
@@ -59,7 +58,7 @@ public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<S
 
         for (var itemStack : entity.getItemsHand()) {
             var item = itemStack.getItem();
-            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(item)).findFirst();
+            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(itemStack)).findFirst();
 
             if (storage.isPresent()) {
                 return storage;

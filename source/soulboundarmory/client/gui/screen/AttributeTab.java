@@ -17,7 +17,7 @@ public class AttributeTab extends SoulboundTab {
     protected List<StatisticEntry> attributes;
 
     public AttributeTab() {
-        super(Translations.menuButtonAttributes);
+        super(Translations.guiButtonAttributes);
     }
 
     @Override

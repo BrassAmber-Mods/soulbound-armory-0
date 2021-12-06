@@ -62,7 +62,7 @@ public abstract class SoulboundTab extends ScreenTab {
             .y(this.height - this.height / 16 - 20)
             .width(112)
             .height(20)
-            .text(Translations.menuButtonReset)
+            .text(Translations.guiButtonReset)
             .primaryAction(action);
     }
 
@@ -100,8 +100,8 @@ public abstract class SoulboundTab extends ScreenTab {
     protected Text pointText(int points) {
         return switch (points) {
             case 0 -> LiteralText.EMPTY;
-            case 1 -> Translations.menuUnspentPoint;
-            default -> Translations.menuUnspentPoints.format(points);
+            case 1 -> Translations.guiUnspentPoint;
+            default -> Translations.guiUnspentPoints.format(points);
         };
     }
 }

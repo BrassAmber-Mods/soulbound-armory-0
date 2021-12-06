@@ -4,7 +4,7 @@ import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.network.ItemComponentPacket;
 
-public class C2SReset extends ItemComponentPacket {
+public final class C2SReset extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
         var identifier = this.message.readIdentifier();

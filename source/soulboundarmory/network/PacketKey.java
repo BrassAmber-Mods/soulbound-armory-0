@@ -11,7 +11,7 @@ import soulboundarmory.SoulboundArmory;
 /**
  A key to a registered packet type; used for sending packets.
 
- @param <T> the message type of {@link P}.
+ @param <T> the message type of {@link P}
  @param <P> the packet type to which this key corresponds
  */
 public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey.Client, PacketKey.Server {
@@ -21,9 +21,9 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
         this.type = type;
     }
 
-    protected P store(T message) {
+    protected final P store(T message) {
         var packet = this.instantiate();
-        packet.store(message);
+        packet.message = message;
 
         return packet;
     }
@@ -31,7 +31,7 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
     /**
      Instantiate a packet of the registered type.
      */
-    P instantiate() {
+    final P instantiate() {
         return Constructors.instantiate(this.type);
     }
 
@@ -48,6 +48,12 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
          */
         public void send(Entity player, T message) {
             SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+        }
+
+        public void sendIfServer(Entity player, T message) {
+            if (!player.world.isClient) {
+                this.send(player, message);
+            }
         }
     }
 

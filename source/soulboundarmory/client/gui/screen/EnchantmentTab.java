@@ -15,7 +15,7 @@ import soulboundarmory.util.Util;
 
 public class EnchantmentTab extends SoulboundTab {
     public EnchantmentTab() {
-        super(Translations.menuButtonEnchantments);
+        super(Translations.guiButtonEnchantments);
     }
 
     @Override

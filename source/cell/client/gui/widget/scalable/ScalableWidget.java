@@ -1,19 +1,19 @@
 package cell.client.gui.widget.scalable;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import cell.client.gui.CellElement;
 import cell.client.gui.DrawableElement;
 import cell.client.gui.widget.Length;
 import cell.client.gui.widget.Widget;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
+/**
+ A textured widget that supports 9-slice scaling.
+ */
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-@OnlyIn(Dist.CLIENT)
 public class ScalableWidget extends Widget<ScalableWidget> {
     private static final Identifier advancementWidgets = new Identifier("textures/gui/advancements/widgets.png");
     private static final Identifier window = new Identifier("textures/gui/advancements/window.png");

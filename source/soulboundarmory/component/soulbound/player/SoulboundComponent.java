@@ -1,50 +1,59 @@
 package soulboundarmory.component.soulbound.player;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.List;
 import java.util.Map;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import soulboundarmory.component.ComponentKey;
 import soulboundarmory.component.EntityComponent;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.network.ExtendedPacketBuffer;
+import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
 
 public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
-    protected final Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages;
+    protected final Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages = new Object2ObjectOpenHashMap<>();
+    protected final boolean client = this.entity.world.isClient;
 
-    protected ItemStorage<?> currentItem;
+    protected int tab;
+    protected ItemStorage<?> storage;
 
     public SoulboundComponent(PlayerEntity player) {
         super(player);
-
-        this.storages = new Object2ObjectOpenHashMap<>();
     }
 
     public abstract boolean hasSoulboundItem();
+
+    public int tab() {
+        return this.tab;
+    }
+
+    public void tab(int tab) {
+        this.tab = tab;
+
+        if (this.client) {
+            Packets.serverTab.send(new ExtendedPacketBuffer().writeIdentifier(this.key().id).writeByte(tab));
+        }
+    }
+
+    public ItemStorage<?> storage() {
+        return this.storage;
+    }
+
+    public void currentItem(ItemStorage<?> storage) {
+        this.storage = storage;
+        storage.unlocked(true);
+    }
 
     protected void store(ItemStorage<?> storage) {
         this.storages.put(storage.type(), storage);
     }
 
-    public ItemStorage<?> storage() {
-        return this.currentItem;
-    }
-
-    public void currentItem(ItemStorage<?> storage) {
-        this.currentItem = storage;
-
-        storage.unlocked(true);
-    }
-
     public ItemStorage<?> heldItemStorage() {
-        for (var itemStack : this.entity.getItemsHand()) {
-            for (var component : this.storages.values()) {
-                if (itemStack.getItem() == component.item()) {
-                    return component;
-                }
+        for (var component : this.storages.values()) {
+            if (ItemUtil.isEquipped(this.entity, component.item())) {
+                return component;
             }
         }
 
@@ -74,7 +83,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
             var storage = this.heldItemStorage();
 
             if (storage == null) {
-                storage = this.currentItem;
+                storage = this.storage;
             } else {
                 this.currentItem(storage);
             }
@@ -118,13 +127,15 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
 
     @Override
     public void serialize(NbtCompound tag) {
-        if (this.currentItem != null) {
-            tag.putString("storage", this.currentItem.type().id().toString());
+        if (this.storage != null) {
+            tag.putString("storage", this.storage.type().id().toString());
         }
 
         for (var storage : this.storages.values()) {
             tag.put(storage.type().id().toString(), storage.serializeNBT());
         }
+
+        tag.putInt("tab", this.tab);
     }
 
     @Override
@@ -132,11 +143,15 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
         var type = StorageType.get(tag.getString("storage"));
 
         if (type != null) {
-            this.currentItem = this.storage(type);
+            this.storage = this.storage(type);
         }
 
         for (var storage : this.storages.values()) {
             storage.deserializeNBT(tag.getCompound(storage.type().id().toString()));
         }
+
+        this.tab = tag.getInt("tab");
     }
+
+    protected abstract ComponentKey<PlayerEntity, ? extends SoulboundComponent> key();
 }

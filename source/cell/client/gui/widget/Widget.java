@@ -103,6 +103,10 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
         return (T) this;
     }
 
+    /**
+     @see #isValidPrimaryClick
+     @see #isValidPrimaryKey
+     */
     public T primaryAction(PressCallback<T> action) {
         this.primaryAction = action;
 
@@ -190,8 +194,6 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     @Override
     public boolean changeFocus(boolean lookForwards) {
-        super.changeFocus(lookForwards);
-
         if (this.active && this.visible) {
             this.selected ^= true;
 
@@ -254,8 +256,6 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX, mouseY, button);
-
         if (this.clicked(mouseX, mouseY)) {
             if (this.isValidPrimaryClick(button)) {
                 this.primaryPress();
@@ -285,7 +285,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!super.keyPressed(keyCode, scanCode, modifiers) && this.selected) {
+        if (this.selected) {
             if (this.isValidTertiaryKey(keyCode, scanCode, modifiers)) {
                 this.tertiaryPress();
             } else if (this.isValidSecondaryKey(keyCode, scanCode, modifiers)) {
@@ -302,32 +302,65 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
         return false;
     }
 
+    /**
+     Determine whether the click should trigger the primary action.
+
+     @return `true` for left click (0) by default.
+     */
     public boolean isValidPrimaryClick(int button) {
         return this.primaryAction != null && button == 0;
     }
 
+    /**
+     Determine whether the click should trigger the secondary action.
+
+     @return `true` for right click (1) by default.
+     */
     public boolean isValidSecondaryClick(int button) {
         return this.secondaryAction != null && button == 1;
     }
 
+    /**
+     Determine whether the click should trigger the tertiary action.
+
+     @return `true` for middle click (2) by default.
+     */
     public boolean isValidTertiaryClick(int button) {
         return this.tertiaryAction != null && button == 2;
     }
 
-    private boolean isValidSecondaryKey(int keyCode, int scanCode, int modifiers) {
-        return this.secondaryAction != null && this.isValidKey(keyCode, scanCode, modifiers) && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
-    }
+    /**
+     Determine whether the key press should trigger the primary action.
 
-    private boolean isValidTertiaryKey(int keyCode, int scanCode, int modifiers) {
-        return this.tertiaryAction != null && this.isValidKey(keyCode, scanCode, modifiers) && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
-    }
-
+     @return `true` for the space bar by default.
+     */
     public boolean isValidPrimaryKey(int keyCode, int scanCode, int modifiers) {
-        return this.primaryAction != null && this.isValidKey(keyCode, scanCode, modifiers);
+        return this.primaryAction != null && this.isValidActionKey(keyCode, scanCode, modifiers);
     }
 
-    public boolean isValidKey(int keyCode, int scanCode, int modifiers) {
-        return keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER;
+    /**
+     Determine whether the key press should trigger the secondary action.
+
+     @return `true` for the space bar when a shift key is pressed by default.
+     */
+    private boolean isValidSecondaryKey(int keyCode, int scanCode, int modifiers) {
+        return this.secondaryAction != null && this.isValidActionKey(keyCode, scanCode, modifiers) && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
+    }
+
+    /**
+     Determine whether the key press should trigger the tertiary action.
+
+     @return `true` for the space bar when a control key is pressed by default.
+     */
+    private boolean isValidTertiaryKey(int keyCode, int scanCode, int modifiers) {
+        return this.tertiaryAction != null && this.isValidActionKey(keyCode, scanCode, modifiers) && (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
+    }
+
+    /**
+     Determine whether the key press is a valid action key.
+     */
+    public boolean isValidActionKey(int keyCode, int scanCode, int modifiers) {
+        return keyCode == GLFW.GLFW_KEY_SPACE;
     }
 
     protected void press() {
@@ -336,23 +369,20 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     protected void primaryPress() {
         this.press();
-
         this.primaryAction.onPress((T) this);
     }
 
     protected void secondaryPress() {
         this.press();
-
         this.secondaryAction.onPress((T) this);
     }
 
     protected void tertiaryPress() {
         this.press();
-
         this.tertiaryAction.onPress((T) this);
     }
 
-    public void playSound() {
+    protected void playSound() {
         soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1));
     }
 }

@@ -1,20 +1,26 @@
 package soulboundarmory.component.soulbound.item.tool;
 
 import com.google.common.collect.Multimap;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.config.Configuration;
-import soulboundarmory.entity.SAAttributes;
-import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.item.SoulboundToolItem;
+import java.util.List;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
+import soulboundarmory.client.gui.screen.AttributeTab;
+import soulboundarmory.client.gui.screen.EnchantmentTab;
+import soulboundarmory.client.gui.screen.SelectionTab;
+import soulboundarmory.client.gui.screen.SkillTab;
+import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.config.Configuration;
+import soulboundarmory.entity.SAAttributes;
+import soulboundarmory.item.SoulboundItem;
+import soulboundarmory.item.SoulboundToolItem;
 
 public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<T> {
     public ToolStorage(SoulboundComponent component, Item item) {
@@ -55,5 +61,10 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
     @Override
     public Class<? extends SoulboundItem> itemClass() {
         return SoulboundToolItem.class;
+    }
+
+    @Override
+    protected List<SoulboundTab> tabs() {
+        return List.of(new SelectionTab(Translations.guiToolSelection), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 }

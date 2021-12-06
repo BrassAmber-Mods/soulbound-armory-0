@@ -46,6 +46,7 @@
     "gui.soulbound-armory.mining_level": "§cmining level: %s",
     "gui.soulbound-armory.reach": "§ereach: %s",
     "gui.soulbound-armory.attack_range": "§eattack range: %s",
+    "hud.soulbound-armory.spell": "§4§l%s",
     "attribute.soulbound-armory.attack_damage": " §6%s attack damage",
     "attribute.soulbound-armory.attack_speed": " §c%s attack speed",
     "attribute.soulbound-armory.critical_strike_rate": " §e%s critical strike rate",

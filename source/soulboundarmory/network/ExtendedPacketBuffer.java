@@ -73,6 +73,13 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         return this;
     }
 
+    @Override
+    public ExtendedPacketBuffer writeByte(int B) {
+        super.writeByte(B);
+
+        return this;
+    }
+
     public ExtendedPacketBuffer writeEntity(Entity entity) {
         return this.writeUuid(entity.getUuid());
     }
@@ -80,10 +87,6 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     //    public Entity readEntity() {
     //        return EntityUtil.getEntity(this.readUuid());
     //    }
-
-    public ExtendedPacketBuffer writePlayer(Entity player) {
-        return this.writeEntity(player);
-    }
 
     //    public PlayerEntity readPlayer() {
     //        return (PlayerEntity) this.readEntity();

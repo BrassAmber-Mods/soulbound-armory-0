@@ -54,7 +54,7 @@ public class CommonEvents {
     public static void construct(EntityEvent.EntityConstructing event) {
         var entity = event.getEntity();
 
-        ComponentRegistry.registry.forEach(key -> {
+        ComponentRegistry.each(key -> {
             if (key.type.isInstance(entity)) {
                 ((EntityAccess) entity).soulboundarmory$components().put(key, ((Function<Entity, Component>) key.instantiate).apply(entity));
             }
