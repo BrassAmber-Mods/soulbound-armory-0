@@ -30,8 +30,8 @@ import static soulboundarmory.component.statistics.StatisticType.experience;
 import static soulboundarmory.component.statistics.StatisticType.level;
 
 /**
- * The main menu of this mod.
- * It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
+ The main menu of this mod.
+ It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
  */
 public class SoulboundScreen extends CellScreen {
     protected final PlayerEntity player = SoulboundArmoryClient.player();
@@ -49,9 +49,9 @@ public class SoulboundScreen extends CellScreen {
     private SoulboundTab tab;
     private ScalableWidget button;
 
-    public SoulboundScreen(SoulboundComponent component, int currentIndex, SoulboundTab... tabs) {
+    public SoulboundScreen(SoulboundComponent component, int currentIndex, List<SoulboundTab> tabs) {
         this.component = component;
-        this.tabs = List.of(tabs);
+        this.tabs = tabs;
 
         for (var index = 0; index < this.tabs.size(); index++) {
             var tab = this.tabs.get(index);
@@ -64,34 +64,39 @@ public class SoulboundScreen extends CellScreen {
 
     @Override
     protected void init() {
-        this.storage = this.component.menuStorage();
-        this.stack = this.component.menuStorage().stack();
+        super.init();
 
-        for (var itemStack : this.player.getItemsHand()) {
-            if (itemStack.equals(this.stack)) {
-                this.stack = itemStack;
+        this.tabButtons.clear();
+        this.options.clear();
+        this.sliders.clear();
 
-                break;
+        this.storage = this.component.storage();
+
+        if (this.storage != null) {
+            this.stack = this.storage.stack();
+
+            for (var itemStack : this.player.getItemsHand()) {
+                if (itemStack.equals(this.stack)) {
+                    this.stack = itemStack;
+
+                    break;
+                }
             }
         }
 
-        super.init();
-
         if (this.displayTabs()) {
-            if (this.tabButtons.isEmpty()) {
-                for (int index = 0, size = this.tabs.size(); index < size; index++) {
-                    var tab = this.add(this.button(this.tabs.get(index)));
-                    this.tabButtons.add(tab);
+            for (int index = 0, size = this.tabs.size(); index < size; index++) {
+                var tab = this.add(this.button(this.tabs.get(index)));
+                this.tabButtons.add(tab);
 
-                    if (index == this.storage.tab()) {
-                        tab.active = false;
-                    }
+                if (index == this.component.tab()) {
+                    tab.active = false;
                 }
             }
 
             this.button = this.button(this.tab);
 
-            var text = this.slot != this.storage.boundSlot() ? Translations.menuButtonBind : Translations.menuButtonUnbind;
+            var text = this.slot != this.storage.boundSlot() ? Translations.guiButtonBind : Translations.guiButtonUnbind;
             var buttonWidth = Math.max(this.button.width(), this.textRenderer.getWidth(text) + 8);
 
             this.add(new ScalableWidget().button()
@@ -106,23 +111,21 @@ public class SoulboundScreen extends CellScreen {
             this.add(this.xpBar = new ExperienceBarOverlay(this.storage).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true));
 
             if (Configuration.instance().client.displayOptions) {
-                if (this.options.isEmpty()) {
-                    var configuration = Configuration.instance().client;
-                    var colors = configuration.colors;
+                var configuration = Configuration.instance().client;
+                var colors = configuration.colors;
 
-                    this.sliders.add(this.addButton(this.colorSlider(colors.red, Translations.red, 0)));
-                    this.sliders.add(this.addButton(this.colorSlider(colors.green, Translations.green, 1)));
-                    this.sliders.add(this.addButton(this.colorSlider(colors.blue, Translations.blue, 2)));
-                    this.sliders.add(this.addButton(this.colorSlider(colors.alpha, Translations.alpha, 3)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.red, Translations.red, 0)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.green, Translations.green, 1)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.blue, Translations.blue, 2)));
+                this.sliders.add(this.addButton(this.colorSlider(colors.alpha, Translations.alpha, 3)));
 
-                    this.options.addAll(this.sliders);
-                    this.options.add(this.add(this.optionButton(
-                        4,
-                        Translations.style.format(configuration.style.text),
-                        this.cycleStyleAction(1),
-                        this.cycleStyleAction(-1)
-                    )));
-                }
+                this.options.addAll(this.sliders);
+                this.options.add(this.add(this.optionButton(
+                    4,
+                    Translations.style.format(configuration.style.text),
+                    this.cycleStyleAction(1),
+                    this.cycleStyleAction(-1)
+                )));
 
                 this.add(this.options);
             }
@@ -184,6 +187,17 @@ public class SoulboundScreen extends CellScreen {
         return super.mouseScrolled(x, y, d);
     }
 
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (modifiers == 0 && SoulboundArmoryClient.guiKeyBinding.matchesKey(keyCode, scanCode)) {
+            this.onClose();
+
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
     protected Slider sliderMousedOver(double x, double y) {
         for (var slider : this.sliders) {
             if (CellElement.contains(x, y, slider.x, slider.y, slider.getWidth(), slider.getHeight())) {
@@ -222,7 +236,7 @@ public class SoulboundScreen extends CellScreen {
     }
 
     protected boolean hoveringBar(double mouseX, double mouseY) {
-        return this.displayTabs() && this.xpBar.contains(mouseX, mouseY);
+        return this.displayTabs() && this.xpBar != null && this.xpBar.contains(mouseX, mouseY);
     }
 
     protected boolean hoveringLevel(int mouseX, int mouseY) {
@@ -279,21 +293,25 @@ public class SoulboundScreen extends CellScreen {
     }
 
     public boolean displayTabs() {
-        return this.slot > -1 && this.storage.isUnlocked();
+        return this.slot > -1 && this.storage != null && this.storage.isUnlocked();
     }
 
-    @SuppressWarnings("UnusedAssignment")
     private void tab(int tab) {
         this.remove(this.tab);
         this.tab = this.tabs.get(tab);
 
-        this.button.active = true;
-        this.tab.button = this.button = this.tabButtons.get(tab);
-        this.button.active = false;
+        if (this.button != null) {
+            this.button.active = true;
+        }
+
+        if (!this.tabButtons.isEmpty()) {
+            this.tab.button = this.button = this.tabButtons.get(tab);
+            this.button.active = false;
+        }
 
         this.tab.open(this.width, this.height);
         this.add(this.tab);
-        this.storage.tab(tab);
+        this.component.tab(tab);
     }
 
     private void cycleStyle(int change) {

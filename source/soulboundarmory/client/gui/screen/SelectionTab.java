@@ -4,31 +4,39 @@ import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import java.util.stream.Collectors;
 import net.minecraft.client.util.math.MatrixStack;
-import soulboundarmory.client.i18n.Translations;
+import net.minecraft.text.Text;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
+import soulboundarmory.network.server.C2SSelectItem;
+import soulboundarmory.util.ItemUtil;
 
+/**
+ The item selection tab, which adds a button for each {@linkplain ItemStorage#isUnlocked unlocked} or {@linkplain ItemStorage#canUnlock unlockable} item.
+ When a button is pressed, {@linkplain C2SSelectItem a packet} is sent to the server and the held item is replaced by the selected item.
+ */
 public class SelectionTab extends SoulboundTab {
-    public SelectionTab() {
-        super(Translations.menuWeaponSelection);
+    public SelectionTab(Text title) {
+        super(title);
     }
 
     @Override
     protected void init() {
+        super.init();
+
         var buttonWidth = 128;
         var buttonHeight = 20;
         var centerX = (this.width - buttonWidth) / 2;
-        var ySep = 32;
+        var separation = 32;
 
         var selection = this.parent.component.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
-        var top = (this.height - buttonHeight - ySep * (selection.size() - 1)) / 2;
+        var top = (this.height - buttonHeight - separation * (selection.size() - 1)) / 2;
 
         for (int row = 0, size = selection.size(); row < size; row++) {
             var storage = selection.get(row);
             var button = this.add(new ScalableWidget().button()
                 .x(centerX)
-                .y(top + (row * ySep))
+                .y(top + row * separation)
                 .width(buttonWidth)
                 .height(buttonHeight)
                 .text(storage.name())
@@ -36,7 +44,7 @@ public class SelectionTab extends SoulboundTab {
             );
 
             if (this.parent.displayTabs()) {
-                button.active = storage.type() != this.parent.storage.type();
+                button.active = ItemUtil.inventoryStream(this.parent.player).noneMatch(stack -> stack.getItem() == storage.item());
             }
         }
     }
@@ -45,15 +53,12 @@ public class SelectionTab extends SoulboundTab {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
-        if (!this.parent.storage.itemEquipped()) {
+        if (this.parent.storage != null && !this.parent.storage.itemEquipped()) {
             drawCenteredText(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
         }
     }
 
     protected PressCallback<ScalableWidget> selectAction(ItemStorage<?> storage) {
-        return button -> {
-            Packets.serverItemType.send(new ExtendedPacketBuffer(storage).writeInt(this.parent.slot));
-            this.removed();
-        };
+        return button -> Packets.serverSelectItem.send(new ExtendedPacketBuffer(storage).writeInt(this.parent.slot));
     }
 }

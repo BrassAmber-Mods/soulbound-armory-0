@@ -5,7 +5,7 @@ import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.network.ItemComponentPacket;
 
-public class C2SEnchant extends ItemComponentPacket {
+public final class C2SEnchant extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
         var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(this.message.readIdentifier());

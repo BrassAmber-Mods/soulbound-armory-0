@@ -32,7 +32,7 @@ public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem 
         if (!world.isClient) {
             var component = StaffStorage.get(user);
 
-            if (component.getFireballCooldown() <= 0) {
+            if (component.fireballCooldown <= 0) {
                 world.spawnEntity(new SoulboundFireballEntity(world, user, component.spell()));
 
                 if (!user.isCreative()) {

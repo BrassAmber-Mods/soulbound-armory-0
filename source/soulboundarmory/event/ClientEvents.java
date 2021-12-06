@@ -4,7 +4,6 @@ import cell.client.gui.CellElement;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.text.LiteralText;
@@ -22,12 +21,12 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.bar.ExperienceBarOverlay;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.text.Translation;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = SoulboundArmory.ID)
@@ -38,19 +37,17 @@ public class ClientEvents {
     @SubscribeEvent
     public static void scroll(InputEvent.MouseScrollEvent event) {
         if (Screen.hasAltDown()) {
-            PlayerEntity player = SoulboundArmoryClient.client.player;
+            var player = SoulboundArmoryClient.client.player;
 
             if (player != null && player.world != null) {
                 var storage = Components.weapon.of(player).heldItemStorage();
 
-                if (storage instanceof StaffStorage) {
-                    var dY = (int) event.getMouseY();
+                if (storage instanceof StaffStorage staff) {
+                    var dy = (int) event.getMouseY();
 
-                    if (dY != 0) {
-                        var staffStorage = (StaffStorage) storage;
-
-                        staffStorage.cycleSpells(-dY);
-                        SoulboundArmoryClient.client.inGameHud.setOverlayMessage(new Translation("§4§l%s", staffStorage.spell()), false);
+                    if (dy != 0) {
+                        staff.cycleSpells(-dy);
+                        SoulboundArmoryClient.client.inGameHud.setOverlayMessage(Translations.hudSpell.format(staff.spell()), false);
 
                         event.setCanceled(true);
                     }

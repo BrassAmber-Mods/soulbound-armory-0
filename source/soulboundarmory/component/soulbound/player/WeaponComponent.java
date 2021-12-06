@@ -1,5 +1,7 @@
 package soulboundarmory.component.soulbound.player;
 
+import soulboundarmory.component.ComponentKey;
+import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
 import soulboundarmory.component.soulbound.item.weapon.GreatswordStorage;
 import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
@@ -22,5 +24,10 @@ public class WeaponComponent extends SoulboundComponent {
     @Override
     public boolean hasSoulboundItem() {
         return ItemUtil.has(this.entity, SoulboundWeaponItem.class);
+    }
+
+    @Override
+    protected ComponentKey<PlayerEntity, ? extends SoulboundComponent> key() {
+        return Components.weapon;
     }
 }

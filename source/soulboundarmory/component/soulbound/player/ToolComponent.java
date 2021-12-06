@@ -1,5 +1,7 @@
 package soulboundarmory.component.soulbound.player;
 
+import soulboundarmory.component.ComponentKey;
+import soulboundarmory.component.Components;
 import soulboundarmory.item.SoulboundToolItem;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.ItemUtil;
@@ -16,5 +18,10 @@ public class ToolComponent extends SoulboundComponent {
     @Override
     public boolean hasSoulboundItem() {
         return ItemUtil.has(this.entity, SoulboundToolItem.class);
+    }
+
+    @Override
+    protected ComponentKey<PlayerEntity, ? extends SoulboundComponent> key() {
+        return Components.tool;
     }
 }

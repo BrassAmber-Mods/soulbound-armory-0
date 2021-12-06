@@ -12,21 +12,21 @@ public class Translations {
     public static final Translation guiKey = new Translation("key.soulbound-armory.gui");
     public static final Translation toggleXPBar = new Translation("key.soulbound-armory.bar");
 
-    public static final Translation menuToolSelection = new Translation("gui.soulbound-armory.confirmation");
-    public static final Translation menuWeaponSelection = new Translation("gui.soulbound-armory.selection");
-    public static final Translation menuButtonAttributes = new Translation("gui.soulbound-armory.attributes");
-    public static final Translation menuButtonEnchantments = new Translation("gui.soulbound-armory.enchantments");
-    public static final Translation menuSkills = new Translation("gui.soulbound-armory.skills");
-    public static final Translation menuButtonReset = new Translation("gui.soulbound-armory.reset");
-    public static final Translation menuButtonBind = new Translation("gui.soulbound-armory.bind");
-    public static final Translation menuButtonUnbind = new Translation("gui.soulbound-armory.unbind");
-    public static final Translation menuUnspentPoints = new Translation("gui.soulbound-armory.unspent_points");
-    public static final Translation menuUnspentPoint = new Translation("gui.soulbound-armory.unspent_point");
-    public static final Translation menuPoints = new Translation("gui.soulbound-armory.points");
-    public static final Translation menuPoint = new Translation("gui.soulbound-armory.point");
-    public static final Translation menuSkillLearnCost = new Translation("gui.soulbound-armory.learn_cost");
-    public static final Translation menuSkillUpgradeCost = new Translation("gui.soulbound-armory.upgrade_cost");
-    public static final Translation menuLevel = new Translation("gui.soulbound-armory.world");
+    public static final Translation guiToolSelection = new Translation("gui.soulbound-armory.confirmation");
+    public static final Translation guiWeaponSelection = new Translation("gui.soulbound-armory.selection");
+    public static final Translation guiButtonAttributes = new Translation("gui.soulbound-armory.attributes");
+    public static final Translation guiButtonEnchantments = new Translation("gui.soulbound-armory.enchantments");
+    public static final Translation guiSkills = new Translation("gui.soulbound-armory.skills");
+    public static final Translation guiButtonReset = new Translation("gui.soulbound-armory.reset");
+    public static final Translation guiButtonBind = new Translation("gui.soulbound-armory.bind");
+    public static final Translation guiButtonUnbind = new Translation("gui.soulbound-armory.unbind");
+    public static final Translation guiUnspentPoints = new Translation("gui.soulbound-armory.unspent_points");
+    public static final Translation guiUnspentPoint = new Translation("gui.soulbound-armory.unspent_point");
+    public static final Translation guiPoints = new Translation("gui.soulbound-armory.points");
+    public static final Translation guiPoint = new Translation("gui.soulbound-armory.point");
+    public static final Translation guiSkillLearnCost = new Translation("gui.soulbound-armory.learn_cost");
+    public static final Translation guiSkillUpgradeCost = new Translation("gui.soulbound-armory.upgrade_cost");
+    public static final Translation guiLevel = new Translation("gui.soulbound-armory.world");
     public static final Translation red = new Translation("gui.soulbound-armory.red");
     public static final Translation green = new Translation("gui.soulbound-armory.green");
     public static final Translation blue = new Translation("gui.soulbound-armory.blue");
@@ -39,6 +39,8 @@ public class Translations {
     public static final Translation guiAttackDamage = new Translation("gui.soulbound-armory.attack_damage");
     public static final Translation guiCriticalStrikeRate = new Translation("gui.soulbound-armory.critical_strike_rate");
     public static final Translation guiAttackRange = new Translation("gui.soulbound-armory.attack_range");
+
+    public static final Translation hudSpell = new Translation("hud.soulbound-armory.spell");
 
     public static final Translation barLevel = new Translation("gui.soulbound-armory.bar.world");
     public static final Translation barXP = new Translation("gui.soulbound-armory.bar.xp");

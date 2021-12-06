@@ -25,16 +25,17 @@ import soulboundarmory.component.statistics.EnchantmentStorage;
 import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
+import soulboundarmory.network.ExtendedPacketBuffer;
+import soulboundarmory.network.Packets;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
-import soulboundarmory.util.Util;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
-import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
 
 public class StaffStorage extends WeaponStorage<StaffStorage> {
-    protected int fireballCooldown;
+    public int fireballCooldown;
+
     protected int spell;
 
     public StaffStorage(SoulboundComponent component, Item item) {
@@ -49,8 +50,11 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
         this.enchantments = new EnchantmentStorage(enchantment -> {
             var name = enchantment.getTranslationKey().toLowerCase();
 
-            return enchantment.isAcceptableItem(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
-                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
+            return enchantment.isAcceptableItem(this.itemStack)
+                && !enchantment.isCursed()
+                && enchantment != UNBREAKING
+                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
+                && !name.contains("holding")
                 && !name.contains("mending");
         });
 
@@ -71,14 +75,6 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
         return StorageType.staff;
     }
 
-    public int getFireballCooldown() {
-        return this.fireballCooldown;
-    }
-
-    public void setFireballCooldown(int ticks) {
-        this.fireballCooldown = ticks;
-    }
-
     public void resetFireballCooldown() {
         this.fireballCooldown = (int) Math.round(20 / this.doubleValue(StatisticType.attackSpeed));
     }
@@ -87,14 +83,16 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
         return this.spell;
     }
 
-    public void setSpell(int spell) {
+    public void spell(int spell) {
         this.spell = spell;
     }
 
     public void cycleSpells(int spells) {
         this.spell = Math.abs((this.spell + spells) % 2);
 
-        this.sync();
+        if (this.client) {
+            Packets.serverSpell.send(new ExtendedPacketBuffer().writeByte(this.spell));
+        }
     }
 
     @Override
@@ -158,21 +156,13 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     public void serializeNBT(NbtCompound tag) {
         super.serializeNBT(tag);
 
-        tag.putInt("spell", this.spell);
+        tag.putByte("spell", (byte) this.spell);
     }
 
     @Override
     public void deserializeNBT(NbtCompound tag) {
         super.deserializeNBT(tag);
 
-        this.setSpell(tag.getInt("spell"));
-    }
-
-    @Override
-    public NbtCompound clientTag() {
-        var tag = super.clientTag();
-        tag.putInt("spell", this.spell);
-
-        return tag;
+        this.spell(tag.getByte("spell"));
     }
 }

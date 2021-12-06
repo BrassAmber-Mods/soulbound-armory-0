@@ -1,6 +1,13 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
+import java.util.List;
 import net.minecraft.item.Item;
+import soulboundarmory.client.gui.screen.AttributeTab;
+import soulboundarmory.client.gui.screen.EnchantmentTab;
+import soulboundarmory.client.gui.screen.SelectionTab;
+import soulboundarmory.client.gui.screen.SkillTab;
+import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
@@ -40,5 +47,10 @@ public abstract class WeaponStorage<T extends ItemStorage<T>> extends ItemStorag
         }
 
         return false;
+    }
+
+    @Override
+    protected List<SoulboundTab> tabs() {
+        return List.of(new SelectionTab(Translations.guiWeaponSelection), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 }

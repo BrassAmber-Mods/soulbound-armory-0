@@ -99,6 +99,7 @@ public class Slider extends SliderWidget implements DrawableElement {
         this.value = (value - this.min) / this.range;
         this.scaledValue = value;
         this.applyValue();
+        this.updateMessage();
 
         return this;
     }
@@ -132,13 +133,13 @@ public class Slider extends SliderWidget implements DrawableElement {
     }
 
     @Override
-    protected void applyValue() {
+    protected void updateMessage() {
         var formattedValue = this.discrete || Math.abs(this.scaledValue) >= 100 ? (long) this.scaledValue : floatFormat.format(this.scaledValue);
         this.setMessage(this.label == LiteralText.EMPTY ? Text.of(String.valueOf(formattedValue)) : Text.of("%s:%s".formatted(this.label, formattedValue)));
     }
 
     @Override
-    protected void updateMessage() {
+    protected void applyValue() {
         this.scaledValue = this.min + this.value * this.range;
 
         if (this.onScroll != null) {
