@@ -358,9 +358,11 @@ public abstract class Widget<T extends Widget<T>> extends CellElement {
 
     /**
      Determine whether the key press is a valid action key.
+
+     @return `true` for space bar and return and enter keys.
      */
     public boolean isValidActionKey(int keyCode, int scanCode, int modifiers) {
-        return keyCode == GLFW.GLFW_KEY_SPACE;
+        return keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER;
     }
 
     protected void press() {
