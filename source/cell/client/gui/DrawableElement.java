@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface DrawableElement extends Drawable, Element, TextureTickListener {
+    // Needs to be named diffirently from Screen#client.
     MinecraftClient minecraft = MinecraftClient.getInstance();
     TextRenderer textDrawer = minecraft.textRenderer;
     TextureManager textureManager = minecraft.textureManager;

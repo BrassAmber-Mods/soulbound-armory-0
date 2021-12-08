@@ -8,6 +8,6 @@ public final class C2SAttribute extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
         storage.incrementPoints(StatisticType.registry.getValue(this.message.readIdentifier()), this.message.readInt());
-        storage.refresh();
+        storage.component.refresh();
     }
 }

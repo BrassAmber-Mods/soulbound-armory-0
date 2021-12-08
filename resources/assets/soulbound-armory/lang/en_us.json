@@ -33,7 +33,7 @@
     "gui.soulbound-armory.alpha": "alpha",
     "gui.soulbound-armory.bar.level": "%s/%s",
     "gui.soulbound-armory.bar.xp": "%s/%s",
-    "gui.soulbound-armory.bar.full_xp": "%s/%s",
+    "gui.soulbound-armory.bar.full_xp": "%s",
     "gui.soulbound-armory.style": "style: %s",
     "gui.soulbound-armory.style.experience": "experience",
     "gui.soulbound-armory.style.boss": "boss",

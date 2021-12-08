@@ -38,7 +38,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        var component = Components.weapon.of(player).storage(StorageType.dagger);
+        var component = Components.weapon.of(player).item(StorageType.dagger);
 
         if (!world.isClient && component.hasSkill(Skills.throwing)) {
             player.setCurrentHand(hand);

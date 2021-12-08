@@ -1,19 +1,13 @@
 package soulboundarmory.component.soulbound.item.tool;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraftforge.common.ForgeMod;
 import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.StorageType;
@@ -23,7 +17,6 @@ import soulboundarmory.component.statistics.EnchantmentStorage;
 import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
-import soulboundarmory.entity.SAAttributes;
 import soulboundarmory.registry.Skills;
 
 import static net.minecraft.enchantment.Enchantments.MENDING;
@@ -49,7 +42,7 @@ public class PickStorage extends ToolStorage<PickStorage> {
                 && !Stream.of("soulbound", "holding", "smelt").map(name::contains).reduce(false, (contains, value) -> value || contains);
         });
 
-        this.skills = new SkillStorage(Skills.enderPull, Skills.ambidexterity);
+        this.skills = new SkillStorage(Skills.enderPull/*, Skills.ambidexterity*/);
     }
 
     @Override
@@ -65,17 +58,6 @@ public class PickStorage extends ToolStorage<PickStorage> {
     @Override
     public StorageType<PickStorage> type() {
         return StorageType.pick;
-    }
-
-    @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
-        var modifiers = HashMultimap.<EntityAttribute, EntityAttributeModifier>create();
-
-        if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.attributeRelative(StatisticType.reach), EntityAttributeModifier.Operation.ADDITION));
-        }
-
-        return modifiers;
     }
 
     @Override

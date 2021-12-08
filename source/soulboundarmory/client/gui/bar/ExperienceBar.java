@@ -3,20 +3,16 @@ package soulboundarmory.client.gui.bar;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
-import java.util.Optional;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.StorageType;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.util.ItemUtil;
 
-public class ExperienceBarOverlay extends ScalableWidget {
+public class ExperienceBar extends ScalableWidget {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Colors colors = configuration.colors;
 
@@ -26,21 +22,18 @@ public class ExperienceBarOverlay extends ScalableWidget {
     protected int row;
     protected int length;
 
-    public ExperienceBarOverlay() {
+    {
         this.experienceBar().texture(ExperienceBarTexture.instance);
     }
 
-    public ExperienceBarOverlay(ItemStack itemStack) {
-        this();
+    public ExperienceBar() {}
 
+    public ExperienceBar(ItemStack itemStack) {
         this.update(itemStack);
     }
 
-    public ExperienceBarOverlay(ItemStorage<?> storage) {
-        this();
-
+    public ExperienceBar(ItemStorage<?> storage) {
         this.update(storage);
-        this.storage = storage;
     }
 
     public void data(int row, int length) {
@@ -48,17 +41,15 @@ public class ExperienceBarOverlay extends ScalableWidget {
         this.length = length;
     }
 
-    public void drawTooltip(MatrixStack stack, int tooltipX, int tooltipY, ItemStack itemStack) {
+    public void drawTooltip(MatrixStack stack, ItemStack itemStack, int x, int y, int width) {
         if (this.update(itemStack)) {
-            var x = tooltipX + 4;
-            var y = tooltipY + this.row * 10;
-
-            // this.render(stack, x, y, this.length);
+            this.x(x + 4).y(y + this.row * 10).width(width - 8);
+            this.render(stack);
         }
     }
 
     private boolean update(ItemStack itemStack) {
-        if (this.update(ItemStorage.get(minecraft.player, itemStack.getItem()))) {
+        if (this.update(ItemStorage.get(minecraft.player, itemStack).orElse(null))) {
             if (itemStack.getItem() instanceof SoulboundItem && this.itemStack != itemStack) {
                 this.itemStack = itemStack;
             }
@@ -67,16 +58,8 @@ public class ExperienceBarOverlay extends ScalableWidget {
         return false;
     }
 
-    private boolean update(Optional<? extends ItemStorage<?>> storage) {
-        return this.update(storage.orElse(null));
-    }
-
     private boolean update(ItemStorage<?> component) {
-        if (component != null) {
-            this.storage = component;
-        }
-
-        return this.storage != null;
+        return (this.storage = component) != null;
     }
 
     @Override
@@ -94,7 +77,7 @@ public class ExperienceBarOverlay extends ScalableWidget {
             super.render(matrixes, mouseX, mouseY, delta);
 
             if (this.storage.canLevelUp()) {
-                this.widthLimit(Math.min(1, this.storage.statistic(StatisticType.experience).floatValue() / this.storage.nextLevelXP()));
+                this.widthLimit(Math.min(1, this.storage.floatValue(StatisticType.experience) / this.storage.nextLevelXP()));
             }
 
             this.v(style.v + 5);
@@ -119,14 +102,20 @@ public class ExperienceBarOverlay extends ScalableWidget {
     }
 
     public boolean render(MatrixStack matrixes, Window window) {
-        var player = SoulboundArmoryClient.player();
-        var item = ItemUtil.handItems(player).stream().filter(i -> this.update(StorageType.get(player, i))).findAny();
-        item.ifPresent(stack -> this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes));
+        var item = ItemStorage.firstEquipped(minecraft.player, false);
 
-        return item.isPresent();
+        if (item.isPresent()) {
+            this.update(item.get());
+            this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes);
+
+            return true;
+        }
+
+        return false;
     }
 
-    private void render(MatrixStack stack, int x, int y, int width) {
+/*
+    private void render(MatrixStack stack) {
         if (colors.alpha > 3) {
             var color = new Color(colors.red, colors.green, colors.blue, colors.alpha);
             var components = color.getComponents(null);
@@ -136,15 +125,15 @@ public class ExperienceBarOverlay extends ScalableWidget {
                 style = BarStyle.EXPERIENCE;
             }
 
-            this.x(x).y(y).v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]).render(stack);
-            this.v(style.v + 5).widthLimit(this.storage.canLevelUp() ? Math.min(1, this.storage.statistic(StatisticType.experience).floatValue() / this.storage.nextLevelXP()) : width).render(stack);
+            this.v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]).render(stack);
+            this.v(style.v + 5).widthLimit(this.storage.canLevelUp() ? Math.min(1, this.storage.floatValue(StatisticType.experience) / this.storage.nextLevelXP()) : this.length).render(stack);
 
             var level = this.storage.intValue(StatisticType.level);
 
             if (level > 0) {
                 var levelString = String.valueOf(level);
-                var levelX = x - textDrawer.getWidth(levelString) / 2;
-                var levelY = y - 8;
+                var levelX = this.x() - textDrawer.getWidth(levelString) / 2;
+                var levelY = this.y() - 8;
 
                 textDrawer.draw(stack, levelString, levelX + 1, levelY, 0);
                 textDrawer.draw(stack, levelString, levelX - 1, levelY, 0);
@@ -156,4 +145,5 @@ public class ExperienceBarOverlay extends ScalableWidget {
             RenderSystem.disableLighting();
         }
     }
+*/
 }

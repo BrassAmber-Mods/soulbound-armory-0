@@ -62,7 +62,7 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     public static StaffStorage get(Entity entity) {
-        return Components.weapon.of(entity).storage(StorageType.staff);
+        return Components.weapon.of(entity).item(StorageType.staff);
     }
 
     @Override

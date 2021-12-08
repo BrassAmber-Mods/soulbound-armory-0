@@ -1,5 +1,10 @@
 package soulboundarmory.component.soulbound.player;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import soulboundarmory.client.gui.screen.SelectionTab;
+import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.ComponentKey;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
@@ -8,8 +13,6 @@ import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
 import soulboundarmory.component.soulbound.item.weapon.SwordStorage;
 import soulboundarmory.item.SoulboundWeaponItem;
 import soulboundarmory.registry.SoulboundItems;
-import soulboundarmory.util.ItemUtil;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class WeaponComponent extends SoulboundComponent {
     public WeaponComponent(PlayerEntity player) {
@@ -22,12 +25,17 @@ public class WeaponComponent extends SoulboundComponent {
     }
 
     @Override
-    public boolean hasSoulboundItem() {
-        return ItemUtil.has(this.entity, SoulboundWeaponItem.class);
+    public ComponentKey<PlayerEntity, ? extends SoulboundComponent> key() {
+        return Components.weapon;
     }
 
     @Override
-    protected ComponentKey<PlayerEntity, ? extends SoulboundComponent> key() {
-        return Components.weapon;
+    protected boolean isAcceptable(ItemStack stack) {
+        return stack.getItem() instanceof SoulboundWeaponItem;
+    }
+
+    @Override
+    public SoulboundTab selectionTab() {
+        return new SelectionTab(Translations.guiWeaponSelection);
     }
 }

@@ -2,12 +2,15 @@ package soulboundarmory.item;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
+import net.minecraft.world.World;
 
 public abstract class SoulboundMeleeWeapon extends SwordItem implements SoulboundWeaponItem {
     protected final float reach;
@@ -30,5 +33,10 @@ public abstract class SoulboundMeleeWeapon extends SwordItem implements Soulboun
         }
 
         return modifiers;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        this.bindSlot(stack, entity, slot);
     }
 }

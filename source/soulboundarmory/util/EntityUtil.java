@@ -1,12 +1,15 @@
 package soulboundarmory.util;
 
+import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import java.util.UUID;
-import soulboundarmory.mixin.access.entity.EntityAccess;
+import net.auoeke.reflect.Fields;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.boss.BossBar;
 
 public class EntityUtil {
+    private static final Reference2BooleanMap<Class<?>> bosses = new Reference2BooleanOpenHashMap<>();
+
     public static double speed(Entity entity) {
         var velocity = entity.getVelocity();
         return Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
@@ -25,6 +28,22 @@ public class EntityUtil {
     }
 
     public static boolean isBoss(Entity entity) {
-        return ((EntityAccess) entity).soulboundarmory$isBoss();
+        return isBoss(entity.getClass());
+    }
+
+    private static boolean isBoss(Class<?> type) {
+        if (type == null) {
+            return false;
+        }
+
+        return bosses.computeBooleanIfAbsent(type, type1 -> {
+            for (var field : Fields.fields(type1)) {
+                if (BossBar.class.isAssignableFrom(field.getType())) {
+                    return true;
+                }
+            }
+
+            return isBoss(type1.getSuperclass());
+        });
     }
 }

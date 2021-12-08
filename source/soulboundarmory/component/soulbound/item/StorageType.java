@@ -1,11 +1,7 @@
 package soulboundarmory.component.soulbound.item;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.component.Components;
@@ -42,38 +38,12 @@ public final class StorageType<T extends ItemStorage<T>> extends RegistryEntry<S
         return get(new Identifier(name));
     }
 
-    public static List<ItemStorage<?>> storages(Entity entity) {
-        return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T extends ItemStorage<T>> Optional<ItemStorage<T>> get(Entity entity, Item item) {
-        return storages(entity).stream().filter(storage -> storage.item() == item).findAny().map(Util::cast);
-    }
-
-    public static Optional<ItemStorage<?>> firstSoulboundItem(Entity entity) {
-        if (entity == null) {
-            return Optional.empty();
-        }
-
-        for (var itemStack : entity.getItemsHand()) {
-            var item = itemStack.getItem();
-            var storage = Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage1 -> storage1.item() == item || storage1.canConsume(itemStack)).findFirst();
-
-            if (storage.isPresent()) {
-                return storage;
-            }
-        }
-
-        return Optional.empty();
-    }
-
     public T get(Entity entity) {
         return Components.soulbound(entity).map(this::get).filter(Objects::nonNull).findAny().orElse(null);
     }
 
     public T get(SoulboundComponent component) {
-        return component.storage(this);
+        return component.item(this);
     }
 
     @Override

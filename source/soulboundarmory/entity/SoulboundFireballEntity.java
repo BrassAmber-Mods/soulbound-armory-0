@@ -48,7 +48,7 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
 
     protected void updatePlayer() {
         if (this.getEntity() != null) {
-            this.storage = Components.weapon.of(this.getEntity()).storage(StorageType.staff);
+            this.storage = Components.weapon.of(this.getEntity()).item(StorageType.staff);
         }
     }
 

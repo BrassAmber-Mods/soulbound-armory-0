@@ -1,25 +1,24 @@
 package soulboundarmory.registry;
 
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.skill.tool.common.AmbidexteritySkill;
+import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.tool.common.EnderPullSkill;
+import soulboundarmory.skill.weapon.common.NourishmentSkill;
 import soulboundarmory.skill.weapon.dagger.ReturnSkill;
+import soulboundarmory.skill.weapon.dagger.ShadowCloneSkill;
 import soulboundarmory.skill.weapon.dagger.SneakReturnSkill;
 import soulboundarmory.skill.weapon.dagger.ThrowingSkill;
-import soulboundarmory.skill.weapon.staff.FireballSkill;
-import soulboundarmory.skill.weapon.staff.HealingSkill;
-import soulboundarmory.skill.weapon.staff.PenetrationSkill;
-import soulboundarmory.skill.Skill;
-import soulboundarmory.skill.weapon.common.NourishmentSkill;
-import soulboundarmory.skill.weapon.dagger.ShadowCloneSkill;
 import soulboundarmory.skill.weapon.greatsword.FreezingSkill;
 import soulboundarmory.skill.weapon.greatsword.LeapingSkill;
 import soulboundarmory.skill.weapon.staff.EndermanacleSkill;
+import soulboundarmory.skill.weapon.staff.FireballSkill;
+import soulboundarmory.skill.weapon.staff.HealingSkill;
+import soulboundarmory.skill.weapon.staff.PenetrationSkill;
 import soulboundarmory.skill.weapon.staff.VulnerabilitySkill;
 import soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 
 public class Skills {
-    public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
+    // public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
     public static final Skill endermanacle = new EndermanacleSkill(SoulboundArmory.id("endermanacle"));
     public static final Skill enderPull = new EnderPullSkill(SoulboundArmory.id("ender_pull"));
     public static final Skill fireball = new FireballSkill(SoulboundArmory.id("fireball"));

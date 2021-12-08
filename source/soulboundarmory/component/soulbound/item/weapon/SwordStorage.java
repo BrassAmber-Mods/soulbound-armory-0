@@ -59,7 +59,7 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     public static SwordStorage get(Entity entity) {
-        return Components.weapon.of(entity).storage(StorageType.sword);
+        return Components.weapon.of(entity).item(StorageType.sword);
     }
 
     @Override

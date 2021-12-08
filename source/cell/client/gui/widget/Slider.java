@@ -39,6 +39,9 @@ public class Slider extends SliderWidget implements DrawableElement {
         this.applyValue();
     }
 
+    @Override
+    public void tick() {}
+
     public Slider x(int x) {
         this.x = x;
 
@@ -146,7 +149,4 @@ public class Slider extends SliderWidget implements DrawableElement {
             this.onScroll.accept(this);
         }
     }
-
-    @Override
-    public void tick() {}
 }

@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -34,14 +34,14 @@ public abstract class CellScreen extends Screen implements DrawableElement {
     }
 
     public static List<StringVisitable> wrap(List<? extends StringVisitable> lines, int width) {
-        return lines.stream().map(line -> textHandler.wrapLines(line, width, Style.EMPTY)).flatMap(List::stream).collect(Collectors.toList());
+        return lines.stream().map(line -> textHandler.wrapLines(line, width, Style.EMPTY)).flatMap(List::stream).toList();
     }
 
     @Override
-    protected void init() {
-        super.init();
-
+    public void init(MinecraftClient client, int width, int height) {
         this.elements.clear();
+
+        super.init(client, width, height);
     }
 
     @Override
@@ -71,7 +71,7 @@ public abstract class CellScreen extends Screen implements DrawableElement {
     }
 
     protected void add(DrawableElement... elements) {
-        this.add(Arrays.asList(elements));
+        this.add(List.of(elements));
     }
 
     protected void remove(DrawableElement element) {

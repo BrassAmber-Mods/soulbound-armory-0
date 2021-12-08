@@ -15,6 +15,6 @@ public final class C2SBindSlot extends ItemComponentPacket {
         }
 
         // this.component.sync();
-        storage.refresh();
+        storage.component.refresh();
     }
 }

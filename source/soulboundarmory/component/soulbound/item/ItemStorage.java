@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityGroup;
@@ -21,8 +22,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.component.Components;
@@ -45,13 +44,12 @@ import soulboundarmory.util.ItemUtil;
 public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundSerializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
 
+    public final SoulboundComponent component;
     public final PlayerEntity player;
+    public final Item item;
     public EnchantmentStorage enchantments;
 
-    protected final SoulboundComponent component;
-    protected final Item item;
     protected final boolean client;
-
     protected SkillStorage skills;
     protected Statistics statistics;
     protected ItemStack itemStack;
@@ -60,8 +58,8 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public ItemStorage(SoulboundComponent component, Item item) {
         this.component = component;
-        this.player = component.entity;
-        this.client = component.entity.world.isClient;
+        this.player = component.player;
+        this.client = component.player.world.isClient;
         this.item = item;
         this.itemStack = this.newItemStack();
     }
@@ -84,27 +82,47 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public abstract Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot);
 
+    public static Stream<ItemStorage<?>> all(Entity entity) {
+        return Components.soulbound(entity).flatMap(component -> component.storages.values().stream());
+    }
+
     public static Optional<ItemStorage<?>> get(Entity entity, Item item) {
-        return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.player == entity && storage.item() == item).findAny();
+        return all(entity).filter(storage -> storage.player == entity && storage.item == item).findAny();
     }
 
     public static ItemStorage<?> get(Entity entity, StorageType<?> type) {
-        return Components.soulbound(entity).flatMap(component -> component.storages().values().stream()).filter(storage -> storage.type() == type).findAny().orElse(null);
+        return all(entity).filter(storage -> storage.type() == type).findAny().orElse(null);
     }
 
-    public SoulboundComponent component() {
-        return this.component;
+    public static Optional<ItemStorage<?>> get(Entity entity, ItemStack stack) {
+        return all(entity).filter(storage -> storage.accepts(stack)).findAny();
     }
 
-    public Item item() {
-        return this.item;
+    public static Optional<ItemStorage<?>> firstEquipped(Entity entity, boolean consumable) {
+        if (entity == null) {
+            return Optional.empty();
+        }
+
+        var storages = all(entity).toList();
+
+        for (var itemStack : entity.getItemsHand()) {
+            for (var storage : storages) {
+                if (storage.accepts(itemStack) || consumable && storage.canConsume(itemStack)) {
+                    return Optional.of(storage);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
-    public ItemStack menuEquippedStack() {
+    public boolean accepts(ItemStack stack) {
+        return stack.getItem() == this.item;
+    }
+
+    public ItemStack equippedMenuStack() {
         for (var itemStack : this.player.getItemsHand()) {
-            var item = itemStack.getItem();
-
-            if (item == this.item() || item == this.consumableItem()) {
+            if (this.accepts(itemStack) || this.canConsume(itemStack)) {
                 return itemStack;
             }
         }
@@ -160,6 +178,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
 
     public int intValue(StatisticType type) {
         return this.statistic(type).intValue();
+    }
+
+    public float floatValue(StatisticType type) {
+        return this.statistic(type).floatValue();
     }
 
     public double doubleValue(StatisticType type) {
@@ -376,12 +398,16 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.sync();
     }
 
+    public boolean canConsume(ItemStack item) {
+        return this.consumableItem() == item.getItem();
+    }
+
     public boolean canUnlock() {
         return !this.unlocked && ItemUtil.handStacks(this.player).anyMatch(this::canConsume);
     }
 
-    public boolean canConsume(ItemStack item) {
-        return this.consumableItem() == item.getItem();
+    public boolean isMenuItem(ItemStack stack) {
+        return this.accepts(stack) || this.canConsume(stack);
     }
 
     public int boundSlot() {
@@ -396,15 +422,13 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         this.boundSlot = -1;
     }
 
-    @SuppressWarnings("VariableUseSideOnly")
+/*
     public void refresh() {
         if (this.client) {
-            if (SoulboundArmoryClient.client.currentScreen instanceof SoulboundScreen) {
-                var handItems = ItemUtil.handItems(this.player);
-
-                if (handItems.contains(this.item())) {
+            if (CellElement.minecraft.currentScreen instanceof SoulboundScreen) {
+                if (ItemUtil.handStacks(this.player).anyMatch(this::accepts)) {
                     this.openGUI(this.component.tab());
-                } else if (handItems.contains(this.consumableItem())) {
+                } else if (ItemUtil.handStacks(this.player).anyMatch(this::canConsume)) {
                     this.openGUI(0);
                 }
             }
@@ -413,38 +437,61 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         }
     }
 
+    public boolean tryOpenGUI() {
+        var handStacks = ItemUtil.handStacks(this.player).toList().listIterator();
+
+        while (handStacks.hasNext()) {
+            var stack = handStacks.next();
+
+            if (this.accepts(stack)) {
+                this.openGUI(this.component.tab(), handStacks.previousIndex());
+            } else if (this.canConsume(stack)) {
+                this.openGUI(0, handStacks.previousIndex());
+            } else {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     public void openGUI() {
         this.openGUI(ItemUtil.equippedStack(this.player.inventory, this.itemClass()) == null ? 0 : this.component.tab());
     }
 
-    public void openGUI(int tab) {
+    public void openGUI(int tab, int slot) {
         if (this.client) {
             if (SoulboundArmoryClient.client.currentScreen instanceof SoulboundScreen screen && this.component.tab() == tab) {
                 screen.refresh();
             } else {
-                SoulboundArmoryClient.client.openScreen(new SoulboundScreen(this.component, tab, this.tabs()));
+                SoulboundArmoryClient.client.openScreen(new SoulboundScreen(this.component, this.tabs(), tab, slot));
             }
         } else {
             Packets.clientOpenGUI.send(this.player, new ExtendedPacketBuffer(this).writeInt(tab));
         }
     }
+*/
 
-    public boolean itemEquipped() {
-        return ItemUtil.isEquipped(this.player, this.item());
+    public boolean isItemEquipped() {
+        return ItemUtil.handStacks(this.player).anyMatch(this::accepts);
     }
 
-    public boolean anyItemEquipped() {
-        return this.menuEquippedStack() != null;
+    public boolean isMenuItemEquipped() {
+        return this.equippedMenuStack() != null;
     }
 
-    public void removeOtherItems() {
-        for (var storage : this.component.storages().values()) {
+    public void removeOtherItems(int slot) {
+        for (var storage : this.component.storages.values()) {
             if (storage != this) {
-                var player = this.player;
+                var inventory = ItemUtil.inventory(this.player).toList().listIterator();
 
-                for (var itemStack : ItemUtil.inventory(player)) {
-                    if (itemStack.getItem() == storage.item()) {
-                        player.inventory.removeOne(itemStack);
+                while (inventory.hasNext()) {
+                    var stack = inventory.next();
+
+                    if (storage.accepts(stack) && (storage != this || inventory.previousIndex() != slot)) {
+                        this.player.inventory.removeOne(stack);
                     }
                 }
             }
@@ -455,15 +502,19 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         return this.itemStack;
     }
 
+    protected ItemStack newItemStack() {
+        return new ItemStack(this.item);
+    }
+
     protected void updateItemStack() {
-        var itemStack = this.itemStack = this.newItemStack();
+        this.itemStack = this.newItemStack();
 
         for (var slot : EquipmentSlot.values()) {
             var attributeModifiers = this.attributeModifiers(slot);
 
             for (var attribute : attributeModifiers.keySet()) {
                 for (var modifier : attributeModifiers.get(attribute)) {
-                    itemStack.addAttributeModifier(attribute, modifier, EquipmentSlot.MAINHAND);
+                    this.itemStack.addAttributeModifier(attribute, modifier, EquipmentSlot.MAINHAND);
                 }
             }
         }
@@ -472,19 +523,12 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
             int level = entry.getValue();
 
             if (level > 0) {
-                itemStack.addEnchantment(entry.getKey(), level);
+                this.itemStack.addEnchantment(entry.getKey(), level);
             }
         }
     }
 
-    protected ItemStack newItemStack() {
-        var itemStack = new ItemStack(this.item);
-        //        Capabilities.itemData.get(itemStack).storage = this;
-
-        return itemStack;
-    }
-
-    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
+    public final Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
         return this.attributeModifiers(LinkedHashMultimap.create(), slot);
     }
 
@@ -492,6 +536,10 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
         var value = this.attributeTotal(statistic);
         return statisticFormat.format(statistic == StatisticType.criticalStrikeRate ? value * 100 : value);
     }
+
+    public abstract List<SoulboundTab> tabs();
+
+    public void tick() {}
 
     @Override
     public void serializeNBT(NbtCompound tag) {
@@ -519,8 +567,4 @@ public abstract class ItemStorage<T extends ItemStorage<T>> implements CompoundS
     public void sync() {
         Packets.clientSync.sendIfServer(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serializeNBT()));
     }
-
-    public void tick() {}
-
-    protected abstract List<SoulboundTab> tabs();
 }

@@ -10,5 +10,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(PlayerInventory.class)
 public interface PlayerInventoryAccess {
     @Accessor("combinedInventory")
-    List<DefaultedList<ItemStack>> compartments();
+    List<DefaultedList<ItemStack>> combinedInventory();
 }

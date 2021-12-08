@@ -2,13 +2,14 @@ package soulboundarmory.component.config;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import soulboundarmory.component.EntityComponent;
+import soulboundarmory.component.Component;
 
-public final class ConfigComponent extends EntityComponent<PlayerEntity> {
+public final class ConfigComponent implements Component {
+    public final PlayerEntity entity;
     public boolean levelupNotifications;
 
     public ConfigComponent(PlayerEntity player) {
-        super(player);
+        this.entity = player;
     }
 
     @Override

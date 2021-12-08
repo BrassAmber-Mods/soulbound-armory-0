@@ -15,7 +15,6 @@ public final class C2SReset extends ItemComponentPacket {
             storage.reset(Category.registry.getValue(identifier));
         }
 
-        // component.sync();
-        storage.refresh();
+        storage.component.refresh();
     }
 }

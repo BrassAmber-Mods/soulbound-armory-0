@@ -57,7 +57,7 @@ public class DaggerStorage extends WeaponStorage<DaggerStorage> {
     }
 
     public static DaggerStorage get(Entity entity) {
-        return Components.weapon.of(entity).storage(StorageType.dagger);
+        return Components.weapon.of(entity).item(StorageType.dagger);
     }
 
     @Override

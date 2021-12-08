@@ -36,7 +36,7 @@ abstract class LivingEntityMixin extends Entity {
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
         if ((Object) this instanceof PlayerEntity player && !this.world.isClient) {
-            var greatsword = Components.weapon.of(player).storage(StorageType.greatsword);
+            var greatsword = Components.weapon.of(player).item(StorageType.greatsword);
             var leapForce = greatsword.leapForce();
 
             if (leapForce > 0) {

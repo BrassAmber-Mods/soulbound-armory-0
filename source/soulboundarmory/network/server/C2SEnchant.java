@@ -17,6 +17,6 @@ public final class C2SEnchant extends ItemComponentPacket {
         }
 
         storage.addEnchantment(enchantment, change);
-        storage.refresh();
+        storage.component.refresh();
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -48,5 +49,10 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
         return HashMultimap.create();
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        this.bindSlot(stack, entity, slot);
     }
 }
