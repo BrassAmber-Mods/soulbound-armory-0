@@ -17,8 +17,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.serial.CompoundSerializable;
@@ -29,7 +29,7 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
         .setDimensions(1, 1)
         .build(SoulboundArmory.id("fireball").toString());
 
-    protected StaffStorage storage;
+    protected StaffComponent storage;
     protected int hitCount;
     protected int spell;
 
@@ -48,7 +48,7 @@ public class SoulboundFireballEntity extends SmallFireballEntity implements Comp
 
     protected void updatePlayer() {
         if (this.getEntity() != null) {
-            this.storage = Components.weapon.of(this.getEntity()).item(StorageType.staff);
+            this.storage = Components.weapon.of(this.getEntity()).item(ItemComponentType.staff);
         }
     }
 

@@ -7,10 +7,10 @@ import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.ComponentKey;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
-import soulboundarmory.component.soulbound.item.weapon.GreatswordStorage;
-import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
-import soulboundarmory.component.soulbound.item.weapon.SwordStorage;
+import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
+import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
+import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
+import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.item.SoulboundWeaponItem;
 import soulboundarmory.registry.SoulboundItems;
 
@@ -18,10 +18,10 @@ public class WeaponComponent extends SoulboundComponent {
     public WeaponComponent(PlayerEntity player) {
         super(player);
 
-        this.store(new DaggerStorage(this, SoulboundItems.dagger));
-        this.store(new SwordStorage(this, SoulboundItems.sword));
-        this.store(new GreatswordStorage(this, SoulboundItems.greatsword));
-        this.store(new StaffStorage(this, SoulboundItems.staff));
+        this.store(new DaggerComponent(this, SoulboundItems.dagger));
+        this.store(new SwordComponent(this, SoulboundItems.sword));
+        this.store(new GreatswordComponent(this, SoulboundItems.greatsword));
+        this.store(new StaffComponent(this, SoulboundItems.staff));
     }
 
     @Override

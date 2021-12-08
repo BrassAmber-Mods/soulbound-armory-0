@@ -1,13 +1,11 @@
 package soulboundarmory.component.soulbound.item;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import soulboundarmory.serial.CompoundSerializable;
 import soulboundarmory.util.Util;
 
 public class ItemData implements CompoundSerializable {
-    public ItemStorage<?> storage;
+    public ItemComponent<?> storage;
 
     @Override
     public void serializeNBT(NbtCompound tag) {
@@ -23,7 +21,7 @@ public class ItemData implements CompoundSerializable {
 
         if (server != null && tag.contains("player") && tag.contains("storage_type")) {
             var entity = server.getPlayerManager().getPlayer(tag.getUuid("player"));
-            var type = StorageType.get(tag.getString("storage_type"));
+            var type = ItemComponentType.get(tag.getString("storage_type"));
 
             if (type != null && entity != null) {
                 this.storage = type.get(entity);

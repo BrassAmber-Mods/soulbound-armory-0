@@ -24,8 +24,8 @@ import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
 
@@ -43,7 +43,7 @@ public class ClientEvents {
             if (player != null && player.world != null) {
                 var storage = Components.weapon.of(player).heldItemStorage();
 
-                if (storage instanceof StaffStorage staff) {
+                if (storage instanceof StaffComponent staff) {
                     var dy = (int) event.getMouseY();
 
                     if (dy != 0) {
@@ -73,9 +73,8 @@ public class ClientEvents {
 
         if (player != null) {
             var itemStack = event.getItemStack();
-            var item = itemStack.getItem();
 
-            ItemStorage.get(player, item).ifPresent(storage -> {
+            ItemComponent.get(player, itemStack).ifPresent(storage -> {
                 var tooltip = event.getToolTip();
                 var startIndex = 1;
 

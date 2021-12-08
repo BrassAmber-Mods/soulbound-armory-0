@@ -1,8 +1,8 @@
 package soulboundarmory.item;
 
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.registry.Skills;
@@ -38,7 +38,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        var component = Components.weapon.of(player).item(StorageType.dagger);
+        var component = Components.weapon.of(player).item(ItemComponentType.dagger);
 
         if (!world.isClient && component.hasSkill(Skills.throwing)) {
             player.setCurrentHand(hand);
@@ -52,7 +52,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
     @Override
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
         var player = (PlayerEntity) entity;
-        var component = DaggerStorage.get(player);
+        var component = DaggerComponent.get(player);
 
         if (!world.isClient) {
             var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);

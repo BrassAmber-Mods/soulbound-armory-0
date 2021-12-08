@@ -17,6 +17,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -26,13 +27,12 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.command.SoulboundArmoryCommand;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.component.soulbound.item.weapon.WeaponStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.entity.SAAttributes;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
@@ -55,7 +55,7 @@ public class CommonEvents {
         var player = event.getPlayer();
 
         if (!player.world.isClient) {
-            Components.soulbound(player).map(SoulboundComponent::item).filter(Objects::nonNull).forEach(ItemStorage::sync);
+            Components.soulbound(player).map(SoulboundComponent::item).filter(Objects::nonNull).forEach(ItemComponent::sync);
         }
     }
 
@@ -115,10 +115,13 @@ public class CommonEvents {
     @SubscribeEvent
     public static void onBlockBreakSpeed(PlayerEvent.BreakSpeed event) {
         var player = event.getPlayer();
+        ItemComponent.get(player, player.getMainHandStack()).ifPresent(component -> {
+            var efficiency = component.statistic(StatisticType.efficiency);
 
-        if (player != null) {
-            event.setNewSpeed(event.getNewSpeed() * (float) player.getAttributeValue(SAAttributes.efficiency));
-        }
+            if (efficiency != null) {
+                event.setNewSpeed(event.getNewSpeed() * efficiency.floatValue());
+            }
+        });
     }
 
     @SubscribeEvent
@@ -134,18 +137,21 @@ public class CommonEvents {
         }
     }
 
+    /**
+     Ensure that items bound to certain slots are inserted thereinto.
+     */
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onEntityItemPickup(PlayerEvent.ItemPickupEvent event) {
-/*
-         ItemEntity entity = event.getItemEntity();
-         ItemStack stack = entity.getStack();
-         PlayerEntity player = event.getPlayer();
+    public static void pickup(EntityItemPickupEvent event) {
+        var entity = event.getItem();
+        var stack = entity.getStack();
+        var player = event.getPlayer();
 
-        player.sendPickup(entity, stack.getCount());
-        SoulboundItemUtil.addItemStack(stack, player);
-
-        event.setFail();
-*/
+        ItemComponent.get(player, stack).ifPresent(component -> {
+            if (component.hasBoundSlot() && component.stackInBoundSlot().isEmpty() && player.inventory.insertStack(component.boundSlot(), stack)) {
+                player.sendPickup(entity, stack.getCount());
+                event.setCanceled(true);
+            }
+        });
     }
 
     /**
@@ -157,23 +163,23 @@ public class CommonEvents {
         var target = event.getEntityLiving();
 
         if (!target.world.isClient) {
-            if (target instanceof PlayerEntity && Components.weapon.of(target).item(StorageType.greatsword).leapForce() > 0 && !damage.isExplosive() && !damage.isProjectile()) {
+            if (target instanceof PlayerEntity && Components.weapon.of(target).item(ItemComponentType.greatsword).leapForce() > 0 && !damage.isExplosive() && !damage.isProjectile()) {
                 event.setCanceled(true);
             }
 
             if (damage.getAttacker() instanceof PlayerEntity player) {
                 var source = damage.getSource();
                 var instance = Components.weapon.of(player);
-                ItemStorage<?> storage;
+                ItemComponent<?> storage;
 
                 if (source instanceof SoulboundDaggerEntity) {
-                    storage = instance.item(StorageType.dagger);
+                    storage = instance.item(ItemComponentType.dagger);
                 } else if (source instanceof PlayerEntity) {
                     storage = instance.item();
                 } else if (source instanceof SoulboundLightningEntity) {
-                    storage = instance.item(StorageType.sword);
+                    storage = instance.item(ItemComponentType.sword);
                 } else if (source instanceof SoulboundFireballEntity) {
-                    storage = instance.item(StorageType.staff);
+                    storage = instance.item(ItemComponentType.staff);
                 } else {
                     return;
                 }
@@ -181,7 +187,7 @@ public class CommonEvents {
                 if (storage != null) {
                     var amount = event.getAmount();
 
-                    if (((WeaponStorage<?>) storage).hit()) {
+                    if (((WeaponComponent<?>) storage).hit()) {
                         event.setAmount(amount *= 2);
                         player.addCritParticles(target);
                     }
@@ -211,14 +217,14 @@ public class CommonEvents {
             var damage = damageAttribute == null ? 0 : damageAttribute.getValue();
             var immediateSource = event.getSource().getSource();
             var component = Components.weapon.of(player);
-            ItemStorage<?> storage;
+            ItemComponent<?> storage;
             Text displayName;
 
             if (immediateSource instanceof SoulboundDaggerEntity dagger) {
-                storage = component.item(StorageType.dagger);
+                storage = component.item(ItemComponentType.dagger);
                 displayName = dagger.itemStack.getName();
             } else if (immediateSource instanceof SoulboundLightningEntity) {
-                storage = component.item(StorageType.sword);
+                storage = component.item(ItemComponentType.sword);
                 displayName = ItemUtil.equippedStack(player, SoulboundItems.sword).getName();
             } else {
                 storage = component.item();
@@ -259,7 +265,7 @@ public class CommonEvents {
 
         if (!fallen.world.isClient && fallen instanceof PlayerEntity player) {
             var component = Components.weapon.of(player);
-            var storage = component.item(StorageType.greatsword);
+            var storage = component.item(ItemComponentType.greatsword);
             var leapForce = storage.leapForce();
 
             if (leapForce > 0) {
@@ -288,13 +294,15 @@ public class CommonEvents {
                             var z = Math.sqrt((radiusXZ * radiusXZ - x * x));
                             var particles = 1;
 
-                            world.spawnParticles(ParticleTypes.ITEM_SNOWBALL,
+                            world.spawnParticles(
+                                ParticleTypes.ITEM_SNOWBALL,
                                 player.getX() + x,
                                 player.getEyeY(),
                                 player.getZ() + z,
                                 particles, 0, 0, 0, 0D
                             );
-                            world.spawnParticles(ParticleTypes.ITEM_SNOWBALL,
+                            world.spawnParticles(
+                                ParticleTypes.ITEM_SNOWBALL,
                                 player.getX() + x,
                                 player.getEyeY(),
                                 player.getZ() - z,

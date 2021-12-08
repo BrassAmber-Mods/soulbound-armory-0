@@ -18,7 +18,7 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.EnchantmentStorage;
@@ -33,36 +33,17 @@ import soulboundarmory.util.AttributeModifierIdentifiers;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 
-public class StaffStorage extends WeaponStorage<StaffStorage> {
+public class StaffComponent extends WeaponComponent<StaffComponent> {
     public int fireballCooldown;
 
     protected int spell;
 
-    public StaffStorage(SoulboundComponent component, Item item) {
+    public StaffComponent(SoulboundComponent component, Item item) {
         super(component, item);
-
-        this.statistics = Statistics.create()
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
-            .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
-            .max(1, StatisticType.criticalStrikeRate).build();
-
-        this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getTranslationKey().toLowerCase();
-
-            return enchantment.isAcceptableItem(this.itemStack)
-                && !enchantment.isCursed()
-                && enchantment != UNBREAKING
-                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
-                && !name.contains("holding")
-                && !name.contains("mending");
-        });
-
-        this.skills = new SkillStorage(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 
-    public static StaffStorage get(Entity entity) {
-        return Components.weapon.of(entity).item(StorageType.staff);
+    public static StaffComponent get(Entity entity) {
+        return Components.weapon.of(entity).item(ItemComponentType.staff);
     }
 
     @Override
@@ -71,8 +52,8 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public StorageType<StaffStorage> type() {
-        return StorageType.staff;
+    public ItemComponentType<StaffComponent> type() {
+        return ItemComponentType.staff;
     }
 
     public void resetFireballCooldown() {
@@ -96,13 +77,11 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
     }
 
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), EntityAttributeModifier.Operation.ADDITION));
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
         }
-
-        return modifiers;
     }
 
     @Override
@@ -164,5 +143,35 @@ public class StaffStorage extends WeaponStorage<StaffStorage> {
         super.deserializeNBT(tag);
 
         this.spell(tag.getByte("spell"));
+    }
+
+    @Override
+    protected Statistics newStatistics() {
+        return Statistics.builder()
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
+            .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
+            .max(1, StatisticType.criticalStrikeRate).build();
+
+    }
+
+    @Override
+    protected EnchantmentStorage newEnchantments() {
+        return new EnchantmentStorage(enchantment -> {
+            var name = enchantment.getTranslationKey().toLowerCase();
+
+            return enchantment.isAcceptableItem(this.itemStack)
+                && !enchantment.isCursed()
+                && enchantment != UNBREAKING
+                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
+                && !name.contains("holding")
+                && !name.contains("mending");
+        });
+
+    }
+
+    @Override
+    protected SkillStorage newSkills() {
+        return new SkillStorage(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 }

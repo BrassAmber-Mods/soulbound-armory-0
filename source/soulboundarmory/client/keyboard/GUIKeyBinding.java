@@ -4,11 +4,11 @@ import cell.client.gui.CellElement;
 import org.lwjgl.glfw.GLFW;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 
 /**
- Open {@linkplain SoulboundScreen the menu} if one of the held items is soulbound or {@linkplain ItemStorage#canConsume consumable}.
+ Open {@linkplain SoulboundScreen the menu} if one of the held items is soulbound or {@linkplain ItemComponent#canConsume consumable}.
  */
 public class GUIKeyBinding extends KeyBindingBase {
     public GUIKeyBinding() {

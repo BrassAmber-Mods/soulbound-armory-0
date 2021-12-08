@@ -8,17 +8,15 @@ import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SkillTab;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.item.SoulboundWeaponItem;
 
-public abstract class WeaponStorage<T extends ItemStorage<T>> extends ItemStorage<T> {
+public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
     protected double criticalStrikeProgress;
 
-    public WeaponStorage(SoulboundComponent component, Item item) {
+    public WeaponComponent(SoulboundComponent component, Item item) {
         super(component, item);
     }
 
@@ -27,11 +25,6 @@ public abstract class WeaponStorage<T extends ItemStorage<T>> extends ItemStorag
         return this.canLevelUp()
             ? Configuration.instance().initialWeaponXP + 3 * (int) Math.round(Math.pow(level, 1.65))
             : -1;
-    }
-
-    @Override
-    public Class<? extends SoulboundItem> itemClass() {
-        return SoulboundWeaponItem.class;
     }
 
     /**

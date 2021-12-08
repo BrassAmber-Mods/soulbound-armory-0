@@ -20,7 +20,7 @@ import soulboundarmory.client.gui.RGBASlider;
 import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
@@ -40,7 +40,7 @@ public class SoulboundScreen extends CellScreen {
     protected final List<Slider> sliders = new ReferenceArrayList<>(4);
     protected final SoulboundComponent component;
     protected final int slot;
-    protected ItemStorage<?> storage;
+    protected ItemComponent<?> storage;
     protected ScalableWidget xpBar;
     protected ItemStack stack;
 
@@ -62,7 +62,7 @@ public class SoulboundScreen extends CellScreen {
         this.sliders.clear();
 
         this.stack = this.player.inventory.getStack(this.slot);
-        this.storage = ItemStorage.get(this.player, this.stack).orElse(null);
+        this.storage = ItemComponent.get(this.player, this.stack).orElse(null);
 
         if (this.displayTabs()) {
             var tabs = this.storage.tabs();
@@ -76,7 +76,8 @@ public class SoulboundScreen extends CellScreen {
 
             this.tabButtons.get(this.component.tab()).active = false;
 
-            var text = this.storage.boundSlot() == -1 ? Translations.guiButtonBind : Translations.guiButtonUnbind;
+            var unbind = this.storage.boundSlot() == this.slot;
+            var text = unbind ? Translations.guiButtonUnbind : Translations.guiButtonBind;
             var buttonWidth = Math.max(this.button.width(), this.textRenderer.getWidth(text) + 8);
 
             this.add(new ScalableWidget().button()
@@ -85,7 +86,7 @@ public class SoulboundScreen extends CellScreen {
                 .width(buttonWidth)
                 .height(20)
                 .text(text)
-                .primaryAction(this.bindSlotAction())
+                .primaryAction(this.bindSlotAction(unbind))
             );
 
             this.add(this.xpBar = new ExperienceBar(this.storage).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true).primaryAction(bar -> {
@@ -285,11 +286,8 @@ public class SoulboundScreen extends CellScreen {
         return button -> this.cycleStyle(change);
     }
 
-    private PressCallback<ScalableWidget> bindSlotAction() {
-        return button -> {
-            Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
-            this.storage.bindSlot(this.slot);
-        };
+    private PressCallback<ScalableWidget> bindSlotAction(boolean unbind) {
+        return button -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.storage).writeInt(unbind ? -1 : this.slot));
     }
 
     private <T extends Widget<T>> PressCallback<T> setTabAction(int index) {

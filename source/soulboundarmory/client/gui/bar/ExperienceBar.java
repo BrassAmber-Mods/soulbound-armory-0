@@ -7,7 +7,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import soulboundarmory.client.texture.ExperienceBarTexture;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
@@ -17,7 +17,7 @@ public class ExperienceBar extends ScalableWidget {
     protected static final Configuration.Client.Colors colors = configuration.colors;
 
     protected ItemStack itemStack;
-    protected ItemStorage<?> storage;
+    protected ItemComponent<?> storage;
 
     protected int row;
     protected int length;
@@ -32,7 +32,7 @@ public class ExperienceBar extends ScalableWidget {
         this.update(itemStack);
     }
 
-    public ExperienceBar(ItemStorage<?> storage) {
+    public ExperienceBar(ItemComponent<?> storage) {
         this.update(storage);
     }
 
@@ -49,7 +49,7 @@ public class ExperienceBar extends ScalableWidget {
     }
 
     private boolean update(ItemStack itemStack) {
-        if (this.update(ItemStorage.get(minecraft.player, itemStack).orElse(null))) {
+        if (this.update(ItemComponent.get(minecraft.player, itemStack).orElse(null))) {
             if (itemStack.getItem() instanceof SoulboundItem && this.itemStack != itemStack) {
                 this.itemStack = itemStack;
             }
@@ -58,7 +58,7 @@ public class ExperienceBar extends ScalableWidget {
         return false;
     }
 
-    private boolean update(ItemStorage<?> component) {
+    private boolean update(ItemComponent<?> component) {
         return (this.storage = component) != null;
     }
 
@@ -102,10 +102,10 @@ public class ExperienceBar extends ScalableWidget {
     }
 
     public boolean render(MatrixStack matrixes, Window window) {
-        var item = ItemStorage.firstEquipped(minecraft.player, false);
+        var component = ItemComponent.firstEquipped(minecraft.player, false);
 
-        if (item.isPresent()) {
-            this.update(item.get());
+        if (component.isPresent()) {
+            this.update(component.get());
             this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes);
 
             return true;

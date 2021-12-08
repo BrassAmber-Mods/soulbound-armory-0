@@ -12,8 +12,8 @@ public class Translations {
     public static final Translation guiKey = new Translation("key.soulbound-armory.gui");
     public static final Translation toggleXPBar = new Translation("key.soulbound-armory.bar");
 
-    public static final Translation guiToolSelection = new Translation("gui.soulbound-armory.confirmation");
-    public static final Translation guiWeaponSelection = new Translation("gui.soulbound-armory.selection");
+    public static final Translation guiToolSelection = new Translation("gui.soulbound-armory.tool_selection");
+    public static final Translation guiWeaponSelection = new Translation("gui.soulbound-armory.weapon_selection");
     public static final Translation guiButtonAttributes = new Translation("gui.soulbound-armory.attributes");
     public static final Translation guiButtonEnchantments = new Translation("gui.soulbound-armory.enchantments");
     public static final Translation guiSkills = new Translation("gui.soulbound-armory.skills");

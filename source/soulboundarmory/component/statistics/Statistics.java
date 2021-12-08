@@ -11,7 +11,7 @@ import soulboundarmory.serial.CompoundSerializable;
 public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements CompoundSerializable, Iterable<Statistic> {
     protected Statistics() {}
 
-    public static Builder create() {
+    public static Builder builder() {
         return new Builder(new Statistics());
     }
 

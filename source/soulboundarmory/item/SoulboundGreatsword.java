@@ -12,7 +12,7 @@ import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import soulboundarmory.component.soulbound.item.weapon.GreatswordStorage;
+import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.registry.Skills;
 
 public class SoulboundGreatsword extends SoulboundMeleeWeapon {
@@ -32,7 +32,7 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
 
     @Override
         public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        if (!world.isClient && GreatswordStorage.get(player).hasSkill(Skills.leaping)) {
+        if (!world.isClient && GreatswordComponent.get(player).hasSkill(Skills.leaping)) {
             player.setCurrentHand(hand);
 
             return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
@@ -52,7 +52,7 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
 
             player.addVelocity(look.x * speed, look.y * speed / 4 + 0.2, look.z * speed);
             player.setSprinting(true);
-            GreatswordStorage.get(player).leapForce(speed / maxSpeed);
+            GreatswordComponent.get(player).leapForce(speed / maxSpeed);
         }
     }
 

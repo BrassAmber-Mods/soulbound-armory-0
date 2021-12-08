@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 
@@ -39,6 +39,6 @@ abstract class ItemStackMixin {
 
     @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;"))
     private Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlot slot, PlayerEntity player) {
-        return stack.getItem() instanceof SoulboundItem && player != null ? ItemStorage.get(player, stack).get().attributeModifiers(slot) : stack.getAttributeModifiers(slot);
+        return stack.getItem() instanceof SoulboundItem && player != null ? ItemComponent.get(player, stack).get().attributeModifiers(slot) : stack.getAttributeModifiers(slot);
     }
 }

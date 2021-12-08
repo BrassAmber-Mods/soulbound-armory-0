@@ -4,7 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import soulboundarmory.client.gui.screen.SelectionTab;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.network.ItemComponentPacket;
 
 /**
@@ -14,7 +14,7 @@ import soulboundarmory.network.ItemComponentPacket;
  */
 public final class C2SSelectItem extends ItemComponentPacket {
     @Override
-    protected void execute(ItemStorage<?> storage) {
+    protected void execute(ItemComponent<?> storage) {
         var slot = this.message.readInt();
 
         if (storage.isUnlocked() || storage.canConsume(storage.player.inventory.getStack(slot))) {
@@ -31,9 +31,9 @@ public final class C2SSelectItem extends ItemComponentPacket {
         }
     }
 
-    private static void set(ItemStorage<?> storage, int slot) {
+    private static void set(ItemComponent<?> storage, int slot) {
         storage.player.inventory.setStack(slot, storage.stack());
         storage.component.currentItem(storage);
-        storage.removeOtherItems(slot);
+        storage.updateInventory(slot);
     }
 }

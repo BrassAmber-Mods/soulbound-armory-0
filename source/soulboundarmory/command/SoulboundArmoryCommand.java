@@ -17,7 +17,7 @@ import soulboundarmory.command.argument.ConstantArgumentType;
 import soulboundarmory.command.argument.StatisticArgumentType;
 import soulboundarmory.command.argument.StorageArgumentType;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.text.Translation;
@@ -118,7 +118,7 @@ public class SoulboundArmoryCommand {
         return (ServerPlayerEntity) context.getSource().getEntity();
     }
 
-    protected static ItemStorage<?> storage(PlayerEntity player) throws CommandSyntaxException {
+    protected static ItemComponent<?> storage(PlayerEntity player) throws CommandSyntaxException {
         return Components.soulbound(player).map(SoulboundComponent::heldItemStorage).filter(Objects::nonNull).findAny().orElseThrow(() -> noItemException.create(player));
     }
 }

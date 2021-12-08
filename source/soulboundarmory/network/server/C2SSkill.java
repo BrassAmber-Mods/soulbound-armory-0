@@ -1,6 +1,6 @@
 package soulboundarmory.network.server;
 
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.network.ItemComponentPacket;
 import soulboundarmory.skill.Skill;
 
@@ -14,7 +14,7 @@ import soulboundarmory.skill.Skill;
  */
 public final class C2SSkill extends ItemComponentPacket {
     @Override
-    public void execute(ItemStorage<?> storage) {
+    public void execute(ItemComponent<?> storage) {
         storage.upgrade(storage.skill(Skill.registry.getValue(this.message.readIdentifier())));
     }
 }

@@ -3,6 +3,7 @@ package soulboundarmory.network;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import soulboundarmory.SoulboundArmory;
+import soulboundarmory.network.client.S2CBindSlot;
 import soulboundarmory.network.client.S2CEnchant;
 import soulboundarmory.network.client.S2CRefresh;
 import soulboundarmory.network.client.S2CSync;
@@ -27,6 +28,7 @@ public class Packets {
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SSpell> serverSpell = server(C2SSpell.class);
     public static final PacketKey.Server<ExtendedPacketBuffer, C2STab> serverTab = server(C2STab.class);
 
+    public static final PacketKey.Client<ExtendedPacketBuffer, S2CBindSlot> clientBindSlot = client(S2CBindSlot.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CEnchant> clientEnchant = client(S2CEnchant.class);
     // public static final PacketKey.Client<ExtendedPacketBuffer, S2COpenGUI> clientOpenGUI = client(S2COpenGUI.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CRefresh> clientRefresh = client(S2CRefresh.class);

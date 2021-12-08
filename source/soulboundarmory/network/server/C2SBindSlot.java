@@ -1,11 +1,13 @@
 package soulboundarmory.network.server;
 
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.ItemComponentPacket;
+import soulboundarmory.network.Packets;
 
 public final class C2SBindSlot extends ItemComponentPacket {
     @Override
-    public void execute(ItemStorage<?> storage) {
+    public void execute(ItemComponent<?> storage) {
         var slot = this.message.readInt();
 
         if (storage.boundSlot() == slot) {
@@ -14,7 +16,6 @@ public final class C2SBindSlot extends ItemComponentPacket {
             storage.bindSlot(slot);
         }
 
-        // this.component.sync();
-        storage.component.refresh();
+        Packets.clientBindSlot.send(storage.player, new ExtendedPacketBuffer(storage).writeInt(slot));
     }
 }
