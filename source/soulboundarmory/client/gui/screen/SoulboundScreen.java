@@ -17,11 +17,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.RGBASlider;
-import soulboundarmory.client.gui.bar.ExperienceBarOverlay;
 import soulboundarmory.client.gui.bar.BarStyle;
+import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
@@ -34,69 +35,48 @@ import static soulboundarmory.component.statistics.StatisticType.level;
  It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
  */
 public class SoulboundScreen extends CellScreen {
-    protected final PlayerEntity player = SoulboundArmoryClient.player();
+    protected final PlayerEntity player = minecraft.player;
     protected final List<DrawableElement> options = new ReferenceArrayList<>(5);
     protected final List<Slider> sliders = new ReferenceArrayList<>(4);
     protected final SoulboundComponent component;
+    protected final int slot;
     protected ItemStorage<?> storage;
-    protected ItemStack stack;
     protected ScalableWidget xpBar;
-    protected int slot;
+    protected ItemStack stack;
 
-    private final List<SoulboundTab> tabs;
     private final List<ScalableWidget> tabButtons = new ReferenceArrayList<>();
-
+    private final List<SoulboundTab> tabs = new ReferenceArrayList<>();
     private SoulboundTab tab;
     private ScalableWidget button;
 
-    public SoulboundScreen(SoulboundComponent component, int currentIndex, List<SoulboundTab> tabs) {
+    public SoulboundScreen(SoulboundComponent component, int slot) {
         this.component = component;
-        this.tabs = tabs;
-
-        for (var index = 0; index < this.tabs.size(); index++) {
-            var tab = this.tabs.get(index);
-            tab.parent = this;
-            tab.index = index;
-        }
-
-        this.tab = this.tabs.get(currentIndex);
+        this.slot = slot;
     }
 
     @Override
     protected void init() {
-        super.init();
-
         this.tabButtons.clear();
+        this.tabs.clear();
         this.options.clear();
         this.sliders.clear();
 
-        this.storage = this.component.storage();
-
-        if (this.storage != null) {
-            this.stack = this.storage.stack();
-
-            for (var itemStack : this.player.getItemsHand()) {
-                if (itemStack.equals(this.stack)) {
-                    this.stack = itemStack;
-
-                    break;
-                }
-            }
-        }
+        this.stack = this.player.inventory.getStack(this.slot);
+        this.storage = ItemStorage.get(this.player, this.stack).orElse(null);
 
         if (this.displayTabs()) {
-            for (int index = 0, size = this.tabs.size(); index < size; index++) {
-                var tab = this.add(this.button(this.tabs.get(index)));
-                this.tabButtons.add(tab);
-
-                if (index == this.component.tab()) {
-                    tab.active = false;
-                }
-            }
-
+            var tabs = this.storage.tabs();
+            this.tab = tabs.get(this.component.tab());
             this.button = this.button(this.tab);
 
-            var text = this.slot != this.storage.boundSlot() ? Translations.guiButtonBind : Translations.guiButtonUnbind;
+            for (var tab : tabs) {
+                this.addTab(tab);
+                this.tabButtons.add(this.add(this.button(tab)));
+            }
+
+            this.tabButtons.get(this.component.tab()).active = false;
+
+            var text = this.storage.boundSlot() == -1 ? Translations.guiButtonBind : Translations.guiButtonUnbind;
             var buttonWidth = Math.max(this.button.width(), this.textRenderer.getWidth(text) + 8);
 
             this.add(new ScalableWidget().button()
@@ -108,7 +88,23 @@ public class SoulboundScreen extends CellScreen {
                 .primaryAction(this.bindSlotAction())
             );
 
-            this.add(this.xpBar = new ExperienceBarOverlay(this.storage).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true));
+            this.add(this.xpBar = new ExperienceBar(this.storage).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true).primaryAction(bar -> {
+                if (Configuration.instance().client.displayOptions ^= true) {
+                    this.add(this.options);
+                } else {
+                    this.remove(this.options);
+                }
+
+                this.refresh();
+            }).tooltip((widget, matrixes, x, y) -> {
+                var xp = this.storage.intValue(experience);
+                this.renderTooltip(
+                    matrixes,
+                    this.storage.canLevelUp() ? Translations.barXP.format(xp, this.storage.nextLevelXP()) : Translations.barFullXP.format(xp),
+                    x,
+                    y
+                );
+            }));
 
             if (Configuration.instance().client.displayOptions) {
                 var configuration = Configuration.instance().client;
@@ -129,9 +125,13 @@ public class SoulboundScreen extends CellScreen {
 
                 this.add(this.options);
             }
-        }
 
-        this.tab(this.tab.index);
+            this.tab(this.tab.index);
+        } else {
+            this.tabs.clear();
+            this.addTab(this.component.selectionTab());
+            this.tab(0);
+        }
     }
 
     @Override
@@ -147,30 +147,12 @@ public class SoulboundScreen extends CellScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX, mouseY, button);
-
-        if (this.hoveringBar(mouseX, mouseY)) {
-            if (Configuration.instance().client.displayOptions ^= true) {
-                this.add(this.options);
-            } else {
-                this.remove(this.options);
-            }
-
-            this.refresh();
-
-            return true;
-        }
-
-        return false;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double x, double y, double d) {
-        var slider = this.sliderMousedOver(x, y);
-
-        if (slider != null) {
-            slider.scroll(d);
-
+        if (super.mouseScrolled(x, y, d)) {
             return true;
         }
 
@@ -184,7 +166,7 @@ public class SoulboundScreen extends CellScreen {
             }
         }
 
-        return super.mouseScrolled(x, y, d);
+        return false;
     }
 
     @Override
@@ -198,45 +180,15 @@ public class SoulboundScreen extends CellScreen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    protected Slider sliderMousedOver(double x, double y) {
-        for (var slider : this.sliders) {
-            if (CellElement.contains(x, y, slider.x, slider.y, slider.getWidth(), slider.getHeight())) {
-                return slider;
-            }
-        }
-
-/*
-        for (var slider = 0; slider < 4; slider++) {
-            if (x >= this.optionX() && x <= this.optionX() + 100
-                && y >= this.optionY(slider) && y <= this.optionY(slider) + 20) {
-                return this.sliders.get(slider);
-            }
-        }
-*/
-
-        return null;
-    }
-
     protected void drawXPBar(MatrixStack stack, int mouseX, int mouseY) {
-        var xp = this.storage.intValue(experience);
         var maxLevel = Configuration.instance().maxLevel;
+        var level = this.storage.intValue(StatisticType.level);
 
-        if (this.hoveringLevel(mouseX, mouseY) && maxLevel >= 0) {
-            this.renderTooltip(stack, Translations.barLevel.format(this.storage.intValue(level), maxLevel), mouseX, mouseY);
-        } else if (this.hoveringBar(mouseX, mouseY)) {
-            this.renderTooltip(
-                stack,
-                this.storage.canLevelUp() ? Translations.barXP.format(xp, this.storage.nextLevelXP()) : Translations.barFullXP.format(xp),
-                mouseX,
-                mouseY
-            );
+        if (maxLevel >= 0 && level > 0 && this.hoveringLevel(mouseX, mouseY)) {
+            this.renderTooltip(stack, Translations.barLevel.format(level, maxLevel), mouseX, mouseY);
         }
 
         RenderSystem.disableLighting();
-    }
-
-    protected boolean hoveringBar(double mouseX, double mouseY) {
-        return this.displayTabs() && this.xpBar != null && this.xpBar.contains(mouseX, mouseY);
     }
 
     protected boolean hoveringLevel(int mouseX, int mouseY) {
@@ -285,26 +237,23 @@ public class SoulboundScreen extends CellScreen {
             .primaryAction(this.setTabAction(tab.index));
     }
 
-    public void refresh() {
-        this.tabButtons.clear();
-
-        this.init(this.client, this.width, this.height);
-        this.tab.init(this.client, this.width, this.height);
+    private void addTab(SoulboundTab tab) {
+        this.tabs.add(tab);
+        tab.parent = this;
+        tab.index = this.tabs.size() - 1;
     }
 
     public boolean displayTabs() {
-        return this.slot > -1 && this.storage != null && this.storage.isUnlocked();
+        return this.storage != null;
     }
 
+    @SuppressWarnings("UnusedAssignment")
     private void tab(int tab) {
         this.remove(this.tab);
         this.tab = this.tabs.get(tab);
 
-        if (this.button != null) {
+        if (this.displayTabs()) {
             this.button.active = true;
-        }
-
-        if (!this.tabButtons.isEmpty()) {
             this.tab.button = this.button = this.tabButtons.get(tab);
             this.button.active = false;
         }
@@ -312,6 +261,13 @@ public class SoulboundScreen extends CellScreen {
         this.tab.open(this.width, this.height);
         this.add(this.tab);
         this.component.tab(tab);
+    }
+
+    public void refresh() {
+        this.tabButtons.clear();
+
+        this.init(this.client, this.width, this.height);
+        this.tab.init(this.client, this.width, this.height);
     }
 
     private void cycleStyle(int change) {
@@ -330,7 +286,10 @@ public class SoulboundScreen extends CellScreen {
     }
 
     private PressCallback<ScalableWidget> bindSlotAction() {
-        return button -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
+        return button -> {
+            Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.storage).writeInt(this.slot));
+            this.storage.bindSlot(this.slot);
+        };
     }
 
     private <T extends Widget<T>> PressCallback<T> setTabAction(int index) {

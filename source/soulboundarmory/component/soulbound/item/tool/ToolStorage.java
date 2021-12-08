@@ -64,7 +64,7 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
     }
 
     @Override
-    protected List<SoulboundTab> tabs() {
+    public List<SoulboundTab> tabs() {
         return List.of(new SelectionTab(Translations.guiToolSelection), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 }

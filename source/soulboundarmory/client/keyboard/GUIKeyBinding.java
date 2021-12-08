@@ -1,10 +1,15 @@
 package soulboundarmory.client.keyboard;
 
-import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.StorageType;
+import cell.client.gui.CellElement;
 import org.lwjgl.glfw.GLFW;
+import soulboundarmory.client.gui.screen.SoulboundScreen;
+import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.player.SoulboundComponent;
 
+/**
+ Open {@linkplain SoulboundScreen the menu} if one of the held items is soulbound or {@linkplain ItemStorage#canConsume consumable}.
+ */
 public class GUIKeyBinding extends KeyBindingBase {
     public GUIKeyBinding() {
         super("menu", GLFW.GLFW_KEY_R);
@@ -12,6 +17,6 @@ public class GUIKeyBinding extends KeyBindingBase {
 
     @Override
     protected void press() {
-        StorageType.firstSoulboundItem(SoulboundArmoryClient.player()).ifPresent(ItemStorage::openGUI);
+        Components.soulbound(CellElement.minecraft.player).anyMatch(SoulboundComponent::tryOpenGUI);
     }
 }

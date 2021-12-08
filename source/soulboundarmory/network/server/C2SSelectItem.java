@@ -23,16 +23,17 @@ public final class C2SSelectItem extends ItemComponentPacket {
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 // Repeat for the client because the screen pauses.
                 MinecraftClient.getInstance().execute(() -> set(storage.type().get(MinecraftClient.getInstance().player), slot));
+            } else {
+                storage.sync();
             }
 
-            storage.refresh();
+            storage.component.refresh();
         }
     }
 
     private static void set(ItemStorage<?> storage, int slot) {
         storage.player.inventory.setStack(slot, storage.stack());
-        storage.component().currentItem(storage);
-        storage.removeOtherItems();
-        storage.sync();
+        storage.component.currentItem(storage);
+        storage.removeOtherItems(slot);
     }
 }

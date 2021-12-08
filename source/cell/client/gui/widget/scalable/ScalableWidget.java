@@ -5,6 +5,7 @@ import cell.client.gui.DrawableElement;
 import cell.client.gui.widget.Length;
 import cell.client.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.client.util.math.MatrixStack;
@@ -266,7 +267,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
     }
 
     public ScalableWidget button(int index) {
-        return this.texture(net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE).v(46 + index * 20).slice(2, 198, 200, 2, 17, 20);
+        return this.texture(ClickableWidget.WIDGETS_TEXTURE).v(46 + index * 20).slice(2, 198, 200, 2, 17, 20);
     }
 
     public ScalableWidget experienceBar() {

@@ -50,7 +50,7 @@ public abstract class WeaponStorage<T extends ItemStorage<T>> extends ItemStorag
     }
 
     @Override
-    protected List<SoulboundTab> tabs() {
+    public List<SoulboundTab> tabs() {
         return List.of(new SelectionTab(Translations.guiWeaponSelection), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 }

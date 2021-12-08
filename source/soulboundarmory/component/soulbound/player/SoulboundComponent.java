@@ -1,29 +1,38 @@
 package soulboundarmory.component.soulbound.player;
 
+import cell.client.gui.CellElement;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import soulboundarmory.client.gui.screen.SoulboundScreen;
+import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.component.Component;
 import soulboundarmory.component.ComponentKey;
-import soulboundarmory.component.EntityComponent;
+import soulboundarmory.component.ComponentRegistry;
 import soulboundarmory.component.soulbound.item.ItemStorage;
 import soulboundarmory.component.soulbound.item.StorageType;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
 
-public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
-    protected final Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages = new Object2ObjectOpenHashMap<>();
-    protected final boolean client = this.entity.world.isClient;
+public abstract class SoulboundComponent implements Component {
+    public final Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages = new Object2ObjectOpenHashMap<>();
+    public final PlayerEntity player;
+    public final boolean client;
 
     protected int tab;
     protected ItemStorage<?> storage;
 
     public SoulboundComponent(PlayerEntity player) {
-        super(player);
+        this.player = player;
+        this.client = this.player.world.isClient;
     }
 
-    public abstract boolean hasSoulboundItem();
+    public boolean hasSoulboundItem() {
+        return ItemUtil.inventory(this.player).anyMatch(this::isAcceptable);
+    }
 
     public int tab() {
         return this.tab;
@@ -37,8 +46,12 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
         }
     }
 
-    public ItemStorage<?> storage() {
+    public ItemStorage<?> item() {
         return this.storage;
+    }
+
+    public <S extends ItemStorage<S>> S item(StorageType<S> type) {
+        return (S) this.storages.get(type);
     }
 
     public void currentItem(ItemStorage<?> storage) {
@@ -52,7 +65,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
 
     public ItemStorage<?> heldItemStorage() {
         for (var component : this.storages.values()) {
-            if (ItemUtil.isEquipped(this.entity, component.item())) {
+            if (ItemUtil.handStacks(this.player).anyMatch(component::accepts)) {
                 return component;
             }
         }
@@ -62,7 +75,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
 
     public ItemStorage<?> menuStorage() {
         for (var component : this.storages.values()) {
-            if (component.anyItemEquipped()) {
+            if (component.isMenuItemEquipped()) {
                 return component;
             }
         }
@@ -70,59 +83,82 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
         return null;
     }
 
-    public <S extends ItemStorage<S>> S storage(StorageType<S> type) {
-        return (S) this.storages.get(type);
+    /**
+     Open a GUI for this component if the player possesses a soulbound or {@linkplain ItemStorage#canConsume consumable} item.
+
+     @return whether a GUI was opened.
+     */
+    public boolean tryOpenGUI() {
+        var handStacks = ItemUtil.handStacks(this.player).toList().listIterator();
+
+        while (handStacks.hasNext()) {
+            var stack = handStacks.next();
+            var match = this.storages.values().stream().filter(storage -> storage.accepts(stack)).findAny();
+            var slot = handStacks.previousIndex();
+            slot = slot == 1 ? 40 : this.player.inventory.selectedSlot;
+
+            if (match.isPresent() || this.storages.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
+                CellElement.minecraft.openScreen(new SoulboundScreen(this, slot));
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages() {
-        return this.storages;
+    /**
+     Reinitialize the current {@linkplain SoulboundScreen menu} if open.
+     */
+    public void refresh() {
+        if (this.client) {
+            if (CellElement.minecraft.currentScreen instanceof SoulboundScreen screen) {
+                screen.refresh();
+            }
+        } else {
+            Packets.clientRefresh.send(this.player, new ExtendedPacketBuffer(this));
+        }
     }
 
     public void tick() {
-        if (this.hasSoulboundItem()) {
-            var storage = this.heldItemStorage();
+        var storage = this.heldItemStorage();
 
-            if (storage == null) {
-                storage = this.storage;
-            } else {
-                this.currentItem(storage);
-            }
+        if (storage == null) {
+            storage = this.storage;
+        } else {
+            this.currentItem(storage);
+        }
 
-            if (storage != null) {
-                var baseItemClass = storage.itemClass();
-                var inventory = this.entity.inventory;
-                var combinedInventory = ItemUtil.inventory(this.entity);
-                var newItemStack = storage.stack();
-                var firstSlot = -1;
+        if (storage != null) {
+            var inventory = this.player.inventory;
+            var combinedInventory = ItemUtil.inventory(this.player).toList();
+            var newItemStack = storage.stack();
+            var found = false;
+            // var firstSlot = -1;
 
-                for (var stack : combinedInventory) {
-                    if (baseItemClass.isInstance(stack.getItem())) {
-                        var index = combinedInventory.indexOf(stack);
+            for (var iterator = combinedInventory.listIterator(); iterator.hasNext();) {
+                var stack = iterator.next();
 
-                        if (stack.getItem() == storage.item() && (firstSlot == -1 || index == 36)) {
-                            firstSlot = index == 36 ? 40 : index;
+                if (this.isAcceptable(stack)) {
+                    var index = iterator.previousIndex();
 
-                            if (storage.boundSlot() != -1) {
-                                storage.bindSlot(firstSlot);
-                            }
+                    if (storage.accepts(stack) && !found) {
+                        found = true;
+                        // firstSlot = /*index == 36 ? 40 :*/ index;
+                        var tag = newItemStack.getTag();
 
-                            var tag = newItemStack.getTag();
+                        if (tag != null && !tag.equals(stack.getTag())) {
                             newItemStack.setCustomName(stack.getName());
-
-                            if (tag != null && !tag.equals(stack.getTag())) {
-                                inventory.setStack(firstSlot, newItemStack);
-                            }
-                        } else if (!(this.entity.isCreative() || index == firstSlot && firstSlot == -1)) {
-                            inventory.removeOne(stack);
+                            inventory.setStack(index, newItemStack);
                         }
+                    } else if (!this.player.isCreative()) {
+                        inventory.removeOne(stack);
                     }
                 }
             }
         }
 
-        for (var storage : this.storages.values()) {
-            storage.tick();
-        }
+        this.storages.values().forEach(ItemStorage::tick);
     }
 
     @Override
@@ -143,7 +179,7 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
         var type = StorageType.get(tag.getString("storage"));
 
         if (type != null) {
-            this.storage = this.storage(type);
+            this.storage = this.item(type);
         }
 
         for (var storage : this.storages.values()) {
@@ -153,5 +189,12 @@ public abstract class SoulboundComponent extends EntityComponent<PlayerEntity> {
         this.tab = tag.getInt("tab");
     }
 
-    protected abstract ComponentKey<PlayerEntity, ? extends SoulboundComponent> key();
+    /**
+     @return this component's {@linkplain ComponentRegistry#register registered} {@linkplain ComponentKey key}.
+     */
+    public abstract ComponentKey<PlayerEntity, ? extends SoulboundComponent> key();
+
+    public abstract SoulboundTab selectionTab();
+
+    protected abstract boolean isAcceptable(ItemStack stack);
 }

@@ -8,6 +8,6 @@ public final class S2CEnchant extends ItemComponentPacket {
     @Override
     public void execute(ItemStorage<?> storage) {
         storage.addEnchantment(ForgeRegistries.ENCHANTMENTS.getValue(this.message.readIdentifier()), this.message.readInt());
-        storage.refresh();
+        storage.component.refresh();
     }
 }

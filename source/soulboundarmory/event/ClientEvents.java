@@ -20,7 +20,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.client.gui.bar.ExperienceBarOverlay;
+import soulboundarmory.client.gui.bar.ExperienceBar;
+import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemStorage;
@@ -31,8 +32,8 @@ import soulboundarmory.item.SoulboundItem;
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public class ClientEvents {
-    public static ExperienceBarOverlay overlayBar;
-    public static ExperienceBarOverlay tooltipBar;
+    public static ExperienceBar overlayBar;
+    public static ExperienceBar tooltipBar;
 
     @SubscribeEvent
     public static void scroll(InputEvent.MouseScrollEvent event) {
@@ -58,7 +59,10 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void onRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE && Configuration.instance().client.overlayExperienceBar && overlayBar.render(event.getMatrixStack(), event.getWindow())) {
+        if (event.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE
+            && (CellElement.minecraft.currentScreen instanceof SoulboundScreen
+            || Configuration.instance().client.overlayExperienceBar && overlayBar.render(event.getMatrixStack(), event.getWindow()))
+        ) {
             event.setCanceled(true);
         }
     }
@@ -104,7 +108,7 @@ public class ClientEvents {
     @SubscribeEvent
     public static void onRenderTooltip(RenderTooltipEvent.PostBackground event) {
         if (event.getStack().getItem() instanceof SoulboundItem) {
-            tooltipBar.drawTooltip(event.getMatrixStack(), event.getX(), event.getY(), event.getStack());
+            tooltipBar.drawTooltip(event.getMatrixStack(), event.getStack(), event.getX(), event.getY(), event.getWidth());
         }
     }
 
@@ -122,8 +126,8 @@ public class ClientEvents {
         @Override
         protected void apply(Void nothing, ResourceManager manager, Profiler profiler) {
             RenderSystem.recordRenderCall(() -> {
-                overlayBar = new ExperienceBarOverlay();
-                tooltipBar = new ExperienceBarOverlay();
+                overlayBar = new ExperienceBar();
+                tooltipBar = new ExperienceBar();
                 overlayBar.width(182).height(5).center(true);
             });
         }

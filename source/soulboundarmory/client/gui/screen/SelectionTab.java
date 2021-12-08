@@ -2,7 +2,6 @@ package soulboundarmory.client.gui.screen;
 
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
-import java.util.stream.Collectors;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import soulboundarmory.component.soulbound.item.ItemStorage;
@@ -22,14 +21,12 @@ public class SelectionTab extends SoulboundTab {
 
     @Override
     protected void init() {
-        super.init();
-
         var buttonWidth = 128;
         var buttonHeight = 20;
         var centerX = (this.width - buttonWidth) / 2;
         var separation = 32;
 
-        var selection = this.parent.component.storages().values().stream().filter(storage -> storage.isUnlocked() || storage.canUnlock()).collect(Collectors.toList());
+        var selection = this.parent.component.storages.values().stream().filter(storage -> storage.isUnlocked() || storage.canConsume(this.parent.stack)).toList();
         var top = (this.height - buttonHeight - separation * (selection.size() - 1)) / 2;
 
         for (int row = 0, size = selection.size(); row < size; row++) {
@@ -44,7 +41,7 @@ public class SelectionTab extends SoulboundTab {
             );
 
             if (this.parent.displayTabs()) {
-                button.active = ItemUtil.inventoryStream(this.parent.player).noneMatch(stack -> stack.getItem() == storage.item());
+                button.active = ItemUtil.inventory(this.parent.player).noneMatch(storage::accepts);
             }
         }
     }
@@ -53,7 +50,7 @@ public class SelectionTab extends SoulboundTab {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
-        if (this.parent.storage != null && !this.parent.storage.itemEquipped()) {
+        if (this.parent.displayTabs() && !this.parent.storage.isItemEquipped()) {
             drawCenteredText(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
         }
     }

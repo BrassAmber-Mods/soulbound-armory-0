@@ -2,6 +2,7 @@ package soulboundarmory.item;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.entity.Entity;
 import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
 import soulboundarmory.entity.SoulboundFireballEntity;
 import net.minecraft.entity.EquipmentSlot;
@@ -49,5 +50,10 @@ public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem 
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         return HashMultimap.create();
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        this.bindSlot(stack, entity, slot);
     }
 }

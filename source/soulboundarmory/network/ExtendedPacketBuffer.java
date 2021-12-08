@@ -4,12 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import soulboundarmory.component.soulbound.item.ItemStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
+import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.player.SoulboundComponent;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
     public ExtendedPacketBuffer() {
@@ -18,6 +19,12 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
 
     public ExtendedPacketBuffer(ByteBuf buffer) {
         super(buffer);
+    }
+
+    public ExtendedPacketBuffer(SoulboundComponent component) {
+        this();
+
+        this.writeIdentifier(component.key().id);
     }
 
     public ExtendedPacketBuffer(ItemStorage<?> component) {

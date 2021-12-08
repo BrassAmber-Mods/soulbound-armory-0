@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.auoeke.reflect.Accessor;
 import net.minecraft.command.CommandSource;
@@ -104,9 +103,9 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
         var input = reader.readString();
         var fields = this.validFields;
 
-        if (Pattern.compile(Pattern.quote("ALL"), Pattern.CASE_INSENSITIVE).matcher(input).find()) {
+        if (input.equals("*")) {
             //noinspection unchecked
-            return this.validFields.values().parallelStream().map(field -> (T) Accessor.get(field)).collect(Collectors.toList());
+            return this.validFields.values().stream().map(field -> (T) Accessor.get(field)).toList();
         }
 
         for (var name : fields.keySet()) {
@@ -120,6 +119,6 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Stream.concat(Stream.of("ALL"), this.validFields.values().stream().map(Field::getName)), builder);
+        return CommandSource.suggestMatching(Stream.concat(Stream.of("*"), this.validFields.values().stream().map(Field::getName)), builder);
     }
 }

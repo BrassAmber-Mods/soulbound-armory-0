@@ -82,7 +82,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         var owner = this.getEntity();
 
         if (owner instanceof PlayerEntity) {
-            this.storage = Components.weapon.of(owner).storage(StorageType.dagger);
+            this.storage = Components.weapon.of(owner).item(StorageType.dagger);
         }
     }
 

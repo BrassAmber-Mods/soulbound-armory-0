@@ -10,14 +10,16 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import soulboundarmory.component.EntityComponent;
+import soulboundarmory.component.Component;
 
-public class EntityData extends EntityComponent<Entity> {
-    protected int freezeTicks;
-    protected int blockTeleportTicks;
+public final class EntityData implements Component {
+    public final Entity entity;
+
+    private int freezeTicks;
+    private int blockTeleportTicks;
 
     public EntityData(Entity entity) {
-        super(entity);
+        this.entity = entity;
     }
 
     public boolean cannotTeleport() {
@@ -46,8 +48,8 @@ public class EntityData extends EntityComponent<Entity> {
                 this.entity.damage(DamageSource.player(freezer), damage);
             }
 
-            if (this.entity instanceof CreeperEntity) {
-                ((CreeperEntity) this.entity).setFuseSpeed(-1);
+            if (this.entity instanceof CreeperEntity creeper) {
+                creeper.setFuseSpeed(-1);
             }
 
             if (this.entity instanceof ProjectileEntity) {
