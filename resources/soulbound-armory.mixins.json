@@ -14,7 +14,7 @@
         "entity.attribute.EntityAttributeModifierMixin",
         "entity.attribute.OperationMixin",
         "entity.player.PlayerInventoryAccess",
-        "entity.player.PlayerInventoryEntityMixin",
+        "entity.player.PlayerInventoryMixin",
         "entity.projectile.AbstractArrowEntityMixin",
         "item.ItemStackMixin",
         "roman.TranslationStorageMixin",

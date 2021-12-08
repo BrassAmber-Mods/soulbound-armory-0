@@ -186,16 +186,15 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 /*
     @Override
     protected void onHit(HitResult result) {
-         Vector3d pos = result.getPos();
-         BlockPos blockPos = new BlockPos(pos);
-         BlockState blockState = this.world.getBlockState(blockPos);
+         var pos = result.getPos();
+         var blockPos = new BlockPos(pos);
+         var blockState = this.world.getBlockState(blockPos);
 
         if (this.ticksSeeking == 0) {
             super.onHit(result);
         }
 
         if (this.world.isClient) {
-            //noinspection MethodCallSideOnly
             this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
         }
     }
