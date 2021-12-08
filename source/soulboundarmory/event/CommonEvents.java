@@ -17,7 +17,6 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -135,23 +134,6 @@ public class CommonEvents {
 
             Block.dropStacks(event.getState(), event.getWorld(), player.getBlockPos(), null);
         }
-    }
-
-    /**
-     Ensure that items bound to certain slots are inserted thereinto.
-     */
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void pickup(EntityItemPickupEvent event) {
-        var entity = event.getItem();
-        var stack = entity.getStack();
-        var player = event.getPlayer();
-
-        ItemComponent.get(player, stack).ifPresent(component -> {
-            if (component.hasBoundSlot() && component.stackInBoundSlot().isEmpty() && player.inventory.insertStack(component.boundSlot(), stack)) {
-                player.sendPickup(entity, stack.getCount());
-                event.setCanceled(true);
-            }
-        });
     }
 
     /**

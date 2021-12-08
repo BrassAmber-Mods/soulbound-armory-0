@@ -121,35 +121,6 @@ public abstract class SoulboundComponent implements Component {
 
         if (storage != null) {
             this.storage.updateInventory(-1);
-
-/*
-            var inventory = this.player.inventory;
-            var combinedInventory = ItemUtil.inventory(this.player).toList();
-            var newItemStack = storage.stack();
-            var found = false;
-            // var firstSlot = -1;
-
-            for (var iterator = combinedInventory.listIterator(); iterator.hasNext();) {
-                var stack = iterator.next();
-
-                if (this.isAcceptable(stack)) {
-                    var index = iterator.previousIndex();
-
-                    if (storage.accepts(stack) && !found) {
-                        found = true;
-                        // firstSlot = index == 36 ? 40 : index;
-                        var tag = newItemStack.getTag();
-
-                        if (tag != null && !tag.equals(stack.getTag())) {
-                            newItemStack.setCustomName(stack.getName());
-                            inventory.setStack(index, newItemStack);
-                        }
-                    } else if (!this.player.isCreative()) {
-                        inventory.removeOne(stack);
-                    }
-                }
-            }
-*/
         }
 
         this.storages.values().forEach(ItemComponent::tick);
