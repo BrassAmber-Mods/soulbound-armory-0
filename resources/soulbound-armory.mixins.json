@@ -5,6 +5,7 @@
     "compatibilityLevel": "JAVA_17",
     "minVersion": "0.8",
     "mixins": [
+        "ServerPlayNetworkHandlerMixin",
         "access.TextColorAccess",
         "access.FormattingAccess",
         "entity.LightningEntityMixin",
@@ -12,7 +13,6 @@
         "entity.LivingEntityMixin",
         "entity.attribute.EntityAttributeModifierMixin",
         "entity.attribute.OperationMixin",
-        "entity.player.PlayerEntityMixin",
         "entity.player.PlayerInventoryAccess",
         "entity.player.PlayerInventoryEntityMixin",
         "entity.projectile.AbstractArrowEntityMixin",
@@ -29,5 +29,9 @@
         "defaultRequire": 1,
         "maxShiftBy": 5
     },
-    "client": ["roman.I18nMixin", "text.FontRenderer$DrawerMixin"]
+    "client": [
+        "GameRendererMixin",
+        "roman.I18nMixin",
+        "text.FontRenderer$DrawerMixin"
+    ]
 }

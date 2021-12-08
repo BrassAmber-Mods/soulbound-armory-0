@@ -14,16 +14,14 @@ import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SkillTab;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.entity.SAAttributes;
-import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.item.SoulboundToolItem;
+import soulboundarmory.entity.Attributes;
 
-public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<T> {
-    public ToolStorage(SoulboundComponent component, Item item) {
+public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
+    public ToolComponent(SoulboundComponent component, Item item) {
         super(component, item);
     }
 
@@ -49,18 +47,10 @@ public abstract class ToolStorage<T extends ItemStorage<T>> extends ItemStorage<
     }
 
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(SAAttributes.efficiency, new EntityAttributeModifier(SAAttributes.efficiencyUUID, "Tool modifier", this.doubleValue(StatisticType.efficiency), EntityAttributeModifier.Operation.ADDITION));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), new EntityAttributeModifier(SAAttributes.reachUUID, "Tool modifier", this.doubleValue(StatisticType.reach), EntityAttributeModifier.Operation.ADDITION));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.toolModifier(Attributes.reach, StatisticType.reach));
         }
-
-        return modifiers;
-    }
-
-    @Override
-    public Class<? extends SoulboundItem> itemClass() {
-        return SoulboundToolItem.class;
     }
 
     @Override

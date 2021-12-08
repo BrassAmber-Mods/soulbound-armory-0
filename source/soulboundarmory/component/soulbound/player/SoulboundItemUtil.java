@@ -1,38 +1,10 @@
 package soulboundarmory.component.soulbound.player;
 
-import java.util.Optional;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.item.SoulboundWeaponItem;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import soulboundarmory.item.SoulboundWeaponItem;
 
 public class SoulboundItemUtil {
-    public static Optional<ItemStorage<?>> firstStorage(Entity entity) {
-        if (entity == null) {
-            return Optional.empty();
-        }
-
-        for (var itemStack : entity.getItemsHand()) {
-            var component = ItemStorage.get(entity, itemStack.getItem());
-
-            if (component.isPresent()) {
-                return component;
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    public static boolean isSoulWeaponEquipped(PlayerEntity player) {
-        return player.getMainHandStack().getItem() instanceof SoulboundWeaponItem
-            || player.getOffHandStack().getItem() instanceof SoulboundWeaponItem;
-    }
-
-    public static boolean addItemStack(ItemStack itemStack, PlayerEntity player) {
-        return addItemStack(itemStack, player, true);
-    }
-
     public static boolean addItemStack(ItemStack itemStack, PlayerEntity player, boolean hasReservedSlot) {
         return true;
 /*

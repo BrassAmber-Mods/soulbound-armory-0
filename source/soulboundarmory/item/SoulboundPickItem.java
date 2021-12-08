@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -18,9 +17,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.text.Translation;
 
 public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem {
     public SoulboundPickItem() {
@@ -35,11 +33,11 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
     @Override
     public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
         if (miner instanceof PlayerEntity player && this.canMine(state, world, pos, (PlayerEntity) miner)) {
-            var component = StorageType.pick.get(miner);
+            var component = ItemComponentType.pick.get(miner);
             var xp = Math.min(5, (int) state.getHardness(world, pos)) + state.getHarvestLevel();
 
             if (!world.isClient && component.incrementStatistic(StatisticType.experience, xp) && Components.config.of(miner).levelupNotifications) {
-                player.sendMessage(new Translation(Translations.levelupMessage.getKey(), stack.getName(), component.intValue(StatisticType.level)), true);
+                player.sendMessage(Translations.levelupMessage.format(stack.getName(), component.intValue(StatisticType.level)), true);
             }
         }
 
@@ -49,10 +47,5 @@ public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem 
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
         return HashMultimap.create();
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        this.bindSlot(stack, entity, slot);
     }
 }

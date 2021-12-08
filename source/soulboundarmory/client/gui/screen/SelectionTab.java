@@ -4,14 +4,14 @@ import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.network.server.C2SSelectItem;
 import soulboundarmory.util.ItemUtil;
 
 /**
- The item selection tab, which adds a button for each {@linkplain ItemStorage#isUnlocked unlocked} or {@linkplain ItemStorage#canUnlock unlockable} item.
+ The item selection tab, which adds a button for each {@linkplain ItemComponent#isUnlocked unlocked} or {@linkplain ItemComponent#canConsume unlockable} item.
  When a button is pressed, {@linkplain C2SSelectItem a packet} is sent to the server and the held item is replaced by the selected item.
  */
 public class SelectionTab extends SoulboundTab {
@@ -55,7 +55,7 @@ public class SelectionTab extends SoulboundTab {
         }
     }
 
-    protected PressCallback<ScalableWidget> selectAction(ItemStorage<?> storage) {
+    protected PressCallback<ScalableWidget> selectAction(ItemComponent<?> storage) {
         return button -> Packets.serverSelectItem.send(new ExtendedPacketBuffer(storage).writeInt(this.parent.slot));
     }
 }

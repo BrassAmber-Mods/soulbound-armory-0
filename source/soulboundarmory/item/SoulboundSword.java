@@ -1,9 +1,5 @@
 package soulboundarmory.item;
 
-import soulboundarmory.component.soulbound.item.tool.PickStorage;
-import soulboundarmory.component.soulbound.item.weapon.SwordStorage;
-import soulboundarmory.entity.SoulboundLightningEntity;
-import soulboundarmory.registry.Skills;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -12,6 +8,10 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
+import soulboundarmory.entity.SoulboundLightningEntity;
+import soulboundarmory.registry.Skills;
 
 public class SoulboundSword extends SoulboundMeleeWeapon {
     public SoulboundSword() {
@@ -25,7 +25,8 @@ public class SoulboundSword extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        var component = (SwordStorage) PickStorage.get(player, this).get();
+        var stack = player.getStackInHand(hand);
+        var component = (SwordComponent) ItemComponent.get(player, stack).get();
 
         if (!world.isClient && component.hasSkill(Skills.summonLightning) && component.lightningCooldown() <= 0) {
             var pos = player.getPos();

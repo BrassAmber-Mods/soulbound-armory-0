@@ -2,9 +2,6 @@ package soulboundarmory.item;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.Entity;
-import soulboundarmory.component.soulbound.item.weapon.StaffStorage;
-import soulboundarmory.entity.SoulboundFireballEntity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -17,6 +14,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
+import soulboundarmory.entity.SoulboundFireballEntity;
 
 public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem {
     public SoulboundStaffItem() {
@@ -31,7 +30,7 @@ public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!world.isClient) {
-            var component = StaffStorage.get(user);
+            var component = StaffComponent.get(user);
 
             if (component.fireballCooldown <= 0) {
                 world.spawnEntity(new SoulboundFireballEntity(world, user, component.spell()));
@@ -50,10 +49,5 @@ public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem 
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         return HashMultimap.create();
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        this.bindSlot(stack, entity, slot);
     }
 }

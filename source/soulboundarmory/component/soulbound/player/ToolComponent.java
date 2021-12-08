@@ -7,7 +7,7 @@ import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.ComponentKey;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.tool.PickStorage;
+import soulboundarmory.component.soulbound.item.tool.PickComponent;
 import soulboundarmory.item.SoulboundToolItem;
 import soulboundarmory.registry.SoulboundItems;
 
@@ -15,7 +15,7 @@ public class ToolComponent extends SoulboundComponent {
     public ToolComponent(PlayerEntity player) {
         super(player);
 
-        this.store(new PickStorage(this, SoulboundItems.pick));
+        this.store(new PickComponent(this, SoulboundItems.pick));
     }
 
     @Override

@@ -18,8 +18,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.component.soulbound.item.weapon.DaggerStorage;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.soulbound.player.SoulboundItemUtil;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
@@ -38,7 +38,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     protected int ticksToSeek;
     protected int ticksSeeking;
     protected int ticksInGround;
-    protected DaggerStorage storage;
+    protected DaggerComponent storage;
 
     public SoulboundDaggerEntity(SoulboundDaggerEntity original, boolean spawnClone) {
         this(original.world, original.getEntity(), original.itemStack, spawnClone, original.getVelocityD(), original.getVelocityD());
@@ -82,7 +82,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         var owner = this.getEntity();
 
         if (owner instanceof PlayerEntity) {
-            this.storage = Components.weapon.of(owner).item(StorageType.dagger);
+            this.storage = Components.weapon.of(owner).item(ItemComponentType.dagger);
         }
     }
 

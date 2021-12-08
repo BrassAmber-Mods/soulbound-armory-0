@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import soulboundarmory.component.soulbound.item.ItemStorage;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
@@ -27,7 +27,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         this.writeIdentifier(component.key().id);
     }
 
-    public ExtendedPacketBuffer(ItemStorage<?> component) {
+    public ExtendedPacketBuffer(ItemComponent<?> component) {
         this();
 
         this.writeIdentifier(component.type().id());

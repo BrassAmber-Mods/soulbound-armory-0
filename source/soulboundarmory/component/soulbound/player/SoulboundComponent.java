@@ -11,19 +11,19 @@ import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.component.Component;
 import soulboundarmory.component.ComponentKey;
 import soulboundarmory.component.ComponentRegistry;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
 
 public abstract class SoulboundComponent implements Component {
-    public final Map<StorageType<? extends ItemStorage<?>>, ItemStorage<?>> storages = new Object2ObjectOpenHashMap<>();
+    public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> storages = new Object2ObjectOpenHashMap<>();
     public final PlayerEntity player;
     public final boolean client;
 
     protected int tab;
-    protected ItemStorage<?> storage;
+    protected ItemComponent<?> storage;
 
     public SoulboundComponent(PlayerEntity player) {
         this.player = player;
@@ -46,24 +46,24 @@ public abstract class SoulboundComponent implements Component {
         }
     }
 
-    public ItemStorage<?> item() {
+    public ItemComponent<?> item() {
         return this.storage;
     }
 
-    public <S extends ItemStorage<S>> S item(StorageType<S> type) {
+    public <S extends ItemComponent<S>> S item(ItemComponentType<S> type) {
         return (S) this.storages.get(type);
     }
 
-    public void currentItem(ItemStorage<?> storage) {
+    public void currentItem(ItemComponent<?> storage) {
         this.storage = storage;
         storage.unlocked(true);
     }
 
-    protected void store(ItemStorage<?> storage) {
+    protected void store(ItemComponent<?> storage) {
         this.storages.put(storage.type(), storage);
     }
 
-    public ItemStorage<?> heldItemStorage() {
+    public ItemComponent<?> heldItemStorage() {
         for (var component : this.storages.values()) {
             if (ItemUtil.handStacks(this.player).anyMatch(component::accepts)) {
                 return component;
@@ -73,18 +73,8 @@ public abstract class SoulboundComponent implements Component {
         return null;
     }
 
-    public ItemStorage<?> menuStorage() {
-        for (var component : this.storages.values()) {
-            if (component.isMenuItemEquipped()) {
-                return component;
-            }
-        }
-
-        return null;
-    }
-
     /**
-     Open a GUI for this component if the player possesses a soulbound or {@linkplain ItemStorage#canConsume consumable} item.
+     Open a GUI for this component if the player possesses a soulbound or {@linkplain ItemComponent#canConsume consumable} item.
 
      @return whether a GUI was opened.
      */
@@ -130,6 +120,9 @@ public abstract class SoulboundComponent implements Component {
         }
 
         if (storage != null) {
+            this.storage.updateInventory(-1);
+
+/*
             var inventory = this.player.inventory;
             var combinedInventory = ItemUtil.inventory(this.player).toList();
             var newItemStack = storage.stack();
@@ -144,7 +137,7 @@ public abstract class SoulboundComponent implements Component {
 
                     if (storage.accepts(stack) && !found) {
                         found = true;
-                        // firstSlot = /*index == 36 ? 40 :*/ index;
+                        // firstSlot = index == 36 ? 40 : index;
                         var tag = newItemStack.getTag();
 
                         if (tag != null && !tag.equals(stack.getTag())) {
@@ -156,9 +149,10 @@ public abstract class SoulboundComponent implements Component {
                     }
                 }
             }
+*/
         }
 
-        this.storages.values().forEach(ItemStorage::tick);
+        this.storages.values().forEach(ItemComponent::tick);
     }
 
     @Override
@@ -176,7 +170,7 @@ public abstract class SoulboundComponent implements Component {
 
     @Override
     public void deserialize(NbtCompound tag) {
-        var type = StorageType.get(tag.getString("storage"));
+        var type = ItemComponentType.get(tag.getString("storage"));
 
         if (type != null) {
             this.storage = this.item(type);

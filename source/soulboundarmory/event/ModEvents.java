@@ -3,7 +3,6 @@ package soulboundarmory.event;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -13,22 +12,18 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
-import soulboundarmory.component.statistics.Category;
-import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.client.render.SoulboundDaggerEntityRenderer;
 import soulboundarmory.client.render.SoulboundFireballEntityRenderer;
-import soulboundarmory.entity.SAAttributes;
+import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.statistics.Category;
+import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.skill.Skill;
-
-import static net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEvents {
@@ -44,7 +39,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void registerRegistries(RegistryEvent.NewRegistry event) {
-        Unsafe.ensureClassInitialized(StorageType.class);
+        Unsafe.ensureClassInitialized(ItemComponentType.class);
         Unsafe.ensureClassInitialized(Category.class);
         Unsafe.ensureClassInitialized(StatisticType.class);
         Unsafe.ensureClassInitialized(Skill.class);
@@ -65,12 +60,6 @@ public class ModEvents {
         event.getRegistry().register(SoulboundFireballEntity.type.setRegistryName("fireball"));
 
         Unsafe.ensureClassInitialized(Components.class);
-    }
-
-    @SubscribeEvent
-    public static void registerAttributes(RegistryEvent.Register<EntityAttribute> event) {
-        event.getRegistry().register(SAAttributes.efficiency.setRegistryName("efficiency"));
-        event.getRegistry().register(SAAttributes.criticalStrikeRate.setRegistryName("critical_strike_rate"));
     }
 
     @SubscribeEvent

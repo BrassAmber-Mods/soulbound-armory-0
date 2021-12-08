@@ -2,7 +2,7 @@ package soulboundarmory.entity;
 
 import java.util.UUID;
 import soulboundarmory.mixin.access.entity.LightningEntityAccess;
-import soulboundarmory.component.soulbound.item.weapon.SwordStorage;
+import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.serial.CompoundSerializable;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -73,7 +73,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
                 for (var entity : this.world.getOtherEntities(this, new Box(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
                     var caster = this.caster();
                     var attackDamage = caster instanceof PlayerEntity
-                            ? (float) SwordStorage.get(caster).attributeTotal(StatisticType.attackDamage)
+                            ? (float) SwordComponent.get(caster).attributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {

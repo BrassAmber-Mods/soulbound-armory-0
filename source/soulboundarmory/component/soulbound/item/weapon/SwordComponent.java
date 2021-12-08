@@ -19,47 +19,28 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.EnchantmentStorage;
 import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
-import soulboundarmory.entity.SAAttributes;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.util.AttributeModifierIdentifiers;
-import soulboundarmory.util.AttributeModifierOperations;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
 
-public class SwordStorage extends WeaponStorage<SwordStorage> {
+public class SwordComponent extends WeaponComponent<SwordComponent> {
     protected int lightningCooldown;
 
-    public SwordStorage(SoulboundComponent component, Item item) {
+    public SwordComponent(SoulboundComponent component, Item item) {
         super(component, item);
-
-        this.statistics = Statistics.create()
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
-            .min(1.6, StatisticType.attackSpeed).min(4, StatisticType.attackDamage).min(3, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate)
-            .build();
-
-        this.enchantments = new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getTranslationKey().toLowerCase();
-
-            return enchantment.isAcceptableItem(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
-                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
-                && !name.contains("mending");
-        });
-
-        this.skills = new SkillStorage(Skills.nourishment, Skills.summonLightning);
     }
 
-    public static SwordStorage get(Entity entity) {
-        return Components.weapon.of(entity).item(StorageType.sword);
+    public static SwordComponent get(Entity entity) {
+        return Components.weapon.of(entity).item(ItemComponentType.sword);
     }
 
     @Override
@@ -68,8 +49,8 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public StorageType<SwordStorage> type() {
-        return StorageType.sword;
+    public ItemComponentType<SwordComponent> type() {
+        return ItemComponentType.sword;
     }
 
     public int lightningCooldown() {
@@ -83,15 +64,11 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
     }
 
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackDamage), EntityAttributeModifier.Operation.ADDITION));
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, new EntityAttributeModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, "Weapon modifier", this.attributeRelative(StatisticType.attackSpeed), EntityAttributeModifier.Operation.ADDITION));
-            modifiers.put(SAAttributes.efficiency, new EntityAttributeModifier(SAAttributes.efficiencyUUID, "Weapon modifier", this.doubleValue(StatisticType.efficiency), EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
-            modifiers.put(SAAttributes.criticalStrikeRate, new EntityAttributeModifier(SAAttributes.criticalStrikeRateUUID, "Weapon modifier", this.doubleValue(StatisticType.criticalStrikeRate), AttributeModifierOperations.percentageAddition));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
         }
-
-        return modifiers;
     }
 
     @Override
@@ -154,5 +131,31 @@ public class SwordStorage extends WeaponStorage<SwordStorage> {
         super.deserializeNBT(tag);
 
         this.lightningCooldown = tag.getInt("lightningCooldown");
+    }
+
+    @Override
+    protected Statistics newStatistics() {
+        return Statistics.builder()
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
+            .min(1.6, StatisticType.attackSpeed).min(4, StatisticType.attackDamage).min(3, StatisticType.reach)
+            .max(1, StatisticType.criticalStrikeRate)
+            .build();
+    }
+
+    @Override
+    protected EnchantmentStorage newEnchantments() {
+        return new EnchantmentStorage(enchantment -> {
+            var name = enchantment.getTranslationKey().toLowerCase();
+
+            return enchantment.isAcceptableItem(this.itemStack) && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
+                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
+                && !name.contains("mending");
+        });
+    }
+
+    @Override
+    protected SkillStorage newSkills() {
+        return new SkillStorage(Skills.nourishment, Skills.summonLightning);
     }
 }

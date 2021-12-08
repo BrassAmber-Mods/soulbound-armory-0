@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.util.EntityUtil;
 
@@ -36,7 +36,7 @@ abstract class LivingEntityMixin extends Entity {
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     protected void freeze(CallbackInfo info, List<Entity> entities) {
         if ((Object) this instanceof PlayerEntity player && !this.world.isClient) {
-            var greatsword = Components.weapon.of(player).item(StorageType.greatsword);
+            var greatsword = Components.weapon.of(player).item(ItemComponentType.greatsword);
             var leapForce = greatsword.leapForce();
 
             if (leapForce > 0) {

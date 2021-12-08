@@ -18,6 +18,7 @@ import soulboundarmory.skill.weapon.staff.VulnerabilitySkill;
 import soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 
 public class Skills {
+    // Should not be visible in the game if it's not implemented.
     // public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
     public static final Skill endermanacle = new EndermanacleSkill(SoulboundArmory.id("endermanacle"));
     public static final Skill enderPull = new EnderPullSkill(SoulboundArmory.id("ender_pull"));

@@ -8,24 +8,24 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import soulboundarmory.component.soulbound.item.ItemStorage;
-import soulboundarmory.component.soulbound.item.StorageType;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 
-public class StorageArgumentType extends RegistryArgumentType<StorageType<?>> {
+public class StorageArgumentType extends RegistryArgumentType<ItemComponentType<?>> {
     protected StorageArgumentType() {
-        super(StorageType.registry());
+        super(ItemComponentType.registry());
     }
 
     public static StorageArgumentType storages() {
         return new StorageArgumentType();
     }
 
-    public static Set<StorageType<? extends ItemStorage<?>>> get(CommandContext<?> context, String name) {
+    public static Set<ItemComponentType<? extends ItemComponent<?>>> get(CommandContext<?> context, String name) {
         return context.getArgument(name, Set.class);
     }
 
     @Override
-    public Set<StorageType<? extends ItemStorage<?>>> parse(StringReader reader) throws CommandSyntaxException {
+    public Set<ItemComponentType<? extends ItemComponent<?>>> parse(StringReader reader) throws CommandSyntaxException {
         var cursor = reader.getCursor();
 
         if (Pattern.compile(Pattern.quote("current"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(reader.readString()).find()) {
