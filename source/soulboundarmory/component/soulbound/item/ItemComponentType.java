@@ -1,6 +1,5 @@
 package soulboundarmory.component.soulbound.item;
 
-import java.util.Objects;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -11,27 +10,31 @@ import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.lib.component.ComponentKey;
 import soulboundarmory.registry.RegistryEntry;
 import soulboundarmory.util.Util;
 
 @SuppressWarnings("unchecked")
 public final class ItemComponentType<T extends ItemComponent<T>> extends RegistryEntry<ItemComponentType<T>> {
     @SuppressWarnings("rawtypes")
-    public static final IForgeRegistry registry = Util.<ItemComponentType>registry("storage");
+    public static final IForgeRegistry registry = Util.<ItemComponentType>newRegistry("storage");
 
-    public static final ItemComponentType<DaggerComponent> dagger = register("dagger");
-    public static final ItemComponentType<SwordComponent> sword = register("sword");
-    public static final ItemComponentType<GreatswordComponent> greatsword = register("greatsword");
-    public static final ItemComponentType<StaffComponent> staff = register("staff");
-    public static final ItemComponentType<PickComponent> pick = register("pick");
+    public static final ItemComponentType<DaggerComponent> dagger = new ItemComponentType<>("dagger", Components.weapon);
+    public static final ItemComponentType<SwordComponent> sword = new ItemComponentType<>("sword", Components.weapon);
+    public static final ItemComponentType<GreatswordComponent> greatsword = new ItemComponentType<>("greatsword", Components.weapon);
+    public static final ItemComponentType<StaffComponent> staff = new ItemComponentType<>("staff", Components.weapon);
+    public static final ItemComponentType<PickComponent> pick = new ItemComponentType<>("pick", Components.tool);
 
-    @SuppressWarnings("unchecked")
-    public static <T extends ItemComponent<T>> IForgeRegistry<ItemComponentType<T>> registry() {
-        return registry;
+    public final ComponentKey<? extends SoulboundComponent> parentKey;
+
+    public ItemComponentType(String path, ComponentKey<? extends SoulboundComponent> key) {
+        super(path);
+
+        this.parentKey = key;
     }
 
     public static ItemComponentType<?> get(Identifier id) {
-        return registry().getValue(id);
+        return Util.cast(registry.getValue(id));
     }
 
     public static ItemComponentType<?> get(String name) {
@@ -39,15 +42,11 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
     }
 
     public T get(Entity entity) {
-        return Components.soulbound(entity).map(this::get).filter(Objects::nonNull).findAny().orElse(null);
-    }
-
-    public T get(SoulboundComponent component) {
-        return component.item(this);
+        return this.parentKey.nullable(entity).map(component -> component.item(this)).orElse(null);
     }
 
     @Override
     public String toString() {
-        return "item component type " + this.getRegistryName();
+        return "item component type " + this.id;
     }
 }

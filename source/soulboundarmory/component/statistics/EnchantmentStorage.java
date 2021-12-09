@@ -1,6 +1,6 @@
 package soulboundarmory.component.statistics;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import net.minecraft.enchantment.Enchantment;
@@ -10,8 +10,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.serial.CompoundSerializable;
 
-public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, Integer> implements Iterable<Enchantment>, CompoundSerializable {
-    public EnchantmentStorage(Predicate<Enchantment> predicate) {
+public class EnchantmentStorage extends Reference2ObjectLinkedOpenHashMap<Enchantment, Integer> implements Iterable<Enchantment>, CompoundSerializable {
+    public void add(Predicate<Enchantment> predicate) {
         ForgeRegistries.ENCHANTMENTS.getValues().stream().filter(predicate).forEach(enchantment -> this.put(enchantment, 0));
     }
 
@@ -33,7 +33,7 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
+    public void serialize(NbtCompound tag) {
         for (var enchantment : this) {
             var level = this.get(enchantment);
 
@@ -41,14 +41,14 @@ public class EnchantmentStorage extends Object2ObjectOpenHashMap<Enchantment, In
                 var identifier = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
 
                 if (identifier != null) {
-                    tag.putInt(identifier.toString(), this.get(enchantment));
+                    tag.putInt(identifier.toString(), level);
                 }
             }
         }
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserialize(NbtCompound nbt) {
         for (var key : nbt.getKeys()) {
             var enchantment = Registry.ENCHANTMENT.get(new Identifier(key));
 

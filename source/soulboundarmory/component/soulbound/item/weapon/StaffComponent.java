@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -17,14 +16,10 @@ import net.minecraft.text.Text;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
-import soulboundarmory.component.statistics.EnchantmentStorage;
-import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.component.statistics.Statistics;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.registry.Skills;
@@ -38,22 +33,42 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
 
     protected int spell;
 
-    public StaffComponent(SoulboundComponent component, Item item) {
-        super(component, item);
-    }
+    public StaffComponent(SoulboundComponent component) {
+        super(component);
 
-    public static StaffComponent get(Entity entity) {
-        return Components.weapon.of(entity).item(ItemComponentType.staff);
-    }
+        this.statistics
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
+            .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
+            .max(1, StatisticType.criticalStrikeRate);
 
-    @Override
-    public Text name() {
-        return Translations.guiStaff;
+        this.enchantments.add(enchantment -> {
+            var name = enchantment.getTranslationKey().toLowerCase();
+
+            return enchantment.type.isAcceptableItem(this.item())
+                && !enchantment.isCursed()
+                && enchantment != UNBREAKING
+                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
+                && !name.contains("holding")
+                && !name.contains("mending");
+        });
+
+        this.skills.add(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 
     @Override
     public ItemComponentType<StaffComponent> type() {
         return ItemComponentType.staff;
+    }
+
+    @Override
+    public Item item() {
+        return SoulboundItems.staff;
+    }
+
+    @Override
+    public Text name() {
+        return Translations.guiStaff;
     }
 
     public void resetFireballCooldown() {
@@ -71,7 +86,7 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     public void cycleSpells(int spells) {
         this.spell = Math.abs((this.spell + spells) % 2);
 
-        if (this.client) {
+        if (this.isClient()) {
             Packets.serverSpell.send(new ExtendedPacketBuffer().writeByte(this.spell));
         }
     }
@@ -97,14 +112,14 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
         var tooltip = new ArrayList<>(List.of(
-            Translations.tooltipAttackSpeed.format(format.format(this.doubleValue(StatisticType.attackSpeed))),
-            Translations.tooltipAttackDamage.format(format.format(this.attributeTotal(StatisticType.attackDamage))),
+            Translations.tooltipAttackSpeed.translate(format.format(this.doubleValue(StatisticType.attackSpeed))),
+            Translations.tooltipAttackDamage.translate(format.format(this.attributeTotal(StatisticType.attackDamage))),
             LiteralText.EMPTY,
             LiteralText.EMPTY
         ));
 
         if (this.doubleValue(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(Translations.tooltipCriticalStrikeRate.format(format.format(this.doubleValue(StatisticType.criticalStrikeRate) * 100)));
+            tooltip.add(Translations.tooltipCriticalStrikeRate.translate(format.format(this.formatStatistic(StatisticType.criticalStrikeRate))));
         }
 
         return tooltip;
@@ -112,7 +127,7 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
 
     @Override
     public Item consumableItem() {
-        return SoulboundItems.staff;
+        return null;
     }
 
     @Override
@@ -132,46 +147,16 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
-        super.serializeNBT(tag);
+    public void serialize(NbtCompound tag) {
+        super.serialize(tag);
 
         tag.putByte("spell", (byte) this.spell);
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
-        super.deserializeNBT(tag);
+    public void deserialize(NbtCompound tag) {
+        super.deserialize(tag);
 
         this.spell(tag.getByte("spell"));
-    }
-
-    @Override
-    protected Statistics newStatistics() {
-        return Statistics.builder()
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
-            .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
-            .max(1, StatisticType.criticalStrikeRate).build();
-
-    }
-
-    @Override
-    protected EnchantmentStorage newEnchantments() {
-        return new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getTranslationKey().toLowerCase();
-
-            return enchantment.isAcceptableItem(this.itemStack)
-                && !enchantment.isCursed()
-                && enchantment != UNBREAKING
-                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
-                && !name.contains("holding")
-                && !name.contains("mending");
-        });
-
-    }
-
-    @Override
-    protected SkillStorage newSkills() {
-        return new SkillStorage(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 }

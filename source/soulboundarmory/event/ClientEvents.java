@@ -23,15 +23,15 @@ import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
+import soulboundarmory.util.ItemUtil;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = SoulboundArmory.ID)
-public class ClientEvents {
+public final class ClientEvents {
     public static ExperienceBar overlayBar;
     public static ExperienceBar tooltipBar;
 
@@ -41,9 +41,9 @@ public class ClientEvents {
             var player = SoulboundArmoryClient.client.player;
 
             if (player != null && player.world != null) {
-                var storage = Components.weapon.of(player).heldItemStorage();
+                var staff = ItemComponentType.staff.get(player);
 
-                if (storage instanceof StaffComponent staff) {
+                if (ItemUtil.handStacks(player).anyMatch(staff::accepts)) {
                     var dy = (int) event.getMouseY();
 
                     if (dy != 0) {

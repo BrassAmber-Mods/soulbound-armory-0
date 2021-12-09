@@ -99,11 +99,6 @@ public abstract class CellScreen extends Screen implements DrawableElement {
         this.buttons.remove(button);
     }
 
-    @Override
-    protected <T extends ClickableWidget> T addButton(T button) {
-        return super.addButton(button);
-    }
-
     public void renderBackground(Identifier identifier, int x, int y, int width, int height) {
         this.renderBackground(identifier, x, y, width, height, 64, 0);
     }

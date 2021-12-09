@@ -102,7 +102,7 @@ public class ExperienceBar extends ScalableWidget {
     }
 
     public boolean render(MatrixStack matrixes, Window window) {
-        var component = ItemComponent.firstEquipped(minecraft.player, false);
+        var component = ItemComponent.firstHeld(minecraft.player);
 
         if (component.isPresent()) {
             this.update(component.get());

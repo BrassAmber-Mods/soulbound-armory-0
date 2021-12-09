@@ -1,7 +1,5 @@
 package soulboundarmory.event;
 
-import java.util.Objects;
-import net.minecraft.block.Block;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
@@ -18,7 +16,6 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -43,10 +40,11 @@ import soulboundarmory.util.EntityUtil;
 import soulboundarmory.util.ItemUtil;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
-public class CommonEvents {
+public final class CommonEvents {
     @SubscribeEvent
     public static void login(ClientPlayerNetworkEvent.LoggedInEvent event) {
-        Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(Components.config.of(event.getPlayer()).levelupNotifications));
+        var configuration = Configuration.instance().client;
+        Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(configuration.levelupNotifications).writeBoolean(configuration.enchantmentGlint));
     }
 
     @SubscribeEvent
@@ -54,7 +52,7 @@ public class CommonEvents {
         var player = event.getPlayer();
 
         if (!player.world.isClient) {
-            Components.soulbound(player).map(SoulboundComponent::item).filter(Objects::nonNull).forEach(ItemComponent::sync);
+            ItemComponent.all(player).forEach(ItemComponent::sync);
         }
     }
 
@@ -63,18 +61,8 @@ public class CommonEvents {
         if (event.getEntity() instanceof PlayerEntity player && !player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             Components.soulbound(player)
                 .map(SoulboundComponent::item)
-                .filter(storage -> storage != null && storage.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
-                .forEach(storage -> {
-                    var drops = event.getDrops();
-
-                    for (var item : drops) {
-                        var stack = item.getStack();
-
-                        if (storage.accepts(stack) && player.giveItemStack(stack)) {
-                            drops.remove(item);
-                        }
-                    }
-                });
+                .filter(component -> component != null && component.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
+                .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.giveItemStack(drop.getStack())));
         }
     }
 
@@ -121,19 +109,6 @@ public class CommonEvents {
                 event.setNewSpeed(event.getNewSpeed() * efficiency.floatValue());
             }
         });
-    }
-
-    @SubscribeEvent
-    public static void onBlockDrop(BlockEvent.BreakEvent event) {
-        var player = event.getPlayer();
-        var tool = player.getMainHandStack();
-
-        if (tool.getItem() == SoulboundItems.pick && Components.tool.of(player).item().hasSkill(Skills.enderPull)) {
-            event.setCanceled(true);
-            event.getWorld().removeBlock(event.getPos(), false);
-
-            Block.dropStacks(event.getState(), event.getWorld(), player.getBlockPos(), null);
-        }
     }
 
     /**
@@ -190,8 +165,6 @@ public class CommonEvents {
 
         if (attacker == null) {
             attacker = entity.getDamageTracker().getBiggestAttacker();
-        } else if (attacker != entity.getDamageTracker().getBiggestAttacker()) {
-            throw new RuntimeException();
         }
 
         if (attacker instanceof PlayerEntity player && !player.world.isClient) {
@@ -315,8 +288,7 @@ public class CommonEvents {
         }
 
         if (event.getEntity() instanceof PlayerEntity player) {
-            Components.tool.of(player).tick();
-            Components.weapon.of(player).tick();
+            Components.soulbound(player).forEach(SoulboundComponent::tick);
         }
     }
 

@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "package": "soulboundarmory.lib.component.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "minVersion": "0.8",
+    "mixins": [
+        "EntityMixin",
+        "EntityTypeMixin",
+        "ItemStackMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1,
+        "maxShiftBy": 5
+    }
+}

@@ -1,5 +1,7 @@
 package soulboundarmory.text;
 
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 public class Translation extends TranslatableText {
@@ -17,6 +19,10 @@ public class Translation extends TranslatableText {
 
     public Translation format(Object... args) {
         return new Translation(this.getKey(), args);
+    }
+
+    public Text translate(Object... args) {
+        return Text.of(I18n.translate(this.getKey(), args));
     }
 
     @Override

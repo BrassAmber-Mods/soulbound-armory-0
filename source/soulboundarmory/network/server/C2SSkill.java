@@ -6,11 +6,10 @@ import soulboundarmory.skill.Skill;
 
 /**
  A client-to-server packet for learning or upgrading a skill.
-
- <ul>buffer:
- <li>Identifier (storage type)</li>
- <li>Identifier (skill's registry name)</li>
- </ul>
+<br><br>
+ buffer: <br>
+ - Identifier (item component type) <br>
+ - Identifier (skill's registry name) <br>
  */
 public final class C2SSkill extends ItemComponentPacket {
     @Override

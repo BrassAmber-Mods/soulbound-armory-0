@@ -3,7 +3,7 @@ package soulboundarmory.mixin.mixin.entity;
 import net.minecraft.entity.LightningEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import soulboundarmory.mixin.access.entity.LightningEntityAccess;
+import soulboundarmory.mixin.access.LightningEntityAccess;
 
 @Mixin(LightningEntity.class)
 abstract class LightningEntityMixin implements LightningEntityAccess {

@@ -17,7 +17,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.soulbound.player.SoulboundItemUtil;
@@ -79,10 +78,8 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     protected void updateShooter() {
-        var owner = this.getEntity();
-
-        if (owner instanceof PlayerEntity) {
-            this.storage = Components.weapon.of(owner).item(ItemComponentType.dagger);
+        if (this.getEntity() instanceof PlayerEntity player) {
+            this.storage = ItemComponentType.dagger.get(player);
         }
     }
 

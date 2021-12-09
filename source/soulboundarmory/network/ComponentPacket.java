@@ -1,6 +1,6 @@
 package soulboundarmory.network;
 
-import soulboundarmory.component.ComponentRegistry;
+import soulboundarmory.lib.component.ComponentRegistry;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 
 public abstract class ComponentPacket extends BufferPacket {
@@ -8,6 +8,6 @@ public abstract class ComponentPacket extends BufferPacket {
 
     @Override
     protected void execute() {
-        this.execute((SoulboundComponent) ComponentRegistry.get(this.message.readIdentifier()).of(this.player()));
+        this.execute((SoulboundComponent) ComponentRegistry.entity(this.message.readIdentifier()).of(this.player()));
     }
 }

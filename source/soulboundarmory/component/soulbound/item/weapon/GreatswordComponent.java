@@ -4,55 +4,52 @@ import com.google.common.collect.Multimap;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.stream.Stream;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
-import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
-import soulboundarmory.component.statistics.EnchantmentStorage;
-import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.component.statistics.Statistics;
 import soulboundarmory.entity.Attributes;
 import soulboundarmory.registry.Skills;
+import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
-import soulboundarmory.util.Util;
 
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
-import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
 
 public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
-    protected NbtCompound cannotFreeze;
+    protected NbtCompound cannotFreeze = new NbtCompound();
     public int leapDuration;
     public double leapForce;
 
-    public GreatswordComponent(SoulboundComponent component, Item item) {
-        super(component, item);
+    public GreatswordComponent(SoulboundComponent component) {
+        super(component);
 
-        this.cannotFreeze = new NbtCompound();
-    }
+        this.statistics
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.attackRange, StatisticType.reach)
+            .min(0.8, StatisticType.attackSpeed).min(6, StatisticType.attackDamage).min(6, StatisticType.reach)
+            .max(1, StatisticType.criticalStrikeRate);
 
-    public static GreatswordComponent get(Entity entity) {
-        return Components.weapon.of(entity).item(ItemComponentType.greatsword);
-    }
+        this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
+            && !enchantment.isCursed()
+            && enchantment !=  UNBREAKING
+            && Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains)
+        );
 
-    @Override
-    public Text name() {
-        return Translations.guiGreatsword;
+        this.skills.add(Skills.nourishment, Skills.leaping, Skills.freezing);
     }
 
     @Override
@@ -61,8 +58,13 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     }
 
     @Override
-    public Item consumableItem() {
-        return Items.IRON_SWORD;
+    public Item item() {
+        return SoulboundItems.greatsword;
+    }
+
+    @Override
+    public Text name() {
+        return Translations.guiGreatsword;
     }
 
     public double leapForce() {
@@ -123,18 +125,18 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
         var tooltip = new ArrayList<>(List.of(
-            Translations.tooltipAttackSpeed.format(format.format(this.doubleValue(StatisticType.attackSpeed))),
-            Translations.tooltipAttackDamage.format(format.format(this.attributeTotal(StatisticType.attackDamage))),
+            Translations.tooltipAttackSpeed.translate(format.format(this.doubleValue(StatisticType.attackSpeed))),
+            Translations.tooltipAttackDamage.translate(format.format(this.attributeTotal(StatisticType.attackDamage))),
             LiteralText.EMPTY,
             LiteralText.EMPTY
         ));
 
         if (this.doubleValue(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(Translations.tooltipCriticalStrikeRate.format(format.format(this.doubleValue(StatisticType.criticalStrikeRate) * 100)));
+            tooltip.add(Translations.tooltipCriticalStrikeRate.translate(format.format(this.doubleValue(StatisticType.criticalStrikeRate) * 100)));
         }
 
         if (this.doubleValue(StatisticType.efficiency) > 0) {
-            tooltip.add(Translations.tooltipToolEfficiency.format(format.format(this.doubleValue(StatisticType.efficiency))));
+            tooltip.add(Translations.tooltipToolEfficiency.translate(format.format(this.doubleValue(StatisticType.efficiency))));
         }
 
         return tooltip;
@@ -160,8 +162,8 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
-        super.serializeNBT(tag);
+    public void serialize(NbtCompound tag) {
+        super.serialize(tag);
 
         tag.putInt("leapDuration", this.leapDuration());
         tag.putDouble("leapForce", this.leapForce());
@@ -169,35 +171,9 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
-        super.deserializeNBT(tag);
+    public void deserialize(NbtCompound tag) {
+        super.deserialize(tag);
 
         this.cannotFreeze = tag.getCompound("cannotFreeze");
-    }
-
-    @Override
-    protected Statistics newStatistics() {
-        return Statistics.builder()
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.attackRange, StatisticType.reach)
-            .min(0.8, StatisticType.attackSpeed).min(6, StatisticType.attackDamage).min(6, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate).build();
-    }
-
-    @Override
-    protected EnchantmentStorage newEnchantments() {
-        return new EnchantmentStorage(enchantment -> {
-            var name = enchantment.getTranslationKey().toLowerCase(Locale.ROOT);
-
-            return enchantment.isAcceptableItem(this.itemStack) && !Util.contains(enchantment, UNBREAKING, VANISHING_CURSE)
-                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound")) && !name.contains("holding")
-                && !name.contains("mending");
-        });
-
-    }
-
-    @Override
-    protected SkillStorage newSkills() {
-        return new SkillStorage(Skills.nourishment, Skills.leaping, Skills.freezing);
     }
 }

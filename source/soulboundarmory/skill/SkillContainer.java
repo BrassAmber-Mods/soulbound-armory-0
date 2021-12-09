@@ -1,21 +1,18 @@
 package soulboundarmory.skill;
 
-import java.util.List;
-import java.util.Set;
 import cell.client.gui.screen.CellScreen;
-import soulboundarmory.component.statistics.SkillStorage;
-import soulboundarmory.serial.CompoundSerializable;
+import java.util.List;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.component.statistics.SkillStorage;
+import soulboundarmory.serial.CompoundSerializable;
 
 public class SkillContainer implements Comparable<SkillContainer>, CompoundSerializable {
-    protected final Skill skill;
-    protected final int maxLevel;
-    protected final SkillStorage storage;
+    public final Skill skill;
+    public final List<SkillContainer> dependencies;
 
+    protected final SkillStorage storage;
     protected boolean learned;
     protected int level;
 
@@ -25,18 +22,10 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
 
     public SkillContainer(Skill skill, SkillStorage storage, boolean learned, int level) {
         this.skill = skill;
-        this.maxLevel = skill.maxLevel;
         this.storage = storage;
         this.learned = learned;
         this.level = level;
-    }
-
-    public Skill skill() {
-        return this.skill;
-    }
-
-    public Set<Skill> dependencies() {
-        return this.skill.dependencies();
+        this.dependencies = skill.dependencies.stream().map(storage::get).toList();
     }
 
     public boolean hasDependencies() {
@@ -64,7 +53,7 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
     }
 
     public boolean canUpgrade() {
-        return this.learned && (this.cost() >= 0 || this.maxLevel < 0 || this.level < this.maxLevel);
+        return this.learned && (this.cost() >= 0 || this.skill.maxLevel < 0 || this.level < this.skill.maxLevel);
     }
 
     public int cost() {
@@ -75,22 +64,16 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
         return this.learned;
     }
 
-    public boolean canLearn() {
-        for (var dependency : this.skill.dependencies()) {
-            if (!this.storage.get(dependency).learned()) {
-                return false;
-            }
-        }
+    public void learn() {
+        this.learned = true;
+    }
 
-        return !this.learned;
+    public boolean canLearn() {
+        return !this.learned && this.dependencies.stream().allMatch(SkillContainer::learned);
     }
 
     public boolean canLearn(int points) {
         return this.canLearn() && points >= this.cost();
-    }
-
-    public void learn() {
-        this.learned = true;
     }
 
     @Override
@@ -100,29 +83,31 @@ public class SkillContainer implements Comparable<SkillContainer>, CompoundSeria
         return tierDifference == 0 ? this.level() - other.level() : tierDifference;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public Text name() {
         return this.skill.name();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public List<? extends Text> tooltip() {
         return this.skill.tooltip();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public void render(CellScreen screen, MatrixStack matrices, int x, int y, int zOffset) {
         this.skill.render(screen, matrices, this.level, x, y, zOffset);
     }
 
+    public void reset() {
+        this.learned = false;
+        this.level = 0;
+    }
+
     @Override
-    public void serializeNBT(NbtCompound tag) {
+    public void serialize(NbtCompound tag) {
         tag.putBoolean("learned", this.learned);
         tag.putInt("level", this.level);
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
+    public void deserialize(NbtCompound tag) {
         this.learned = tag.getBoolean("learned");
         this.level = tag.getInt("level");
     }

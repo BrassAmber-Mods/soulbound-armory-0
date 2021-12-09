@@ -3,18 +3,12 @@ package soulboundarmory.util;
 import java.util.Random;
 
 public class Math2 {
-    public static double signum(double first, double... others) {
-        var sign = Math.signum(first);
-
-        for (var number : others) {
-            sign *= Math.signum(number);
-        }
-
-        return sign;
+    public static int signum(double n) {
+        return (int) Math.signum(n);
     }
 
-    public static int signum(int n) {
-        return (int) Math.signum(n);
+    public static int signum(double x, double y, double z) {
+        return signum(x) * signum(y) * signum(z);
     }
 
     public static int min(int... values) {

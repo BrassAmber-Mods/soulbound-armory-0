@@ -14,7 +14,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.entity.SoulboundFireballEntity;
 
 public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem {
@@ -30,7 +30,7 @@ public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!world.isClient) {
-            var component = StaffComponent.get(user);
+            var component = ItemComponentType.staff.get(user);
 
             if (component.fireballCooldown <= 0) {
                 world.spawnEntity(new SoulboundFireballEntity(world, user, component.spell()));

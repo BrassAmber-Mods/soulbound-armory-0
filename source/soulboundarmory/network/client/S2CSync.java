@@ -9,6 +9,6 @@ import soulboundarmory.network.ItemComponentPacket;
 public final class S2CSync extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> storage) {
-        storage.deserializeNBT(this.message.readNbt());
+        storage.deserialize(this.message.readNbt());
     }
 }

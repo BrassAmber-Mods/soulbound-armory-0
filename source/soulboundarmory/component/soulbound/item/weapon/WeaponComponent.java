@@ -2,6 +2,7 @@ package soulboundarmory.component.soulbound.item.weapon;
 
 import java.util.List;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import soulboundarmory.client.gui.screen.AttributeTab;
 import soulboundarmory.client.gui.screen.EnchantmentTab;
 import soulboundarmory.client.gui.screen.SelectionTab;
@@ -16,8 +17,13 @@ import soulboundarmory.config.Configuration;
 public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
     protected double criticalStrikeProgress;
 
-    public WeaponComponent(SoulboundComponent component, Item item) {
-        super(component, item);
+    public WeaponComponent(SoulboundComponent component) {
+        super(component);
+    }
+
+    @Override
+    public Item consumableItem() {
+        return Items.WOODEN_SWORD;
     }
 
     @Override

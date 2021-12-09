@@ -26,7 +26,7 @@ public class SelectionTab extends SoulboundTab {
         var centerX = (this.width - buttonWidth) / 2;
         var separation = 32;
 
-        var selection = this.parent.component.storages.values().stream().filter(storage -> storage.isUnlocked() || storage.canConsume(this.parent.stack)).toList();
+        var selection = this.parent.component.items.values().stream().filter(storage -> storage.isUnlocked() || storage.canConsume(this.parent.stack)).toList();
         var top = (this.height - buttonHeight - separation * (selection.size() - 1)) / 2;
 
         for (int row = 0, size = selection.size(); row < size; row++) {

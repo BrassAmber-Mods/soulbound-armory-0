@@ -5,7 +5,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class ExperienceBarKeyBinding extends KeyBindingBase {
     public ExperienceBarKeyBinding() {
-        super("bar", GLFW.GLFW_KEY_X);
+        super("bar", GLFW.GLFW_KEY_UNKNOWN);
     }
 
     @Override

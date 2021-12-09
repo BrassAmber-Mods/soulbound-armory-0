@@ -1,11 +1,5 @@
 package soulboundarmory.item;
 
-import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
-import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.entity.SoulboundDaggerEntity;
-import soulboundarmory.registry.Skills;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -14,6 +8,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.entity.SoulboundDaggerEntity;
+import soulboundarmory.registry.Skills;
 
 public class SoulboundDagger extends SoulboundMeleeWeapon {
     private static final int USE_TIME = 1200;
@@ -38,7 +36,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        var component = Components.weapon.of(player).item(ItemComponentType.dagger);
+        var component = ItemComponentType.dagger.get(player);
 
         if (!world.isClient && component.hasSkill(Skills.throwing)) {
             player.setCurrentHand(hand);
@@ -52,7 +50,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
     @Override
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
         var player = (PlayerEntity) entity;
-        var component = DaggerComponent.get(player);
+        var component = ItemComponentType.dagger.get(player);
 
         if (!world.isClient) {
             var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);

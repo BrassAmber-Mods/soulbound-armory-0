@@ -1,0 +1,26 @@
+{
+    "required": true,
+    "package": "soulboundarmory.lib.text.mixin",
+    "plugin": "soulboundarmory.lib.text.Transformer",
+    "compatibilityLevel": "JAVA_17",
+    "minVersion": "0.8",
+    "mixins": [
+        "access.TextColorAccess",
+        "access.FormattingAccess",
+        "TextColorMixin",
+        "StyleMixin",
+        "StyleMixin$SerializerMixin",
+        "FormattingMixin",
+        "dummy.ExtendedFormattingDummyMixin",
+        "dummy.LanguageDummyMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1,
+        "maxShiftBy": 5
+    },
+    "client": [
+        "I18nMixin",
+        "FontRenderer$DrawerMixin",
+        "TranslationStorageMixin"
+    ]
+}

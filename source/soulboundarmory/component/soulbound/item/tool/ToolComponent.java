@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
 import soulboundarmory.client.gui.screen.AttributeTab;
@@ -21,8 +20,8 @@ import soulboundarmory.config.Configuration;
 import soulboundarmory.entity.Attributes;
 
 public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
-    public ToolComponent(SoulboundComponent component, Item item) {
-        super(component, item);
+    public ToolComponent(SoulboundComponent component) {
+        super(component);
     }
 
     @Override
