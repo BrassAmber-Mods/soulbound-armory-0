@@ -13,8 +13,8 @@ import soulboundarmory.enchantment.ImpactEnchantment;
 public class SoulboundArmory {
     public static final String ID = "soulbound-armory";
 
+    public static final String componentKey = id("components").toString();
     public static final SimpleChannel channel = NetworkRegistry.newSimpleChannel(id("main"), () -> "0", "0"::equals, "0"::equals);
-
     public static final Enchantment impact = new ImpactEnchantment();
 
     public static Identifier id(String path) {

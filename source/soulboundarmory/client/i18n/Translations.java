@@ -26,7 +26,7 @@ public class Translations {
     public static final Translation guiPoint = new Translation("gui.soulbound-armory.point");
     public static final Translation guiSkillLearnCost = new Translation("gui.soulbound-armory.learn_cost");
     public static final Translation guiSkillUpgradeCost = new Translation("gui.soulbound-armory.upgrade_cost");
-    public static final Translation guiLevel = new Translation("gui.soulbound-armory.world");
+    public static final Translation guiLevel = new Translation("gui.soulbound-armory.level");
     public static final Translation red = new Translation("gui.soulbound-armory.red");
     public static final Translation green = new Translation("gui.soulbound-armory.green");
     public static final Translation blue = new Translation("gui.soulbound-armory.blue");

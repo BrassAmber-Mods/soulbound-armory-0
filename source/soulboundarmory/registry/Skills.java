@@ -18,7 +18,7 @@ import soulboundarmory.skill.weapon.staff.VulnerabilitySkill;
 import soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 
 public class Skills {
-    // Should not be visible in the game if it's not implemented.
+    // Should not be visible in the game if not implemented.
     // public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
     public static final Skill endermanacle = new EndermanacleSkill(SoulboundArmory.id("endermanacle"));
     public static final Skill enderPull = new EnderPullSkill(SoulboundArmory.id("ender_pull"));
@@ -34,12 +34,4 @@ public class Skills {
     public static final Skill summonLightning = new SummonLightningSkill(SoulboundArmory.id("summon_lightning"));
     public static final Skill throwing = new ThrowingSkill(SoulboundArmory.id("throwing"));
     public static final Skill vulnerability = new VulnerabilitySkill(SoulboundArmory.id("vulnerability"));
-
-    static {
-        for (var skill : Skill.registry) {
-            if (skill.getRegistryName().getNamespace().equals(SoulboundArmory.ID)) {
-                skill.initDependencies();
-            }
-        }
-    }
 }

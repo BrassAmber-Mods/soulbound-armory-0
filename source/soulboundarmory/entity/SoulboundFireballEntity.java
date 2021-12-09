@@ -21,9 +21,8 @@ import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
-import soulboundarmory.serial.CompoundSerializable;
 
-public class SoulboundFireballEntity extends SmallFireballEntity implements CompoundSerializable {
+public class SoulboundFireballEntity extends SmallFireballEntity {
     public static final EntityType<SoulboundFireballEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundFireballEntity>) SoulboundFireballEntity::new, SpawnGroup.MISC)
         .setDimensions(1, 1)

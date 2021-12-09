@@ -154,7 +154,7 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
+    public void serialize(NbtCompound tag) {
         tag.putDouble("min", this.min);
         tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
@@ -162,7 +162,7 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
+    public void deserialize(NbtCompound tag) {
         this.min = tag.getDouble("min");
         this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));

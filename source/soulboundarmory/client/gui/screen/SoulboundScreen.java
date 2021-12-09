@@ -16,7 +16,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import soulboundarmory.SoulboundArmoryClient;
-import soulboundarmory.client.gui.RGBASlider;
 import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.i18n.Translations;
@@ -35,6 +34,9 @@ import static soulboundarmory.component.statistics.StatisticType.level;
  It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
  */
 public class SoulboundScreen extends CellScreen {
+    protected static final Configuration.Client configuration = Configuration.instance().client;
+    protected static final Configuration.Client.Colors colors = configuration.colors;
+
     protected final PlayerEntity player = minecraft.player;
     protected final List<DrawableElement> options = new ReferenceArrayList<>(5);
     protected final List<Slider> sliders = new ReferenceArrayList<>(4);
@@ -90,7 +92,7 @@ public class SoulboundScreen extends CellScreen {
             );
 
             this.add(this.xpBar = new ExperienceBar(this.storage).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true).primaryAction(bar -> {
-                if (Configuration.instance().client.displayOptions ^= true) {
+                if (configuration.displayOptions ^= true) {
                     this.add(this.options);
                 } else {
                     this.remove(this.options);
@@ -107,22 +109,19 @@ public class SoulboundScreen extends CellScreen {
                 );
             }));
 
-            if (Configuration.instance().client.displayOptions) {
-                var configuration = Configuration.instance().client;
-                var colors = configuration.colors;
-
-                this.sliders.add(this.addButton(this.colorSlider(colors.red, Translations.red, 0)));
-                this.sliders.add(this.addButton(this.colorSlider(colors.green, Translations.green, 1)));
-                this.sliders.add(this.addButton(this.colorSlider(colors.blue, Translations.blue, 2)));
-                this.sliders.add(this.addButton(this.colorSlider(colors.alpha, Translations.alpha, 3)));
+            if (configuration.displayOptions) {
+                this.sliders.add(this.addButton(this.colorSlider(Translations.red, 0)));
+                this.sliders.add(this.addButton(this.colorSlider(Translations.green, 1)));
+                this.sliders.add(this.addButton(this.colorSlider(Translations.blue, 2)));
+                this.sliders.add(this.addButton(this.colorSlider(Translations.alpha, 3)));
 
                 this.options.addAll(this.sliders);
-                this.options.add(this.add(this.optionButton(
+                this.options.add(this.optionButton(
                     4,
                     Translations.style.format(configuration.style.text),
                     this.cycleStyleAction(1),
                     this.cycleStyleAction(-1)
-                )));
+                ));
 
                 this.add(this.options);
             }
@@ -211,13 +210,17 @@ public class SoulboundScreen extends CellScreen {
             .secondaryAction(secondaryAction);
     }
 
-    public Slider colorSlider(double currentValue, Text text, int id) {
-        return new RGBASlider(id, text)
-            .x(this.optionX())
-            .y(this.optionY(id))
+    public Slider colorSlider(Text text, int id) {
+        return new Slider()
+            .label(text)
+            .min(0)
+            .max(255)
+            .value(colors.get(id))
             .width(100)
             .height(20)
-            .value(currentValue);
+            .x(this.optionX())
+            .y(this.optionY(id))
+            .onSlide(slider -> colors.set(id, (int) slider.value()));
     }
 
     public int optionX() {

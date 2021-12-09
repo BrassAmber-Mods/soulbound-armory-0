@@ -28,7 +28,7 @@ public class SneakReturnSkill extends Skill {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
+    public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
         screen.renderGuiItem(Items.LEAD.getDefaultStack(), x, y, zOffset);
     }
 }

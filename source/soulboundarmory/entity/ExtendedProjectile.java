@@ -1,6 +1,6 @@
 package soulboundarmory.entity;
 
-import soulboundarmory.mixin.access.entity.AbstractArrowEntityAccess;
+import soulboundarmory.mixin.access.AbstractArrowEntityAccess;
 import soulboundarmory.util.Math2;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

@@ -9,8 +9,11 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.AttributeModifierIdentifiers;
@@ -27,18 +30,20 @@ abstract class ItemStackMixin {
 
     @ModifyVariable(method = "getTooltip", at = @At(value = "LOAD", ordinal = 0), ordinal = 0)
     private boolean normalizeCustomAttributes(boolean green) {
-        return AttributeModifierIdentifiers.isReserved(this.modifier.getId()) || green;
+        return green || AttributeModifierIdentifiers.isReserved(this.modifier.getId());
     }
-
-    /*
-    @ModifyVariable(method = "getTooltipLines", at = @At(value = "STORE", ordinal = 2), index = 16, name = "g")
-    private double convertToPercentage(double value) {
-        return this.modifier.getOperation() == EntityAttributeModifierOperations.percentageAddition ? 100 * value : value;
-    }
-    */
 
     @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;"))
     private Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(ItemStack stack, EquipmentSlot slot, PlayerEntity player) {
         return stack.getItem() instanceof SoulboundItem && player != null ? ItemComponent.get(player, stack).get().attributeModifiers(slot) : stack.getAttributeModifiers(slot);
+    }
+
+    @Inject(method = "hasGlint", at = @At("HEAD"), cancellable = true)
+    private void disableGlint(CallbackInfoReturnable<Boolean> info) {
+        Components.marker.nullable(this)
+            .map(component -> component.item)
+            .map(component -> Components.config.of(component.player))
+            .filter(component -> !component.glint)
+            .ifPresent(component -> info.setReturnValue(false));
     }
 }

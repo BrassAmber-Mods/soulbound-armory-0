@@ -26,7 +26,7 @@ repositories {
 
 loom {
     forge {
-        mixinConfig("soulbound-armory.mixins.json")
+        mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")
     }
 
     runConfigs {

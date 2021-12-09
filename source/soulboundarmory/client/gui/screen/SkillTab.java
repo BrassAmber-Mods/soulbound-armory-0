@@ -99,9 +99,9 @@ public class SkillTab extends SoulboundTab {
         this.withZ(-200, () -> this.window.render(stack, mouseX, mouseY, tickDelta));
         // this.withZ(-200, () -> this.drawVerticallyInterpolatedTexture(stack, this.x, this.y, 0, 0, 22, 126, 140, this.window.getWidth(), this.window.getHeight()));
 
-        this.textRenderer.drawWithShadow(stack, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0x202020);
+        this.textRenderer.draw(stack, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0x808080);
         var text = this.pointText(this.parent.storage.intValue(StatisticType.skillPoints));
-        this.textRenderer.drawWithShadow(stack, text, this.insideEndX - 8 - this.textRenderer.getWidth(text), this.insideY + 6, 0x202020);
+        this.textRenderer.draw(stack, text, this.insideEndX - 8 - this.textRenderer.getWidth(text), this.insideY + 6, 0x808080);
 
         var delta = 20F * tickDelta / 255F;
         this.chroma = this.isSkillSelected(mouseX, mouseY) ? Math.max(this.chroma - delta, 175F / 255F) : Math.min(this.chroma + delta, 1F);
@@ -290,11 +290,11 @@ public class SkillTab extends SoulboundTab {
             var x = offset + (data[0] - 1) * spacing;
 
             if (skill.hasDependencies()) {
-                var dependencies = skill.dependencies();
+                var dependencies = skill.dependencies;
                 var total = 0;
 
                 for (var other : dependencies) {
-                    total += this.skills.get(this.parent.storage.skill(other)).get(0);
+                    total += this.skills.get(other).get(0);
                 }
 
                 x += total / dependencies.size();

@@ -1,10 +1,6 @@
 package soulboundarmory.entity;
 
 import java.util.UUID;
-import soulboundarmory.mixin.access.entity.LightningEntityAccess;
-import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
-import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.serial.CompoundSerializable;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
@@ -21,8 +17,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.AreaHelper;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.mixin.access.LightningEntityAccess;
 
-public class SoulboundLightningEntity extends LightningEntity implements LightningEntityAccess, CompoundSerializable {
+public class SoulboundLightningEntity extends LightningEntity implements LightningEntityAccess {
     protected UUID caster;
 
     public SoulboundLightningEntity(World world, double x, double y, double z, UUID caster) {
@@ -73,7 +72,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
                 for (var entity : this.world.getOtherEntities(this, new Box(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
                     var caster = this.caster();
                     var attackDamage = caster instanceof PlayerEntity
-                            ? (float) SwordComponent.get(caster).attributeTotal(StatisticType.attackDamage)
+                            ? (float) ItemComponentType.sword.get(caster).attributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {

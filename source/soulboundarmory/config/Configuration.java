@@ -140,6 +140,12 @@ public class Configuration {
         @Comment("replace the default XP bar with an XP bar for the currently held soulbound item")
         public boolean overlayExperienceBar = true;
 
+        @Comment("enable enchantment glow for enchanted items")
+        public boolean enchantmentGlint = false;
+
+        @Comment("display attributes in tooltips")
+        public boolean tooltipAttributes = true;
+
         // @EnumHandler(option = EnumDisplayOption.BUTTON)
         public BarStyle style = BarStyle.EXPERIENCE;
 
@@ -170,7 +176,7 @@ public class Configuration {
                     case 1 -> this.green = value;
                     case 2 -> this.blue = value;
                     case 3 -> this.alpha = value;
-                    default -> throw new IllegalArgumentException(String.format("invalid color component ID: %s", id));
+                    default -> throw new IllegalArgumentException("invalid color component ID: " + id);
                 }
             }
 
@@ -180,7 +186,7 @@ public class Configuration {
                     case 1 -> this.green;
                     case 2 -> this.blue;
                     case 3 -> this.alpha;
-                    default -> throw new IllegalArgumentException(String.format("invalid color component ID: %s", id));
+                    default -> throw new IllegalArgumentException("invalid color component ID: " + id);
                 };
             }
         }

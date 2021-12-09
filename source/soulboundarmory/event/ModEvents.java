@@ -4,8 +4,6 @@ import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -22,16 +20,15 @@ import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.entity.SoulboundFireballEntity;
+import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
-import soulboundarmory.skill.Skill;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
-public class ModEvents {
-    @OnlyIn(Dist.CLIENT)
+public final class ModEvents {
     @SubscribeEvent
     public static void setup(FMLClientSetupEvent event) {
         ClientRegistry.registerKeyBinding(SoulboundArmoryClient.guiKeyBinding);
-        ClientRegistry.registerKeyBinding(SoulboundArmoryClient.toggleXPBarKeyBinding);
+        // ClientRegistry.registerKeyBinding(SoulboundArmoryClient.toggleXPBarKeyBinding);
 
         RenderingRegistry.registerEntityRenderingHandler(SoulboundDaggerEntity.type, SoulboundDaggerEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(SoulboundFireballEntity.type, SoulboundFireballEntityRenderer::new);
@@ -42,24 +39,18 @@ public class ModEvents {
         Unsafe.ensureClassInitialized(ItemComponentType.class);
         Unsafe.ensureClassInitialized(Category.class);
         Unsafe.ensureClassInitialized(StatisticType.class);
-        Unsafe.ensureClassInitialized(Skill.class);
+        Unsafe.ensureClassInitialized(Skills.class);
+        Unsafe.ensureClassInitialized(Components.class);
     }
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        var registry = event.getRegistry();
-        registry.register(SoulboundItems.dagger.setRegistryName("dagger"));
-        registry.register(SoulboundItems.sword.setRegistryName("sword"));
-        registry.register(SoulboundItems.greatsword.setRegistryName("greatsword"));
-        registry.register(SoulboundItems.staff.setRegistryName("staff"));
-        registry.register(SoulboundItems.pick.setRegistryName("pick"));
+        event.getRegistry().registerAll(SoulboundItems.dagger, SoulboundItems.sword, SoulboundItems.greatsword, SoulboundItems.staff, SoulboundItems.pick);
     }
 
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityType<?>> event) {
         event.getRegistry().register(SoulboundFireballEntity.type.setRegistryName("fireball"));
-
-        Unsafe.ensureClassInitialized(Components.class);
     }
 
     @SubscribeEvent

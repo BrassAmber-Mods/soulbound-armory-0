@@ -1,16 +1,18 @@
 package soulboundarmory.component.soulbound.player;
 
 import cell.client.gui.CellElement;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
-import soulboundarmory.component.Component;
-import soulboundarmory.component.ComponentKey;
-import soulboundarmory.component.ComponentRegistry;
+import soulboundarmory.lib.component.Component;
+import soulboundarmory.lib.component.ComponentKey;
+import soulboundarmory.lib.component.ComponentRegistry;
+import soulboundarmory.lib.component.EntityComponentKey;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.network.ExtendedPacketBuffer;
@@ -18,20 +20,50 @@ import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
 
 public abstract class SoulboundComponent implements Component {
-    public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> storages = new Object2ObjectOpenHashMap<>();
+    public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> items = new Reference2ReferenceOpenHashMap<>();
     public final PlayerEntity player;
-    public final boolean client;
 
+    protected ItemComponent<?> item;
     protected int tab;
-    protected ItemComponent<?> storage;
 
     public SoulboundComponent(PlayerEntity player) {
         this.player = player;
-        this.client = this.player.world.isClient;
     }
 
-    public boolean hasSoulboundItem() {
-        return ItemUtil.inventory(this.player).anyMatch(this::isAcceptable);
+    /**
+     @return this component's {@linkplain ComponentRegistry#register registered} {@linkplain EntityComponentKey key}.
+     */
+    public abstract ComponentKey<? extends SoulboundComponent> key();
+
+    /**
+     @return the selection tab for this component.
+     */
+    public abstract SoulboundTab selectionTab();
+
+    /**
+     @return whether the given item stack matches any of this component's items.
+     */
+    public abstract boolean accepts(ItemStack stack);
+
+    public final boolean isClient() {
+        return this.player.world.isClient;
+    }
+
+    public ItemComponent<?> item() {
+        return this.item;
+    }
+
+    public <S extends ItemComponent<S>> S item(ItemComponentType<S> type) {
+        return (S) this.items.get(type);
+    }
+
+    public void currentItem(ItemComponent<?> item) {
+        this.item = item;
+        item.unlock();
+    }
+
+    protected void store(ItemComponent<?> item) {
+        this.items.put(item.type(), item);
     }
 
     public int tab() {
@@ -41,36 +73,23 @@ public abstract class SoulboundComponent implements Component {
     public void tab(int tab) {
         this.tab = tab;
 
-        if (this.client) {
+        if (this.isClient()) {
             Packets.serverTab.send(new ExtendedPacketBuffer().writeIdentifier(this.key().id).writeByte(tab));
         }
     }
 
-    public ItemComponent<?> item() {
-        return this.storage;
+    /**
+     @return the item component that matches `stack`.
+     */
+    public Optional<ItemComponent<?>> component(ItemStack stack) {
+        return this.items.values().stream().filter(component -> component.accepts(stack)).findAny();
     }
 
-    public <S extends ItemComponent<S>> S item(ItemComponentType<S> type) {
-        return (S) this.storages.get(type);
-    }
-
-    public void currentItem(ItemComponent<?> storage) {
-        this.storage = storage;
-        storage.unlocked(true);
-    }
-
-    protected void store(ItemComponent<?> storage) {
-        this.storages.put(storage.type(), storage);
-    }
-
-    public ItemComponent<?> heldItemStorage() {
-        for (var component : this.storages.values()) {
-            if (ItemUtil.handStacks(this.player).anyMatch(component::accepts)) {
-                return component;
-            }
-        }
-
-        return null;
+    /**
+     @return the item component corresponding to the first held item stack that matches this component.
+     */
+    public Optional<ItemComponent<?>> heldItemComponent() {
+        return ItemUtil.handStacks(this.player).flatMap(stack -> this.component(stack).stream()).findFirst();
     }
 
     /**
@@ -83,11 +102,11 @@ public abstract class SoulboundComponent implements Component {
 
         while (handStacks.hasNext()) {
             var stack = handStacks.next();
-            var match = this.storages.values().stream().filter(storage -> storage.accepts(stack)).findAny();
+            var match = this.items.values().stream().filter(storage -> storage.accepts(stack)).findAny();
             var slot = handStacks.previousIndex();
             slot = slot == 1 ? 40 : this.player.inventory.selectedSlot;
 
-            if (match.isPresent() || this.storages.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
+            if (match.isPresent() || this.items.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
                 CellElement.minecraft.openScreen(new SoulboundScreen(this, slot));
 
                 return true;
@@ -101,7 +120,7 @@ public abstract class SoulboundComponent implements Component {
      Reinitialize the current {@linkplain SoulboundScreen menu} if open.
      */
     public void refresh() {
-        if (this.client) {
+        if (this.isClient()) {
             if (CellElement.minecraft.currentScreen instanceof SoulboundScreen screen) {
                 screen.refresh();
             }
@@ -110,30 +129,33 @@ public abstract class SoulboundComponent implements Component {
         }
     }
 
+    /**
+     Invoked every tick.
+     */
     public void tick() {
-        var storage = this.heldItemStorage();
+        var storage = this.heldItemComponent().orElse(null);
 
         if (storage == null) {
-            storage = this.storage;
+            storage = this.item;
         } else {
             this.currentItem(storage);
         }
 
         if (storage != null) {
-            this.storage.updateInventory(-1);
+            this.item.updateInventory(-1);
         }
 
-        this.storages.values().forEach(ItemComponent::tick);
+        this.items.values().forEach(ItemComponent::tick);
     }
 
     @Override
     public void serialize(NbtCompound tag) {
-        if (this.storage != null) {
-            tag.putString("storage", this.storage.type().id().toString());
+        if (this.item != null) {
+            tag.putString("storage", this.item.type().id().toString());
         }
 
-        for (var storage : this.storages.values()) {
-            tag.put(storage.type().id().toString(), storage.serializeNBT());
+        for (var storage : this.items.values()) {
+            tag.put(storage.type().id().toString(), storage.serialize());
         }
 
         tag.putInt("tab", this.tab);
@@ -144,22 +166,13 @@ public abstract class SoulboundComponent implements Component {
         var type = ItemComponentType.get(tag.getString("storage"));
 
         if (type != null) {
-            this.storage = this.item(type);
+            this.item = this.item(type);
         }
 
-        for (var storage : this.storages.values()) {
-            storage.deserializeNBT(tag.getCompound(storage.type().id().toString()));
+        for (var storage : this.items.values()) {
+            storage.deserialize(tag.getCompound(storage.type().id().toString()));
         }
 
         this.tab = tag.getInt("tab");
     }
-
-    /**
-     @return this component's {@linkplain ComponentRegistry#register registered} {@linkplain ComponentKey key}.
-     */
-    public abstract ComponentKey<PlayerEntity, ? extends SoulboundComponent> key();
-
-    public abstract SoulboundTab selectionTab();
-
-    protected abstract boolean isAcceptable(ItemStack stack);
 }

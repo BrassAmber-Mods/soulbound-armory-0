@@ -1,37 +1,23 @@
 {
     "required": true,
     "package": "soulboundarmory.mixin.mixin",
-    "plugin": "soulboundarmory.Transformer",
     "compatibilityLevel": "JAVA_17",
     "minVersion": "0.8",
     "mixins": [
         "ServerPlayNetworkHandlerMixin",
-        "access.TextColorAccess",
-        "access.FormattingAccess",
+        "BlockMixin",
         "entity.LightningEntityMixin",
-        "entity.EntityMixin",
         "entity.LivingEntityMixin",
         "entity.attribute.EntityAttributeModifierMixin",
         "entity.attribute.OperationMixin",
         "entity.player.PlayerInventoryAccess",
         "entity.player.PlayerInventoryMixin",
         "entity.projectile.AbstractArrowEntityMixin",
-        "item.ItemStackMixin",
-        "roman.TranslationStorageMixin",
-        "text.TextColorMixin",
-        "text.StyleMixin",
-        "text.StyleMixin$SerializerMixin",
-        "text.FormattingMixin",
-        "dummy.ExtendedFormattingDummyMixin",
-        "dummy.LanguageDummyMixin"
+        "item.ItemStackMixin"
     ],
     "injectors": {
         "defaultRequire": 1,
         "maxShiftBy": 5
     },
-    "client": [
-        "GameRendererMixin",
-        "roman.I18nMixin",
-        "text.FontRenderer$DrawerMixin"
-    ]
+    "client": ["GameRendererMixin"]
 }

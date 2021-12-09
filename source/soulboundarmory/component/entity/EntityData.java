@@ -10,11 +10,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import soulboundarmory.component.Component;
+import soulboundarmory.lib.component.Component;
 
 public final class EntityData implements Component {
     public final Entity entity;
-
     private int freezeTicks;
     private int blockTeleportTicks;
 
@@ -34,7 +33,10 @@ public final class EntityData implements Component {
         if (!freezer.world.isClient) {
             ((ServerWorld) freezer.world).spawnParticles(
                 ParticleTypes.ITEM_SNOWBALL,
-                this.entity.getX(), this.entity.getEyeY(), this.entity.getZ(), 32, 0.1, 0, 0.1, 2D
+                this.entity.getX(),
+                this.entity.getEyeY(),
+                this.entity.getZ(),
+                32, 0.1, 0, 0.1, 2D
             );
 
             this.entity.playSound(SoundEvents.BLOCK_SNOW_HIT, 1, 1.2F / (this.entity.world.random.nextFloat() * 0.2F + 0.9F));
@@ -59,7 +61,7 @@ public final class EntityData implements Component {
     }
 
     public boolean canBeFrozen() {
-        return (!(this.entity instanceof PlayerEntity) || this.entity.getServer().isPvpEnabled()) && this.entity.isAlive();
+        return this.entity.isAlive() && (!(this.entity instanceof PlayerEntity) || this.entity.getServer().isPvpEnabled());
     }
 
     public boolean isFrozen() {

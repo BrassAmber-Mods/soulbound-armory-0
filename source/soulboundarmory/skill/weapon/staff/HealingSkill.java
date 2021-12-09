@@ -22,7 +22,7 @@ public class HealingSkill extends Skill {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(CellScreen screen, MatrixStack matrices, int level, int x, int y, int zOffset) {
+    public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
         screen.renderGuiItem(PotionUtil.setPotion(Items.POTION.getDefaultStack(), Potions.HEALING), x, y, zOffset);
     }
 }

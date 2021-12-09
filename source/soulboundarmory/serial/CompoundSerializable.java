@@ -1,15 +1,18 @@
 package soulboundarmory.serial;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraftforge.common.util.INBTSerializable;
 
-public interface CompoundSerializable extends INBTSerializable<NbtCompound> {
-    default void serializeNBT(NbtCompound tag) {}
+public interface CompoundSerializable {
+    void deserialize(NbtCompound arg);
 
-    @Override
-    default NbtCompound serializeNBT() {
+    default void serialize(NbtCompound tag) {}
+
+    /**
+     @return a new compound tag with the result of {@link #serialize(NbtCompound)}.
+     */
+    default NbtCompound serialize() {
         var tag = new NbtCompound();
-        this.serializeNBT(tag);
+        this.serialize(tag);
 
         return tag;
     }

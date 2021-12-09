@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -119,6 +119,6 @@ public class SoulboundArmoryCommand {
     }
 
     protected static ItemComponent<?> storage(PlayerEntity player) throws CommandSyntaxException {
-        return Components.soulbound(player).map(SoulboundComponent::heldItemStorage).filter(Objects::nonNull).findAny().orElseThrow(() -> noItemException.create(player));
+        return Components.soulbound(player).map(SoulboundComponent::heldItemComponent).filter(Optional::isPresent).findAny().orElseThrow(() -> noItemException.create(player)).get();
     }
 }

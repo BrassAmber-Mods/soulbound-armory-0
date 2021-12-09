@@ -40,57 +40,56 @@ import soulboundarmory.serial.CompoundSerializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
 import soulboundarmory.util.ItemUtil;
+import soulboundarmory.util.Math2;
 
 public abstract class ItemComponent<T extends ItemComponent<T>> implements CompoundSerializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
 
     public final SoulboundComponent component;
     public final PlayerEntity player;
-    public final Item item;
-    public final EnchantmentStorage enchantments;
+    public final EnchantmentStorage enchantments = new EnchantmentStorage();
 
-    protected final boolean client;
-    protected final Statistics statistics;
-    protected final SkillStorage skills;
+    protected final Statistics statistics = new Statistics();
+    protected final SkillStorage skills = new SkillStorage();
     protected ItemStack itemStack;
     protected boolean unlocked;
     protected int boundSlot;
 
-    public ItemComponent(SoulboundComponent component, Item item) {
+    public ItemComponent(SoulboundComponent component) {
         this.component = component;
         this.player = component.player;
-        this.client = component.player.world.isClient;
-        this.item = item;
-
-        this.updateItemStack();
-        this.statistics = this.newStatistics();
-        this.enchantments = this.newEnchantments();
-        this.skills = this.newSkills();
-        this.updateItemStack();
     }
 
     /**
      @return all item components attached to `entity`.
      */
     public static Stream<ItemComponent<?>> all(Entity entity) {
-        return Components.soulbound(entity).flatMap(component -> component.storages.values().stream());
+        return Components.soulbound(entity).flatMap(component -> component.items.values().stream());
     }
 
+    /**
+     @return the component attached to `entity` that matches `stack`.
+     */
     public static Optional<ItemComponent<?>> get(Entity entity, ItemStack stack) {
-        return all(entity).filter(storage -> storage.accepts(stack)).findAny();
+        return Components.soulbound(entity).filter(component -> component.accepts(stack)).flatMap(component -> component.items.values().stream().filter(item -> item.accepts(stack))).findAny();
     }
 
-    public static Optional<ItemComponent<?>> firstEquipped(Entity entity, boolean consumable) {
+    /**
+     Find the first component that matches an item held by an entity.
+
+     @return the component.
+     */
+    public static Optional<ItemComponent<?>> firstHeld(Entity entity) {
         if (entity == null) {
             return Optional.empty();
         }
 
-        var storages = all(entity).toList();
+        var components = Components.soulbound(entity).toList();
 
-        for (var itemStack : entity.getItemsHand()) {
-            for (var storage : storages) {
-                if (storage.accepts(itemStack) || consumable && storage.canConsume(itemStack)) {
-                    return Optional.of(storage);
+        for (var stack : entity.getItemsHand()) {
+            for (var component : components) {
+                if (component.accepts(stack)) {
+                    return component.component(stack);
                 }
             }
         }
@@ -99,24 +98,24 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     }
 
     /**
-     @return the name of this item without a "soulbound" prefix.
+     @return the type of this item.
      */
-    public abstract Text name();
+    public abstract ItemComponentType<T> type();
 
     /**
-     @return a list of attributes to be displayed on the attribute tab for this item.
+     @return the item that corresponds to this component.
      */
-    public abstract List<StatisticEntry> screenAttributes();
-
-    /**
-     @return the tooltip for stacks of this item.
-     */
-    public abstract List<Text> tooltip();
+    public abstract Item item();
 
     /**
      @return the item that may be consumed in order to unlock this item.
      */
     public abstract Item consumableItem();
+
+    /**
+     @return the name of this item without a "soulbound" prefix.
+     */
+    public abstract Text name();
 
     /**
      @return the increase in `statistic` per point.
@@ -128,11 +127,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      @return the XP required in order to reach level `level` from the previous level.
      */
     public abstract int getLevelXP(int level);
-
-    /**
-     @return the type of this item.
-     */
-    public abstract ItemComponentType<T> type();
 
     /**
      Put attribute modifiers into the given map for a new stack of this item.
@@ -147,9 +141,23 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     public abstract List<SoulboundTab> tabs();
 
     /**
+     @return a list of attributes to be displayed on the attribute tab for this item.
+     */
+    public abstract List<StatisticEntry> screenAttributes();
+
+    /**
+     @return the tooltip for stacks of this item.
+     */
+    public abstract List<Text> tooltip();
+
+    /**
      Invoked every tick.
      */
     public void tick() {}
+
+    public final boolean isClient() {
+        return this.player.world.isClient;
+    }
 
     /**
      Determine whether a given item stack matches this component.
@@ -158,7 +166,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      @return whether `stack` matches this component.
      */
     public boolean accepts(ItemStack stack) {
-        return stack.getItem() == this.item;
+        return stack.getItem() == this.item();
     }
 
     /**
@@ -168,8 +176,8 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         return this.unlocked;
     }
 
-    public void unlocked(boolean unlocked) {
-        this.unlocked = unlocked;
+    public void unlock() {
+        this.unlocked = true;
     }
 
     public int size(Category category) {
@@ -252,13 +260,11 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
             }
 
             if (xp < 0) {
-                var currentLevelXP = this.getLevelXP(this.intValue(StatisticType.level) - 1);
-
                 this.incrementStatistic(StatisticType.level, -1);
-                this.incrementStatistic(StatisticType.experience, currentLevelXP);
+                this.incrementStatistic(StatisticType.experience, this.getLevelXP(this.intValue(StatisticType.level) - 1));
             }
         } else if (type == StatisticType.level) {
-            var sign = (int) Math.signum(amount);
+            var sign = Math2.signum(amount);
 
             for (var i = 0; i < Math.abs(amount); i++) {
                 this.levelUp(sign);
@@ -331,16 +337,15 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      @param sign 1 if leveling up; -1 if leveling down
      */
     public void levelUp(int sign) {
-        var statistic = this.statistic(StatisticType.level);
-        statistic.add(sign);
-        var level = statistic.intValue();
+        var level = this.statistic(StatisticType.level);
+        level.add(sign);
         var configuration = Configuration.instance();
 
-        if (level % configuration.levelsPerEnchantment == 0) {
+        if (level.intValue() % configuration.levelsPerEnchantment == 0) {
             this.incrementStatistic(StatisticType.enchantmentPoints, sign);
         }
 
-        if (level % configuration.levelsPerSkillPoint == 0) {
+        if (level.intValue() % configuration.levelsPerSkillPoint == 0) {
             this.incrementStatistic(StatisticType.skillPoints, sign);
         }
 
@@ -351,32 +356,34 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         return this.skills.values();
     }
 
-    public SkillContainer skill(Identifier identifier) {
-        return this.skill(Skill.registry.getValue(identifier));
-    }
-
     public SkillContainer skill(Skill skill) {
         return this.skills.get(skill);
     }
 
+    public SkillContainer skill(Identifier identifier) {
+        return this.skill(Skill.registry.getValue(identifier));
+    }
+
     public boolean hasSkill(Identifier identifier) {
-        return this.hasSkill(Skill.registry.getValue(identifier));
+        return this.skill(identifier) != null;
     }
 
     public boolean hasSkill(Skill skill) {
-        return this.skills.contains(skill);
+        var container = this.skill(skill);
+        return container != null && container.learned();
     }
 
     public boolean hasSkill(Skill skill, int level) {
-        return this.skills.contains(skill, level);
+        var container = this.skill(skill);
+        return container != null && container.learned() && container.level() >= level;
     }
 
     /**
      Learn or upgrade a skill.
      */
     public void upgrade(SkillContainer skill) {
-        if (this.client) {
-            Packets.serverSkill.send(new ExtendedPacketBuffer().writeIdentifier(skill.skill().getRegistryName()));
+        if (this.isClient()) {
+            Packets.serverSkill.send(new ExtendedPacketBuffer(this).writeIdentifier(skill.skill.getRegistryName()));
         } else {
             var points = this.intValue(StatisticType.skillPoints);
             var cost = skill.cost();
@@ -465,7 +472,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
             this.updateItemStack();
         } else if (category == Category.skill) {
             this.skills.reset();
-
             this.statistic(StatisticType.skillPoints).setToMin();
         }
 
@@ -495,6 +501,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         this.boundSlot = -1;
     }
 
+    /**
+     @return the item stack in the bound slot.
+     @throws IndexOutOfBoundsException if no slot is bound.
+     */
     public final ItemStack stackInBoundSlot() {
         return this.player.inventory.getStack(this.boundSlot);
     }
@@ -523,38 +533,34 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      @param slot the slot from which to not remove
      */
     public void updateInventory(int slot) {
-        if (!this.player.isCreative()) {
-            if (slot == -1 && this.hasBoundSlot() && this.accepts(this.stackInBoundSlot())) {
-                slot = this.boundSlot;
-            }
+        if (slot == -1 && this.hasBoundSlot() && this.accepts(this.stackInBoundSlot())) {
+            slot = this.boundSlot;
+        }
 
-            for (var storage : this.component.storages.values()) {
-                var inventory = ItemUtil.inventory(this.player).toList().listIterator();
+        var inventory = ItemUtil.inventory(this.player).toList().listIterator();
 
-                while (inventory.hasNext()) {
-                    var stack = inventory.next();
+        while (inventory.hasNext()) {
+            var stack = inventory.next();
 
-                    if (storage.accepts(stack)) {
-                        if (storage == this) {
-                            if (slot == -1) {
-                                slot = inventory.previousIndex();
+            if (this.component.accepts(stack)) {
+                if (this.accepts(stack)) {
+                    if (slot == -1) {
+                        slot = inventory.previousIndex();
 
-                                if (this.hasBoundSlot()) {
-                                    this.bindSlot(slot);
-                                }
-                            } else if (inventory.previousIndex() != slot) {
-                                this.player.inventory.removeOne(stack);
-
-                                continue;
-                            }
-
-                            if (!stack.isItemEqual(this.itemStack)) {
-                                this.player.inventory.setStack(slot, this.stack());
-                            }
-                        } else {
-                            this.player.inventory.removeOne(stack);
+                        if (this.hasBoundSlot()) {
+                            this.bindSlot(slot);
                         }
+                    } else if (inventory.previousIndex() != slot) {
+                        this.player.inventory.removeOne(stack);
+
+                        continue;
                     }
+
+                    if (!stack.equals(this.itemStack, false)) {
+                        this.player.inventory.setStack(slot, this.stack());
+                    }
+                } else if (!this.player.isCreative()) {
+                    this.player.inventory.removeOne(stack);
                 }
             }
         }
@@ -571,7 +577,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     }
 
     /**
-     @return a copy of the current stack.
+     @return a copy of the current item stack.
      */
     public ItemStack stack() {
         return this.itemStack.copy();
@@ -581,20 +587,15 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      Synchronize information to the client.
      */
     public void sync() {
-        Packets.clientSync.sendIfServer(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serializeNBT()));
+        Packets.clientSync.sendIfServer(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serialize()));
     }
-
-    protected abstract Statistics newStatistics();
-
-    protected abstract EnchantmentStorage newEnchantments();
-
-    protected abstract SkillStorage newSkills();
 
     /**
      @return a new item stack with all statistics applied.
      */
     protected ItemStack newItemStack() {
-        this.itemStack = this.item.getDefaultStack();
+        this.itemStack = this.item().getDefaultStack();
+        Components.marker.of(this.itemStack).item = this;
 
         if (this.statistics != null && this.enchantments != null && this.skills != null) {
             for (var slot : EquipmentSlot.values()) {
@@ -652,20 +653,20 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     }
 
     @Override
-    public void serializeNBT(NbtCompound tag) {
-        tag.put("statistics", this.statistics.serializeNBT());
-        tag.put("enchantments", this.enchantments.serializeNBT());
-        tag.put("skills", this.skills.serializeNBT());
+    public void serialize(NbtCompound tag) {
+        tag.put("statistics", this.statistics.serialize());
+        tag.put("enchantments", this.enchantments.serialize());
+        tag.put("skills", this.skills.serialize());
         tag.putBoolean("unlocked", this.unlocked);
         tag.putInt("slot", this.boundSlot());
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
-        this.statistics.deserializeNBT(tag.getCompound("statistics"));
-        this.enchantments.deserializeNBT(tag.getCompound("enchantments"));
-        this.skills.deserializeNBT(tag.getCompound("skills"));
-        this.unlocked(tag.getBoolean("unlocked"));
+    public void deserialize(NbtCompound tag) {
+        this.statistics.deserialize(tag.getCompound("statistics"));
+        this.enchantments.deserialize(tag.getCompound("enchantments"));
+        this.skills.deserialize(tag.getCompound("skills"));
+        this.unlocked = tag.getBoolean("unlocked");
         this.bindSlot(tag.getInt("slot"));
 
         this.updateItemStack();

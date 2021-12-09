@@ -11,8 +11,8 @@ import net.minecraft.util.math.MathHelper;
 public class Slider extends SliderWidget implements DrawableElement {
     protected static final NumberFormat floatFormat = NumberFormat.getNumberInstance();
 
-    public Text label;
-    public ScrollCallback onScroll;
+    public Text label = LiteralText.EMPTY;
+    public SlideCallback onSlide;
 
     protected double min;
     protected double max;
@@ -24,19 +24,6 @@ public class Slider extends SliderWidget implements DrawableElement {
 
     public Slider() {
         super(0, 0, 0, 0, LiteralText.EMPTY, 0);
-    }
-
-    public Slider(int x, int y, int width, int height, double value, double min, double max, Text label) {
-        super(x, y, width, height, label, (value - min) / (max - min));
-
-        this.label = label;
-        this.min = min;
-        this.max = max;
-        this.range = max - min;
-        this.scaledValue = value;
-        this.discrete = true;
-
-        this.applyValue();
     }
 
     @Override
@@ -107,6 +94,12 @@ public class Slider extends SliderWidget implements DrawableElement {
         return this;
     }
 
+    public Slider onSlide(SlideCallback callback) {
+        this.onSlide = callback;
+
+        return this;
+    }
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         var addition = Screen.hasShiftDown()
@@ -138,15 +131,15 @@ public class Slider extends SliderWidget implements DrawableElement {
     @Override
     protected void updateMessage() {
         var formattedValue = this.discrete || Math.abs(this.scaledValue) >= 100 ? (long) this.scaledValue : floatFormat.format(this.scaledValue);
-        this.setMessage(this.label == LiteralText.EMPTY ? Text.of(String.valueOf(formattedValue)) : Text.of("%s:%s".formatted(this.label, formattedValue)));
+        this.setMessage(this.label == LiteralText.EMPTY ? Text.of(String.valueOf(formattedValue)) : Text.of("%s: %s".formatted(this.label, formattedValue)));
     }
 
     @Override
     protected void applyValue() {
         this.scaledValue = this.min + this.value * this.range;
 
-        if (this.onScroll != null) {
-            this.onScroll.accept(this);
+        if (this.onSlide != null) {
+            this.onSlide.onSlide(this);
         }
     }
 }
