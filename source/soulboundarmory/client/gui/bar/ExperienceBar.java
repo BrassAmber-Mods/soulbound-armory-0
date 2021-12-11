@@ -86,15 +86,7 @@ public class ExperienceBar extends ScalableWidget {
             var level = this.storage.intValue(StatisticType.level);
 
             if (level > 0) {
-                var levelString = String.valueOf(level);
-                var levelX = this.middleX() - textDrawer.getWidth(levelString) / 2;
-                var levelY = this.y() - 8;
-
-                textDrawer.draw(matrixes, levelString, levelX + 1, levelY, 0);
-                textDrawer.draw(matrixes, levelString, levelX - 1, levelY, 0);
-                textDrawer.draw(matrixes, levelString, levelX, levelY + 1, 0);
-                textDrawer.draw(matrixes, levelString, levelX, levelY - 1, 0);
-                textDrawer.draw(matrixes, levelString, levelX, levelY, color.getRGB());
+                drawStrokedText(matrixes, String.valueOf(level), this.middleX() - textDrawer.getWidth(String.valueOf(level)) / 2F, this.y() - 8, color.getRGB());
             }
 
             RenderSystem.disableLighting();
