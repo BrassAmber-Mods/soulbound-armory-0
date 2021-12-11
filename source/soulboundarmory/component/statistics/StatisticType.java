@@ -13,8 +13,6 @@ public class StatisticType extends RegistryEntry<StatisticType> {
     public static final StatisticType skillPoints = new StatisticType("skill_points");
     public static final StatisticType attributePoints = new StatisticType("attribute_points");
     public static final StatisticType enchantmentPoints = new StatisticType("enchantment_points");
-    public static final StatisticType spentAttributePoints = new StatisticType("spent_attribute_points");
-    public static final StatisticType spentEnchantmentPoints = new StatisticType("spent_enchantment_points");
     public static final StatisticType efficiency = new StatisticType("efficiency");
     public static final StatisticType reach = new StatisticType("reach");
     public static final StatisticType miningLevel = new StatisticType("harvest_level");

@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import java.util.Collections;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +39,7 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<?>> implements A
 
         for (var name : this.registry.getKeys()) {
             if (Pattern.compile(Pattern.quote(name.getPath()), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(input).find()) {
-                return (Set<T>) Collections.singleton(this.registry.getValue(name));
+                return new ReferenceOpenHashSet<>((T[]) new IForgeRegistryEntry<?>[]{this.registry.getValue(name)});
             }
         }
 
@@ -52,6 +52,6 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<?>> implements A
     }
 
     protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return this.registry.getKeys().stream().map(Identifier::getPath);
+        return Stream.concat(this.registry.getKeys().stream().map(Identifier::getPath), Stream.of("all"));
     }
 }

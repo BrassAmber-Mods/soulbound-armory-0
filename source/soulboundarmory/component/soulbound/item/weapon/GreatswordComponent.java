@@ -34,14 +34,15 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     public int leapDuration;
     public double leapForce;
 
-    public GreatswordComponent(SoulboundComponent component) {
+    public GreatswordComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.attackRange, StatisticType.reach)
             .min(0.8, StatisticType.attackSpeed).min(6, StatisticType.attackDamage).min(6, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate);
+            .max(1, StatisticType.criticalStrikeRate)
+            .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
             && !enchantment.isCursed()

@@ -40,9 +40,9 @@ public class SoulboundScreen extends CellScreen {
     protected final PlayerEntity player = minecraft.player;
     protected final List<DrawableElement> options = new ReferenceArrayList<>(5);
     protected final List<Slider> sliders = new ReferenceArrayList<>(4);
-    protected final SoulboundComponent component;
+    protected final SoulboundComponent<?> component;
     protected final int slot;
-    protected ItemComponent<?> storage;
+    protected ItemComponent<?> item;
     protected ScalableWidget xpBar;
     protected ItemStack stack;
 
@@ -51,7 +51,7 @@ public class SoulboundScreen extends CellScreen {
     private SoulboundTab tab;
     private ScalableWidget button;
 
-    public SoulboundScreen(SoulboundComponent component, int slot) {
+    public SoulboundScreen(SoulboundComponent<?> component, int slot) {
         this.component = component;
         this.slot = slot;
     }
@@ -64,11 +64,11 @@ public class SoulboundScreen extends CellScreen {
         this.sliders.clear();
 
         this.stack = this.player.inventory.getStack(this.slot);
-        this.storage = ItemComponent.get(this.player, this.stack).orElse(null);
+        this.item = ItemComponent.get(this.player, this.stack).orElse(null);
 
         if (this.displayTabs()) {
-            var tabs = this.storage.tabs();
-            this.tab = tabs.get(this.component.tab());
+            var tabs = this.item.tabs();
+            this.tab = tabs.get(this.component.tab);
             this.button = this.button(this.tab);
 
             for (var tab : tabs) {
@@ -76,9 +76,9 @@ public class SoulboundScreen extends CellScreen {
                 this.tabButtons.add(this.add(this.button(tab)));
             }
 
-            this.tabButtons.get(this.component.tab()).active = false;
+            this.tabButtons.get(this.component.tab).active = false;
 
-            var unbind = this.storage.boundSlot() == this.slot;
+            var unbind = this.item.boundSlot() == this.slot;
             var text = unbind ? Translations.guiButtonUnbind : Translations.guiButtonBind;
             var buttonWidth = Math.max(this.button.width(), this.textRenderer.getWidth(text) + 8);
 
@@ -91,7 +91,7 @@ public class SoulboundScreen extends CellScreen {
                 .primaryAction(this.bindSlotAction(unbind))
             );
 
-            this.add(this.xpBar = new ExperienceBar(this.storage).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true).primaryAction(bar -> {
+            this.add(this.xpBar = new ExperienceBar(this.item).width(182).height(5).x(this.width / 2).y(this.height - 27).center(true).primaryAction(bar -> {
                 if (configuration.displayOptions ^= true) {
                     this.add(this.options);
                 } else {
@@ -100,10 +100,10 @@ public class SoulboundScreen extends CellScreen {
 
                 this.refresh();
             }).tooltip((widget, matrixes, x, y) -> {
-                var xp = this.storage.intValue(experience);
+                var xp = this.item.intValue(experience);
                 this.renderTooltip(
                     matrixes,
-                    this.storage.canLevelUp() ? Translations.barXP.format(xp, this.storage.nextLevelXP()) : Translations.barFullXP.format(xp),
+                    this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp),
                     x,
                     y
                 );
@@ -182,7 +182,7 @@ public class SoulboundScreen extends CellScreen {
 
     protected void drawXPBar(MatrixStack stack, int mouseX, int mouseY) {
         var maxLevel = Configuration.instance().maxLevel;
-        var level = this.storage.intValue(StatisticType.level);
+        var level = this.item.intValue(StatisticType.level);
 
         if (maxLevel >= 0 && level > 0 && this.hoveringLevel(mouseX, mouseY)) {
             this.renderTooltip(stack, Translations.barLevel.format(level, maxLevel), mouseX, mouseY);
@@ -192,7 +192,7 @@ public class SoulboundScreen extends CellScreen {
     }
 
     protected boolean hoveringLevel(int mouseX, int mouseY) {
-        var levelString = String.valueOf(this.storage.intValue(level));
+        var levelString = String.valueOf(this.item.intValue(level));
         var levelLeftX = (this.width - this.textRenderer.getWidth(levelString)) / 2;
         var levelTopY = this.height - 35;
 
@@ -215,6 +215,7 @@ public class SoulboundScreen extends CellScreen {
             .label(text)
             .min(0)
             .max(255)
+            .discrete(true)
             .value(colors.get(id))
             .width(100)
             .height(20)
@@ -248,7 +249,7 @@ public class SoulboundScreen extends CellScreen {
     }
 
     public boolean displayTabs() {
-        return this.storage != null;
+        return this.item != null;
     }
 
     @SuppressWarnings("UnusedAssignment")
@@ -264,7 +265,8 @@ public class SoulboundScreen extends CellScreen {
 
         this.tab.open(this.width, this.height);
         this.add(this.tab);
-        this.component.tab(tab);
+        this.component.tab = tab;
+        Packets.serverTab.send(new ExtendedPacketBuffer().writeIdentifier(this.component.key().id).writeByte(tab));
     }
 
     public void refresh() {
@@ -290,7 +292,7 @@ public class SoulboundScreen extends CellScreen {
     }
 
     private PressCallback<ScalableWidget> bindSlotAction(boolean unbind) {
-        return button -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.storage).writeInt(unbind ? -1 : this.slot));
+        return button -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.item).writeInt(unbind ? -1 : this.slot));
     }
 
     private <T extends Widget<T>> PressCallback<T> setTabAction(int index) {

@@ -5,15 +5,15 @@ import net.minecraft.item.ItemStack;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.lib.component.ComponentKey;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.item.SoulboundWeaponItem;
+import soulboundarmory.lib.component.EntityComponentKey;
 
-public class WeaponComponent extends SoulboundComponent {
+public class WeaponComponent extends SoulboundComponent<WeaponComponent> {
     public WeaponComponent(PlayerEntity player) {
         super(player);
 
@@ -24,7 +24,7 @@ public class WeaponComponent extends SoulboundComponent {
     }
 
     @Override
-    public ComponentKey<? extends SoulboundComponent> key() {
+    public EntityComponentKey<WeaponComponent> key() {
         return Components.weapon;
     }
 

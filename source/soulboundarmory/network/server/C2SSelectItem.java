@@ -24,7 +24,7 @@ public final class C2SSelectItem extends ItemComponentPacket {
                 // Repeat for the client because the screen pauses.
                 MinecraftClient.getInstance().execute(() -> set(storage.type().get(MinecraftClient.getInstance().player), slot));
             } else {
-                storage.sync();
+                storage.synchronize();
             }
 
             storage.component.refresh();

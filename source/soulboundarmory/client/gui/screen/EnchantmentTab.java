@@ -20,16 +20,16 @@ public class EnchantmentTab extends SoulboundTab {
 
     @Override
     protected void init() {
-        var storage = this.parent.storage;
-        var enchantments = storage.enchantments;
+        var component = this.parent.item;
+        var enchantments = component.enchantments;
         var resetButton = this.add(this.resetButton(this.resetAction(Category.enchantment)));
-        resetButton.active = storage.intValue(StatisticType.spentEnchantmentPoints) > 0;
+        resetButton.active = enchantments.values().stream().anyMatch(level -> level > 0);
 
         Util.enumerate(enchantments, (enchantment, level, row) -> {
             var disenchant = this.add(this.squareButton(this.width + 122 >> 1, this.height(enchantments.size(), row), Text.of("-"), this.disenchantAction(enchantment)));
             var enchant = this.add(this.squareButton(this.width + 162 >> 1, this.height(enchantments.size(), row), Text.of("+"), this.enchantAction(enchantment)));
             disenchant.active = level > 0;
-            enchant.active = storage.intValue(StatisticType.enchantmentPoints) > 0;
+            enchant.active = component.intValue(StatisticType.enchantmentPoints) > 0;
         });
     }
 
@@ -37,9 +37,9 @@ public class EnchantmentTab extends SoulboundTab {
     public void render(MatrixStack matrixes, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixes, mouseX, mouseY, partialTicks);
 
-        this.displayPoints(matrixes, this.parent.storage.intValue(StatisticType.enchantmentPoints));
+        this.displayPoints(matrixes, this.parent.item.intValue(StatisticType.enchantmentPoints));
 
-        var enchantments = this.parent.storage.enchantments;
+        var enchantments = this.parent.item.enchantments;
 
         Util.enumerate(enchantments, (enchantment, level, row) -> this.textRenderer.drawWithShadow(
             matrixes,
@@ -51,7 +51,7 @@ public class EnchantmentTab extends SoulboundTab {
     }
 
     protected PressCallback<ScalableWidget> enchantAction(Enchantment enchantment) {
-        return button -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent.storage)
+        return button -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent.item)
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeBoolean(true)
             .writeBoolean(hasShiftDown())
@@ -59,7 +59,7 @@ public class EnchantmentTab extends SoulboundTab {
     }
 
     protected PressCallback<ScalableWidget> disenchantAction(Enchantment enchantment) {
-        return button -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent.storage)
+        return button -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent.item)
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeBoolean(false)
             .writeBoolean(hasShiftDown())

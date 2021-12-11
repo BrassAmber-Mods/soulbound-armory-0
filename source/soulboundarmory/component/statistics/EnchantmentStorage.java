@@ -1,6 +1,6 @@
 package soulboundarmory.component.statistics;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntLinkedOpenHashMap;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import net.minecraft.enchantment.Enchantment;
@@ -10,7 +10,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.serial.CompoundSerializable;
 
-public class EnchantmentStorage extends Reference2ObjectLinkedOpenHashMap<Enchantment, Integer> implements Iterable<Enchantment>, CompoundSerializable {
+public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantment> implements Iterable<Enchantment>, CompoundSerializable {
     public void add(Predicate<Enchantment> predicate) {
         ForgeRegistries.ENCHANTMENTS.getValues().stream().filter(predicate).forEach(enchantment -> this.put(enchantment, 0));
     }

@@ -85,7 +85,7 @@ public abstract class Skill extends RegistryEntry<Skill> {
      */
     public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
         CellScreen.textureManager.bindTexture(this.texture);
-        screen.withZ(zOffset, () -> DrawableHelper.drawTexture(matrixes, x, y, 0, 0, 16, 16, 16, 16));
+        DrawableHelper.drawTexture(matrixes, x, y, zOffset, 0, 0, 16, 16, 16, 16);
     }
 
     /**

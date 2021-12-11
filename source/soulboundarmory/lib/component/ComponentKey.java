@@ -4,24 +4,20 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.util.Identifier;
-import soulboundarmory.util.Util;
 
 /**
  A key that corresponds to a registered component; used for extracting components from objects.
 
- @param <O> the base type of the entities for which the component is registered
  @param <C> the type of the component
  */
-public abstract class ComponentKey<C extends Component> {
-    public final Class<?> type;
+public abstract class ComponentKey<B, C extends Component<C>> {
     public final Identifier id;
     public final String key;
 
-    private final Predicate<?> predicate;
-    private final Function<?, C> instantiate;
+    protected final Predicate<?> predicate;
+    protected final Function<?, C> instantiate;
 
-    ComponentKey(Class<?> type, Identifier id, Predicate<?> predicate, Function<?, C> instantiate) {
-        this.type = type;
+    <O extends B> ComponentKey(Identifier id, Predicate<O> predicate, Function<O, C> instantiate) {
         this.id = id;
         this.key = id.toString();
         this.predicate = predicate;
@@ -29,24 +25,29 @@ public abstract class ComponentKey<C extends Component> {
     }
 
     /**
-     Instantiate a component if the supplied object matches this key's predicate. The object's type is not checked.
+     Attach a new instance of the component if the supplied object is of the component's target type and matches this key's predicate.
 
      @param object the object to test
-     @return the component.
+     @return the new instance of the component if it is applicable to the object or null
+     @throws IllegalArgumentException if the component is already attached to the object.
      */
-    public C instantiate(Object object) {
-        return this.predicate == null || this.predicate.test(Util.cast(object)) ? this.instantiate.apply(Util.cast(object)) : null;
-    }
+    public abstract C attach(B object);
 
     /**
-     @return the component attached to `object` or null.
+     Extract the instance of this component from an object.
+
+     @param object the object wherefrom to extract
+     @return null if `object` is null; otherwise the component instance attached to `object` or null.
      */
-    public abstract C of(Object object);
+    public abstract C of(B object);
 
     /**
-     @return the component attached to `object`.
+     Extract the instance of this component from an object and wrap it in an {@link Optional}.
+
+     @param object the object wherefrom to extract
+     @return empty if `object` is null; otherwise an {@link Optional} of the component instance attached to `object` or empty.
      */
-    public final Optional<C> nullable(Object object) {
+    public final Optional<C> nullable(B object) {
         return Optional.ofNullable(this.of(object));
     }
 }

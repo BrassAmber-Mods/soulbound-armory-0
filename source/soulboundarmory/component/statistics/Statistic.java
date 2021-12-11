@@ -5,13 +5,12 @@ import net.minecraft.nbt.NbtCompound;
 import soulboundarmory.serial.CompoundSerializable;
 
 public class Statistic extends Number implements Comparable<Number>, CompoundSerializable {
-    protected final Category category;
-    protected final StatisticType type;
+    public final Category category;
+    public final StatisticType type;
 
     protected BigDecimal value;
     protected double min;
     protected double max;
-    protected int points;
 
     public Statistic(Category category, StatisticType statistic) {
         this.type = statistic;
@@ -24,14 +23,6 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
     @Override
     public String toString() {
         return "Statistic {name: %s, type: %s, min: %.3f, max: %.3f, value: %s}".formatted(this.type.id(), this.category.id(), this.min, this.max, this.value);
-    }
-
-    public StatisticType type() {
-        return this.type;
-    }
-
-    public Category getCategory() {
-        return this.category;
     }
 
     public boolean aboveMin() {
@@ -72,22 +63,6 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
 
     public void setToMax() {
         this.value(this.max);
-    }
-
-    public int points() {
-        return this.points;
-    }
-
-    public void points(int points) {
-        this.points = points;
-    }
-
-    public void incrementPoints(int points) {
-        this.points += points;
-    }
-
-    public void incrementPoints() {
-        ++this.points;
     }
 
     public BigDecimal value() {
@@ -145,7 +120,6 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
 
     public void reset() {
         this.setToMin();
-        this.points(0);
     }
 
     @Override
@@ -158,7 +132,6 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
         tag.putDouble("min", this.min);
         tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
-        tag.putInt("points", this.points);
     }
 
     @Override
@@ -166,6 +139,5 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
         this.min = tag.getDouble("min");
         this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));
-        this.points = tag.getInt("points");
     }
 }

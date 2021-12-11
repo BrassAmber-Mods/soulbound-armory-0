@@ -21,11 +21,11 @@ import static net.minecraft.enchantment.Enchantments.MENDING;
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 
 public class PickComponent extends ToolComponent<PickComponent> {
-    public PickComponent(SoulboundComponent component) {
+    public PickComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.efficiency, StatisticType.reach, StatisticType.miningLevel)
             .min(1, StatisticType.efficiency).min(2, StatisticType.reach)
             .max(3, StatisticType.miningLevel);

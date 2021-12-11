@@ -20,7 +20,7 @@ import soulboundarmory.config.Configuration;
 import soulboundarmory.entity.Attributes;
 
 public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
-    public ToolComponent(SoulboundComponent component) {
+    public ToolComponent(SoulboundComponent<?> component) {
         super(component);
     }
 

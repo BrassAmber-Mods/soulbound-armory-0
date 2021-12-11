@@ -1,14 +1,18 @@
 package soulboundarmory.network.client;
 
-import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.network.ItemComponentPacket;
+import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.network.ComponentPacket;
 
 /**
- * A server-to-client packet for updating the client's information about a soulbound item.
+ A server-to-client packet that updates an entire soulbound component.
+ <br><br>
+ buffer: <br>
+ - Identifier (component) <br>
+ - NbtCompound (component) <br>
  */
-public final class S2CSync extends ItemComponentPacket {
+public final class S2CSync extends ComponentPacket {
     @Override
-    public void execute(ItemComponent<?> storage) {
-        storage.deserialize(this.message.readNbt());
+    protected void execute(SoulboundComponent<?> component) {
+        component.deserialize(this.message.readNbt());
     }
 }

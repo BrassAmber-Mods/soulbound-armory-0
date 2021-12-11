@@ -19,7 +19,6 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.i18n.Translations;
@@ -38,7 +37,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void scroll(InputEvent.MouseScrollEvent event) {
         if (Screen.hasAltDown()) {
-            var player = SoulboundArmoryClient.client.player;
+            var player = CellElement.minecraft.player;
 
             if (player != null && player.world != null) {
                 var staff = ItemComponentType.staff.get(player);
@@ -48,7 +47,7 @@ public final class ClientEvents {
 
                     if (dy != 0) {
                         staff.cycleSpells(-dy);
-                        SoulboundArmoryClient.client.inGameHud.setOverlayMessage(Translations.hudSpell.format(staff.spell()), false);
+                        CellElement.minecraft.inGameHud.setOverlayMessage(Translations.hudSpell.format(staff.spell()), false);
 
                         event.setCanceled(true);
                     }

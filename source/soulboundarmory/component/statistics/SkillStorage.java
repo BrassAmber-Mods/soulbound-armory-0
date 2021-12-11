@@ -10,8 +10,10 @@ import soulboundarmory.skill.SkillContainer;
 public class SkillStorage extends Reference2ObjectLinkedOpenHashMap<Skill, SkillContainer> implements CompoundSerializable {
     public void add(Skill... skills) {
         for (var skill : skills) {
-            this.put(skill, new SkillContainer(skill, this));
+            this.put(skill, new SkillContainer(skill));
         }
+
+        this.values().forEach(container -> container.initializeDependencies(this));
     }
 
     public void reset() {

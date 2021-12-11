@@ -1,13 +1,14 @@
 package soulboundarmory.lib.component;
 
-import javax.annotation.Nonnull;
 import net.minecraft.nbt.NbtCompound;
 import soulboundarmory.serial.CompoundSerializable;
 
 /**
  A persistent attachment to a game object.
+
+ @param <T> the type of the implementing component
  */
-public interface Component extends CompoundSerializable {
+public interface Component<C extends Component<C>> extends CompoundSerializable {
     /**
      Serialize this component into `tag`.
 
@@ -26,15 +27,14 @@ public interface Component extends CompoundSerializable {
     void deserialize(NbtCompound tag);
 
     /**
-     Item components can override this method in order to affect equality between item stacks with the same component.
-     The default implementation compares their {@linkplain #serialize() tags}.
+     Invoked after the object is copied if it has the same component attached.
+     The default implementation deserializes the object's copy's component instance from this instance.
      */
-    default boolean equals(@Nonnull Component other) {
-        return this.serialize().equals(other.serialize());
-    }
+    default void copy(C copy) {
+        var tag = this.serialize();
 
-    /**
-     Finish initializing after the object is constructed.
-     */
-    default void initialize() {}
+        if (!tag.isEmpty()) {
+            copy.deserialize(tag);
+        }
+    }
 }

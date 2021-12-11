@@ -17,9 +17,11 @@ import net.auoeke.reflect.Classes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -32,6 +34,15 @@ public class Util {
 
     public static <T> T cast(Object object) {
         return (T) object;
+    }
+
+    public static boolean isClient() {
+        var threadName = Thread.currentThread().getName();
+        return threadName.equals("Render thread") || threadName.equals("Game thread");
+    }
+
+    public static boolean isPhysicalClient() {
+        return FMLEnvironment.dist == Dist.CLIENT;
     }
 
     public static MinecraftServer server() {

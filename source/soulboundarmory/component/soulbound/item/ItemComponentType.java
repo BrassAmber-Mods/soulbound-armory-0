@@ -10,7 +10,7 @@ import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.lib.component.ComponentKey;
+import soulboundarmory.lib.component.EntityComponentKey;
 import soulboundarmory.registry.RegistryEntry;
 import soulboundarmory.util.Util;
 
@@ -25,9 +25,9 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
     public static final ItemComponentType<StaffComponent> staff = new ItemComponentType<>("staff", Components.weapon);
     public static final ItemComponentType<PickComponent> pick = new ItemComponentType<>("pick", Components.tool);
 
-    public final ComponentKey<? extends SoulboundComponent> parentKey;
+    public final EntityComponentKey<? extends SoulboundComponent<?>> parentKey;
 
-    public ItemComponentType(String path, ComponentKey<? extends SoulboundComponent> key) {
+    public ItemComponentType(String path, EntityComponentKey<? extends SoulboundComponent<?>> key) {
         super(path);
 
         this.parentKey = key;

@@ -20,10 +20,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class Widget<T extends Widget<T>> extends CellElement {
+public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
     protected static final SoundManager soundManager = minecraft.getSoundManager();
 
-    public List<CellElement> children = new ReferenceArrayList<>();
+    public List<CellElement<T>> children = new ReferenceArrayList<>();
     public Text text = LiteralText.EMPTY;
     public PressCallback<T> primaryAction;
     public PressCallback<T> secondaryAction;

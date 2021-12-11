@@ -5,12 +5,12 @@ import net.minecraft.item.ItemStack;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.lib.component.ComponentKey;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.tool.PickComponent;
 import soulboundarmory.item.SoulboundToolItem;
+import soulboundarmory.lib.component.EntityComponentKey;
 
-public class ToolComponent extends SoulboundComponent {
+public class ToolComponent extends SoulboundComponent<ToolComponent> {
     public ToolComponent(PlayerEntity player) {
         super(player);
 
@@ -18,7 +18,7 @@ public class ToolComponent extends SoulboundComponent {
     }
 
     @Override
-    public ComponentKey<? extends SoulboundComponent> key() {
+    public EntityComponentKey<ToolComponent> key() {
         return Components.tool;
     }
 

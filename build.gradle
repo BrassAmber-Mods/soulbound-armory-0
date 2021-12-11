@@ -28,18 +28,12 @@ loom {
     forge {
         mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")
     }
-
-    runConfigs {
-        client {
-            environment("client")
-        }
-    }
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:1.16.5")
     mappings("net.fabricmc:yarn:1.16.5+build.10:v2")
-    forge("net.minecraftforge:forge:1.16.5-36.2.19")
+    forge("net.minecraftforge:forge:1.16.5-36.2.20")
 
     implementation("net.auoeke:reflect:latest.integration")
 }

@@ -4,9 +4,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.client.S2CBindSlot;
+import soulboundarmory.network.client.S2CCriticalHitParticles;
 import soulboundarmory.network.client.S2CEnchant;
 import soulboundarmory.network.client.S2CRefresh;
 import soulboundarmory.network.client.S2CSync;
+import soulboundarmory.network.client.S2CSyncItem;
 import soulboundarmory.network.server.C2SAttribute;
 import soulboundarmory.network.server.C2SBindSlot;
 import soulboundarmory.network.server.C2SConfig;
@@ -17,7 +19,7 @@ import soulboundarmory.network.server.C2SSkill;
 import soulboundarmory.network.server.C2SSpell;
 import soulboundarmory.network.server.C2STab;
 
-public class Packets {
+public final class Packets {
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SAttribute> serverAttribute = server(C2SAttribute.class);
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SBindSlot> serverBindSlot = server(C2SBindSlot.class);
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SConfig> serverConfig = server(C2SConfig.class);
@@ -29,10 +31,11 @@ public class Packets {
     public static final PacketKey.Server<ExtendedPacketBuffer, C2STab> serverTab = server(C2STab.class);
 
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CBindSlot> clientBindSlot = client(S2CBindSlot.class);
+    public static final PacketKey.Client<ExtendedPacketBuffer, S2CCriticalHitParticles> clientCriticalHitParticles = client(S2CCriticalHitParticles.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CEnchant> clientEnchant = client(S2CEnchant.class);
-    // public static final PacketKey.Client<ExtendedPacketBuffer, S2COpenGUI> clientOpenGUI = client(S2COpenGUI.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CRefresh> clientRefresh = client(S2CRefresh.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CSync> clientSync = client(S2CSync.class);
+    public static final PacketKey.Client<ExtendedPacketBuffer, S2CSyncItem> clientSyncItem = client(S2CSyncItem.class);
 
     private static byte id;
 

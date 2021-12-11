@@ -1,9 +1,9 @@
 package soulboundarmory.network;
 
+import cell.client.gui.CellElement;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
-import soulboundarmory.SoulboundArmoryClient;
 
 /**
  The base packet type.
@@ -40,6 +40,6 @@ public abstract class Packet<T> {
      If this method is invoked by the server, then return the sender of this packet; otherwise, return the player.
      */
     protected final PlayerEntity player() {
-        return this.context.getDirection().getReceptionSide().isClient() ? SoulboundArmoryClient.client.player : this.context.getSender();
+        return this.context.getDirection().getReceptionSide().isClient() ? CellElement.minecraft.player : this.context.getSender();
     }
 }

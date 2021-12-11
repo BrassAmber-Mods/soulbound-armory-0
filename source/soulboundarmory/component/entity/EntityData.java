@@ -10,9 +10,9 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import soulboundarmory.lib.component.Component;
+import soulboundarmory.lib.component.EntityComponent;
 
-public final class EntityData implements Component {
+public final class EntityData implements EntityComponent<EntityData> {
     public final Entity entity;
     private int freezeTicks;
     private int blockTeleportTicks;

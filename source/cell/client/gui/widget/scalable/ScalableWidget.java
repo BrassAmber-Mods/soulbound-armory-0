@@ -301,7 +301,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
             var width = corner[1][0] - u;
             var height = corner[2][1] - v;
 
-            drawTexture(matrices, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.getZOffset(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
+            drawTexture(matrices, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.z(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
         }
     }
 
@@ -337,7 +337,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
                 for (int drawnWidth; remainingWidth > 0; remainingWidth -= drawnWidth) {
                     drawnWidth = Math.min(remainingWidth, maxWidth);
 
-                    drawTexture(matrices, endX - remainingWidth, y, this.getZOffset(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
+                    drawTexture(matrices, endX - remainingWidth, y, this.z(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
                 }
             }
         }
@@ -355,10 +355,10 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         var endX = this.x() + this.width() - 1;
         var endY = this.y() + this.height();
 
-        CellElement.drawHorizontalLine(matrices, this.x(), endX, this.y(), this.getZOffset(), -1);
-        CellElement.drawVerticalLine(matrices, this.x(), this.y(), endY, this.getZOffset(), -1);
-        CellElement.drawVerticalLine(matrices, endX, this.y(), endY, this.getZOffset(), -1);
-        CellElement.drawHorizontalLine(matrices, this.x(), endX, endY - 1, this.getZOffset(), -1);
+        CellElement.drawHorizontalLine(matrices, this.x(), endX, this.y(), this.z(), -1);
+        CellElement.drawVerticalLine(matrices, this.x(), this.y(), endY, this.z(), -1);
+        CellElement.drawVerticalLine(matrices, endX, this.y(), endY, this.z(), -1);
+        CellElement.drawHorizontalLine(matrices, this.x(), endX, endY - 1, this.z(), -1);
     }
 
     protected void detectBorder() {}
