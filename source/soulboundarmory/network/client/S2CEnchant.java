@@ -2,12 +2,25 @@ package soulboundarmory.network.client;
 
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.network.ItemComponentPacket;
 
+/**
+ A server-to-client packet that updates the client after the server has changed the level of an enchantment.
+ <br><br>
+ buffer: <br>
+ - Identifier (item component type) <br>
+ - Identifier (enchantment) <br>
+ - int (enchentment level) <br>
+ - int (remaining enchantment points) <br>
+
+ @see ItemComponent#addEnchantment
+ */
 public final class S2CEnchant extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> storage) {
-        storage.addEnchantment(ForgeRegistries.ENCHANTMENTS.getValue(this.message.readIdentifier()), this.message.readInt());
+        storage.enchantments.put(this.message.readRegistryEntry(ForgeRegistries.ENCHANTMENTS), this.message.readInt());
+        storage.set(StatisticType.enchantmentPoints, this.message.readInt());
         storage.component.refresh();
     }
 }

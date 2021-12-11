@@ -166,17 +166,17 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     @Override
     public void onPlayerCollision(PlayerEntity player) {
-        if (!this.world.isClient
-            && player == this.getEntity()
-            && (this.isClone
-            || this.storage != null
-            && this.life() >= Math.max(1, 20 / this.storage.doubleValue(StatisticType.attackSpeed))
-            && (player.isCreative()
-            && (SoulboundItemUtil.hasSoulWeapon(player)))
-            || SoulboundItemUtil.addItemStack(this.asItemStack(), player, true))
-        ) {
-            player.sendPickup(this, 1);
-            this.remove();
+        if (!this.world.isClient && player == this.getEntity()) {
+            if (this.isClone
+                || this.storage != null
+                && player.isCreative()
+                && this.life() >= Math.max(1, 20 / this.storage.doubleValue(StatisticType.attackSpeed))
+                && SoulboundItemUtil.hasSoulboundWeapon(player)
+                || SoulboundItemUtil.addItemStack(this.asItemStack(), player, true)
+            ) {
+                player.sendPickup(this, 1);
+                this.remove();
+            }
         }
     }
 

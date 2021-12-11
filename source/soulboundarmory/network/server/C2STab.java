@@ -5,7 +5,7 @@ import soulboundarmory.network.ComponentPacket;
 
 public final class C2STab extends ComponentPacket {
     @Override
-    protected void execute(SoulboundComponent component) {
-        component.tab(this.message.readByte());
+    protected void execute(SoulboundComponent<?> component) {
+        component.tab = this.message.readByte();
     }
 }

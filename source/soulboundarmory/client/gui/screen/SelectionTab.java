@@ -50,7 +50,7 @@ public class SelectionTab extends SoulboundTab {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
         super.render(matrices, mouseX, mouseY, partialTicks);
 
-        if (this.parent.displayTabs() && !this.parent.storage.isItemEquipped()) {
+        if (this.parent.displayTabs() && !this.parent.item.isItemEquipped()) {
             drawCenteredText(matrices, this.textRenderer, this.label(), this.width / 2, 40, 0xFFFFFF);
         }
     }

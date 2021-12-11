@@ -100,7 +100,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
         var tag = new NbtCompound();
 
         for (var statistic : this.get(category).values()) {
-            tag.put(statistic.type().id().toString(), statistic.serialize());
+            tag.put(statistic.type.id().toString(), statistic.serialize());
         }
 
         return tag;

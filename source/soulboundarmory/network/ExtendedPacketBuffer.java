@@ -1,18 +1,25 @@
 package soulboundarmory.network;
 
+import cell.client.gui.CellElement;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.util.Util;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
     public ExtendedPacketBuffer() {
@@ -23,7 +30,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         super(buffer);
     }
 
-    public ExtendedPacketBuffer(SoulboundComponent component) {
+    public ExtendedPacketBuffer(SoulboundComponent<?> component) {
         this();
 
         this.writeIdentifier(component.key().id);
@@ -32,7 +39,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     public ExtendedPacketBuffer(ItemComponent<?> component) {
         this();
 
-        this.writeIdentifier(component.type().id());
+        this.writeItemComponent(component);
     }
 
     public ExtendedPacketBuffer writeRegistryEntry(IForgeRegistryEntry<?> entry) {
@@ -100,6 +107,17 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     }
 
     public ExtendedPacketBuffer writeEntity(Entity entity) {
+        return this.writeInt(entity.getEntityId());
+    }
+
+    public Entity readEntity() {
+        var id = this.readInt();
+        return Util.isClient()
+            ? CellElement.minecraft.world.getEntityById(id)
+            : ((Collection<ServerWorld>) Util.server().getWorlds()).stream().map(world -> world.getEntityById(id)).filter(Objects::nonNull).findAny().orElse(null);
+    }
+
+    public ExtendedPacketBuffer writePersistentEntity(Entity entity) {
         return this.writeUuid(entity.getUuid());
     }
 
@@ -110,6 +128,16 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     //    public PlayerEntity readPlayer() {
     //        return (PlayerEntity) this.readEntity();
     //    }
+
+    public ExtendedPacketBuffer writeItemComponent(ItemComponent<?> component) {
+        this.writeIdentifier(component.type().id());
+
+        return this;
+    }
+
+    public ItemComponent<?> readItemComponent(PlayerEntity player) {
+        return ItemComponentType.get(this.readIdentifier()).get(player);
+    }
 
     @Override
     public ExtendedPacketBuffer writeNbt(NbtCompound tag) {

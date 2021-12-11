@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
@@ -45,17 +46,17 @@ import soulboundarmory.util.Math2;
 public abstract class ItemComponent<T extends ItemComponent<T>> implements CompoundSerializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
 
-    public final SoulboundComponent component;
+    public final SoulboundComponent<?> component;
     public final PlayerEntity player;
     public final EnchantmentStorage enchantments = new EnchantmentStorage();
+    public final Statistics statistics = new Statistics();
 
-    protected final Statistics statistics = new Statistics();
     protected final SkillStorage skills = new SkillStorage();
     protected ItemStack itemStack;
     protected boolean unlocked;
     protected int boundSlot;
 
-    public ItemComponent(SoulboundComponent component) {
+    public ItemComponent(SoulboundComponent<?> component) {
         this.component = component;
         this.player = component.player;
     }
@@ -199,10 +200,12 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      @return the total value of the attribute.
      */
     public double attributeTotal(StatisticType attribute) {
-        if (attribute == StatisticType.attackDamage) {
-            var attackDamage = this.doubleValue(StatisticType.attackDamage);
+        var doubleValue = this.doubleValue(attribute);
 
-            for (var entry : this.enchantments.entrySet()) {
+        if (attribute == StatisticType.attackDamage) {
+            var attackDamage = doubleValue;
+
+            for (var entry : this.enchantments.reference2IntEntrySet()) {
                 var enchantment = entry.getKey();
 
                 if (entry.getValue() > 0) {
@@ -211,9 +214,17 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
             }
 
             return attackDamage;
+        } else if (attribute == StatisticType.efficiency) {
+            var efficiency = this.enchantment(Enchantments.EFFICIENCY);
+
+            if (efficiency > 0) {
+                efficiency = 1 + efficiency * efficiency;
+            }
+
+            return efficiency + doubleValue;
         }
 
-        return this.doubleValue(attribute);
+        return doubleValue;
     }
 
     /**
@@ -274,56 +285,53 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         }
 
         this.updateItemStack();
-        this.sync();
+        this.synchronize();
 
         return leveledUp;
     }
 
-    public void incrementPoints(StatisticType type, int points) {
-        if (points == 0) {
+    public void incrementAttributePoints(StatisticType type, int points) {
+        var attributePoints = this.statistic(StatisticType.attributePoints);
+        var attribute = this.statistic(type);
+        var bigPoints = BigDecimal.valueOf(points);
+        var bigIncrease = BigDecimal.valueOf(this.increase(type));
+        var change = bigIncrease.multiply(bigPoints);
+
+        if (points > 0) {
+            var maxChange = BigDecimal.valueOf(attribute.max()).subtract(attribute.value());
+
+            if (maxChange.compareTo(change) < 0) {
+                change = maxChange;
+                points = change.divide(bigIncrease, RoundingMode.UP).intValue();
+            }
+
+            if (points > attributePoints.intValue()) {
+                change = bigIncrease.multiply(attributePoints.value());
+                points = attributePoints.intValue();
+            }
+        } else {
+            var maxChange = BigDecimal.valueOf(attribute.min()).subtract(attribute.value());
+
+            if (maxChange.compareTo(change) > 0) {
+                change = maxChange;
+                points = change.divide(bigIncrease, RoundingMode.UP).intValue();
+            }
+        }
+
+        if (change.compareTo(BigDecimal.ZERO) == 0) {
             return;
         }
 
-        var statistic = this.statistic(type);
-        BigDecimal change;
-
-        if (points > 0) {
-            change = BigDecimal.valueOf(statistic.max()).subtract(statistic.value());
-            var newPoints = change.divide(BigDecimal.valueOf(this.increase(type)), RoundingMode.UP);
-            var bigPoints = BigDecimal.valueOf(points);
-
-            if (newPoints.compareTo(bigPoints) < 0) {
-                points = newPoints.intValue();
-            } else {
-                change = BigDecimal.valueOf(this.increase(type)).multiply(bigPoints);
-            }
-        } else {
-            change = BigDecimal.valueOf(statistic.min()).subtract(statistic.value());
-            var newPoints = change.divide(BigDecimal.valueOf(this.increase(type)), RoundingMode.UP);
-            var bigPoints = BigDecimal.valueOf(points);
-
-            if (newPoints.compareTo(bigPoints) > 0) {
-                points = newPoints.intValue();
-            } else {
-                change = BigDecimal.valueOf(this.increase(type)).multiply(bigPoints);
-            }
-        }
-
-        var attributePoints = this.statistic(StatisticType.attributePoints);
-        var spentAttributePoints = this.statistic(StatisticType.spentAttributePoints);
-
         attributePoints.add(-points);
-        spentAttributePoints.add(points);
-        statistic.add(change);
-        statistic.incrementPoints(points);
+        attribute.add(change);
 
         this.updateItemStack();
-        this.sync();
+        this.synchronize();
     }
 
     public void set(StatisticType statistic, Number value) {
         this.statistics.put(statistic, value);
-        this.sync();
+        this.synchronize();
     }
 
     public boolean canLevelUp() {
@@ -364,10 +372,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         return this.skill(Skill.registry.getValue(identifier));
     }
 
-    public boolean hasSkill(Identifier identifier) {
-        return this.skill(identifier) != null;
-    }
-
     public boolean hasSkill(Skill skill) {
         var container = this.skill(skill);
         return container != null && container.learned();
@@ -386,16 +390,17 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
             Packets.serverSkill.send(new ExtendedPacketBuffer(this).writeIdentifier(skill.skill.getRegistryName()));
         } else {
             var points = this.intValue(StatisticType.skillPoints);
-            var cost = skill.cost();
 
-            // Synchronization is handled by incrementStatistic.
             if (skill.canLearn(points)) {
                 skill.learn();
-                this.incrementStatistic(StatisticType.skillPoints, -cost);
             } else if (skill.canUpgrade(points)) {
                 skill.upgrade();
-                this.incrementStatistic(StatisticType.skillPoints, -cost);
+            } else {
+                return;
             }
+
+            // Synchronization is handled by incrementStatistic.
+            this.incrementStatistic(StatisticType.skillPoints, -skill.cost());
         }
     }
 
@@ -417,33 +422,23 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      Add levels to an enchantment.
 
      @param enchantment the enchantment
-     @param levels      the number of levels to add to `enchantment`
+     @param levels      the number of levels to add
      */
     public void addEnchantment(Enchantment enchantment, int levels) {
         var current = this.enchantment(enchantment);
         var change = Math.max(0, current + levels) - current;
-
-        this.statistics.add(StatisticType.enchantmentPoints, -change);
-        this.statistics.add(StatisticType.spentEnchantmentPoints, change);
-
+        var enchantmentPoints = this.statistic(StatisticType.enchantmentPoints);
+        enchantmentPoints.add(-change);
         this.enchantments.add(enchantment, change);
+
         this.updateItemStack();
+        // this.synchronize();
 
-        this.sync();
-    }
-
-    /**
-     {@linkplain #reset(Category) reset} all statistic categories.
-     */
-    public void reset() {
-        for (var category : Category.registry) {
-            this.reset(category);
-        }
-
-        this.unlocked = false;
-        this.boundSlot = -1;
-
-        this.sync();
+        Packets.clientEnchant.send(this.player, new ExtendedPacketBuffer(this)
+            .writeRegistryEntry(enchantment)
+            .writeInt(current + change)
+            .writeInt(enchantmentPoints.intValue())
+        );
     }
 
     /**
@@ -455,27 +450,33 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         if (category == Category.datum) {
             this.statistics.reset(Category.datum);
         } else if (category == Category.attribute) {
-            for (var type : this.statistics.get(Category.attribute).values()) {
-                this.incrementStatistic(StatisticType.attributePoints, type.points());
-                type.reset();
+            for (var statistic : this.statistics.get(Category.attribute).values()) {
+                this.incrementAttributePoints(statistic.type, Integer.MIN_VALUE);
             }
-
-            this.set(StatisticType.spentAttributePoints, 0);
-            this.updateItemStack();
         } else if (category == Category.enchantment) {
             for (var enchantment : this.enchantments) {
-                this.incrementStatistic(StatisticType.enchantmentPoints, this.enchantments.get(enchantment));
-                this.enchantments.put(enchantment, 0);
+                this.incrementStatistic(StatisticType.enchantmentPoints, this.enchantments.put(enchantment, 0));
             }
-
-            this.statistic(StatisticType.spentEnchantmentPoints).setToMin();
-            this.updateItemStack();
         } else if (category == Category.skill) {
             this.skills.reset();
             this.statistic(StatisticType.skillPoints).setToMin();
         }
 
-        this.sync();
+        this.synchronize();
+    }
+
+    /**
+     {@linkplain #reset(Category) Reset} all statistic categories and lock this item.
+     */
+    public void reset() {
+        for (var category : Category.registry) {
+            this.reset(category);
+        }
+
+        this.unlocked = false;
+        this.unbindSlot();
+
+        this.synchronize();
     }
 
     /**
@@ -577,6 +578,16 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     }
 
     /**
+     Ensure that the client's component is up to date with the server.
+
+     @see #serialize(NbtCompound)
+     @see #deserialize(NbtCompound)
+     */
+    public void synchronize() {
+        Packets.clientSyncItem.sendIfServer(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serialize()));
+    }
+
+    /**
      @return a copy of the current item stack.
      */
     public ItemStack stack() {
@@ -584,10 +595,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     }
 
     /**
-     Synchronize information to the client.
+     Replace the current itme stack by a {@linkplain #newItemStack new item stack}.
      */
-    public void sync() {
-        Packets.clientSync.sendIfServer(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serialize()));
+    public void updateItemStack() {
+        this.itemStack = this.newItemStack();
     }
 
     /**
@@ -597,34 +608,25 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         this.itemStack = this.item().getDefaultStack();
         Components.marker.of(this.itemStack).item = this;
 
-        if (this.statistics != null && this.enchantments != null && this.skills != null) {
-            for (var slot : EquipmentSlot.values()) {
-                var attributeModifiers = this.attributeModifiers(slot);
+        for (var slot : EquipmentSlot.values()) {
+            var attributeModifiers = this.attributeModifiers(slot);
 
-                for (var attribute : attributeModifiers.keySet()) {
-                    for (var modifier : attributeModifiers.get(attribute)) {
-                        this.itemStack.addAttributeModifier(attribute, modifier, EquipmentSlot.MAINHAND);
-                    }
-                }
-            }
-
-            for (var entry : this.enchantments.entrySet()) {
-                int level = entry.getValue();
-
-                if (level > 0) {
-                    this.itemStack.addEnchantment(entry.getKey(), level);
+            for (var attribute : attributeModifiers.keySet()) {
+                for (var modifier : attributeModifiers.get(attribute)) {
+                    this.itemStack.addAttributeModifier(attribute, modifier, EquipmentSlot.MAINHAND);
                 }
             }
         }
 
-        return this.itemStack;
-    }
+        for (var entry : this.enchantments.entrySet()) {
+            int level = entry.getValue();
 
-    /**
-     Replace the current itme stack by a {@linkplain #newItemStack new item stack}.
-     */
-    protected void updateItemStack() {
-        this.itemStack = this.newItemStack();
+            if (level > 0) {
+                this.itemStack.addEnchantment(entry.getKey(), level);
+            }
+        }
+
+        return this.itemStack;
     }
 
     /**
@@ -658,7 +660,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         tag.put("enchantments", this.enchantments.serialize());
         tag.put("skills", this.skills.serialize());
         tag.putBoolean("unlocked", this.unlocked);
-        tag.putInt("slot", this.boundSlot());
+        tag.putInt("slot", this.boundSlot);
     }
 
     @Override

@@ -12,34 +12,40 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.lib.component.Component;
-import soulboundarmory.lib.component.ComponentKey;
 import soulboundarmory.lib.component.ComponentRegistry;
+import soulboundarmory.lib.component.ItemStackComponent;
+import soulboundarmory.lib.component.ItemStackComponentKey;
 import soulboundarmory.lib.component.access.ItemStackAccess;
 import soulboundarmory.util.Util;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin implements ItemStackAccess {
     @Unique
-    private Map<ComponentKey<?>, Component> components;
+    private Map<ItemStackComponentKey<?>, ItemStackComponent<?>> components;
 
     @Override
-    public Component soulboundarmory$component(ComponentKey<?> key) {
+    public ItemStackComponent<?> soulboundarmory$component(ItemStackComponentKey<?> key) {
         return this.components == null ? null : this.components.get(key);
+    }
+
+    @Override
+    public ItemStackComponent<?> soulboundarmory$component(ItemStackComponentKey<?> key, ItemStackComponent<?> component) {
+        return this.components().put(key, component);
+    }
+
+    @Unique
+    private Map<ItemStackComponentKey<?>, ItemStackComponent<?>> components() {
+        return this.components == null ? this.components = new Reference2ReferenceOpenHashMap<>() : this.components;
     }
 
     @Inject(method = {"<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/nbt/NbtCompound;)V", "<init>(Lnet/minecraft/nbt/NbtCompound;)V"}, at = @At(value = "RETURN"))
     private void addComponents(CallbackInfo info) {
         for (var key : ComponentRegistry.item.values()) {
-            var component = key.instantiate(this);
-
-            if (component != null) {
-                this.components().put(key, component);
-            }
+            key.attach((ItemStack) (Object) this);
         }
 
         if (this.components != null) {
-            this.components.values().forEach(Component::initialize);
+            this.components.values().forEach(ItemStackComponent::initialize);
         }
     }
 
@@ -62,13 +68,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
     @ModifyVariable(method = "copy", at = @At(value = "STORE"), ordinal = 1)
     private ItemStack copyComponents(ItemStack copy) {
         if (this.components != null) {
-            this.components.forEach((key, component) -> {
-                var tag = component.serialize();
-
-                if (!tag.isEmpty()) {
-                    key.of(copy).deserialize(tag);
-                }
-            });
+            this.components.forEach((key, component) -> component.copy(Util.cast(key.of(copy))));
         }
 
         return copy;
@@ -79,7 +79,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
         if (this.components != null && info.getReturnValueZ()) {
             info.setReturnValue(this.components.entrySet().stream().allMatch(entry -> {
                 var component = entry.getKey().of(other);
-                return component != null && entry.getValue().equals(component);
+                return component != null && entry.getValue().equals(Util.cast(component));
             }));
         }
     }
@@ -91,13 +91,8 @@ abstract class ItemStackMixin implements ItemStackAccess {
         if (mixin.components != null && info.getReturnValueZ()) {
             info.setReturnValue(mixin.components.entrySet().stream().allMatch(entry -> {
                 var component = entry.getKey().of(other);
-                return component != null && entry.getValue().equals(component);
+                return component != null && entry.getValue().equals(Util.cast(component));
             }));
         }
-    }
-
-    @Unique
-    private Map<ComponentKey<?>, Component> components() {
-        return this.components == null ? this.components = new Reference2ReferenceOpenHashMap<>() : this.components;
     }
 }

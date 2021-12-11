@@ -17,7 +17,7 @@ import soulboundarmory.config.Configuration;
 public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
     protected double criticalStrikeProgress;
 
-    public WeaponComponent(SoulboundComponent component) {
+    public WeaponComponent(SoulboundComponent<?> component) {
         super(component);
     }
 

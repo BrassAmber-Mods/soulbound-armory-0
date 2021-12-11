@@ -15,47 +15,46 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.command.argument.ConstantArgumentType;
 import soulboundarmory.command.argument.StatisticArgumentType;
-import soulboundarmory.command.argument.StorageArgumentType;
+import soulboundarmory.command.argument.ItemComponentArgumentType;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
-import soulboundarmory.text.Translation;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static soulboundarmory.command.argument.RegistryArgumentType.registry;
 import static soulboundarmory.command.argument.StatisticArgumentType.statisticTypes;
-import static soulboundarmory.command.argument.StorageArgumentType.storages;
+import static soulboundarmory.command.argument.ItemComponentArgumentType.itemComponents;
 
-public class SoulboundArmoryCommand {
-    protected static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType(player -> new Translation(Translations.commandNoItem.getKey(), ((PlayerEntity) player).getName()));
+public final class SoulboundArmoryCommand {
+    private static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType(player -> Translations.commandNoItem.format(((PlayerEntity) player).getName()));
 
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(
             literal("sa").requires(source -> source.hasPermissionLevel(2))
                 .then(literal("add")
-                    .then(argument("storage", storages())
+                    .then(argument("storage", itemComponents())
                         .then(argument("statistic", statisticTypes())
                             .then(argument("value", doubleArg()).executes(context -> add(context, false))
                                 .then(argument("players", EntityArgumentType.players()).executes(context -> add(context, true)))))))
                 .then(literal("set")
-                    .then(argument("storage", storages())
+                    .then(argument("storage", itemComponents())
                         .then(argument("statistic", statisticTypes())
                             .then(argument("value", doubleArg()).executes(context -> set(context, false))
                                 .then(argument("players", EntityArgumentType.players()).executes(context -> set(context, true)))))))
                 .then(literal("reset")
-                    .then(argument("storage", storages()).executes(context -> reset(context, false, false))
+                    .then(argument("storage", itemComponents()).executes(context -> reset(context, false, false))
                         .then(argument("category", registry(Category.registry)).executes(context -> reset(context, false, true))
                             .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, true))))
                         .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, false)))))
         );
     }
 
-    protected static int add(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static int add(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
         var players = players(context, hasPlayerArgument);
-        var types = StorageArgumentType.get(context, "storage");
+        var types = ItemComponentArgumentType.get(context, "storage");
 
         for (var player : players) {
             for (var statistic : StatisticArgumentType.get(context, "statistic")) {
@@ -70,9 +69,9 @@ public class SoulboundArmoryCommand {
         return players.size();
     }
 
-    protected static int set(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static int set(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
         var players = players(context, hasPlayerArgument);
-        var types = StorageArgumentType.get(context, "storage");
+        var types = ItemComponentArgumentType.get(context, "storage");
 
         for (var player : players) {
             for (var statistic : StatisticArgumentType.get(context, "statistic")) {
@@ -87,9 +86,9 @@ public class SoulboundArmoryCommand {
         return players.size();
     }
 
-    protected static int reset(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument, boolean hasCategoryArgument) throws CommandSyntaxException {
+    private static int reset(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument, boolean hasCategoryArgument) throws CommandSyntaxException {
         var players = players(context, hasPlayerArgument);
-        var types = StorageArgumentType.get(context, "storage");
+        var types = ItemComponentArgumentType.get(context, "storage");
 
         for (var player : players) {
             if (types.isEmpty()) {
@@ -110,15 +109,15 @@ public class SoulboundArmoryCommand {
         return players.size();
     }
 
-    protected static Collection<ServerPlayerEntity> players(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static Collection<ServerPlayerEntity> players(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
         return hasPlayerArgument ? EntityArgumentType.getPlayers(context, "players") : Collections.singleton(player(context));
     }
 
-    protected static ServerPlayerEntity player(CommandContext<ServerCommandSource> context) {
+    private static ServerPlayerEntity player(CommandContext<ServerCommandSource> context) {
         return (ServerPlayerEntity) context.getSource().getEntity();
     }
 
-    protected static ItemComponent<?> storage(PlayerEntity player) throws CommandSyntaxException {
+    private static ItemComponent<?> storage(PlayerEntity player) throws CommandSyntaxException {
         return Components.soulbound(player).map(SoulboundComponent::heldItemComponent).filter(Optional::isPresent).findAny().orElseThrow(() -> noItemException.create(player)).get();
     }
 }

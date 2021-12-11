@@ -40,7 +40,7 @@ abstract class ItemStackMixin {
 
     @Inject(method = "hasGlint", at = @At("HEAD"), cancellable = true)
     private void disableGlint(CallbackInfoReturnable<Boolean> info) {
-        Components.marker.nullable(this)
+        Components.marker.nullable((ItemStack) (Object) this)
             .map(component -> component.item)
             .map(component -> Components.config.of(component.player))
             .filter(component -> !component.glint)

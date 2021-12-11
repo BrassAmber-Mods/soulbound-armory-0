@@ -81,6 +81,12 @@ public class Slider extends SliderWidget implements DrawableElement {
         return this;
     }
 
+    public Slider discrete(boolean discrete) {
+        this.discrete = discrete;
+
+        return this;
+    }
+
     public double value() {
         return this.scaledValue;
     }

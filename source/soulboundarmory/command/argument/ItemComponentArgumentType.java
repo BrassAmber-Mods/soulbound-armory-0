@@ -4,20 +4,20 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import java.util.Collections;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.util.Util;
 
-public class StorageArgumentType extends RegistryArgumentType<ItemComponentType<?>> {
-    protected StorageArgumentType() {
+public class ItemComponentArgumentType extends RegistryArgumentType<ItemComponentType<?>> {
+    protected ItemComponentArgumentType() {
         super(ItemComponentType.registry);
     }
 
-    public static StorageArgumentType storages() {
-        return new StorageArgumentType();
+    public static ItemComponentArgumentType itemComponents() {
+        return new ItemComponentArgumentType();
     }
 
     public static Set<ItemComponentType<? extends ItemComponent<?>>> get(CommandContext<?> context, String name) {
@@ -29,7 +29,7 @@ public class StorageArgumentType extends RegistryArgumentType<ItemComponentType<
         var cursor = reader.getCursor();
 
         if (Util.containsIgnoreCase(reader.readString(), "current")) {
-            return Collections.emptySet();
+            return new ReferenceOpenHashSet<>();
         }
 
         reader.setCursor(cursor);

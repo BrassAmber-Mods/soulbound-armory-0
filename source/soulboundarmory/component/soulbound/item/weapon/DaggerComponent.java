@@ -29,14 +29,15 @@ import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
 
 public class DaggerComponent extends WeaponComponent<DaggerComponent> {
-    public DaggerComponent(SoulboundComponent component) {
+    public DaggerComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.attackRange, StatisticType.reach)
             .min(2, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate);
+            .max(1, StatisticType.criticalStrikeRate)
+            .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
             && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)

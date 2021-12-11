@@ -29,18 +29,18 @@ import soulboundarmory.util.AttributeModifierIdentifiers;
 import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 
 public class StaffComponent extends WeaponComponent<StaffComponent> {
-    public int fireballCooldown;
-
     protected int spell;
+    protected int fireballCooldown;
 
-    public StaffComponent(SoulboundComponent component) {
+    public StaffComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
             .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
-            .max(1, StatisticType.criticalStrikeRate);
+            .max(1, StatisticType.criticalStrikeRate)
+            .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> {
             var name = enchantment.getTranslationKey().toLowerCase();
@@ -69,6 +69,10 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     @Override
     public Text name() {
         return Translations.guiStaff;
+    }
+
+    public int fireballCooldown() {
+        return this.fireballCooldown;
     }
 
     public void resetFireballCooldown() {

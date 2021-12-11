@@ -13,7 +13,7 @@ public enum SoulboundToolMaterial implements ToolMaterial {
 
     @Override
     public float getMiningSpeedMultiplier() {
-        return 0.5F;
+        return 2;
     }
 
     @Override

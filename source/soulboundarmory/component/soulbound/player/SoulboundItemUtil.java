@@ -78,7 +78,7 @@ public class SoulboundItemUtil {
 */
     }
 
-    public static boolean hasSoulWeapon(PlayerEntity player) {
+    public static boolean hasSoulboundWeapon(PlayerEntity player) {
         var size = player.inventory.size();
         var inventory = player.inventory.main.toArray(new ItemStack[size + 1]);
         inventory[size] = player.getOffHandStack();

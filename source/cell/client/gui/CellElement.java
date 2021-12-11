@@ -2,6 +2,7 @@ package cell.client.gui;
 
 import cell.client.gui.widget.Length;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -10,7 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
-public abstract class CellElement extends DrawableHelper implements DrawableElement, Cloneable {
+public abstract class CellElement<T extends CellElement<T>> extends DrawableHelper implements DrawableElement, Cloneable {
     public int x;
     public int y;
 
@@ -84,12 +85,32 @@ public abstract class CellElement extends DrawableHelper implements DrawableElem
         fill(matrices, x, y1 + 1, x + 1, y2, z, color);
     }
 
+    public int z() {
+        return this.getZOffset();
+    }
+
+    public T z(int z) {
+        this.setZOffset(z);
+
+        return (T) this;
+    }
+
+    public T addZ(int z) {
+        return this.z(this.z() + z);
+    }
+
+    public void withZ(int z, Runnable runnable) {
+        this.addZ(z);
+        runnable.run();
+        this.addZ(-z);
+    }
+
     @Override
-    protected CellElement clone() {
+    protected T clone() {
         try {
-            return (CellElement) super.clone();
+            return (T) super.clone();
         } catch (CloneNotSupportedException exception) {
-            throw new InternalError(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 }

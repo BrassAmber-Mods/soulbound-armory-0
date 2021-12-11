@@ -90,7 +90,7 @@ public abstract class SoulboundTab extends ScreenTab {
     }
 
     protected PressCallback<ScalableWidget> resetAction(Category category) {
-        return button -> Packets.serverReset.send(new ExtendedPacketBuffer(this.parent.storage).writeIdentifier(category.id()));
+        return button -> Packets.serverReset.send(new ExtendedPacketBuffer(this.parent.item).writeIdentifier(category.id()));
     }
 
     protected void displayPoints(MatrixStack matrixes, int points) {

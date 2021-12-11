@@ -29,14 +29,15 @@ import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 public class SwordComponent extends WeaponComponent<SwordComponent> {
     protected int lightningCooldown;
 
-    public SwordComponent(SoulboundComponent component) {
+    public SwordComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints, StatisticType.spentAttributePoints, StatisticType.spentEnchantmentPoints)
+            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
             .min(1.6, StatisticType.attackSpeed).min(4, StatisticType.attackDamage).min(3, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate);
+            .max(1, StatisticType.criticalStrikeRate)
+            .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
             && !enchantment.isCursed()

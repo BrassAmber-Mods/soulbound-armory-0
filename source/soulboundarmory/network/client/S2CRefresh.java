@@ -12,7 +12,7 @@ import soulboundarmory.network.ComponentPacket;
  */
 public final class S2CRefresh extends ComponentPacket {
     @Override
-    protected void execute(SoulboundComponent component) {
+    protected void execute(SoulboundComponent<?> component) {
         component.refresh();
     }
 }

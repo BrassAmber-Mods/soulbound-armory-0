@@ -1,13 +1,15 @@
 package soulboundarmory.event;
 
+import java.lang.management.ManagementFactory;
+import net.auoeke.reflect.Accessor;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.GameRules;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -19,6 +21,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Logger;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.command.SoulboundArmoryCommand;
@@ -42,48 +46,12 @@ import soulboundarmory.util.ItemUtil;
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public final class CommonEvents {
     @SubscribeEvent
-    public static void login(ClientPlayerNetworkEvent.LoggedInEvent event) {
-        var configuration = Configuration.instance().client;
-        Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(configuration.levelupNotifications).writeBoolean(configuration.enchantmentGlint));
-    }
-
-    @SubscribeEvent
-    public static void login(PlayerEvent.PlayerLoggedInEvent event) {
-        var player = event.getPlayer();
-
-        if (!player.world.isClient) {
-            ItemComponent.all(player).forEach(ItemComponent::sync);
-        }
-    }
-
-    @SubscribeEvent
     public static void onPlayerDrops(LivingDropsEvent event) {
         if (event.getEntity() instanceof PlayerEntity player && !player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             Components.soulbound(player)
                 .map(SoulboundComponent::item)
                 .filter(component -> component != null && component.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
                 .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.giveItemStack(drop.getStack())));
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerCopy(PlayerEvent.Clone event) {
-        var original = event.getOriginal();
-        var player = event.getPlayer();
-
-        for (var type : Components.soulboundComponents) {
-            var originalComponent = type.of(original);
-            var currentComponent = type.of(player);
-
-            currentComponent.deserialize(originalComponent.serialize());
-
-            if (!player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
-                var storage = currentComponent.item();
-
-                if (storage != null && storage.intValue(StatisticType.level) >= Configuration.instance().preservationLevel) {
-                    player.giveItemStack(storage.stack());
-                }
-            }
         }
     }
 
@@ -120,7 +88,7 @@ public final class CommonEvents {
         var target = event.getEntityLiving();
 
         if (!target.world.isClient) {
-            if (target instanceof PlayerEntity && Components.weapon.of(target).item(ItemComponentType.greatsword).leapForce() > 0 && !damage.isExplosive() && !damage.isProjectile()) {
+            if (target instanceof PlayerEntity && ItemComponentType.greatsword.get(target).leapForce() > 0 && !damage.isExplosive() && !damage.isProjectile()) {
                 event.setCanceled(true);
             }
 
@@ -146,7 +114,7 @@ public final class CommonEvents {
 
                     if (((WeaponComponent<?>) storage).hit()) {
                         event.setAmount(amount *= 2);
-                        player.addCritParticles(target);
+                        Packets.clientCriticalHitParticles.sendNearby(target, new ExtendedPacketBuffer().writeEntity(target));
                     }
 
                     if (storage.hasSkill(Skills.nourishment)) {
@@ -302,5 +270,9 @@ public final class CommonEvents {
     @SubscribeEvent
     public static void registerCommand(RegisterCommandsEvent event) {
         SoulboundArmoryCommand.register(event);
+
+        if (ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(argument -> argument.startsWith("-agentlib:jdwp"))) {
+            Accessor.<Logger>getObject(CommandManager.class, "LOGGER").setLevel(Level.DEBUG);
+        }
     }
 }

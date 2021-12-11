@@ -12,7 +12,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
-public class Configuration {
+public final class Configuration {
     public static transient final String MULTIPLIER_CATEGORY = "multipliers";
     public static transient final String CLIENT_CATEGORY = "client";
 

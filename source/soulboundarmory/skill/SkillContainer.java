@@ -1,6 +1,7 @@
 package soulboundarmory.skill;
 
 import cell.client.gui.screen.CellScreen;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
@@ -8,24 +9,19 @@ import net.minecraft.text.Text;
 import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.serial.CompoundSerializable;
 
-public class SkillContainer implements Comparable<SkillContainer>, CompoundSerializable {
+public final class SkillContainer implements Comparable<SkillContainer>, CompoundSerializable {
+    public final List<SkillContainer> dependencies = new ReferenceArrayList<>();
     public final Skill skill;
-    public final List<SkillContainer> dependencies;
 
-    protected final SkillStorage storage;
-    protected boolean learned;
-    protected int level;
+    private boolean learned;
+    private int level;
 
-    public SkillContainer(Skill skill, SkillStorage storage) {
-        this(skill, storage, false, 0);
+    public SkillContainer(Skill skill) {
+        this.skill = skill;
     }
 
-    public SkillContainer(Skill skill, SkillStorage storage, boolean learned, int level) {
-        this.skill = skill;
-        this.storage = storage;
-        this.learned = learned;
-        this.level = level;
-        this.dependencies = skill.dependencies.stream().map(storage::get).toList();
+    public void initializeDependencies(SkillStorage storage) {
+        this.dependencies.addAll(this.skill.dependencies.stream().map(storage::get).toList());
     }
 
     public boolean hasDependencies() {
