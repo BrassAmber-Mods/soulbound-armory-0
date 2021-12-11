@@ -58,8 +58,8 @@ public final class CommonEvents {
     /*
     @SubscribeEvent
     public static void onUseBlock(UseBlockEvent event) {
-        PlayerEntity player = event.getPlayer();
-        ItemStack mainStack = player.getMainHandStack();
+        var player = event.getPlayer();
+        var mainStack = player.getMainHandStack();
 
         if (mainStack.getItem() instanceof SoulboundWeaponItem && mainStack != event.getItemStack()) {
             event.setFail();

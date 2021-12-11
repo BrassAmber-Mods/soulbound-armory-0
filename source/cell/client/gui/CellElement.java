@@ -8,6 +8,7 @@ import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
@@ -18,6 +19,9 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     protected Length width = new Length();
     protected Length height = new Length();
 
+    /**
+     @return whether an area starting at (`startX`, `startY`) with dimensions (`width`, `height`) contains the point (`x`, `y`).
+     */
     public static boolean contains(double x, double y, double startX, double startY, double width, double height) {
         return x >= startX && x <= startX + width && y >= startY && y <= startY + height;
     }
@@ -83,6 +87,64 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         }
 
         fill(matrices, x, y1 + 1, x + 1, y2, z, color);
+    }
+
+    /**
+     Draw text with stroke.
+
+     @param text the text
+     @param x the x at which to start
+     @param y the y at which to start
+     @param color the color of the text
+     @param strokeColor the color of the stroke
+     */
+    public static void drawStrokedText(MatrixStack matrixes, Text text, float x, float y, int color, int strokeColor) {
+        textDrawer.draw(matrixes, text, x + 1, y, strokeColor);
+        textDrawer.draw(matrixes, text, x - 1, y, strokeColor);
+        textDrawer.draw(matrixes, text, x, y + 1, strokeColor);
+        textDrawer.draw(matrixes, text, x, y - 1, strokeColor);
+        textDrawer.draw(matrixes, text, x, y, color);
+    }
+
+    /**
+     Draw text with stroke.
+
+     @param text the text
+     @param x the x at which to start
+     @param y the y at which to start
+     @param color the color of the text
+     @param strokeColor the color of the stroke
+     */
+    public static void drawStrokedText(MatrixStack matrixes, String string, float x, float y, int color, int strokeColor) {
+        textDrawer.draw(matrixes, string, x + 1, y, strokeColor);
+        textDrawer.draw(matrixes, string, x - 1, y, strokeColor);
+        textDrawer.draw(matrixes, string, x, y + 1, strokeColor);
+        textDrawer.draw(matrixes, string, x, y - 1, strokeColor);
+        textDrawer.draw(matrixes, string, x, y, color);
+    }
+
+    /**
+     Draw text with stroke.
+
+     @param text the text
+     @param x the x at which to start
+     @param y the y at which to start
+     @param color the color of the text
+     */
+    public static void drawStrokedText(MatrixStack matrixes, Text text, float x, float y, int color) {
+        drawStrokedText(matrixes, text, x, y, color, 0);
+    }
+
+    /**
+     Draw text with stroke.
+
+     @param text the text
+     @param x the x at which to start
+     @param y the y at which to start
+     @param color the color of the text
+     */
+    public static void drawStrokedText(MatrixStack matrixes, String text, float x, float y, int color) {
+        drawStrokedText(matrixes, text, x, y, color, 0);
     }
 
     public int z() {

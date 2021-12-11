@@ -20,13 +20,13 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
         super(1, -2, -1);
     }
 
+    private static float maxUsageRatio(float attackSpeed, int timeLeft) {
+        return Math.min(attackSpeed / 2 * (USE_TIME - timeLeft) / 20F, 1);
+    }
+
     @Override
     public int getMaxUseTime(ItemStack stack) {
         return USE_TIME;
-    }
-
-    public float getMaxUsageRatio(float attackSpeed, int timeLeft) {
-        return Math.min(attackSpeed / 2 * (USE_TIME - timeLeft) / 20F, 1);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
         if (!world.isClient) {
             var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
-            var velocity = this.getMaxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
+            var velocity = maxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
             var maxVelocity = velocity / attackSpeed;
             var dagger = new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity);
 

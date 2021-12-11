@@ -188,11 +188,6 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
     }
 
     @Override
-    protected T clone() {
-        return (T) super.clone();
-    }
-
-    @Override
     public boolean changeFocus(boolean lookForwards) {
         if (this.active && this.visible) {
             this.selected ^= true;
