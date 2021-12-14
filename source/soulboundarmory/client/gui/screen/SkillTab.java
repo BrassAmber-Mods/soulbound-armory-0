@@ -21,8 +21,6 @@ import soulboundarmory.skill.SkillContainer;
  */
 public class SkillTab extends SoulboundTab {
     protected static final Identifier background = new Identifier("textures/block/andesite.png");
-    protected static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
-    protected static final Identifier widgets = new Identifier("textures/gui/advancements/widgets.png");
 
     protected static final ScalableWidget<?> grayRectangle = new ScalableWidget<>().grayRectangle();
     protected static final ScalableWidget<?> blueRectangle = new ScalableWidget<>().blueRectangle();
@@ -80,40 +78,55 @@ public class SkillTab extends SoulboundTab {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
-        super.render(matrices, mouseX, mouseY, partialTicks);
-
-        this.renderWindow(matrices, mouseX, mouseY, partialTicks);
-        this.renderSkills(matrices, mouseX, mouseY);
+    protected void renderWidget() {
+        this.renderWindow();
+        this.renderSkills();
     }
 
-    public void renderWindow(MatrixStack stack, int mouseX, int mouseY, float tickDelta) {
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+            return true;
+        }
+
+        var skill = this.selectedSkill();
+
+        if (skill != null) {
+            this.parent().item.upgrade(skill);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public void renderWindow() {
         this.chroma(this.chroma);
         RenderSystem.enableBlend();
 
         renderBackground(background, this.insideX, this.insideY, this.insideWidth, this.insideHeight, (int) (128 * this.chroma));
 
-        drawStrokedText(stack, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0xEEEEEE);
+        drawStrokedText(this.matrixes, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0xEEEEEE);
         var text = this.pointText(this.parent().item.intValue(StatisticType.skillPoints));
-        drawStrokedText(stack, text, this.insideEndX - 8 - textDrawer.getWidth(text), this.insideY + 6, 0xEEEEEE);
+        drawStrokedText(this.matrixes, text, this.insideEndX - 8 - textDrawer.getWidth(text), this.insideY + 6, 0xEEEEEE);
 
-        var delta = 20F * tickDelta / 255F;
-        this.chroma = this.selectedSkill(mouseX, mouseY) == null ? Math.min(this.chroma + delta, 1F) : Math.max(this.chroma - delta, 175F / 255F);
+        var delta = 20F * tickDelta() / 255F;
+        this.chroma = this.selectedSkill() == null ? Math.min(this.chroma + delta, 1F) : Math.max(this.chroma - delta, 175F / 255F);
     }
 
-    protected void renderSkills(MatrixStack stack, int mouseX, int mouseY) {
+    protected void renderSkills() {
         for (var skill : this.skills.keySet()) {
-            if (this.isHovered(skill, mouseX, mouseY)) {
+            if (this.isHovered(skill)) {
                 this.selectedSkill = skill;
             } else {
-                this.renderSkill(stack, skill, mouseX, mouseY);
+                this.renderSkill(this.matrixes, skill);
             }
         }
 
-        this.renderSkill(stack, this.selectedSkill, mouseX, mouseY);
+        this.renderSkill(this.matrixes, this.selectedSkill);
     }
 
-    protected void renderSkill(MatrixStack matrixes, SkillContainer skill, int mouseX, int mouseY) {
+    protected void renderSkill(MatrixStack matrixes, SkillContainer skill) {
         var positions = this.skills.get(skill);
 
         if (positions != null) {
@@ -126,7 +139,7 @@ public class SkillTab extends SoulboundTab {
             if (skill == this.selectedSkill) {
                 this.chroma(1);
 
-                if (this.isHovered(skill, mouseX, mouseY)) {
+                if (this.isHovered(skill)) {
                     this.renderTooltip(matrixes, skill, x, y);
                 }
 
@@ -201,9 +214,9 @@ public class SkillTab extends SoulboundTab {
         RenderSystem.color3f(chroma, chroma, chroma);
     }
 
-    protected SkillContainer selectedSkill(double mouseX, double mouseY) {
+    protected SkillContainer selectedSkill() {
         for (var skill : this.skills.keySet()) {
-            if (this.isHovered(skill, mouseX, mouseY)) {
+            if (this.isHovered(skill)) {
                 return skill;
             }
         }
@@ -211,9 +224,9 @@ public class SkillTab extends SoulboundTab {
         return null;
     }
 
-    protected boolean isHovered(SkillContainer skill, double mouseX, double mouseY) {
+    protected boolean isHovered(SkillContainer skill) {
         var positions = this.skills.get(skill);
-        return Math.abs(positions[0] - mouseX) <= 12 && Math.abs(positions[1] - mouseY) <= 12;
+        return Math.abs(positions[0] - mouseX()) <= 12 && Math.abs(positions[1] - mouseY()) <= 12;
     }
 
     protected void updateIcons() {
@@ -271,22 +284,5 @@ public class SkillTab extends SoulboundTab {
 
             this.skills.put(skill, new int[]{x, this.insideY + 24 + 32 * tier});
         }
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return true;
-        }
-
-        var skill = this.selectedSkill(mouseX, mouseY);
-
-        if (skill != null) {
-            this.parent().item.upgrade(skill);
-
-            return true;
-        }
-
-        return false;
     }
 }
