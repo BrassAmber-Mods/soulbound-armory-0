@@ -4,7 +4,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -37,15 +36,13 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        var component = ItemComponentType.dagger.of(player);
-
-        if (!world.isClient && component.hasSkill(Skills.throwing)) {
+        if (ItemComponentType.dagger.of(player).hasSkill(Skills.throwing)) {
             player.setCurrentHand(hand);
 
-            return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
+            return TypedActionResult.consume(player.getStackInHand(hand));
         }
 
-        return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
+        return TypedActionResult.fail(player.getStackInHand(hand));
     }
 
     @Override
