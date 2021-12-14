@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import soulboundarmory.util.Util;
 
-final class ScreenDelegate extends Screen {
+public final class ScreenDelegate extends Screen {
     public final Screen parent = Widget.screen();
     public final CellScreen<?> screen;
 
