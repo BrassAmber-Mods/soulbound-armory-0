@@ -180,7 +180,7 @@ public class SkillTab extends SoulboundTab {
                     genericSections.add((cost == 1 ? Translations.guiSkillUpgradeCostSingular : Translations.guiSkillUpgradeCostPlural).format(cost));
                 }
             }
-        } else if (skill.canUpgrade()) {
+        } else if (skill.canLearn()) {
             genericSections.add((cost == 1 ? Translations.guiSkillLearnCostSingular : Translations.guiSkillLearnCostPlural).format(cost));
         }
 
