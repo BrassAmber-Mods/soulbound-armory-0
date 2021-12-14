@@ -26,8 +26,6 @@ import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 
-import static net.minecraft.enchantment.Enchantments.UNBREAKING;
-
 public class StaffComponent extends WeaponComponent<StaffComponent> {
     protected int spell;
     protected int fireballCooldown;
@@ -38,22 +36,17 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
-            .min(0.48, StatisticType.attackSpeed).min(8, StatisticType.attackDamage)
+            .min(0.48, StatisticType.attackSpeed)
+            .min(8, StatisticType.attackDamage)
             .max(1, StatisticType.criticalStrikeRate)
             .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> {
             var name = enchantment.getTranslationKey().toLowerCase();
-
-            return enchantment.type.isAcceptableItem(this.item())
-                && !enchantment.isCursed()
-                && enchantment != UNBREAKING
-                && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"))
-                && !name.contains("holding")
-                && !name.contains("mending");
+            return !name.contains("holding") && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"));
         });
 
-        this.skills.add(Skills.healing, Skills.penetration, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
+        this.skills.add(Skills.healing, Skills.vulnerability, Skills.penetration, Skills.endermanacle);
     }
 
     @Override

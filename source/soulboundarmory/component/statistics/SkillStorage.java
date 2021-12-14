@@ -3,11 +3,11 @@ package soulboundarmory.component.statistics;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
 
-public class SkillStorage extends Reference2ObjectLinkedOpenHashMap<Skill, SkillContainer> implements CompoundSerializable {
+public class SkillStorage extends Reference2ObjectLinkedOpenHashMap<Skill, SkillContainer> implements Serializable {
     public void add(Skill... skills) {
         for (var skill : skills) {
             this.put(skill, new SkillContainer(skill));

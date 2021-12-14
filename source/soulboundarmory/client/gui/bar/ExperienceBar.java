@@ -12,7 +12,7 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItem;
 
-public class ExperienceBar extends ScalableWidget {
+public class ExperienceBar extends ScalableWidget<ExperienceBar> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Colors colors = configuration.colors;
 
@@ -62,39 +62,8 @@ public class ExperienceBar extends ScalableWidget {
         return (this.storage = component) != null;
     }
 
-    @Override
-    public void render(MatrixStack matrixes, int mouseX, int mouseY, float delta) {
-        if (colors.alpha > 3) {
-            var color = new Color(colors.red, colors.green, colors.blue, colors.alpha);
-            var components = color.getComponents(null);
-            var style = configuration.style;
-
-            if (style == null) {
-                style = BarStyle.EXPERIENCE;
-            }
-
-            this.v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]);
-            super.render(matrixes, mouseX, mouseY, delta);
-
-            if (this.storage.canLevelUp()) {
-                this.widthLimit(Math.min(1, this.storage.floatValue(StatisticType.experience) / this.storage.nextLevelXP()));
-            }
-
-            this.v(style.v + 5);
-            super.render(matrixes, mouseX, mouseY, delta);
-
-            var level = this.storage.intValue(StatisticType.level);
-
-            if (level > 0) {
-                drawStrokedText(matrixes, String.valueOf(level), this.middleX() - textDrawer.getWidth(String.valueOf(level)) / 2F, this.y() - 8, color.getRGB());
-            }
-
-            RenderSystem.disableLighting();
-        }
-    }
-
     public boolean render(MatrixStack matrixes, Window window) {
-        var component = ItemComponent.firstHeld(minecraft.player);
+        var component = ItemComponent.fromHands(minecraft.player);
 
         if (component.isPresent()) {
             this.update(component.get());
@@ -106,7 +75,34 @@ public class ExperienceBar extends ScalableWidget {
         return false;
     }
 
-/*
+    @Override
+    public void renderWidget() {
+        if (colors.alpha > 3) {
+            var color = new Color(colors.red, colors.green, colors.blue, colors.alpha);
+            var components = color.getComponents(null);
+            var style = configuration.style;
+
+            this.v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]);
+            super.renderWidget();
+
+            if (this.storage.canLevelUp()) {
+                this.widthLimit(Math.min(1, this.storage.floatValue(StatisticType.experience) / this.storage.nextLevelXP()));
+            }
+
+            this.v(style.v + 5);
+            super.renderWidget();
+
+            var level = this.storage.intValue(StatisticType.level);
+
+            if (level > 0) {
+                drawStrokedText(this.matrixes, String.valueOf(level), this.middleX() - textDrawer.getWidth(String.valueOf(level)) / 2F, this.y() - 8, color.getRGB());
+            }
+
+            RenderSystem.disableLighting();
+        }
+    }
+
+    /*
     private void render(MatrixStack stack) {
         if (colors.alpha > 3) {
             var color = new Color(colors.red, colors.green, colors.blue, colors.alpha);

@@ -2,197 +2,151 @@ package soulboundarmory.event;
 
 import java.lang.management.ManagementFactory;
 import net.auoeke.reflect.Accessor;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.EntityTeleportEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.command.SoulboundArmoryCommand;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.entity.SoulboundDaggerEntity;
-import soulboundarmory.entity.SoulboundFireballEntity;
-import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.registry.Skills;
-import soulboundarmory.registry.SoulboundItems;
-import soulboundarmory.util.EntityUtil;
-import soulboundarmory.util.ItemUtil;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public final class CommonEvents {
-    @SubscribeEvent
-    public static void onPlayerDrops(LivingDropsEvent event) {
+    /**
+     Remove soulbound items that are to be preserved from drops and give them to the player.
+     Insert dropped items into the attacker's inventory if the attacker has {@link Skills#enderPull}.
+     */
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void playerDrops(LivingDropsEvent event) {
         if (event.getEntity() instanceof PlayerEntity player && !player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             Components.soulbound(player)
                 .map(SoulboundComponent::item)
                 .filter(component -> component != null && component.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
                 .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.giveItemStack(drop.getStack())));
+        } else {
+            ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> {
+                if (component.hasSkill(Skills.enderPull)) {
+                    event.getDrops().forEach(drop -> component.player.inventory.insertStack(drop.getStack()));
+                }
+            });
         }
     }
 
-    /*
+    /**
+     Apply {@link StatisticType#efficiency}.
+     */
     @SubscribeEvent
-    public static void onUseBlock(UseBlockEvent event) {
-        var player = event.getPlayer();
-        var mainStack = player.getMainHandStack();
-
-        if (mainStack.getItem() instanceof SoulboundWeaponItem && mainStack != event.getItemStack()) {
-            event.setFail();
-        }
+    public static void breakSpeed(PlayerEvent.BreakSpeed event) {
+        ItemComponent.fromMainHand(event.getPlayer()).ifPresent(component -> {
+            var efficiency = component.floatValue(StatisticType.efficiency);
+            event.setNewSpeed(efficiency > 0 || component instanceof ToolComponent ? event.getNewSpeed() + efficiency : 0);
+        });
     }
-    */
 
-    @SubscribeEvent
-    public static void onBlockBreakSpeed(PlayerEvent.BreakSpeed event) {
-        var player = event.getPlayer();
-        ItemComponent.get(player, player.getMainHandStack()).ifPresent(component -> {
-            var efficiency = component.statistic(StatisticType.efficiency);
-
-            if (efficiency != null) {
-                event.setNewSpeed(event.getNewSpeed() * efficiency.floatValue());
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void breakBlock(BlockEvent.BreakEvent event) {
+        ItemComponent.fromMainHand(event.getPlayer()).ifPresent(component -> {
+            if (component.hasSkill(Skills.enderPull)) {
+                component.player.addExperience(event.getExpToDrop());
+                event.setExpToDrop(0);
             }
         });
     }
 
     /**
-     Cancel damage to leaping players, determine whether player hits are critical and apply {@link Skills#nourishment}.
+     Determine whether player hits are critical and apply {@link Skills#nourishment}.
      */
     @SubscribeEvent
     public static void damage(LivingDamageEvent event) {
         var damage = event.getSource();
         var target = event.getEntityLiving();
 
-        if (!target.world.isClient) {
-            if (target instanceof PlayerEntity && ItemComponentType.greatsword.get(target).leapForce() > 0 && !damage.isExplosive() && !damage.isProjectile()) {
-                event.setCanceled(true);
-            }
+        if (damage.getAttacker() instanceof ServerPlayerEntity player) {
+            ItemComponent.fromAttacker(target, damage).ifPresent(component -> {
+                var amount = event.getAmount();
 
-            if (damage.getAttacker() instanceof PlayerEntity player) {
-                var source = damage.getSource();
-                var instance = Components.weapon.of(player);
-                ItemComponent<?> storage;
-
-                if (source instanceof SoulboundDaggerEntity) {
-                    storage = instance.item(ItemComponentType.dagger);
-                } else if (source instanceof PlayerEntity) {
-                    storage = instance.item();
-                } else if (source instanceof SoulboundLightningEntity) {
-                    storage = instance.item(ItemComponentType.sword);
-                } else if (source instanceof SoulboundFireballEntity) {
-                    storage = instance.item(ItemComponentType.staff);
-                } else {
-                    return;
+                if (((WeaponComponent<?>) component).hit()) {
+                    event.setAmount(amount *= 2);
+                    Packets.clientCriticalHitParticles.sendNearby(target, new ExtendedPacketBuffer().writeEntity(target));
                 }
 
-                if (storage != null) {
-                    var amount = event.getAmount();
-
-                    if (((WeaponComponent<?>) storage).hit()) {
-                        event.setAmount(amount *= 2);
-                        Packets.clientCriticalHitParticles.sendNearby(target, new ExtendedPacketBuffer().writeEntity(target));
-                    }
-
-                    if (storage.hasSkill(Skills.nourishment)) {
-                        var value = (1 + storage.skill(Skills.nourishment).level()) * amount / 20F;
-                        player.getHungerManager().add((int) (Math.ceil(value + 1) / 2), 1.5F * value);
-                    }
+                if (component.hasSkill(Skills.nourishment)) {
+                    var value = (1 + component.skill(Skills.nourishment).level()) * amount / 20F;
+                    player.getHungerManager().add((int) (value + 1) / 2, 1.5F * value);
                 }
-            }
+            });
         }
     }
 
+    /**
+     Cancel damage to leaping players.
+     */
+    @SubscribeEvent
+    public static void livingAttack(LivingAttackEvent event) {
+        var target = event.getEntityLiving();
+        var damage = event.getSource();
+
+        if (target instanceof ServerPlayerEntity && ItemComponentType.greatsword.of(target).leapForce() > 0 && damage.getAttacker() != null && !damage.isExplosive() && !damage.isProjectile()) {
+            event.setCanceled(true);
+        }
+    }
+
+    /**
+     Add experience points for kills.
+     */
     @SubscribeEvent
     public static void death(LivingDeathEvent event) {
-        var entity = event.getEntityLiving();
-        var attacker = event.getSource().getAttacker();
-
-        if (attacker == null) {
-            attacker = entity.getDamageTracker().getBiggestAttacker();
-        }
-
-        if (attacker instanceof PlayerEntity player && !player.world.isClient) {
-            var damageAttribute = entity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-            var damage = damageAttribute == null ? 0 : damageAttribute.getValue();
-            var immediateSource = event.getSource().getSource();
-            var component = Components.weapon.of(player);
-            ItemComponent<?> storage;
-            Text displayName;
-
-            if (immediateSource instanceof SoulboundDaggerEntity dagger) {
-                storage = component.item(ItemComponentType.dagger);
-                displayName = dagger.itemStack.getName();
-            } else if (immediateSource instanceof SoulboundLightningEntity) {
-                storage = component.item(ItemComponentType.sword);
-                displayName = ItemUtil.equippedStack(player, SoulboundItems.sword).getName();
-            } else {
-                storage = component.item();
-                displayName = player.getMainHandStack().getName();
-            }
-
-            if (storage != null) {
-                var configuration = Configuration.instance();
-
-                var xp = entity.getMaxHealth()
-                    * player.world.getDifficulty().getId() * configuration.difficultyMultiplier
-                    * (1 + entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR) * configuration.armorMultiplier);
-
-                xp *= damage <= 0 ? configuration.passiveMultiplier : 1 + damage * configuration.attackDamageMultiplier;
-
-                if (EntityUtil.isBoss(entity)) {
-                    xp *= configuration.bossMultiplier;
-                }
-
-                if (player.world.getServer().isHardcore()) {
-                    xp *= configuration.hardcoreMultiplier;
-                }
-
-                if (damage > 0 && entity.isBaby()) {
-                    xp *= configuration.babyMultiplier;
-                }
-
-                if (storage.incrementStatistic(StatisticType.experience, Math.round(xp)) && Components.config.of(player).levelupNotifications) {
-                    player.sendMessage(Translations.levelupMessage.format(displayName, storage.intValue(StatisticType.level)), true);
-                }
-            }
-        }
+        ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> component.killed(event.getEntityLiving()));
     }
 
+    /**
+     Reduce fall damage, freeze nearby entities and add circular snow particles after landing from a leap.
+     */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void fall(LivingFallEvent event) {
-        var fallen = event.getEntity();
-
-        if (!fallen.world.isClient && fallen instanceof PlayerEntity player) {
-            var component = Components.weapon.of(player);
-            var storage = component.item(ItemComponentType.greatsword);
-            var leapForce = storage.leapForce();
+        if (event.getEntity() instanceof ServerPlayerEntity player) {
+            var greatsword = ItemComponentType.greatsword.of(player);
+            var leapForce = greatsword.leapForce();
 
             if (leapForce > 0) {
-                if (storage.hasSkill(Skills.freezing)) {
+                var distance = event.getDistance() - (greatsword.zenith() + 3 + 3 * leapForce);
+
+                if (distance <= 0) {
+                    event.setCanceled(true);
+                } else {
+                    event.setDistance(distance * Math.min(1, 1.4F - leapForce));
+                }
+
+                greatsword.leapDuration = 4;
+
+                if (greatsword.hasSkill(Skills.freezing)) {
                     var radiusXZ = Math.min(4, event.getDistance());
                     var radiusY = Math.min(2, 0.5F * event.getDistance());
                     var nearbyEntities = player.world.getOtherEntities(player, new Box(
@@ -204,13 +158,13 @@ public final class CommonEvents {
 
                     for (var entity : nearbyEntities) {
                         if (entity.squaredDistanceTo(entity) <= radiusXZ * radiusXZ) {
-                            storage.freeze(entity, (int) Math.min(60, 12 * event.getDistance()), 0.4F * event.getDistance());
+                            greatsword.freeze(entity, (int) Math.min(60, 12 * event.getDistance()), 0.4F * event.getDistance());
                             froze = true;
                         }
                     }
 
                     if (froze && !nearbyEntities.isEmpty()) {
-                        var world = (ServerWorld) player.world;
+                        var world = player.getServerWorld();
 
                         for (double i = 0; i <= 2 * radiusXZ; i += radiusXZ / 48D) {
                             var x = radiusXZ - i;
@@ -224,6 +178,7 @@ public final class CommonEvents {
                                 player.getZ() + z,
                                 particles, 0, 0, 0, 0D
                             );
+
                             world.spawnParticles(
                                 ParticleTypes.ITEM_SNOWBALL,
                                 player.getX() + x,
@@ -234,32 +189,31 @@ public final class CommonEvents {
                         }
                     }
                 }
-
-                if (event.getDistance() <= 16 * leapForce) {
-                    event.setCanceled(true);
-                } else {
-                    event.setDamageMultiplier(event.getDistance() / (float) (Math.max(1, Math.log(4 * leapForce) / Math.log(2))));
-                }
-
-                storage.leapDuration(4);
             }
         }
     }
 
+    /**
+     Tick components.
+     */
     @SubscribeEvent
-    public static void tick(LivingEvent.LivingUpdateEvent event) {
+    public static void livingTick(LivingEvent.LivingUpdateEvent event) {
         var entityData = Components.entityData.of(event.getEntity());
-        entityData.tick();
 
-        if (entityData.isFrozen()) {
+        if (entityData.isFrozen() /*&& !event.getEntity().world.isClient*/) {
             event.setCanceled(true);
         }
+
+        entityData.tick();
 
         if (event.getEntity() instanceof PlayerEntity player) {
             Components.soulbound(player).forEach(SoulboundComponent::tick);
         }
     }
 
+    /**
+     Prevent entities afflicted with {@link Skills#endermanacle} from teleporting.
+     */
     @SubscribeEvent
     public static void teleport(EntityTeleportEvent event) {
         if (Components.entityData.of(event.getEntity()).cannotTeleport()) {
@@ -267,6 +221,9 @@ public final class CommonEvents {
         }
     }
 
+    /**
+     Register the command and enable command errors debug logging in development environments.
+     */
     @SubscribeEvent
     public static void registerCommand(RegisterCommandsEvent event) {
         SoulboundArmoryCommand.register(event);

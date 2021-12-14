@@ -1,17 +1,16 @@
 package soulboundarmory.skill.weapon.greatsword;
 
 import cell.client.gui.screen.CellScreen;
-import soulboundarmory.registry.Skills;
-import soulboundarmory.skill.Skill;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skill;
 
 public class FreezingSkill extends Skill {
-    public FreezingSkill(Identifier identifier) {
-        super(identifier);
+    public FreezingSkill() {
+        super("freezing");
     }
 
     @Override

@@ -1,16 +1,15 @@
 package soulboundarmory.skill.weapon.staff;
 
 import cell.client.gui.screen.CellScreen;
-import soulboundarmory.skill.Skill;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.skill.Skill;
 public class FireballSkill extends Skill {
-    public FireballSkill(Identifier identifier) {
-        super(identifier);
+    public FireballSkill() {
+        super("fireball");
     }
 
     @Override

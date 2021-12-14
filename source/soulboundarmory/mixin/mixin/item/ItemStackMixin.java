@@ -1,22 +1,28 @@
 package soulboundarmory.mixin.mixin.item;
 
 import com.google.common.collect.Multimap;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.AttributeModifierIdentifiers;
+import soulboundarmory.util.Util;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
@@ -45,5 +51,17 @@ abstract class ItemStackMixin {
             .map(component -> Components.config.of(component.player))
             .filter(component -> !component.glint)
             .ifPresent(component -> info.setReturnValue(false));
+    }
+
+    @Inject(method = "postMine", at = @At("RETURN"))
+    private void addXP(World world, BlockState state, BlockPos pos, PlayerEntity miner, CallbackInfo info) {
+        Components.marker.nullable((ItemStack) (Object) this).ifPresent(marker -> marker.item.mined(state, pos));
+    }
+
+    @Inject(method = "isSuitableFor", at = @At("RETURN"), cancellable = true)
+    private void checkSoulboundItemHasSuitableMiningLevel(BlockState state, CallbackInfoReturnable<Boolean> info) {
+        if (info.getReturnValueZ()) {
+            Components.marker.nullable(Util.cast(this)).ifPresent(marker -> info.setReturnValue(marker.item.intValue(StatisticType.miningLevel) >= state.getHarvestLevel()));
+        }
     }
 }

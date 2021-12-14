@@ -1,10 +1,7 @@
 package soulboundarmory.client.gui.screen;
 
-import cell.client.gui.widget.callback.PressCallback;
-import cell.client.gui.widget.scalable.ScalableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.text.Text;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
@@ -19,17 +16,14 @@ public class EnchantmentTab extends SoulboundTab {
     }
 
     @Override
-    protected void init() {
-        var component = this.parent.item;
+    public void initialize() {
+        var component = this.parent().item;
         var enchantments = component.enchantments;
-        var resetButton = this.add(this.resetButton(this.resetAction(Category.enchantment)));
-        resetButton.active = enchantments.values().stream().anyMatch(level -> level > 0);
+        this.add(this.resetButton(this.resetAction(Category.enchantment))).active(enchantments.values().stream().anyMatch(level -> level > 0));
 
         Util.enumerate(enchantments, (enchantment, level, row) -> {
-            var disenchant = this.add(this.squareButton(this.width + 122 >> 1, this.height(enchantments.size(), row), Text.of("-"), this.disenchantAction(enchantment)));
-            var enchant = this.add(this.squareButton(this.width + 162 >> 1, this.height(enchantments.size(), row), Text.of("+"), this.enchantAction(enchantment)));
-            disenchant.active = level > 0;
-            enchant.active = component.intValue(StatisticType.enchantmentPoints) > 0;
+            this.add(this.squareButton(this.width() + 122 >> 1, this.height(enchantments.size(), row), "-", this.disenchantAction(enchantment))).active(level > 0);
+            this.add(this.squareButton(this.width() + 162 >> 1, this.height(enchantments.size(), row), "+", this.enchantAction(enchantment))).active(component.intValue(StatisticType.enchantmentPoints) > 0);
         });
     }
 
@@ -37,32 +31,32 @@ public class EnchantmentTab extends SoulboundTab {
     public void render(MatrixStack matrixes, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixes, mouseX, mouseY, partialTicks);
 
-        this.displayPoints(matrixes, this.parent.item.intValue(StatisticType.enchantmentPoints));
+        this.displayPoints(matrixes, this.parent().item.intValue(StatisticType.enchantmentPoints));
 
-        var enchantments = this.parent.item.enchantments;
+        var enchantments = this.parent().item.enchantments;
 
-        Util.enumerate(enchantments, (enchantment, level, row) -> this.textRenderer.drawWithShadow(
+        Util.enumerate(enchantments, (enchantment, level, row) -> textDrawer.drawWithShadow(
             matrixes,
             enchantment.getName(level),
-            (this.width - 182) / 2F,
-            this.height(enchantments.size(), row) - this.textRenderer.fontHeight / 2F,
+            this.width() - 182 >> 1,
+            this.height(enchantments.size(), row) - fontHeight() / 2F,
             0xFFFFFF
         ));
     }
 
-    protected PressCallback<ScalableWidget> enchantAction(Enchantment enchantment) {
-        return button -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent.item)
+    protected Runnable enchantAction(Enchantment enchantment) {
+        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent().item)
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeBoolean(true)
-            .writeBoolean(hasShiftDown())
+            .writeBoolean(isShiftDown())
         );
     }
 
-    protected PressCallback<ScalableWidget> disenchantAction(Enchantment enchantment) {
-        return button -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent.item)
+    protected Runnable disenchantAction(Enchantment enchantment) {
+        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent().item)
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeBoolean(false)
-            .writeBoolean(hasShiftDown())
+            .writeBoolean(isShiftDown())
         );
     }
 }

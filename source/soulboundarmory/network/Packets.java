@@ -6,6 +6,7 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.client.S2CBindSlot;
 import soulboundarmory.network.client.S2CCriticalHitParticles;
 import soulboundarmory.network.client.S2CEnchant;
+import soulboundarmory.network.client.S2CFreeze;
 import soulboundarmory.network.client.S2CRefresh;
 import soulboundarmory.network.client.S2CSync;
 import soulboundarmory.network.client.S2CSyncItem;
@@ -33,6 +34,7 @@ public final class Packets {
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CBindSlot> clientBindSlot = client(S2CBindSlot.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CCriticalHitParticles> clientCriticalHitParticles = client(S2CCriticalHitParticles.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CEnchant> clientEnchant = client(S2CEnchant.class);
+    public static final PacketKey.Client<ExtendedPacketBuffer, S2CFreeze> clientFreeze = client(S2CFreeze.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CRefresh> clientRefresh = client(S2CRefresh.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CSync> clientSync = client(S2CSync.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CSyncItem> clientSyncItem = client(S2CSyncItem.class);

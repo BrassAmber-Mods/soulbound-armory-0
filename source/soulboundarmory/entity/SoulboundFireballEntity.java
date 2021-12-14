@@ -10,6 +10,7 @@ import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
@@ -28,7 +29,7 @@ public class SoulboundFireballEntity extends SmallFireballEntity {
         .setDimensions(1, 1)
         .build(SoulboundArmory.id("fireball").toString());
 
-    protected StaffComponent storage;
+    protected StaffComponent component;
     protected int hitCount;
     protected int spell;
 
@@ -46,8 +47,8 @@ public class SoulboundFireballEntity extends SmallFireballEntity {
     }
 
     protected void updatePlayer() {
-        if (this.getEntity() != null) {
-            this.storage = Components.weapon.of(this.getEntity()).item(ItemComponentType.staff);
+        if (this.getOwner() instanceof PlayerEntity owner) {
+            this.component = ItemComponentType.staff.of(owner);
         }
     }
 
@@ -57,15 +58,15 @@ public class SoulboundFireballEntity extends SmallFireballEntity {
 
     @Override
     protected void onCollision(HitResult result) {
-        if (!this.world.isClient && result.getType() == HitResult.Type.ENTITY && this.getEntity() instanceof PlayerEntity player) {
-            var entity = ((EntityHitResult) result).getEntity();
+        if (result instanceof EntityHitResult entityResult && this.getOwner() instanceof ServerPlayerEntity player) {
+            var entity = entityResult.getEntity();
             var fiery = this.isBurning();
 
             if (entity != null) {
                 var data = Components.entityData.of(entity);
-                var endermanacle = this.storage.skill(Skills.endermanacle);
+                var endermanacle = this.component.skill(Skills.endermanacle);
                 var invulnerable = entity.isFireImmune() || entity instanceof EndermanEntity;
-                var canAttack = invulnerable && this.storage.hasSkill(Skills.vulnerability);
+                var canAttack = invulnerable && this.component.hasSkill(Skills.vulnerability);
                 var canBurn = (canAttack || !invulnerable) && fiery;
                 var source = canAttack ? DamageSource.player(player) : DamageSource.fireball(this, player);
 
@@ -77,14 +78,14 @@ public class SoulboundFireballEntity extends SmallFireballEntity {
                     entity.setFireTicks(20);
                 }
 
-                if (entity.damage(source, (float) this.storage.attributeTotal(StatisticType.attackDamage))) {
+                if (entity.damage(source, (float) this.component.attributeTotal(StatisticType.attackDamage))) {
                     EnchantmentHelper.onTargetDamaged(player, entity);
 
                     if (canBurn) {
                         entity.setFireTicks(100);
                     }
 
-                    var penetration = this.storage.skill(Skills.penetration);
+                    var penetration = this.component.skill(Skills.penetration);
 
                     if (penetration.learned() && this.hitCount < penetration.level() + 1) {
                         this.hitCount++;

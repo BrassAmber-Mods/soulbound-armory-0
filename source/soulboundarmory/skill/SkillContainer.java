@@ -5,11 +5,12 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import soulboundarmory.component.statistics.SkillStorage;
-import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.serial.Serializable;
 
-public final class SkillContainer implements Comparable<SkillContainer>, CompoundSerializable {
+public final class SkillContainer implements Comparable<SkillContainer>, Serializable {
     public final List<SkillContainer> dependencies = new ReferenceArrayList<>();
     public final Skill skill;
 
@@ -53,7 +54,7 @@ public final class SkillContainer implements Comparable<SkillContainer>, Compoun
     }
 
     public int cost() {
-        return this.skill.cost(this.learned, this.level);
+        return this.skill.cost(this.learned, this.level + 1);
     }
 
     public boolean learned() {
@@ -83,7 +84,7 @@ public final class SkillContainer implements Comparable<SkillContainer>, Compoun
         return this.skill.name();
     }
 
-    public List<? extends Text> tooltip() {
+    public List<? extends StringVisitable> tooltip() {
         return this.skill.tooltip();
     }
 

@@ -13,8 +13,8 @@ import net.minecraft.util.Identifier;
 public abstract class ComponentKey<B, C extends Component<C>> {
     public final Identifier id;
     public final String key;
+    public final Predicate<?> predicate;
 
-    protected final Predicate<?> predicate;
     protected final Function<?, C> instantiate;
 
     <O extends B> ComponentKey(Identifier id, Predicate<O> predicate, Function<O, C> instantiate) {
@@ -25,7 +25,7 @@ public abstract class ComponentKey<B, C extends Component<C>> {
     }
 
     /**
-     Attach a new instance of the component if the supplied object is of the component's target type and matches this key's predicate.
+     Attach a new instance of the component if the supplied object is of the component's target type.
 
      @param object the object to test
      @return the new instance of the component if it is applicable to the object or null
@@ -49,5 +49,15 @@ public abstract class ComponentKey<B, C extends Component<C>> {
      */
     public final Optional<C> nullable(B object) {
         return Optional.ofNullable(this.of(object));
+    }
+
+    /**
+     Extract the instance of this component from an object if it is attached or attach a new component.
+
+     @param object the object wherefrom to extract or whereto to attach
+     @return the component instance.
+     */
+    public final C obtain(B object) {
+        return this.nullable(object).orElseGet(() -> this.attach(object));
     }
 }

@@ -26,31 +26,29 @@ import soulboundarmory.entity.Attributes;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
-
-import static net.minecraft.enchantment.Enchantments.UNBREAKING;
+import soulboundarmory.util.Math2;
 
 public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
-    protected NbtCompound cannotFreeze = new NbtCompound();
     public int leapDuration;
-    public double leapForce;
+
+    protected NbtCompound cannotFreeze = new NbtCompound();
+    protected float zenith;
+    protected float leapForce;
 
     public GreatswordComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.attackRange, StatisticType.reach)
-            .min(0.8, StatisticType.attackSpeed).min(6, StatisticType.attackDamage).min(6, StatisticType.reach)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
+            .min(0.8, StatisticType.attackSpeed)
+            .min(4, StatisticType.attackDamage)
+            .min(6, StatisticType.reach)
             .max(1, StatisticType.criticalStrikeRate)
             .max(4, StatisticType.attackSpeed);
 
-        this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
-            && !enchantment.isCursed()
-            && enchantment !=  UNBREAKING
-            && Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains)
-        );
-
-        this.skills.add(Skills.nourishment, Skills.leaping, Skills.freezing);
+        this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
+        this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.leaping, Skills.freezing);
     }
 
     @Override
@@ -68,27 +66,25 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
         return Translations.guiGreatsword;
     }
 
-    public double leapForce() {
+    public float leapForce() {
         return this.leapForce;
     }
 
-    public void leapForce(double force) {
+    public void leap(float force) {
         this.resetLeapForce();
         this.leapForce = force;
+        this.zenith = (float) Math2.zenith(this.player);
     }
 
     public void resetLeapForce() {
         this.leapForce = 0;
         this.leapDuration = 0;
+        this.zenith = 0;
         this.cannotFreeze = new NbtCompound();
     }
 
-    public int leapDuration() {
-        return this.leapDuration;
-    }
-
-    public void leapDuration(int ticks) {
-        this.leapDuration = ticks;
+    public float zenith() {
+        return this.zenith;
     }
 
     public void freeze(Entity entity, int ticks, double damage) {
@@ -98,7 +94,6 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
 
         if (!this.cannotFreeze.contains(key) && component.canBeFrozen()) {
             component.freeze(this.player, ticks, (float) damage);
-
             this.cannotFreeze.putUuid(key, id);
         }
     }
@@ -108,7 +103,7 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
         if (slot == EquipmentSlot.MAINHAND) {
             modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
             modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.attackRange, StatisticType.attackRange));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
         }
     }
 
@@ -166,7 +161,7 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     public void serialize(NbtCompound tag) {
         super.serialize(tag);
 
-        tag.putInt("leapDuration", this.leapDuration());
+        tag.putInt("leapDuration", this.leapDuration);
         tag.putDouble("leapForce", this.leapForce());
         tag.put("cannotFreeze", this.cannotFreeze);
     }

@@ -1,6 +1,6 @@
 package soulboundarmory.component.soulbound.player;
 
-import cell.client.gui.CellElement;
+import cell.client.gui.screen.CellScreen;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -116,7 +116,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
             slot = slot == 1 ? 40 : this.player.inventory.selectedSlot;
 
             if (match.isPresent() || this.items.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
-                CellElement.minecraft.openScreen(new SoulboundScreen(this, slot));
+                new SoulboundScreen(this, slot).open();
 
                 return true;
             }
@@ -130,7 +130,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
      */
     public void refresh() {
         if (this.isClient()) {
-            if (CellElement.minecraft.currentScreen instanceof SoulboundScreen screen) {
+            if (CellScreen.cellScreen() instanceof SoulboundScreen screen) {
                 screen.refresh();
             }
         } else {

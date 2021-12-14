@@ -3,7 +3,6 @@ package soulboundarmory.component.soulbound.item.weapon;
 import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.entity.EquipmentSlot;
@@ -25,26 +24,19 @@ import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 
-import static net.minecraft.enchantment.Enchantments.UNBREAKING;
-import static net.minecraft.enchantment.Enchantments.VANISHING_CURSE;
-
 public class DaggerComponent extends WeaponComponent<DaggerComponent> {
     public DaggerComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.attackRange, StatisticType.reach)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
             .min(2, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.reach)
             .max(1, StatisticType.criticalStrikeRate)
             .max(4, StatisticType.attackSpeed);
 
-        this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
-            && !Arrays.asList(UNBREAKING, VANISHING_CURSE).contains(enchantment)
-            && Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains)
-        );
-
-        this.skills.add(Skills.nourishment, Skills.throwing, Skills.shadowClone, Skills.returning, Skills.sneakReturn);
+        this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
+        this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.throwing, Skills.shadowClone, Skills.returning, Skills.sneakReturn);
     }
 
     @Override
@@ -108,7 +100,6 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
         if (slot == EquipmentSlot.MAINHAND) {
             modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
             modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.attackRange, StatisticType.attackRange));
             modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
         }
     }

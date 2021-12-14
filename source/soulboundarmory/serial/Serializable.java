@@ -2,7 +2,7 @@ package soulboundarmory.serial;
 
 import net.minecraft.nbt.NbtCompound;
 
-public interface CompoundSerializable {
+public interface Serializable {
     void deserialize(NbtCompound arg);
 
     default void serialize(NbtCompound tag) {}

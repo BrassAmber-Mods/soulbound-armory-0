@@ -14,20 +14,20 @@ import soulboundarmory.network.ItemComponentPacket;
  */
 public final class C2SSelectItem extends ItemComponentPacket {
     @Override
-    protected void execute(ItemComponent<?> storage) {
+    protected void execute(ItemComponent<?> component) {
         var slot = this.message.readInt();
 
-        if (storage.isUnlocked() || storage.canConsume(storage.player.inventory.getStack(slot))) {
-            set(storage, slot);
+        if (component.isUnlocked() || component.canConsume(component.player.inventory.getStack(slot))) {
+            set(component, slot);
 
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 // Repeat for the client because the screen pauses.
-                MinecraftClient.getInstance().execute(() -> set(storage.type().get(MinecraftClient.getInstance().player), slot));
+                MinecraftClient.getInstance().execute(() -> set(component.type().of(MinecraftClient.getInstance().player), slot));
             } else {
-                storage.synchronize();
+                component.synchronize();
             }
 
-            storage.component.refresh();
+            component.component.refresh();
         }
     }
 

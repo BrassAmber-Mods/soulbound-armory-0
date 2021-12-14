@@ -1,6 +1,6 @@
 package soulboundarmory.network;
 
-import cell.client.gui.CellElement;
+import cell.client.gui.widget.Widget;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
@@ -113,21 +113,9 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     public Entity readEntity() {
         var id = this.readInt();
         return Util.isClient()
-            ? CellElement.minecraft.world.getEntityById(id)
+            ? Widget.minecraft.world.getEntityById(id)
             : ((Collection<ServerWorld>) Util.server().getWorlds()).stream().map(world -> world.getEntityById(id)).filter(Objects::nonNull).findAny().orElse(null);
     }
-
-    public ExtendedPacketBuffer writePersistentEntity(Entity entity) {
-        return this.writeUuid(entity.getUuid());
-    }
-
-    //    public Entity readEntity() {
-    //        return EntityUtil.getEntity(this.readUuid());
-    //    }
-
-    //    public PlayerEntity readPlayer() {
-    //        return (PlayerEntity) this.readEntity();
-    //    }
 
     public ExtendedPacketBuffer writeItemComponent(ItemComponent<?> component) {
         this.writeIdentifier(component.type().id());
@@ -136,7 +124,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     }
 
     public ItemComponent<?> readItemComponent(PlayerEntity player) {
-        return ItemComponentType.get(this.readIdentifier()).get(player);
+        return ItemComponentType.get(this.readIdentifier()).of(player);
     }
 
     @Override

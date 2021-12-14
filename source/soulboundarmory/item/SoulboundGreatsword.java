@@ -10,8 +10,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.registry.Skills;
 
@@ -32,40 +30,37 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
 
     @Override
         public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        if (!world.isClient && ItemComponentType.greatsword.get(player).hasSkill(Skills.leaping)) {
+        if (!world.isClient && ItemComponentType.greatsword.of(player).hasSkill(Skills.leaping)) {
             player.setCurrentHand(hand);
 
-            return new TypedActionResult<>(ActionResult.SUCCESS, player.getStackInHand(hand));
+            return new TypedActionResult<>(ActionResult.CONSUME, player.getStackInHand(hand));
         }
 
         return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
     }
 
     @Override
-    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity player, int timeLeft) {
-        var timeTaken = 200 - timeLeft;
+    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int timeLeft) {
+        ItemComponentType.greatsword.nullable(user).ifPresent(component -> {
+            var timeTaken = 200 - timeLeft;
 
-        if (timeTaken > 5) {
-            var look = player.getRotationVector();
-            var maxSpeed = 1.25F;
-            var speed = Math.min(maxSpeed, timeTaken / 20F * maxSpeed);
+            if (timeTaken > 5) {
+                var look = user.getRotationVector();
+                var maxSpeed = 1.25F;
+                var speed = Math.min(maxSpeed, timeTaken / 20F * maxSpeed);
 
-            player.addVelocity(look.x * speed, look.y * speed / 4 + 0.2, look.z * speed);
-            player.setSprinting(true);
-            ItemComponentType.greatsword.get(player).leapForce(speed / maxSpeed);
-        }
+                user.addVelocity(look.x * speed, look.y * speed / 2 + 0.2, look.z * speed);
+                user.setSprinting(true);
+                component.leap(speed / maxSpeed);
+            }
+        });
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int itemSlot, boolean isSelected) {
-        if (world.isClient && isSelected) {
-            var player = (ClientPlayerEntity) entity;
-
-            if (player.getActiveItem().getItem() == this) {
-                player.forwardSpeed *= 4.5;
-                player.sidewaysSpeed *= 4.5;
-            }
+        if (entity instanceof ClientPlayerEntity user && isSelected && user.getActiveItem().getItem() == this) {
+            user.input.movementForward *= 4.5;
+            user.input.movementSideways *= 4.5;
         }
     }
 }

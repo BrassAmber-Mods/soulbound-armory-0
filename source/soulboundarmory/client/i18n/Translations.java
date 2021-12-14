@@ -24,8 +24,10 @@ public class Translations {
     public static final Translation guiUnspentPoint = new Translation("gui.soulbound-armory.unspent_point");
     public static final Translation guiPoints = new Translation("gui.soulbound-armory.points");
     public static final Translation guiPoint = new Translation("gui.soulbound-armory.point");
-    public static final Translation guiSkillLearnCost = new Translation("gui.soulbound-armory.learn_cost");
-    public static final Translation guiSkillUpgradeCost = new Translation("gui.soulbound-armory.upgrade_cost");
+    public static final Translation guiSkillLearnCostSingular = new Translation("gui.soulbound-armory.learn_cost_singular");
+    public static final Translation guiSkillLearnCostPlural = new Translation("gui.soulbound-armory.learn_cost_plural");
+    public static final Translation guiSkillUpgradeCostSingular = new Translation("gui.soulbound-armory.upgrade_cost_singular");
+    public static final Translation guiSkillUpgradeCostPlural = new Translation("gui.soulbound-armory.upgrade_cost_plural");
     public static final Translation guiLevel = new Translation("gui.soulbound-armory.level");
     public static final Translation red = new Translation("gui.soulbound-armory.red");
     public static final Translation green = new Translation("gui.soulbound-armory.green");
@@ -67,7 +69,5 @@ public class Translations {
     public static final Translation miningLevelDiamond = new Translation("mining_level.soulbound-armory.diamond");
     public static final Translation miningLevelObsidian = new Translation("mining_level.soulbound-armory.obsidian");
 
-    public static final Translation commandUsage0 = new Translation("command.soulbound-armory.client_usage0");
-    public static final Translation commandUsage1 = new Translation("command.soulbound-armory.client_usage1");
     public static final Translation commandNoItem = new Translation("command.soulbound-armory.no_item");
 }

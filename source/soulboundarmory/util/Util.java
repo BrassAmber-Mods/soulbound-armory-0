@@ -10,9 +10,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import net.auoeke.reflect.Classes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
@@ -55,6 +58,10 @@ public class Util {
 
     public static boolean contains(Object target, Object... items) {
         return Arrays.asList(items).contains(target);
+    }
+
+    public static <T> Stream<T> stream(Spliterator<T> iterator) {
+        return StreamSupport.stream(iterator, false);
     }
 
     public static <T> Set<T> hashSet(T... elements) {

@@ -11,11 +11,10 @@ public final class C2SBindSlot extends ItemComponentPacket {
         var slot = this.message.readInt();
 
         if (storage.boundSlot() == slot) {
-            storage.unbindSlot();
-        } else {
-            storage.bindSlot(slot);
+            slot = -1;
         }
 
+        storage.bindSlot(slot);
         Packets.clientBindSlot.send(storage.player, new ExtendedPacketBuffer(storage).writeInt(slot));
     }
 }

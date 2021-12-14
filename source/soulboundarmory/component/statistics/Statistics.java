@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.serial.Serializable;
 
-public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements CompoundSerializable, Iterable<Statistic> {
+public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements Serializable, Iterable<Statistic> {
     public Statistic get(Category category, StatisticType statistic) {
         return this.get(category).get(statistic);
     }

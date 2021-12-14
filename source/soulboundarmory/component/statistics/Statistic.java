@@ -2,9 +2,9 @@ package soulboundarmory.component.statistics;
 
 import java.math.BigDecimal;
 import net.minecraft.nbt.NbtCompound;
-import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.serial.Serializable;
 
-public class Statistic extends Number implements Comparable<Number>, CompoundSerializable {
+public class Statistic extends Number implements Comparable<Number>, Serializable {
     public final Category category;
     public final StatisticType type;
 
@@ -105,6 +105,10 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
         return this.compareTo(number) > 0;
     }
 
+    public void addUnchecked(Number number) {
+        this.value = this.value.add(number instanceof BigDecimal big ? big : BigDecimal.valueOf(number.doubleValue()));
+    }
+
     public void add(Number number) {
         var currentValue = this.value.doubleValue();
         var addition = number.doubleValue();
@@ -114,7 +118,7 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
         } else if (currentValue + addition > this.max) {
             this.setToMax();
         } else {
-            this.value = this.value.add(number instanceof BigDecimal big ? big : BigDecimal.valueOf(addition));
+            this.addUnchecked(number);
         }
     }
 
@@ -130,14 +134,16 @@ public class Statistic extends Number implements Comparable<Number>, CompoundSer
     @Override
     public void serialize(NbtCompound tag) {
         tag.putDouble("min", this.min);
-        tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
     }
 
     @Override
     public void deserialize(NbtCompound tag) {
-        this.min = tag.getDouble("min");
-        this.max = tag.getDouble("max");
         this.value = new BigDecimal(tag.getString("value"));
+        var dMin = this.min - tag.getDouble("min");
+
+        if (dMin != 0) {
+            this.addUnchecked(dMin);
+        }
     }
 }

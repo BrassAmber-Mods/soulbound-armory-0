@@ -15,5 +15,6 @@ public final class S2CSyncItem extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> component) {
         component.deserialize(this.message.readNbt());
+        component.component.refresh();
     }
 }

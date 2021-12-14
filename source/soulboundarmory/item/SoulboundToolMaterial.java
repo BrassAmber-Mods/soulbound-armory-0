@@ -23,7 +23,7 @@ public enum SoulboundToolMaterial implements ToolMaterial {
 
     @Override
     public int getMiningLevel() {
-        return 0;
+        return 3;
     }
 
     @Override

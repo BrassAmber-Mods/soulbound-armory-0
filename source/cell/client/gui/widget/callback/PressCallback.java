@@ -1,10 +1,11 @@
 package cell.client.gui.widget.callback;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import cell.client.gui.widget.Widget;
 
-@OnlyIn(Dist.CLIENT)
 public interface PressCallback<T extends Widget<T>> {
+    static <T extends Widget<T>> PressCallback<T> of(Runnable runnable) {
+        return widget -> runnable.run();
+    }
+
     void onPress(T widget);
 }

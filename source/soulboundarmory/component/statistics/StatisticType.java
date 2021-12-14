@@ -19,7 +19,6 @@ public class StatisticType extends RegistryEntry<StatisticType> {
     public static final StatisticType attackSpeed = new StatisticType("attack_speed");
     public static final StatisticType attackDamage = new StatisticType("attack_damage");
     public static final StatisticType criticalStrikeRate = new StatisticType("critical_strike_rate");
-    public static final StatisticType attackRange = new StatisticType("attack_range");
 
     public StatisticType(String path) {
         super(path);

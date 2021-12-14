@@ -1,11 +1,10 @@
 package soulboundarmory.skill.weapon.sword;
 
-import net.minecraft.util.Identifier;
 import soulboundarmory.skill.Skill;
 
 public class SummonLightningSkill extends Skill {
-    public SummonLightningSkill(Identifier identifier) {
-        super(identifier);
+    public SummonLightningSkill() {
+        super("summon_lightning");
     }
 
     @Override

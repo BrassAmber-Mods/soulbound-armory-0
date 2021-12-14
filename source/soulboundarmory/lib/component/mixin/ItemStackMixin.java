@@ -41,7 +41,9 @@ abstract class ItemStackMixin implements ItemStackAccess {
     @Inject(method = {"<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/nbt/NbtCompound;)V", "<init>(Lnet/minecraft/nbt/NbtCompound;)V"}, at = @At(value = "RETURN"))
     private void addComponents(CallbackInfo info) {
         for (var key : ComponentRegistry.item.values()) {
-            key.attach((ItemStack) (Object) this);
+            if (key.predicate == null || key.predicate.test(Util.cast(this))) {
+                key.attach((ItemStack) (Object) this);
+            }
         }
 
         if (this.components != null) {

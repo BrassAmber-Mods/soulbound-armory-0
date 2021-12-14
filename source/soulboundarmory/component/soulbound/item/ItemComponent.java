@@ -11,21 +11,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.gui.screen.StatisticEntry;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
@@ -35,20 +40,23 @@ import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.entity.SoulboundDaggerEntity;
+import soulboundarmory.entity.SoulboundFireballEntity;
+import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
 import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Math2;
 
-public abstract class ItemComponent<T extends ItemComponent<T>> implements CompoundSerializable {
+public abstract class ItemComponent<T extends ItemComponent<T>> implements Serializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
 
     public final SoulboundComponent<?> component;
     public final PlayerEntity player;
-    public final EnchantmentStorage enchantments = new EnchantmentStorage();
+    public final EnchantmentStorage enchantments = new EnchantmentStorage(this);
     public final Statistics statistics = new Statistics();
 
     protected final SkillStorage skills = new SkillStorage();
@@ -80,7 +88,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
 
      @return the component.
      */
-    public static Optional<ItemComponent<?>> firstHeld(Entity entity) {
+    public static Optional<ItemComponent<?>> fromHands(Entity entity) {
         if (entity == null) {
             return Optional.empty();
         }
@@ -96,6 +104,30 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         }
 
         return Optional.empty();
+    }
+
+    public static Optional<ItemComponent<?>> fromMainHand(LivingEntity entity) {
+        return get(entity, entity.getMainHandStack());
+    }
+
+    /**
+     Find the item component corresponding to the weapon that an attacker used.
+
+     @param source the source of the damage that the attacker inflicted
+     @return an {@link Optional} containing the item component if it has been found.
+     */
+    public static Optional<? extends ItemComponent<?>> fromAttacker(LivingEntity target, DamageSource source) {
+        var entity = source.getSource();
+        var attacker = source.getAttacker();
+
+        if (attacker == null) {
+            attacker = target.getDamageTracker().getBiggestAttacker();
+        }
+
+        return entity instanceof SoulboundDaggerEntity ? ItemComponentType.dagger.nullable(attacker)
+            : entity instanceof SoulboundLightningEntity ? ItemComponentType.sword.nullable(attacker)
+                : entity instanceof SoulboundFireballEntity ? ItemComponentType.staff.nullable(attacker)
+                    : Components.weapon.nullable(attacker).map(SoulboundComponent::item);
     }
 
     /**
@@ -156,6 +188,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      */
     public void tick() {}
 
+    public void killed(LivingEntity entity) {}
+
+    public void mined(BlockState state, BlockPos position) {}
+
     public final boolean isClient() {
         return this.player.world.isClient;
     }
@@ -214,7 +250,9 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
             }
 
             return attackDamage;
-        } else if (attribute == StatisticType.efficiency) {
+        }
+
+        if (attribute == StatisticType.efficiency) {
             var efficiency = this.enchantment(Enchantments.EFFICIENCY);
 
             if (efficiency > 0) {
@@ -241,19 +279,38 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         return this.doubleValue(attribute);
     }
 
+    /**
+     @return the integral value of a statistic if it is present or 0.
+     */
     public int intValue(StatisticType type) {
-        return this.statistic(type).intValue();
+        var statistic = this.statistic(type);
+        return statistic == null ? 0 : statistic.intValue();
     }
 
+    /**
+     @return the float value of a statistic if it is present or 0.
+     */
     public float floatValue(StatisticType type) {
-        return this.statistic(type).floatValue();
+        var statistic = this.statistic(type);
+        return statistic == null ? 0 : statistic.floatValue();
     }
 
+    /**
+     @return the double value of a statistic if it is present or 0.
+     */
     public double doubleValue(StatisticType type) {
-        return this.statistic(type).doubleValue();
+        var statistic = this.statistic(type);
+        return statistic == null ? 0 : statistic.doubleValue();
     }
 
-    public boolean incrementStatistic(StatisticType type, double amount) {
+    /**
+     Increase a statistic with special handling for experience points and level and synchronize.
+     If the item leveled up and levelup messages are enabled, then send a message.
+
+     @param type   the type of the statistic
+     @param amount the amount to add
+     */
+    public void incrementStatistic(StatisticType type, double amount) {
         var leveledUp = false;
 
         if (type == StatisticType.experience) {
@@ -287,9 +344,17 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         this.updateItemStack();
         this.synchronize();
 
-        return leveledUp;
+        if (leveledUp && Components.config.of(this.player).levelupNotifications) {
+            this.player.sendMessage(Translations.levelupMessage.format(this.itemStack.getName(), this.intValue(StatisticType.level)), true);
+        }
     }
 
+    /**
+     Add points to an attribute.
+
+     @param type   the type of the attribute.
+     @param points the number of points to add; will be clamped in order to not exceed the attribute's bounds and available attribute points.
+     */
     public void incrementAttributePoints(StatisticType type, int points) {
         var attributePoints = this.statistic(StatisticType.attributePoints);
         var attribute = this.statistic(type);
@@ -329,11 +394,17 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         this.synchronize();
     }
 
+    /**
+     Set the value of a statistic and synchronize.
+     */
     public void set(StatisticType statistic, Number value) {
         this.statistics.put(statistic, value);
         this.synchronize();
     }
 
+    /**
+     @return whether this item can level up further, taking the configuration into account.
+     */
     public boolean canLevelUp() {
         var configuration = Configuration.instance();
         return this.intValue(StatisticType.level) < configuration.maxLevel || configuration.maxLevel < 0;
@@ -358,6 +429,13 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
         }
 
         this.incrementStatistic(StatisticType.attributePoints, sign);
+    }
+
+    /**
+     @return the XP required in order to reach the next level.
+     */
+    public int nextLevelXP() {
+        return this.getLevelXP(this.intValue(StatisticType.level));
     }
 
     public Collection<SkillContainer> skills() {
@@ -405,13 +483,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
     }
 
     /**
-     @return the XP required in order to reach the next level.
-     */
-    public int nextLevelXP() {
-        return this.getLevelXP(this.intValue(StatisticType.level));
-    }
-
-    /**
      @return the current level of `enchantment`.
      */
     public int enchantment(Enchantment enchantment) {
@@ -425,9 +496,16 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Compo
      @param levels      the number of levels to add
      */
     public void addEnchantment(Enchantment enchantment, int levels) {
-        var current = this.enchantment(enchantment);
-        var change = Math.max(0, current + levels) - current;
         var enchantmentPoints = this.statistic(StatisticType.enchantmentPoints);
+        var current = this.enchantment(enchantment);
+
+        if (levels > 0) {
+            levels = Math.min(levels, enchantmentPoints.intValue());
+        } else if (levels < 0) {
+            levels = Math.max(levels, -current);
+        }
+
+        var change = Math.max(0, current + levels) - current;
         enchantmentPoints.add(-change);
         this.enchantments.add(enchantment, change);
 
