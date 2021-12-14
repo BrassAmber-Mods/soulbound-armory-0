@@ -1,6 +1,5 @@
 package cell.client.gui.widget.scalable;
 
-import cell.client.gui.CellElement;
 import cell.client.gui.DrawableElement;
 import cell.client.gui.widget.Length;
 import cell.client.gui.widget.Widget;
@@ -8,14 +7,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 /**
  A textured widget that supports 9-slice scaling.
  */
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public class ScalableWidget extends Widget<ScalableWidget> {
+public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     private static final Identifier advancementWidgets = new Identifier("textures/gui/advancements/widgets.png");
     private static final Identifier window = new Identifier("textures/gui/advancements/window.png");
 
@@ -38,13 +36,13 @@ public class ScalableWidget extends Widget<ScalableWidget> {
     protected Length widthLimit = new Length();
     protected Length heightLimit = new Length();
 
-    public ScalableWidget texture(AbstractTexture texture) {
+    public T texture(AbstractTexture texture) {
         this.texture = texture;
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget texture(Identifier id) {
+    public T texture(Identifier id) {
         var texture = DrawableElement.textureManager.getTexture(id);
 
         if (texture == null) {
@@ -55,27 +53,27 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         return this.texture(texture);
     }
 
-    public ScalableWidget texture(String id) {
+    public T texture(String id) {
         return this.texture(new Identifier(id));
     }
 
-    public ScalableWidget u(int u) {
+    public T u(int u) {
         this.u = u;
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget v(int v) {
+    public T v(int v) {
         this.v = v;
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget uv(int u, int v) {
+    public T uv(int u, int v) {
         return this.u(u).v(v);
     }
 
-    public ScalableWidget slice(int u0, int u1, int u2, int v0, int v1, int v2) {
+    public T slice(int u0, int u1, int u2, int v0, int v1, int v2) {
         this.corners[2][3][0] = this.corners[2][1][0] = this.corners[0][3][0] = this.corners[0][1][0] = u0;
         this.corners[3][2][0] = this.corners[3][0][0] = this.corners[1][2][0] = this.corners[1][0][0] = u1;
         this.corners[3][3][0] = this.corners[3][1][0] = this.corners[1][3][0] = this.corners[1][1][0] = u2;
@@ -90,7 +88,7 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         this.middles[4][1][1] = this.middles[4][0][1] = this.middles[3][3][1] = this.middles[3][2][1] = this.middles[2][3][1] = this.middles[2][2][1] = this.middles[1][3][1] = this.middles[1][2][1] = v1;
         this.middles[4][3][1] = this.middles[4][2][1] = v2;
 
-        return this;
+        return (T) this;
     }
 
     public int textureWidth() {
@@ -101,19 +99,19 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         return this.textureHeight;
     }
 
-    public ScalableWidget textureWidth(int width) {
+    public T textureWidth(int width) {
         this.textureWidth = width;
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget textureHeight(int height) {
+    public T textureHeight(int height) {
         this.textureHeight = height;
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget textureSize(int width, int height) {
+    public T textureSize(int width, int height) {
         return this.textureWidth(width).textureHeight(height);
     }
 
@@ -128,28 +126,28 @@ public class ScalableWidget extends Widget<ScalableWidget> {
     }
 
     @Override
-    public ScalableWidget width(int width) {
+    public T width(int width) {
         return super.width(width);
     }
 
     @Override
-    public ScalableWidget height(int height) {
+    public T height(int height) {
         return super.height(height);
     }
 
-    public ScalableWidget width(float width) {
+    public T width(float width) {
         this.width.set(width);
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget height(float height) {
+    public T height(float height) {
         this.height.set(height);
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget max() {
+    public T maxSize() {
         return this.width(1F).height(1F);
     }
 
@@ -161,136 +159,136 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         return this.heightLimit.get(this.height());
     }
 
-    public ScalableWidget widthLimit(int width) {
+    public T widthLimit(int width) {
         this.widthLimit.set(width);
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget widthLimit(float width) {
+    public T widthLimit(float width) {
         this.widthLimit.set(width);
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget heightLimit(int height) {
+    public T heightLimit(int height) {
         this.heightLimit.set(height);
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget heightLimit(float height) {
+    public T heightLimit(float height) {
         this.heightLimit.set(height);
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget limit(int width, int height) {
+    public T limit(int width, int height) {
         return this.widthLimit(width).heightLimit(height);
     }
 
-    public ScalableWidget limit(float width, float height) {
+    public T limit(float width, float height) {
         return this.widthLimit(width).heightLimit(height);
     }
 
-    public ScalableWidget color4f(float r, float g, float b, float a) {
+    public T color4f(float r, float g, float b, float a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
 
-        return this;
+        return (T) this;
     }
 
-    public ScalableWidget color3f(float r, float g, float b) {
+    public T color3f(float r, float g, float b) {
         return this.color4f(r, g, b, 1);
     }
 
-    public ScalableWidget yellowRectangle() {
+    public T yellowRectangle() {
         return this.longRectangle(0);
     }
 
-    public ScalableWidget blueRectangle() {
+    public T blueRectangle() {
         return this.longRectangle(1);
     }
 
-    public ScalableWidget grayRectangle() {
+    public T grayRectangle() {
         return this.longRectangle(2);
     }
 
-    public ScalableWidget yellowSpikedRectangle() {
+    public T yellowSpikedRectangle() {
         return this.spikedRectangle(0);
     }
 
-    public ScalableWidget yellowRoundedRectangle() {
+    public T yellowRoundedRectangle() {
         return this.roundedRectangle(0);
     }
 
-    public ScalableWidget whiteRectangle() {
+    public T whiteRectangle() {
         return this.rectangle(1);
     }
 
-    public ScalableWidget whiteSpikedRectangle() {
+    public T whiteSpikedRectangle() {
         return this.spikedRectangle(1);
     }
 
-    public ScalableWidget whiteRoundedRectangle() {
+    public T whiteRoundedRectangle() {
         return this.roundedRectangle(1);
     }
 
-    public ScalableWidget inactiveButton() {
+    public T slider() {
         return this.button(0);
     }
 
-    public ScalableWidget button() {
+    public T button() {
         return this.button(1);
     }
 
-    public ScalableWidget window() {
+    public T window() {
         return this.texture(window).slice(14, 238, 252, 22, 126, 140);
     }
 
-    public ScalableWidget longRectangle(int index) {
+    public T longRectangle(int index) {
         return this.texture(advancementWidgets).v(3 + index * 26).slice(2, 198, 200, 2, 18, 20);
     }
 
-    public ScalableWidget rectangle(int index) {
+    public T rectangle(int index) {
         return this.texture(advancementWidgets).uv(1, 129 + index * 26).slice(2, 22, 24, 2, 22, 24);
     }
 
-    public ScalableWidget spikedRectangle(int index) {
+    public T spikedRectangle(int index) {
         return this.texture(advancementWidgets).uv(26, 128 + index * 26).slice(10, 16, 26, 10, 16, 26);
     }
 
-    public ScalableWidget roundedRectangle(int index) {
+    public T roundedRectangle(int index) {
         return this.texture(advancementWidgets).uv(54, 129 + index * 26).slice(7, 15, 22, 4, 21, 26);
     }
 
-    public ScalableWidget button(int index) {
+    public T button(int index) {
         return this.texture(ClickableWidget.WIDGETS_TEXTURE).v(46 + index * 20).slice(2, 198, 200, 2, 17, 20);
     }
 
-    public ScalableWidget experienceBar() {
+    public T experienceBar() {
         return this.texture(GUI_ICONS_TEXTURE).v(64).slice(1, 172, 182, 1, 4, 5);
     }
 
     @Override
-    public void renderBackground(MatrixStack matrixes, int mouseX, int mouseY, float delta) {
+    public void renderWidget() {
         this.texture.bindTexture();
         this.resetColor();
 
         RenderSystem.enableBlend();
-        this.renderCorners(matrixes);
-        this.renderMiddles(matrixes);
-        // this.renderAll(matrixes);
+        this.renderCorners();
+        this.renderMiddles();
+        // this.renderAll();
         RenderSystem.disableBlend();
 
-        if (this.focused && this.active && (this.primaryAction != null || this.secondaryAction != null)) {
-            this.drawBorder(matrixes);
+        if (this.focused() && this.active()) {
+            this.drawBorder();
         }
     }
 
-    protected void renderCorners(MatrixStack matrices) {
+    protected void renderCorners() {
         var corners = this.corners;
 
         for (int i = 0, length = corners.length; i < length; ++i) {
@@ -301,11 +299,11 @@ public class ScalableWidget extends Widget<ScalableWidget> {
             var width = corner[1][0] - u;
             var height = corner[2][1] - v;
 
-            drawTexture(matrices, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.z(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
+            drawTexture(this.matrixes, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.z(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
         }
     }
 
-    protected void renderMiddles(MatrixStack matrices) {
+    protected void renderMiddles() {
         var middles = this.middles;
         var corners = this.corners;
         var middleWidth = this.widthLimit() - corners[0][1][0] + corners[1][0][0] - corners[1][1][0];
@@ -337,13 +335,13 @@ public class ScalableWidget extends Widget<ScalableWidget> {
                 for (int drawnWidth; remainingWidth > 0; remainingWidth -= drawnWidth) {
                     drawnWidth = Math.min(remainingWidth, maxWidth);
 
-                    drawTexture(matrices, endX - remainingWidth, y, this.z(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
+                    drawTexture(this.matrixes, endX - remainingWidth, y, this.z(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
                 }
             }
         }
     }
 
-    protected void renderAll(MatrixStack matrixes) {
+    protected void renderAll() {
         int[][][] sections = {};
 
         for (var index = 0; index < sections.length; index++) {
@@ -351,24 +349,23 @@ public class ScalableWidget extends Widget<ScalableWidget> {
         }
     }
 
-    protected void drawBorder(MatrixStack matrices) {
+    protected void drawBorder() {
         var endX = this.x() + this.width() - 1;
         var endY = this.y() + this.height();
 
-        CellElement.drawHorizontalLine(matrices, this.x(), endX, this.y(), this.z(), -1);
-        CellElement.drawVerticalLine(matrices, this.x(), this.y(), endY, this.z(), -1);
-        CellElement.drawVerticalLine(matrices, endX, this.y(), endY, this.z(), -1);
-        CellElement.drawHorizontalLine(matrices, this.x(), endX, endY - 1, this.z(), -1);
+        drawHorizontalLine(this.matrixes, this.x(), endX, this.y(), this.z(), -1);
+        drawVerticalLine(this.matrixes, this.x(), this.y(), endY, this.z(), -1);
+        drawVerticalLine(this.matrixes, endX, this.y(), endY, this.z(), -1);
+        drawHorizontalLine(this.matrixes, this.x(), endX, endY - 1, this.z(), -1);
     }
 
     protected void detectBorder() {}
 
     protected void resetColor() {
-        if (this.active) {
+        if (this.active()) {
             RenderSystem.color4f(this.r, this.g, this.b, this.a);
         } else {
             var chroma = 160F / 255;
-
             RenderSystem.color4f(this.r * chroma, this.g * chroma, this.b * chroma, this.a);
         }
     }

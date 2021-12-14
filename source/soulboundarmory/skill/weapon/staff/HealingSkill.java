@@ -1,18 +1,17 @@
 package soulboundarmory.skill.weapon.staff;
 
 import cell.client.gui.screen.CellScreen;
-import soulboundarmory.skill.Skill;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
-import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.skill.Skill;
 
 public class HealingSkill extends Skill {
-    public HealingSkill(Identifier identifier) {
-        super(identifier);
+    public HealingSkill() {
+        super("healing");
     }
 
     @Override

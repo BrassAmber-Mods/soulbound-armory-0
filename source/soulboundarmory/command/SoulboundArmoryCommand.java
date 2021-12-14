@@ -61,7 +61,7 @@ public final class SoulboundArmoryCommand {
                 if (types.isEmpty()) {
                     storage(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
                 } else for (var type : types) {
-                    type.get(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
+                    type.of(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
                 }
             }
         }
@@ -78,7 +78,7 @@ public final class SoulboundArmoryCommand {
                 if (types.isEmpty()) {
                     storage(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
                 } else for (var type : types) {
-                    type.get(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
+                    type.of(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
                 }
             }
         }
@@ -98,10 +98,10 @@ public final class SoulboundArmoryCommand {
             for (var type : types) {
                 if (hasCategoryArgument) {
                     for (var category : ConstantArgumentType.getConstants(context, "statistic", Category.class)) {
-                        type.get(player).reset(category);
+                        type.of(player).reset(category);
                     }
                 } else {
-                    type.get(player).reset();
+                    type.of(player).reset();
                 }
             }
         }

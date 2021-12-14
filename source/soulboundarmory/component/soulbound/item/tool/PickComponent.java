@@ -1,7 +1,6 @@
 package soulboundarmory.component.soulbound.item.tool;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.item.Item;
@@ -14,11 +13,7 @@ import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
-
-import static net.minecraft.enchantment.Enchantments.MENDING;
-import static net.minecraft.enchantment.Enchantments.UNBREAKING;
 
 public class PickComponent extends ToolComponent<PickComponent> {
     public PickComponent(SoulboundComponent<?> component) {
@@ -27,16 +22,10 @@ public class PickComponent extends ToolComponent<PickComponent> {
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.efficiency, StatisticType.reach, StatisticType.miningLevel)
-            .min(1, StatisticType.efficiency).min(2, StatisticType.reach)
+            .min(2, StatisticType.reach)
             .max(3, StatisticType.miningLevel);
 
-        this.skills.add(Skills.enderPull/*, Skills.ambidexterity*/);
-
-        this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
-            && !enchantment.isCursed()
-            && !Arrays.asList(UNBREAKING, MENDING).contains(enchantment)
-            && Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains)
-        );
+        this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
     }
 
     @Override

@@ -8,8 +8,8 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 public class ThrowingSkill extends Skill {
-    public ThrowingSkill(Identifier identifier) {
-        super(identifier);
+    public ThrowingSkill() {
+        super("throwing");
     }
 
     @Override

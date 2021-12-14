@@ -34,7 +34,10 @@ public final class ComponentRegistry {
      */
     public static <E extends Entity, C extends EntityComponent<C>> EntityComponentKey<C> entity(Class<E> type, String path, Predicate<E> predicate, Function<E, C> instantiate) {
         var key = new EntityComponentKey<>(type, Util.id(path), predicate, instantiate);
-        entity.put(key.id, key);
+
+        if (entity.put(key.id, key) != null) {
+            throw new IllegalArgumentException("Entity component %s is already registered.".formatted(key.id));
+        }
 
         return key;
     }
@@ -64,7 +67,10 @@ public final class ComponentRegistry {
      */
     public static <C extends ItemStackComponent<C>> ItemStackComponentKey<C> item(String path, Predicate<ItemStack> predicate, Function<ItemStack, C> instantiate) {
         var key = new ItemStackComponentKey<>(Util.id(path), predicate, instantiate);
-        item.put(key.id, key);
+
+        if (item.put(key.id, key) != null) {
+            throw new IllegalArgumentException("Item component %s is already registered.".formatted(key.id));
+        }
 
         return key;
     }
@@ -93,7 +99,11 @@ public final class ComponentRegistry {
 
     @SubscribeEvent
     public static void addComponents(EntityEvent.EntityConstructing event) {
-        entity.values().forEach(key -> key.attach(event.getEntity()));
+        entity.values().forEach(key -> {
+            if (key.type.isInstance(event.getEntity()) && (key.predicate == null || key.predicate.test(Util.cast(entity)))) {
+                key.attach(event.getEntity());
+            }
+        });
     }
 
     @SubscribeEvent
@@ -102,7 +112,7 @@ public final class ComponentRegistry {
     }
 
     @SubscribeEvent
-    public static void onPlayerCopy(PlayerEvent.Clone event) {
+    public static void copy(PlayerEvent.Clone event) {
         for (var key : entity.values()) {
             var original = key.of(event.getOriginal());
             var copy = key.of(event.getPlayer());

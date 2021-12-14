@@ -30,7 +30,7 @@ public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!world.isClient) {
-            var component = ItemComponentType.staff.get(user);
+            var component = ItemComponentType.staff.of(user);
 
             if (component.fireballCooldown() <= 0) {
                 world.spawnEntity(new SoulboundFireballEntity(world, user, component.spell()));

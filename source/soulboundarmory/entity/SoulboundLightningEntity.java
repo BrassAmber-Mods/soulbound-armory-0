@@ -72,7 +72,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
                 for (var entity : this.world.getOtherEntities(this, new Box(this.getX() - radius, this.getY() - radius, this.getZ() - radius, this.getX() + radius, this.getY() + 6 + radius, this.getZ() + radius))) {
                     var caster = this.caster();
                     var attackDamage = caster instanceof PlayerEntity
-                            ? (float) ItemComponentType.sword.get(caster).attributeTotal(StatisticType.attackDamage)
+                            ? (float) ItemComponentType.sword.of(caster).attributeTotal(StatisticType.attackDamage)
                             : 5;
 
                     if (entity != caster && entity instanceof LivingEntity) {

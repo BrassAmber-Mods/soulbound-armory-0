@@ -11,9 +11,13 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import soulboundarmory.lib.component.EntityComponent;
+import soulboundarmory.network.ExtendedPacketBuffer;
+import soulboundarmory.network.Packets;
 
 public final class EntityData implements EntityComponent<EntityData> {
     public final Entity entity;
+    public float tickDelta;
+
     private int freezeTicks;
     private int blockTeleportTicks;
 
@@ -30,8 +34,12 @@ public final class EntityData implements EntityComponent<EntityData> {
     }
 
     public void freeze(PlayerEntity freezer, int ticks, float damage) {
-        if (!freezer.world.isClient) {
-            ((ServerWorld) freezer.world).spawnParticles(
+        if (ticks > this.freezeTicks || ticks == 0) {
+            this.freezeTicks = ticks;
+        }
+
+        if (freezer.world instanceof ServerWorld world) {
+            world.spawnParticles(
                 ParticleTypes.ITEM_SNOWBALL,
                 this.entity.getX(),
                 this.entity.getEyeY(),
@@ -39,24 +47,24 @@ public final class EntityData implements EntityComponent<EntityData> {
                 32, 0.1, 0, 0.1, 2D
             );
 
-            this.entity.playSound(SoundEvents.BLOCK_SNOW_HIT, 1, 1.2F / (this.entity.world.random.nextFloat() * 0.2F + 0.9F));
+            this.entity.playSound(SoundEvents.BLOCK_SNOW_HIT, 1, 1.2F / (this.entity.world.random.nextFloat() / 5 + 0.9F));
             this.entity.extinguish();
 
-            if (ticks > this.freezeTicks) {
-                this.freezeTicks = ticks;
-            }
+            if (this.entity instanceof LivingEntity entity) {
+                entity.damage(DamageSource.player(freezer), damage);
 
-            if (this.entity instanceof LivingEntity) {
-                this.entity.damage(DamageSource.player(freezer), damage);
-            }
-
-            if (this.entity instanceof CreeperEntity creeper) {
-                creeper.setFuseSpeed(-1);
-            }
-
-            if (this.entity instanceof ProjectileEntity) {
+                if (entity instanceof CreeperEntity creeper) {
+                    creeper.setFuseSpeed(-1);
+                }
+            } else if (this.entity instanceof ProjectileEntity) {
                 this.entity.setVelocity(0, this.entity.getVelocity().y, 0);
+            } else {
+                this.update(false);
+
+                return;
             }
+
+            this.update(true);
         }
     }
 
@@ -70,14 +78,16 @@ public final class EntityData implements EntityComponent<EntityData> {
 
     public void tick() {
         if (!this.entity.world.isClient) {
-            if (this.isFrozen() && this.entity instanceof LivingEntity entity) {
-                if (entity.hurtTime > 0) {
-                    entity.hurtTime--;
+            if (this.isFrozen()) {
+                if (--this.freezeTicks == 0) {
+                    this.update(false);
                 }
 
-                this.freezeTicks--;
-            } else {
-                this.freezeTicks = 0;
+                if (this.entity instanceof LivingEntity entity) {
+                    if (entity.hurtTime > 0) {
+                        entity.hurtTime--;
+                    }
+                }
             }
 
             if (this.cannotTeleport()) {
@@ -96,5 +106,9 @@ public final class EntityData implements EntityComponent<EntityData> {
     public void deserialize(NbtCompound tag) {
         this.freezeTicks = tag.getInt("freezeTicks");
         this.blockTeleportTicks = tag.getInt("blockTeleportTicks");
+    }
+
+    private void update(boolean frozen) {
+        Packets.clientFreeze.sendNearby(this.entity, new ExtendedPacketBuffer().writeEntity(this.entity).writeBoolean(frozen));
     }
 }

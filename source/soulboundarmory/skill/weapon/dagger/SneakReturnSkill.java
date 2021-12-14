@@ -1,17 +1,16 @@
 package soulboundarmory.skill.weapon.dagger;
 
 import cell.client.gui.screen.CellScreen;
-import soulboundarmory.registry.Skills;
-import soulboundarmory.skill.Skill;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skill;
 
 public class SneakReturnSkill extends Skill {
-    public SneakReturnSkill(Identifier identifier) {
-        super(identifier);
+    public SneakReturnSkill() {
+        super("sneak_return");
     }
 
     @Override

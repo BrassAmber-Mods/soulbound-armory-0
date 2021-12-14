@@ -13,8 +13,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
 public final class Configuration {
-    public static transient final String MULTIPLIER_CATEGORY = "multipliers";
-    public static transient final String CLIENT_CATEGORY = "client";
+    private static transient final String MULTIPLIERS = "multipliers";
+    private static transient final String CLIENT = "client";
 
     public static transient final Configuration instance = new Configuration();
 
@@ -36,36 +36,40 @@ public final class Configuration {
     @Comment("the minimum level for soul weapons to be preserved after death")
     public int preservationLevel = 0;
 
-    @Category(MULTIPLIER_CATEGORY)
+    @Category(MULTIPLIERS)
     @Comment("1 + (armor multiplier) * armor")
     public double armorMultiplier = 0.2;
 
-    @Category(MULTIPLIER_CATEGORY)
+    @Category(MULTIPLIERS)
     @Comment("1 + (attack damage multiplier) * damage")
     public double attackDamageMultiplier = 0.35;
 
-    @Category(MULTIPLIER_CATEGORY)
-    @Comment({"(difficulty multiplier) * difficulty", "Difficulty ranges from 0 to 3.",})
+    @Category(MULTIPLIERS)
+    @Comment({"(difficulty multiplier) * difficulty", "Difficulty ranges from 0 to 3."})
     public double difficultyMultiplier = 0.5;
 
-    @Category(MULTIPLIER_CATEGORY)
+    @Category(MULTIPLIERS)
+    @Comment("peaceful mode multiplier")
+    public double peacefulMultiplier = 0;
+
+    @Category(MULTIPLIERS)
     @Comment("the multiplier for XPs gained by killing baby entities")
     public double babyMultiplier = 2;
 
-    @Category(MULTIPLIER_CATEGORY)
+    @Category(MULTIPLIERS)
     @Comment("the multiplier for XPs gained by killing bosses")
     public double bossMultiplier = 3;
 
-    @Category(MULTIPLIER_CATEGORY)
+    @Category(MULTIPLIERS)
     @Comment("the multiplier for XPs gained in hardcore mode")
     public double hardcoreMultiplier = 2;
 
-    @Category(MULTIPLIER_CATEGORY)
+    @Category(MULTIPLIERS)
     @Comment("the multiplier for XPs gained by killing passive entities")
     public double passiveMultiplier = 0;
 
     // @TransitiveObject
-    @Category(CLIENT_CATEGORY)
+    @Category(CLIENT)
     @OnlyIn(Dist.CLIENT)
     public Client client = new Client();
 
@@ -132,7 +136,7 @@ public final class Configuration {
 
     public static class Client {
         @Comment("receive levelup notifications above the hotbar")
-        public boolean levelupNotifications = true;
+        public boolean levelupNotifications = false;
 
         @Comment("display option button and sliders in the menu")
         public boolean displayOptions = true;
@@ -140,7 +144,7 @@ public final class Configuration {
         @Comment("replace the default XP bar with an XP bar for the currently held soulbound item")
         public boolean overlayExperienceBar = true;
 
-        @Comment("enable enchantment glow for enchanted items")
+        @Comment("enable enchantment glint for enchanted items")
         public boolean enchantmentGlint = false;
 
         @Comment("display attributes in tooltips")

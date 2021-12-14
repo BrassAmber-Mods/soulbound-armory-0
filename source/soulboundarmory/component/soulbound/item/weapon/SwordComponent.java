@@ -24,8 +24,6 @@ import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 
-import static net.minecraft.enchantment.Enchantments.UNBREAKING;
-
 public class SwordComponent extends WeaponComponent<SwordComponent> {
     protected int lightningCooldown;
 
@@ -35,17 +33,14 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
-            .min(1.6, StatisticType.attackSpeed).min(4, StatisticType.attackDamage).min(3, StatisticType.reach)
+            .min(1.6, StatisticType.attackSpeed)
+            .min(3, StatisticType.attackDamage)
+            .min(3, StatisticType.reach)
             .max(1, StatisticType.criticalStrikeRate)
             .max(4, StatisticType.attackSpeed);
 
-        this.enchantments.add(enchantment -> enchantment.type.isAcceptableItem(this.item())
-            && !enchantment.isCursed()
-            && enchantment != UNBREAKING
-            && Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains)
-        );
-
-        this.skills.add(Skills.nourishment, Skills.summonLightning);
+        this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
+        this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.summonLightning);
     }
 
     @Override

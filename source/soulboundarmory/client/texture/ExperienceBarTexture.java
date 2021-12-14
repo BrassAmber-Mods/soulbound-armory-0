@@ -1,19 +1,16 @@
 package soulboundarmory.client.texture;
 
-import java.util.Arrays;
 import cell.client.gui.CellElement;
-import soulboundarmory.SoulboundArmory;
-import soulboundarmory.client.gui.bar.BarStyle;
-import soulboundarmory.util.Math2;
-import soulboundarmory.util.Resources;
+import java.util.Arrays;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.resource.ResourceManager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.SoulboundArmory;
+import soulboundarmory.client.gui.bar.BarStyle;
+import soulboundarmory.util.Math2;
+import soulboundarmory.util.Resources;
 
-@OnlyIn(Dist.CLIENT)
 public class ExperienceBarTexture extends ResourceTexture {
     public static final ExperienceBarTexture instance = new ExperienceBarTexture();
 

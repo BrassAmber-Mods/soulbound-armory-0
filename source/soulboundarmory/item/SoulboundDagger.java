@@ -3,6 +3,7 @@ package soulboundarmory.item;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -36,7 +37,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        var component = ItemComponentType.dagger.get(player);
+        var component = ItemComponentType.dagger.of(player);
 
         if (!world.isClient && component.hasSkill(Skills.throwing)) {
             player.setCurrentHand(hand);
@@ -49,16 +50,13 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
 
     @Override
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
-        var player = (PlayerEntity) entity;
-        var component = ItemComponentType.dagger.get(player);
-
-        if (!world.isClient) {
+        if (entity instanceof ServerPlayerEntity player) {
+            var component = ItemComponentType.dagger.of(player);
             var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
             var velocity = maxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
             var maxVelocity = velocity / attackSpeed;
-            var dagger = new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity);
 
-            world.spawnEntity(dagger);
+            world.spawnEntity(new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity));
 
             if (!player.isCreative()) {
                 player.inventory.removeOne(itemStack);

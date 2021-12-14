@@ -14,7 +14,7 @@ public final class ItemStackComponentKey<C extends ItemStackComponent<C>> extend
 
     @Override
     public C attach(ItemStack stack) {
-        if (this.predicate == null || this.predicate.test(Util.cast(stack))) {
+        if (stack != null && (this.predicate == null || this.predicate.test(Util.cast(stack)))) {
             var component = this.instantiate.apply(Util.cast(stack));
             var previous = ((ItemStackAccess) (Object) stack).soulboundarmory$component(this, component);
 

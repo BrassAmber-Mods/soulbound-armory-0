@@ -4,7 +4,7 @@ import cell.client.gui.widget.scalable.ScalableWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
-import java.util.Arrays;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -24,14 +24,14 @@ public class SkillTab extends SoulboundTab {
     protected static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
     protected static final Identifier widgets = new Identifier("textures/gui/advancements/widgets.png");
 
-    protected static final ScalableWidget grayRectangle = new ScalableWidget().grayRectangle();
-    protected static final ScalableWidget blueRectangle = new ScalableWidget().blueRectangle();
-    protected static final ScalableWidget whiteFrame = new ScalableWidget().whiteRectangle();
-    protected static final ScalableWidget yellowFrame = new ScalableWidget().yellowRectangle();
+    protected static final ScalableWidget<?> grayRectangle = new ScalableWidget<>().grayRectangle();
+    protected static final ScalableWidget<?> blueRectangle = new ScalableWidget<>().blueRectangle();
+    protected static final ScalableWidget<?> whiteFrame = new ScalableWidget<>().whiteRectangle();
+    protected static final ScalableWidget<?> yellowFrame = new ScalableWidget<>().yellowRectangle();
 
-    protected final Map<SkillContainer, List<Integer>> skills = new Reference2ReferenceLinkedOpenHashMap<>();
+    protected final Map<SkillContainer, int[]> skills = new Reference2ReferenceLinkedOpenHashMap<>();
 
-    protected ScalableWidget window;
+    protected ScalableWidget<?> window;
     protected SkillContainer selectedSkill;
 
     protected float chroma;
@@ -46,22 +46,18 @@ public class SkillTab extends SoulboundTab {
     protected int insideY;
     protected int insideEndX;
     protected int insideEndY;
-    protected int x;
-    protected int y;
 
     public SkillTab() {
         super(Translations.guiSkills);
     }
 
     @Override
-    public void init() {
-        super.init();
-
+    public void initialize() {
         this.chroma = 1;
-        this.window = new ScalableWidget().window().width(512).height(288).z(-200);
-        this.centerX = Math.max(this.button.endX() + this.window.width() / 2 + 4, this.width / 2);
-        this.centerY = Math.min(this.parent.xpBar.y() - 16 - this.window.height() / 2, this.height / 2);
-        this.window.x(this.centerX).y(this.centerY).center(true);
+        this.window = new ScalableWidget<>().window().width(512).height(288).z(-200);
+        this.centerX = Math.max(this.button.endX() + this.window.width() / 2 + 4, this.width() / 2);
+        this.centerY = Math.min(this.parent().xpBar.y() - 16 - this.window.height() / 2, this.height() / 2);
+        this.window.x(this.centerX).y(this.centerY).center();
         this.insideWidth = this.window.width() - 18;
         this.insideHeight = this.window.height() - 29;
         this.insideCenterX = this.centerX;
@@ -74,11 +70,11 @@ public class SkillTab extends SoulboundTab {
         this.add(this.window);
         this.updateIcons();
 
-        if (!this.parent.options.isEmpty()) {
-            var slider = this.parent.sliders.get(0);
+        if (!this.parent().options.isEmpty()) {
+            var slider = this.parent().sliders.get(0);
 
-            if (slider != null && slider.x < this.x + this.window.width()) {
-                this.buttons.removeAll(this.parent.options);
+            if (slider != null && slider.x() < this.window.endX()) {
+                this.remove(this.parent().options);
             }
         }
     }
@@ -95,11 +91,11 @@ public class SkillTab extends SoulboundTab {
         this.chroma(this.chroma);
         RenderSystem.enableBlend();
 
-        this.renderBackground(background, this.insideX, this.insideY, this.insideWidth, this.insideHeight, (int) (128 * this.chroma));
+        renderBackground(background, this.insideX, this.insideY, this.insideWidth, this.insideHeight, (int) (128 * this.chroma));
 
-        this.textRenderer.draw(stack, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0x999999);
-        var text = this.pointText(this.parent.item.intValue(StatisticType.skillPoints));
-        this.textRenderer.draw(stack, text, this.insideEndX - 8 - this.textRenderer.getWidth(text), this.insideY + 6, 0x999999);
+        drawStrokedText(stack, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0xEEEEEE);
+        var text = this.pointText(this.parent().item.intValue(StatisticType.skillPoints));
+        drawStrokedText(stack, text, this.insideEndX - 8 - textDrawer.getWidth(text), this.insideY + 6, 0xEEEEEE);
 
         var delta = 20F * tickDelta / 255F;
         this.chroma = this.selectedSkill(mouseX, mouseY) == null ? Math.min(this.chroma + delta, 1F) : Math.max(this.chroma - delta, 175F / 255F);
@@ -123,22 +119,21 @@ public class SkillTab extends SoulboundTab {
         if (positions != null) {
             var width = 16;
             var height = 16;
-            var x = positions.get(0) - width / 2;
-            var y = positions.get(1) - height / 2;
-            var offsetV = skill.learned() ? 26 : 0;
+            var x = positions[0] - width / 2;
+            var y = positions[1] - height / 2;
             float chroma;
 
             if (skill == this.selectedSkill) {
                 this.chroma(1);
 
                 if (this.isHovered(skill, mouseX, mouseY)) {
-                    this.renderTooltip(matrixes, skill, x, y, offsetV);
+                    this.renderTooltip(matrixes, skill, x, y);
                 }
 
                 chroma = 1;
             } else {
                 this.chroma(this.chroma);
-                this.addZOffset(-200);
+                this.addZ(-200);
 
                 chroma = this.chroma;
             }
@@ -146,56 +141,60 @@ public class SkillTab extends SoulboundTab {
             (skill.learned() ? yellowFrame : whiteFrame).x(x - 4).y(y - 4).z(this.getZOffset()).width(24).height(24).render(matrixes);
 
             RenderSystem.color3f(chroma, chroma, chroma);
-            skill.render(this, matrixes, x, y, this.getZOffset());
+            skill.render(this.parent(), matrixes, x, y, this.getZOffset());
             this.setZOffset(0);
         }
     }
 
-    protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY, int offsetV) {
+    protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY) {
         var name = skill.name();
-        List<? extends StringVisitable> tooltip = skill.tooltip();
-        var barWidth = 36 + this.textRenderer.getWidth(name);
-        var size = tooltip.size();
+        var tooltip = skill.tooltip();
+        var barWidth = 36 + Math.max(108, textDrawer.getWidth(name));
 
-        if (size > 0) {
-            var learned = skill.learned();
-            var belowCenter = centerY > this.insideCenterY;
-            var y = centerY + (belowCenter ? -56 : 14);
-            var textY = y + 7;
-            Text string = null;
+        var belowCenter = centerY > this.insideCenterY;
+        var y = centerY + (belowCenter ? -56 : 14);
+        var textY = y + 7;
+        var cost = skill.cost();
 
-            if (!learned) {
-                var cost = skill.cost();
-                var plural = cost == 1 ? Translations.guiPoint : Translations.guiPoints;
-                string = Translations.guiSkillLearnCost.format(cost, plural);
-            } else if (skill.canUpgrade()) {
-                string = Translations.guiLevel.format(skill.level());
+        var sections = new ReferenceArrayList<List<? extends StringVisitable>>();
+        var genericSections = new ReferenceArrayList<Text>();
+
+        if (skill.learned()) {
+            if (skill.skill.isTiered()) {
+                genericSections.add(Translations.guiLevel.format(skill.level()));
+
+                if (skill.canUpgrade()) {
+                    genericSections.add((cost == 1 ? Translations.guiSkillUpgradeCostSingular : Translations.guiSkillUpgradeCostPlural).format(cost));
+                }
+            }
+        } else if (skill.canUpgrade()) {
+            genericSections.add((cost == 1 ? Translations.guiSkillLearnCostSingular : Translations.guiSkillLearnCostPlural).format(cost));
+        }
+
+        barWidth = Math.max(barWidth, 12 + genericSections.stream().peek(section -> sections.add(List.of(section))).map(textDrawer::getWidth).max(Comparator.naturalOrder()).orElse(0));
+
+        if (tooltip.size() > 0) {
+            sections.add(0, tooltip = wrap(tooltip, barWidth - 8));
+        }
+
+        var height = 1 + (1 + tooltip.size()) * fontHeight();
+
+        for (var section : sections) {
+            grayRectangle.x(centerX - 8).y(y).width(barWidth).height(height).render(stack);
+
+            for (var line : section) {
+                textDrawer.draw(stack, line.getString(), centerX - 3, textY, 0x999999);
+                textY += fontHeight();
             }
 
-            barWidth = 12 + Math.max(barWidth, 8 + this.textRenderer.getWidth(string));
-            tooltip = wrap(tooltip, barWidth);
-            size = tooltip.size();
-            barWidth = Math.max(barWidth, 8 + this.textRenderer.getWidth(tooltip.stream().max(Comparator.comparingInt(this.textRenderer::getWidth)).get()));
-            var offset = (1 + size) * this.textRenderer.fontHeight;
-            var tooltipHeight = 1 + offset;
-
-            if (!learned || skill.canUpgrade()) {
-                this.chroma(1);
-                grayRectangle.x(centerX - 8).y(y + tooltipHeight).width(barWidth).height(20).render(stack);
-                this.textRenderer.drawWithShadow(stack, string, centerX - 3, textY + offset, 0x999999);
-            }
-
-            this.chroma(1);
-            grayRectangle.x(centerX - 8).y(y).width(barWidth).height(tooltipHeight).render(stack);
-
-            for (var i = 0; i < size; i++) {
-                this.textRenderer.draw(stack, tooltip.get(i).getString(), centerX - 3, textY - 1 + i * this.textRenderer.fontHeight, 0x999999);
-            }
+            y += height;
+            textY = y + 6;
+            height = 20;
         }
 
         this.chroma(1);
         blueRectangle.x(centerX - 8).y(centerY - 2).width(barWidth).height(20).render(stack);
-        this.textRenderer.drawWithShadow(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
+        textDrawer.drawWithShadow(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
     }
 
     protected void chroma(float chroma) {
@@ -214,14 +213,14 @@ public class SkillTab extends SoulboundTab {
 
     protected boolean isHovered(SkillContainer skill, double mouseX, double mouseY) {
         var positions = this.skills.get(skill);
-        return Math.abs(positions.get(0) - mouseX) <= 12 && Math.abs(positions.get(1) - mouseY) <= 12;
+        return Math.abs(positions[0] - mouseX) <= 12 && Math.abs(positions[1] - mouseY) <= 12;
     }
 
     protected void updateIcons() {
         this.skills.clear();
 
         var tierOrders = new Int2ReferenceLinkedOpenHashMap<int[]>();
-        var skills = this.parent.item.skills();
+        var skills = this.parent().item.skills();
 
         for (var skill : skills) {
             var tier = skill.tier();
@@ -262,7 +261,7 @@ public class SkillTab extends SoulboundTab {
                 var total = 0;
 
                 for (var other : dependencies) {
-                    total += this.skills.get(other).get(0);
+                    total += this.skills.get(other)[0];
                 }
 
                 x += total / dependencies.size();
@@ -270,20 +269,24 @@ public class SkillTab extends SoulboundTab {
                 x += this.centerX;
             }
 
-            this.skills.put(skill, Arrays.asList(x, this.insideY + 24 + 32 * tier));
+            this.skills.put(skill, new int[]{x, this.insideY + 24 + 32 * tier});
         }
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+            return true;
+        }
+
         var skill = this.selectedSkill(mouseX, mouseY);
 
         if (skill != null) {
-            this.parent.item.upgrade(skill);
+            this.parent().item.upgrade(skill);
 
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, mouseButton);
+        return false;
     }
 }

@@ -29,7 +29,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
     @Override
     public void deserialize(NbtCompound tag) {
         if (!Util.isClient()) {
-            this.item = ItemComponentType.get(tag.getString("item")).get(Util.server().getPlayerManager().getPlayer(tag.getUuid("player")));
+            this.item = ItemComponentType.get(tag.getString("item")).of(Util.server().getPlayerManager().getPlayer(tag.getUuid("player")));
         }
     }
 }

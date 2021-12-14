@@ -4,15 +4,29 @@ import it.unimi.dsi.fastutil.objects.Reference2IntLinkedOpenHashMap;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
-import soulboundarmory.serial.CompoundSerializable;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.serial.Serializable;
+import soulboundarmory.util.Util;
 
-public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantment> implements Iterable<Enchantment>, CompoundSerializable {
+public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantment> implements Iterable<Enchantment>, Serializable {
+    protected final ItemComponent<?> component;
+
+    public EnchantmentStorage(ItemComponent<?> component) {
+        this.component = component;
+    }
+
     public void add(Predicate<Enchantment> predicate) {
-        ForgeRegistries.ENCHANTMENTS.getValues().stream().filter(predicate).forEach(enchantment -> this.put(enchantment, 0));
+        ForgeRegistries.ENCHANTMENTS.getValues().stream()
+            .filter(enchantment -> enchantment.type.isAcceptableItem(this.component.item())
+                && !enchantment.isCursed()
+                && !Util.contains(enchantment, Enchantments.UNBREAKING, Enchantments.MENDING))
+            .filter(predicate)
+            .forEach(enchantment -> this.put(enchantment, 0));
     }
 
     @Override

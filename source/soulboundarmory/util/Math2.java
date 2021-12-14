@@ -1,6 +1,8 @@
 package soulboundarmory.util;
 
 import java.util.Random;
+import net.minecraft.entity.LivingEntity;
+import net.minecraftforge.common.ForgeMod;
 
 public class Math2 {
     public static int signum(double n) {
@@ -9,6 +11,18 @@ public class Math2 {
 
     public static int signum(double x, double y, double z) {
         return signum(x) * signum(y) * signum(z);
+    }
+
+    public static double square(double value) {
+        return value * value;
+    }
+
+    public static float square(float value) {
+        return value * value;
+    }
+
+    public static double zenith(LivingEntity entity) {
+        return square(entity.getVelocity().y) / 2 / entity.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get());
     }
 
     public static int min(int... values) {

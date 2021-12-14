@@ -5,16 +5,11 @@ import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> extends Widget<T> {
     protected static final Char2CharMap shifted = new Char2CharOpenHashMap(Map.ofEntries(
         Map.entry('`', '~'),
@@ -55,33 +50,31 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
     protected int index;
     protected int column;
 
-    protected AbstractTextBoxWidget() {
+    public AbstractTextBoxWidget() {
         this.updateCaret();
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
-
-        this.renderText(matrices);
-        this.renderCaret(matrices);
+    protected void renderWidget() {
+        this.renderText();
+        this.renderCaret();
     }
 
-    protected void renderText(MatrixStack matrices) {
+    protected void renderText() {
         var lines = this.lines;
 
         for (int i = 0, size = lines.size(); i < size; i++) {
             var line = lines.get(i);
-            textDrawer.draw(matrices, line.getString(), this.textX, this.getY(i), 0xFFFFFF);
+            textDrawer.draw(this.matrixes, line.getString(), this.textX, this.getY(i), 0xFFFFFF);
         }
     }
 
-    protected void renderCaret(MatrixStack matrices) {
-        textDrawer.drawWithShadow(matrices, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
+    protected void renderCaret() {
+        textDrawer.drawWithShadow(this.matrixes, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
     }
 
     protected int getY(int line) {
-        return this.textY + line * (textDrawer.fontHeight + 3);
+        return this.textY + line * (fontHeight() + 3);
     }
 
     @Override

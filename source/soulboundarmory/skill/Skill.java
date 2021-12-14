@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.event.RegistryEvent;
@@ -33,8 +34,11 @@ public abstract class Skill extends RegistryEntry<Skill> {
 
     private int tier = -1;
 
-    public Skill(Identifier identifier) {
-        this(identifier, 0);
+    public Skill(Identifier identifier, Identifier texture, int maxLevel) {
+        super(identifier);
+
+        this.texture = texture;
+        this.maxLevel = maxLevel;
     }
 
     public Skill(Identifier identifier, int maxLevel) {
@@ -45,14 +49,27 @@ public abstract class Skill extends RegistryEntry<Skill> {
         this(identifier, texture, 0);
     }
 
-    public Skill(Identifier identifier, Identifier texture, int maxLevel) {
-        super(identifier);
-
-        this.texture = texture;
-        this.maxLevel = maxLevel;
+    public Skill(Identifier identifier) {
+        this(identifier, 0);
     }
 
+    public Skill(String path) {
+        this(Util.id(path), 0);
+    }
+
+    /**
+     @param learned whether this skill has been learned
+     @param level the next level
+     @return the cost of unlocking this skill if it has not been learned or upgrading it to level `level` from the previous level.
+     */
     public abstract int cost(boolean learned, int level);
+
+    /**
+     @return whether this skill has multiple levels.
+     */
+    public final boolean isTiered() {
+        return this.cost(true, 1) >= 0;
+    }
 
     public Set<Skill> dependencies() {
         return this.dependencies;
@@ -76,7 +93,7 @@ public abstract class Skill extends RegistryEntry<Skill> {
         return Text.of(name.substring(0, 1).toUpperCase() + name.substring(1));
     }
 
-    public List<? extends Text> tooltip() {
+    public List<? extends StringVisitable> tooltip() {
         return Stream.of(I18n.translate("skill.%s.%s.desc".formatted(this.getRegistryName().getNamespace(), this.getRegistryName().getPath())).split("\\\\n")).map(Translation::new).toList();
     }
 

@@ -13,8 +13,8 @@ import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.item.SoulboundWeaponItem;
 import soulboundarmory.lib.component.EntityComponentKey;
 
-public class WeaponComponent extends SoulboundComponent<WeaponComponent> {
-    public WeaponComponent(PlayerEntity player) {
+public class SoulboundWeaponComponent extends SoulboundComponent<SoulboundWeaponComponent> {
+    public SoulboundWeaponComponent(PlayerEntity player) {
         super(player);
 
         this.store(new DaggerComponent(this));
@@ -24,7 +24,7 @@ public class WeaponComponent extends SoulboundComponent<WeaponComponent> {
     }
 
     @Override
-    public EntityComponentKey<WeaponComponent> key() {
+    public EntityComponentKey<SoulboundWeaponComponent> key() {
         return Components.weapon;
     }
 

@@ -1,6 +1,7 @@
 package soulboundarmory.event;
 
 import cell.client.gui.CellElement;
+import cell.client.gui.screen.CellScreen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import net.minecraft.client.gui.screen.Screen;
@@ -40,7 +41,7 @@ public final class ClientEvents {
             var player = CellElement.minecraft.player;
 
             if (player != null && player.world != null) {
-                var staff = ItemComponentType.staff.get(player);
+                var staff = ItemComponentType.staff.of(player);
 
                 if (ItemUtil.handStacks(player).anyMatch(staff::accepts)) {
                     var dy = (int) event.getMouseY();
@@ -59,8 +60,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE
-            && (CellElement.minecraft.currentScreen instanceof SoulboundScreen
-            || Configuration.instance().client.overlayExperienceBar && overlayBar.render(event.getMatrixStack(), event.getWindow()))
+            && (CellScreen.cellScreen() instanceof SoulboundScreen || Configuration.instance().client.overlayExperienceBar && overlayBar.render(event.getMatrixStack(), event.getWindow()))
         ) {
             event.setCanceled(true);
         }
@@ -126,7 +126,7 @@ public final class ClientEvents {
             RenderSystem.recordRenderCall(() -> {
                 overlayBar = new ExperienceBar();
                 tooltipBar = new ExperienceBar();
-                overlayBar.width(182).height(5).center(true);
+                overlayBar.width(182).height(5).center();
             });
         }
     }

@@ -8,17 +8,17 @@ import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
 public final class ConfigComponent implements EntityComponent<ConfigComponent> {
-    public final PlayerEntity entity;
+    public final PlayerEntity player;
     public boolean levelupNotifications;
     public boolean glint;
 
     public ConfigComponent(PlayerEntity player) {
-        this.entity = player;
+        this.player = player;
     }
 
     @Override
     public void spawn() {
-        if (this.entity.world.isClient) {
+        if (this.player.world.isClient) {
             var configuration = Configuration.instance().client;
             Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(configuration.levelupNotifications).writeBoolean(configuration.enchantmentGlint));
         }

@@ -1,5 +1,6 @@
 package soulboundarmory.component.soulbound.item;
 
+import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -41,8 +42,12 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
         return get(new Identifier(name));
     }
 
-    public T get(Entity entity) {
+    public T of(Entity entity) {
         return this.parentKey.nullable(entity).map(component -> component.item(this)).orElse(null);
+    }
+
+    public Optional<T> nullable(Entity entity) {
+        return Optional.ofNullable(this.of(entity));
     }
 
     @Override

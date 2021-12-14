@@ -24,7 +24,7 @@ public final class EntityComponentKey<C extends EntityComponent<C>> extends Comp
 
     @Override
     public C attach(Entity entity) {
-        if (this.type.isInstance(entity) && (this.predicate == null || this.predicate.test(Util.cast(entity)))) {
+        if (this.type.isInstance(entity)) {
             var component = this.instantiate.apply(Util.cast(entity));
             var previous = ((EntityAccess) entity).soulboundarmory$components().put(this, component);
 
