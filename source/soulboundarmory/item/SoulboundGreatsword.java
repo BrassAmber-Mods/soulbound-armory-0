@@ -5,7 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -29,14 +28,11 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     }
 
     @Override
-        public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        if (!world.isClient && ItemComponentType.greatsword.of(player).hasSkill(Skills.leaping)) {
-            player.setCurrentHand(hand);
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        player.setCurrentHand(hand);
 
-            return new TypedActionResult<>(ActionResult.CONSUME, player.getStackInHand(hand));
-        }
+        return ItemComponentType.greatsword.of(player).hasSkill(Skills.leaping) ? TypedActionResult.consume(player.getStackInHand(hand)) : TypedActionResult.fail(player.getStackInHand(hand));
 
-        return new TypedActionResult<>(ActionResult.FAIL, player.getStackInHand(hand));
     }
 
     @Override
