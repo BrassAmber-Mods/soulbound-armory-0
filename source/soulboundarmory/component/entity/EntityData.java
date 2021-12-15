@@ -17,6 +17,7 @@ import soulboundarmory.network.Packets;
 public final class EntityData implements EntityComponent<EntityData> {
     public final Entity entity;
     public float tickDelta;
+    public float animationProgress;
 
     private int freezeTicks;
     private int blockTeleportTicks;
@@ -33,11 +34,7 @@ public final class EntityData implements EntityComponent<EntityData> {
         this.blockTeleportTicks = ticks;
     }
 
-    public void freeze(PlayerEntity freezer, int ticks, float damage) {
-        if (ticks > this.freezeTicks || ticks == 0) {
-            this.freezeTicks = ticks;
-        }
-
+    public void freeze(PlayerEntity freezer, float leapForce, int ticks, float damage) {
         if (freezer.world instanceof ServerWorld world) {
             world.spawnParticles(
                 ParticleTypes.ITEM_SNOWBALL,
@@ -56,15 +53,19 @@ public final class EntityData implements EntityComponent<EntityData> {
                 if (entity instanceof CreeperEntity creeper) {
                     creeper.setFuseSpeed(-1);
                 }
-            } else if (this.entity instanceof ProjectileEntity) {
-                this.entity.setVelocity(0, this.entity.getVelocity().y, 0);
-            } else {
-                this.update(false);
+            } else if (this.entity instanceof ProjectileEntity projectile && !projectile.isOnGround()) {
+                projectile.setVelocity(projectile.getPos().subtract(freezer.getPos()).normalize().multiply(leapForce * 5));
 
+                return;
+            } else {
                 return;
             }
 
             this.update(true);
+        }
+
+        if (ticks > this.freezeTicks || ticks == 0) {
+            this.freezeTicks = ticks;
         }
     }
 

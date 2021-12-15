@@ -31,7 +31,7 @@ public class EnchantmentTab extends SoulboundTab {
     public void render(MatrixStack matrixes, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixes, mouseX, mouseY, partialTicks);
 
-        this.displayPoints(matrixes, this.parent().item.intValue(StatisticType.enchantmentPoints));
+        this.displayPoints(this.parent().item.intValue(StatisticType.enchantmentPoints));
 
         var enchantments = this.parent().item.enchantments;
 

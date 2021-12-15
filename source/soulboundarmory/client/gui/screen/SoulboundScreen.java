@@ -2,7 +2,6 @@ package soulboundarmory.client.gui.screen;
 
 import cell.client.gui.screen.CellScreen;
 import cell.client.gui.widget.Widget;
-import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import cell.client.gui.widget.slider.SliderWidget;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -62,13 +61,15 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         this.item = ItemComponent.get(this.player, this.stack).orElse(null);
 
         if (this.displayTabs()) {
-            this.add(this.xpBar = new ExperienceBar(this.item).x(this.width() / 2).y(this.height() - 27).center().primaryAction(bar -> {
-                configuration.displayOptions ^= true;
-                this.refresh();
-            }).tooltip((bar, matrixes, x, y) -> {
-                var xp = this.item.intValue(experience);
-                this.renderTooltip(x, y, this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp));
-            }));
+            this.add(this.xpBar = new ExperienceBar(this.item).x(this.width() / 2).y(this.height() - 27).center()
+                .tooltip((bar, matrixes, x, y) -> {
+                    var xp = this.item.intValue(experience);
+                    this.renderTooltip(x, y, this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp));
+                }).primaryAction(() -> {
+                    configuration.displayOptions ^= true;
+                    this.refresh();
+                }).secondaryAction(() -> configuration.overlayExperienceBar ^= true)
+                .scrollAction(amount -> this.cycleStyle((int) amount)));
 
             var tabs = this.item.tabs();
             this.tab = tabs.get(this.component.tab);
@@ -95,7 +96,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 .width(buttonWidth)
                 .height(20)
                 .text(text)
-                .primaryAction(widget -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.item).writeInt(unbind ? -1 : this.slot)))
+                .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.item).writeInt(unbind ? -1 : this.slot)))
             );
 
             this.tab(this.tab.index);
@@ -107,11 +108,12 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 this.sliders.add(this.colorSlider(Translations.alpha, 3));
 
                 this.options.addAll(this.sliders);
+
                 this.options.add(this.optionButton(
                     4,
                     Translations.style.format(configuration.style.text),
-                    button -> this.cycleStyle(1),
-                    button -> this.cycleStyle(-1)
+                    () -> this.cycleStyle(1),
+                    () -> this.cycleStyle(-1)
                 ));
 
                 this.add(this.options);
@@ -123,9 +125,9 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     }
 
     @Override
-    public void renderWidget() {
+    public void render() {
         renderBackground(this.matrixes);
-        super.renderWidget();
+        super.render();
 
         if (this.displayTabs()) {
             var maxLevel = Configuration.instance().maxLevel;
@@ -193,7 +195,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         return this.height() / 16 + Math.max(this.height() / 16 * row, 30 * row);
     }
 
-    private <T extends ScalableWidget<T>> T optionButton(int row, Text text, PressCallback<T> primaryAction, PressCallback<T> secondaryAction) {
+    private <T extends ScalableWidget<T>> T optionButton(int row, Text text, Runnable primaryAction, Runnable secondaryAction) {
         return new ScalableWidget<T>().button()
             .x(this.optionX())
             .y(this.optionY(row))
@@ -225,7 +227,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
             .width(Math.max(96, Math.round(this.width() / 7.5F)))
             .height(20)
             .text(tab.title)
-            .primaryAction(widget -> this.tab(tab.index));
+            .primaryAction(() -> this.tab(tab.index));
     }
 
     private void addTab(SoulboundTab tab) {

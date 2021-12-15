@@ -3,7 +3,9 @@ package soulboundarmory.util;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -41,6 +44,23 @@ public class Util {
 
     public static String capitalize(String string) {
         return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+    }
+
+    public static <T> T[] array(T... elements) {
+        return elements;
+    }
+
+    public static <K, V> Map<K, V> map(Map.Entry<K, V>... entries) {
+        var map = new Reference2ReferenceLinkedOpenHashMap<K, V>();
+        Stream.of(entries).forEach(entry -> map.put(entry.getKey(), entry.getValue()));
+
+        return map;
+    }
+
+    public static <K, V, T extends Map<K, V>> T add(T map, Map.Entry<K, V> entry) {
+        map.put(entry.getKey(), entry.getValue());
+
+        return map;
     }
 
     public static boolean isClient() {
@@ -83,6 +103,14 @@ public class Util {
         return union;
     }
 
+    public static <A> A[] prepend(A element, A[] array) {
+        var union = (A[]) Array.newInstance(Util.componentType(array), array.length + 1);
+        System.arraycopy(array, 0, union, 1, array.length);
+        union[0] = element;
+
+        return union;
+    }
+
     public static String namespace() {
         return ModLoadingContext.get().getActiveNamespace();
     }
@@ -115,10 +143,18 @@ public class Util {
     }
 
     public static <K, V> void enumerate(Map<K, V> map, TriConsumer<K, V, Integer> action) {
-        var counter = 0;
+        var count = 0;
 
         for (var entry : map.entrySet()) {
-            action.accept(entry.getKey(), entry.getValue(), counter++);
+            action.accept(entry.getKey(), entry.getValue(), count++);
+        }
+    }
+
+    public static <T> void enumerate(Iterable<T> iterable, ObjIntConsumer<T> action) {
+        var count = 0;
+
+        for (var element : iterable) {
+            action.accept(element, count++);
         }
     }
 

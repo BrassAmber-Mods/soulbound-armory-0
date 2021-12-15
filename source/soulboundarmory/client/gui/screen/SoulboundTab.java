@@ -1,11 +1,9 @@
 package soulboundarmory.client.gui.screen;
 
 import cell.client.gui.widget.Widget;
-import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -49,7 +47,7 @@ public abstract class SoulboundTab extends Tab<SoulboundTab> {
             .width(20)
             .height(20)
             .text(Text.of(text))
-            .primaryAction(PressCallback.of(action));
+            .primaryAction(action);
     }
 
     public Widget<?> resetButton(Runnable action) {
@@ -59,7 +57,7 @@ public abstract class SoulboundTab extends Tab<SoulboundTab> {
             .width(112)
             .height(20)
             .text(Translations.guiButtonReset)
-            .primaryAction(PressCallback.of(action));
+            .primaryAction(action);
     }
 
     protected SoulboundScreen parent() {
@@ -70,8 +68,8 @@ public abstract class SoulboundTab extends Tab<SoulboundTab> {
         return () -> Packets.serverReset.send(new ExtendedPacketBuffer(this.parent().item).writeIdentifier(category.id()));
     }
 
-    protected void displayPoints(MatrixStack matrixes, int points) {
-        drawCenteredText(matrixes, textDrawer, this.pointText(points), Math.round(this.width() / 2F), 4, 0xFFFFFF);
+    protected void displayPoints(int points) {
+        drawCenteredText(this.matrixes, textDrawer, this.pointText(points), Math.round(this.width() / 2F), 4, 0xFFFFFF);
     }
 
     protected Text pointText(int points) {

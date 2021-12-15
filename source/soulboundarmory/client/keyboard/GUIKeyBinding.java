@@ -1,11 +1,12 @@
 package soulboundarmory.client.keyboard;
 
-import cell.client.gui.CellElement;
+import cell.client.gui.widget.Widget;
+import java.util.stream.Stream;
+import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
 
 /**
  Open {@linkplain SoulboundScreen the menu} if one of the held items is soulbound or {@linkplain ItemComponent#canConsume consumable}.
@@ -17,6 +18,6 @@ public class GUIKeyBinding extends KeyBindingBase {
 
     @Override
     protected void press() {
-        Components.soulbound(CellElement.minecraft.player).anyMatch(SoulboundComponent::tryOpenGUI);
+        Stream.of(Hand.values()).anyMatch(hand -> Components.soulbound(Widget.minecraft.player).anyMatch(component -> component.tryOpenGUI(hand)));
     }
 }

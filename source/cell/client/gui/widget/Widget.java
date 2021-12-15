@@ -5,6 +5,8 @@ import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.callback.TextProvider;
 import cell.client.gui.widget.callback.TooltipProvider;
 import cell.client.gui.widget.callback.TooltipRenderer;
+import cell.client.gui.widget.scroll.ContextScrollAction;
+import cell.client.gui.widget.scroll.ScrollAction;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,10 +40,11 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
      The element selected by the keyboard; may be `null`, `this` or a child.
      */
     public Optional<Widget<?>> selected = Optional.empty();
+    public TooltipRenderer<T> tooltip;
     public PressCallback<T> primaryAction;
     public PressCallback<T> secondaryAction;
     public PressCallback<T> tertiaryAction;
-    public TooltipRenderer<T> tooltip;
+    public ContextScrollAction<T> scrollAction;
 
     public boolean centerX;
     public boolean centerY;
@@ -151,6 +154,28 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         this.tertiaryAction = action;
 
         return (T) this;
+    }
+
+    public T primaryAction(Runnable action) {
+        return this.primaryAction(widget -> action.run());
+    }
+
+    public T secondaryAction(Runnable action) {
+        return this.secondaryAction(widget -> action.run());
+    }
+
+    public T tertiaryAction(Runnable action) {
+        return this.tertiaryAction(widget -> action.run());
+    }
+
+    public T scrollAction(ContextScrollAction<T> action) {
+        this.scrollAction = action;
+
+        return (T) this;
+    }
+
+    public T scrollAction(ScrollAction<T> action) {
+        return this.scrollAction((ContextScrollAction<T>) action);
     }
 
     public T tooltip(String tooltip) {
@@ -332,6 +357,10 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         return this.parent.isEmpty();
     }
 
+    public boolean scrollable() {
+        return this.scrollAction != null;
+    }
+
     public int index() {
         return this.parent.map(parent -> parent.children.indexOf(this)).orElse(-1);
     }
@@ -464,7 +493,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
                 this.whileFocused();
             }
 
-            this.renderWidget();
+            this.render();
 
             this.children.forEach(child -> child.render(matrixes, mouseX, mouseY, delta));
         }
@@ -474,7 +503,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         this.render(matrixes, -1, -1, 0);
     }
 
-    protected void renderWidget() {}
+    protected void render() {}
 
     protected void renderTooltip() {
         if (this.mouseFocused || Screen.hasShiftDown()) {
@@ -638,6 +667,12 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (this.scrollable() && this.mouseFocused) {
+            this.scroll(amount);
+
+            return true;
+        }
+
         return this.childrenReverse().anyMatch(widget -> widget.mouseScrolled(mouseX, mouseY, amount));
     }
 
@@ -726,6 +761,12 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
     protected void secondaryClick() {}
 
     protected void tertiaryClick() {}
+
+    protected void scroll(double amount) {
+        if (this.scrollAction != null) {
+            this.scrollAction.scroll((T) this, amount);
+        }
+    }
 
     protected void execute(PressCallback<T> callback) {
         if (callback != null) {

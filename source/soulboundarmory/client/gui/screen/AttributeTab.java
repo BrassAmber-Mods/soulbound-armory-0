@@ -1,18 +1,19 @@
 package soulboundarmory.client.gui.screen;
 
-import java.util.List;
-import net.minecraft.client.util.math.MatrixStack;
+import java.util.Map;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
+import soulboundarmory.util.Util;
 
 import static soulboundarmory.component.statistics.Category.attribute;
 
 public class AttributeTab extends SoulboundTab {
-    protected List<StatisticEntry> attributes;
+    protected Map<Statistic, Text> attributes;
+    protected int length;
 
     public AttributeTab() {
         super(Translations.guiButtonAttributes);
@@ -21,30 +22,25 @@ public class AttributeTab extends SoulboundTab {
     @Override
     public void initialize() {
         this.attributes = this.parent().item.screenAttributes();
-        var size = this.attributes.size();
-        var start = (this.height() - (size - 1) * this.height() / 16) / 2;
+        this.length = Math.max(182, width(this.attributes.values().stream()) + 40);
         this.add(this.resetButton(this.resetAction(attribute))).active(this.parent().item.statistics.get(attribute).values().stream().anyMatch(Statistic::aboveMin));
 
-        for (var index = 0; index < size; index++) {
-            var attribute = this.attributes.get(index).statistic;
-            this.add(this.squareButton((this.width() + 182) / 2, start + index * this.height() / 16 + 4, "+", this.addPointAction(attribute))).active(this.parent().item.intValue(StatisticType.attributePoints) > 0 && attribute.belowMax());
-            this.add(this.squareButton((this.width() + 182) / 2 - 20, start + index * this.height() / 16 + 4, "-", this.removePointAction(attribute))).active(attribute.aboveMin());
-        }
+        Util.enumerate(this.attributes, (statistic, text, row) -> {
+            var x = this.middleX() + this.length / 2;
+            var y = this.height(this.attributes.size(), row) + 4;
+            this.add(this.squareButton(x - 20, y, "-", this.removePointAction(statistic))).active(statistic.aboveMin());
+            this.add(this.squareButton(x, y, "+", this.addPointAction(statistic))).active(this.parent().item.intValue(StatisticType.attributePoints) > 0 && statistic.belowMax());
+        });
     }
 
     @Override
-    public void render(MatrixStack matrixes, int mouseX, int mouseY, float tickDelta) {
-        super.render(matrixes, mouseX, mouseY, tickDelta);
-
-        this.displayPoints(matrixes, this.parent().item.intValue(StatisticType.attributePoints));
-
-        for (int row = 0, size = this.attributes.size(); row < size; row++) {
-            this.drawAttribute(matrixes, this.attributes.get(row).text, row, size);
-        }
+    protected void render() {
+        this.displayPoints(this.parent().item.intValue(StatisticType.attributePoints));
+        Util.enumerate(this.attributes, (entry, text, row) -> this.drawAttribute(text, row, this.attributes.size()));
     }
 
-    public void drawAttribute(MatrixStack stack, Text format, int row, int rows) {
-        textDrawer.drawWithShadow(stack, format, (this.width() - 182) / 2F, this.height(rows, row), 0xFFFFFF);
+    public void drawAttribute(Text format, int row, int rows) {
+        textDrawer.drawWithShadow(this.matrixes, format, this.middleX() - this.length / 2F, this.height(rows, row), 0xFFFFFF);
     }
 
     protected Runnable addPointAction(Statistic statistic) {

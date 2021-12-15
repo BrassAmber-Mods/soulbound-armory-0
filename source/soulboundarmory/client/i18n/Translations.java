@@ -3,7 +3,9 @@ package soulboundarmory.client.i18n;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.text.Text;
+import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.text.Translation;
@@ -13,10 +15,10 @@ public class Translations {
     public static final Translation tooltipToolEfficiency = attribute("tool_efficiency");
     public static final Translation tooltipWeaponEfficiency = attribute("weapon_efficiency");
     public static final Translation tooltipReach = attribute("reach");
-    public static final Translation tooltipMiningLevel = attribute("harvest_level");
+    public static final Translation tooltipUpgradeProgress = attribute("upgrade_progress");
     public static final Translation tooltipAttackSpeed = attribute("attack_speed");
     public static final Translation tooltipAttackDamage = attribute("attack_damage");
-    public static final Translation tooltipCriticalStrikeRate = attribute("critical_strike_rate");
+    public static final Translation tooltipCriticalHitRate = attribute("critical_hit_rate");
     public static final Translation tooltipAttackRange = attribute("attack_range");
 
     public static final Translation guiDagger = gui("dagger");
@@ -48,11 +50,12 @@ public class Translations {
     public static final Translation guiToolEfficiency = gui("tool_efficiency");
     public static final Translation guiWeaponEfficiency = gui("weapon_efficiency");
     public static final Translation guiReach = gui("reach");
-    public static final Translation guiMiningLevel = gui("harvest_level");
+    public static final Translation guiUpgradeProgress = gui("upgrade_progress");
     public static final Translation guiAttackSpeed = gui("attack_speed");
     public static final Translation guiAttackDamage = gui("attack_damage");
-    public static final Translation guiCriticalStrikeRate = gui("critical_strike_rate");
+    public static final Translation guiCriticalHitRate = gui("critical_hit_rate");
     public static final Translation guiAttackRange = gui("attack_range");
+    public static final Translation toggleBar = gui("bar.toggle");
     public static final Translation barLevel = gui("bar.level");
     public static final Translation barXP = gui("bar.xp");
     public static final Translation barFullXP = gui("bar.full_xp");
@@ -61,22 +64,22 @@ public class Translations {
     public static final Translation bossStyle = gui("style.boss");
     public static final Translation horseStyle = gui("style.horse");
 
-    public static final Translation miningLevelWood = harvestLevel("wood");
-    public static final Translation miningLevelStone = harvestLevel("stone");
-    public static final Translation miningLevelIron = harvestLevel("iron");
-    public static final Translation miningLevelDiamond = harvestLevel("diamond");
-    public static final Translation miningLevelNetherite = harvestLevel("netherite");
-
     public static final Translation hudSpell = of("hud", "spell");
 
     public static final Translation guiKey = of("key", "gui");
 
-    public static final Translation levelupMessage = of("message", "levelup");
+    public static final Translation levelupMessage = message("levelup");
+    public static final Translation cannotAbsorbDamaged = message("cannot_absorb_damaged");
+    public static final Translation cannotAbsorbWeaker = message("cannot_absorb_weaker");
 
     public static final Translation commandNoItem = of("command", "no_item");
 
     public static Text skillName(Skill skill) {
         return Text.of(Util.capitalize(I18n.translate("skill.%s.%s.name".formatted(skill.getRegistryName().getNamespace(), skill.getRegistryName().getPath()))));
+    }
+
+    public static Translation toolMaterial(ToolMaterial material) {
+        return of("tool_material", TierSortingRegistry.getName(material).getPath());
     }
 
     public static List<Text> skillDescription(Skill skill) {
@@ -95,7 +98,7 @@ public class Translations {
         return of("gui", path);
     }
 
-    private static Translation harvestLevel(String path) {
-        return of("harvest_level", path);
+    private static Translation message(String path) {
+        return of("message", path);
     }
 }

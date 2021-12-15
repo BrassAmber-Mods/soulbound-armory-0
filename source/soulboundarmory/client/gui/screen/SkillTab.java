@@ -78,7 +78,7 @@ public class SkillTab extends SoulboundTab {
     }
 
     @Override
-    protected void renderWidget() {
+    protected void render() {
         this.renderWindow();
         this.renderSkills();
     }

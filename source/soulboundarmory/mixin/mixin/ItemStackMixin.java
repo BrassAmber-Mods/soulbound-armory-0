@@ -7,6 +7,9 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,8 +22,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.AttributeModifierIdentifiers;
+import soulboundarmory.util.Util;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
@@ -52,14 +57,18 @@ abstract class ItemStackMixin {
     }
 
     @Inject(method = "postMine", at = @At("RETURN"))
-    private void addXP(World world, BlockState state, BlockPos pos, PlayerEntity miner, CallbackInfo info) {
-        Components.marker.nullable((ItemStack) (Object) this).ifPresent(marker -> marker.item.mined(state, pos));
+    private void addXPByEnderPull(World world, BlockState state, BlockPos pos, PlayerEntity miner, CallbackInfo info) {
+        Components.marker.nullable(Util.cast(this)).ifPresent(marker -> marker.item.mined(state, pos));
     }
 
-    @Inject(method = "isSuitableFor", at = @At("RETURN"), cancellable = true)
-    private void checkSoulboundItemHasSuitableMiningLevel(BlockState state, CallbackInfoReturnable<Boolean> info) {
-        if (info.getReturnValueZ()) {
-            // Components.marker.nullable(Util.cast(this)).ifPresent(marker -> info.setReturnValue(marker.item.intValue(StatisticType.miningLevel) >= state.getMaterial().getHarvestLevel()));
+    @Inject(method = "use", at = @At("RETURN"), cancellable = true)
+    private void absorbTool(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> info) {
+        if (hand == Hand.MAIN_HAND && info.getReturnValue().getResult() == ActionResult.PASS) {
+            Components.marker.nullable(Util.cast(this)).ifPresent(marker -> {
+                if (marker.item instanceof ToolComponent tool) {
+                    tool.absorb();
+                }
+            });
         }
     }
 }

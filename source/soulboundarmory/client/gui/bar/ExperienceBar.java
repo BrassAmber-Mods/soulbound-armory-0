@@ -59,21 +59,21 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
     }
 
     @Override
-    public void renderWidget() {
+    public void render() {
         if (colors.alpha > 3) {
             var color = new Color(colors.red, colors.green, colors.blue, colors.alpha);
             var components = color.getComponents(null);
             var style = configuration.style;
 
             this.v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]);
-            super.renderWidget();
+            super.render();
 
             if (this.component.canLevelUp()) {
                 this.widthLimit(Math.min(1, this.component.floatValue(StatisticType.experience) / this.component.nextLevelXP()));
             }
 
             this.v(style.v + 5);
-            super.renderWidget();
+            super.render();
 
             var level = this.component.intValue(StatisticType.level);
 

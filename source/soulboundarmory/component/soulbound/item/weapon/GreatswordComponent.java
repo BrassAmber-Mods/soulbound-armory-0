@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -15,18 +16,19 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
-import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
+import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.Attributes;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.Math2;
+import soulboundarmory.util.Util;
 
 public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     public int leapDuration;
@@ -40,11 +42,11 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
 
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalHitRate, StatisticType.efficiency, StatisticType.reach)
             .min(0.8, StatisticType.attackSpeed)
             .min(4, StatisticType.attackDamage)
             .min(6, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate)
+            .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
@@ -93,7 +95,7 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
         var key = id.toString();
 
         if (!this.cannotFreeze.contains(key) && component.canBeFrozen()) {
-            component.freeze(this.player, ticks, (float) damage);
+            component.freeze(this.player, this.leapForce, ticks, (float) damage);
             this.cannotFreeze.putUuid(key, id);
         }
     }
@@ -108,13 +110,8 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     }
 
     @Override
-    public List<StatisticEntry> screenAttributes() {
-        return List.of(
-            new StatisticEntry(this.statistic(StatisticType.attackSpeed), Translations.guiAttackSpeed.format(this.formatStatistic(StatisticType.attackSpeed))),
-            new StatisticEntry(this.statistic(StatisticType.attackDamage), Translations.guiAttackDamage.format(this.formatStatistic(StatisticType.attackDamage))),
-            new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), Translations.guiCriticalStrikeRate.format(this.formatStatistic(StatisticType.criticalStrikeRate))),
-            new StatisticEntry(this.statistic(StatisticType.efficiency), Translations.guiWeaponEfficiency.format(this.formatStatistic(StatisticType.efficiency)))
-        );
+    public Map<Statistic, Text> screenAttributes() {
+        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiWeaponEfficiency));
     }
 
     @Override
@@ -127,8 +124,8 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
             LiteralText.EMPTY
         ));
 
-        if (this.doubleValue(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(Translations.tooltipCriticalStrikeRate.translate(format.format(this.doubleValue(StatisticType.criticalStrikeRate) * 100)));
+        if (this.doubleValue(StatisticType.criticalHitRate) > 0) {
+            tooltip.add(Translations.tooltipCriticalHitRate.translate(format.format(this.doubleValue(StatisticType.criticalHitRate) * 100)));
         }
 
         if (this.doubleValue(StatisticType.efficiency) > 0) {
@@ -142,7 +139,7 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     public double increase(StatisticType statistic) {
         if (statistic == StatisticType.attackSpeed) return 0.02;
         if (statistic == StatisticType.attackDamage) return 0.1;
-        if (statistic == StatisticType.criticalStrikeRate) return 0.01;
+        if (statistic == StatisticType.criticalHitRate) return 0.01;
         if (statistic == StatisticType.efficiency) return 0.02;
 
         return 0;

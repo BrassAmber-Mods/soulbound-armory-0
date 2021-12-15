@@ -8,16 +8,14 @@ public class Statistic extends Number implements Comparable<Number>, Serializabl
     public final Category category;
     public final StatisticType type;
 
-    protected BigDecimal value;
-    protected double min;
-    protected double max;
+    protected BigDecimal value = BigDecimal.ZERO;
+    protected double min = 0;
+    protected double max = Double.MAX_VALUE;
+    protected double defaultMax = this.max;
 
     public Statistic(Category category, StatisticType statistic) {
         this.type = statistic;
         this.category = category;
-        this.value = BigDecimal.ZERO;
-        this.min = 0;
-        this.max = Double.MAX_VALUE;
     }
 
     @Override
@@ -55,6 +53,11 @@ public class Statistic extends Number implements Comparable<Number>, Serializabl
 
     public void max(double max) {
         this.max = max;
+    }
+
+    public void defaultMax(double max) {
+        this.max = max;
+        this.defaultMax = max;
 
         if (this.doubleValue() > max) {
             this.setToMax();
@@ -124,6 +127,7 @@ public class Statistic extends Number implements Comparable<Number>, Serializabl
 
     public void reset() {
         this.setToMin();
+        // this.max = this.defaultMax;
     }
 
     @Override
@@ -134,6 +138,7 @@ public class Statistic extends Number implements Comparable<Number>, Serializabl
     @Override
     public void serialize(NbtCompound tag) {
         tag.putDouble("min", this.min);
+        tag.putDouble("max", this.max);
         tag.putString("value", this.value.toString());
     }
 
@@ -145,5 +150,7 @@ public class Statistic extends Number implements Comparable<Number>, Serializabl
         if (dMin != 0) {
             this.addUnchecked(dMin);
         }
+
+        this.max = Math.max(this.defaultMax, tag.getDouble("max"));
     }
 }

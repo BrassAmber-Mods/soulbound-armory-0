@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -24,12 +25,12 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import soulboundarmory.client.gui.screen.SoulboundTab;
-import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
@@ -45,11 +46,14 @@ import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
+import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.text.Translation;
 import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Math2;
+import soulboundarmory.util.Util;
 
 public abstract class ItemComponent<T extends ItemComponent<T>> implements Serializable {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
@@ -176,7 +180,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     /**
      @return a list of attributes to be displayed on the attribute tab for this item.
      */
-    public abstract List<StatisticEntry> screenAttributes();
+    public abstract Map<Statistic, Text> screenAttributes();
 
     /**
      @return the tooltip for stacks of this item.
@@ -194,6 +198,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
     public final boolean isClient() {
         return this.player.world.isClient;
+    }
+
+    public ToolMaterial material() {
+        return SoulboundItems.material;
     }
 
     /**
@@ -259,7 +267,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
                 efficiency = 1 + efficiency * efficiency;
             }
 
-            return efficiency + doubleValue;
+            return efficiency + doubleValue + this.material().getMiningSpeedMultiplier();
         }
 
         return doubleValue;
@@ -530,6 +538,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         } else if (category == Category.attribute) {
             for (var statistic : this.statistics.get(Category.attribute).values()) {
                 this.incrementAttributePoints(statistic.type, Integer.MIN_VALUE);
+                statistic.reset();
             }
         } else if (category == Category.enchantment) {
             for (var enchantment : this.enchantments) {
@@ -714,8 +723,19 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @return the formatted value.
      */
     protected String formatStatistic(StatisticType statistic) {
-        var value = this.attributeTotal(statistic);
-        return statisticFormat.format(statistic == StatisticType.criticalStrikeRate ? value * 100 : value);
+        if (statistic == StatisticType.upgradeProgress || statistic == StatisticType.criticalHitRate) {
+            return this.formatPercentage(statistic);
+        }
+
+        return statisticFormat.format(this.attributeTotal(statistic));
+    }
+
+    protected String formatPercentage(StatisticType statistic) {
+        return (int) (this.floatValue(statistic) * 100) + "%";
+    }
+
+    protected Map.Entry<Statistic, Text> statisticEntry(StatisticType type, Translation translation, Object... arguments) {
+        return Map.entry(this.statistic(type), translation.format(Util.prepend(this.formatStatistic(type), arguments)));
     }
 
     /**

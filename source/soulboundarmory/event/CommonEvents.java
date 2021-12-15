@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -45,11 +46,13 @@ public final class CommonEvents {
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void playerDrops(LivingDropsEvent event) {
-        if (event.getEntity() instanceof PlayerEntity player && !player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
-            Components.soulbound(player)
-                .map(SoulboundComponent::item)
-                .filter(component -> component != null && component.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
-                .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.giveItemStack(drop.getStack())));
+        if (event.getEntity() instanceof PlayerEntity player) {
+            if (!player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+                Components.soulbound(player)
+                    .map(SoulboundComponent::item)
+                    .filter(component -> component != null && component.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
+                    .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.giveItemStack(drop.getStack())));
+            }
         } else {
             ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> {
                 if (component.hasSkill(Skills.enderPull)) {
@@ -64,12 +67,26 @@ public final class CommonEvents {
      */
     @SubscribeEvent
     public static void breakSpeed(PlayerEvent.BreakSpeed event) {
-        ItemComponent.fromMainHand(event.getPlayer()).ifPresent(component -> {
-            var efficiency = component.floatValue(StatisticType.efficiency);
-            event.setNewSpeed(efficiency > 0 || component instanceof ToolComponent ? event.getNewSpeed() + efficiency : 0);
+        ItemComponent.fromMainHand(event.getPlayer()).ifPresent(item -> {
+            var efficiency = item.floatValue(StatisticType.efficiency);
+
+            if (item instanceof ToolComponent) {
+                if (!item.stack().isSuitableFor(event.getState())) {
+                    return;
+                }
+            } else if (efficiency == 0) {
+                event.setNewSpeed(0);
+
+                return;
+            }
+
+            event.setNewSpeed(event.getNewSpeed() + efficiency);
         });
     }
 
+    /**
+     Give the player experience directly if {@link Skills#enderPull} is unlocked.
+     */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void breakBlock(BlockEvent.BreakEvent event) {
         ItemComponent.fromMainHand(event.getPlayer()).ifPresent(component -> {
@@ -115,6 +132,18 @@ public final class CommonEvents {
 
         if (target instanceof ServerPlayerEntity && ItemComponentType.greatsword.of(target).leapForce() > 0 && damage.getAttacker() != null && !damage.isExplosive() && !damage.isProjectile()) {
             event.setCanceled(true);
+        }
+    }
+
+    /**
+     Cancel knockback to leaping players.
+     */
+    @SubscribeEvent
+    public static void knockback(LivingKnockBackEvent event) {
+        if (event.getEntity() instanceof ServerPlayerEntity player) {
+            if (ItemComponentType.greatsword.of(player).leapForce() > 0) {
+                event.setCanceled(true);
+            }
         }
     }
 

@@ -20,10 +20,6 @@ public class ItemComponentArgumentType extends RegistryArgumentType<ItemComponen
         return new ItemComponentArgumentType();
     }
 
-    public static Set<ItemComponentType<? extends ItemComponent<?>>> get(CommandContext<?> context, String name) {
-        return context.getArgument(name, Set.class);
-    }
-
     @Override
     public Set<ItemComponentType<? extends ItemComponent<?>>> parse(StringReader reader) throws CommandSyntaxException {
         var cursor = reader.getCursor();

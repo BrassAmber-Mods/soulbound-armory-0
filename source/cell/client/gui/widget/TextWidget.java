@@ -39,7 +39,7 @@ public class TextWidget extends Widget<TextWidget> {
     }
 
     @Override
-    protected void renderWidget() {
+    protected void render() {
         for (var index = 0; index < this.text.size(); index++) {
             if (this.shadow) {
                 textDrawer.drawWithShadow(this.matrixes, this.text.get(index), this.x(), this.y() + fontHeight() * index, this.active() ? 0xFFFFFFFF : 0xA0FFFFFF);

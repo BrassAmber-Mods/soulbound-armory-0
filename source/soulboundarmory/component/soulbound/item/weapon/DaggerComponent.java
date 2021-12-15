@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -13,16 +14,17 @@ import net.minecraft.item.Item;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeMod;
-import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
+import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.Attributes;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
+import soulboundarmory.util.Util;
 
 public class DaggerComponent extends WeaponComponent<DaggerComponent> {
     public DaggerComponent(SoulboundComponent<?> component) {
@@ -30,9 +32,9 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
 
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalHitRate, StatisticType.efficiency, StatisticType.reach)
             .min(2, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate)
+            .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
@@ -55,13 +57,8 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
     }
 
     @Override
-    public List<StatisticEntry> screenAttributes() {
-        return List.of(
-            new StatisticEntry(this.statistic(StatisticType.attackSpeed), Translations.guiAttackSpeed.format(this.formatStatistic(StatisticType.attackSpeed))),
-            new StatisticEntry(this.statistic(StatisticType.attackDamage), Translations.guiAttackDamage.format(this.formatStatistic(StatisticType.attackDamage))),
-            new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), Translations.guiCriticalStrikeRate.format(this.formatStatistic(StatisticType.criticalStrikeRate))),
-            new StatisticEntry(this.statistic(StatisticType.efficiency), Translations.guiWeaponEfficiency.format(this.formatStatistic(StatisticType.efficiency)))
-        );
+    public Map<Statistic, Text> screenAttributes() {
+        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiWeaponEfficiency));
     }
 
     @Override
@@ -74,8 +71,8 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
             LiteralText.EMPTY
         ));
 
-        if (this.doubleValue(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(Translations.tooltipCriticalStrikeRate.translate(format.format(this.doubleValue(StatisticType.criticalStrikeRate) * 100)));
+        if (this.doubleValue(StatisticType.criticalHitRate) > 0) {
+            tooltip.add(Translations.tooltipCriticalHitRate.translate(format.format(this.doubleValue(StatisticType.criticalHitRate) * 100)));
         }
 
         if (this.doubleValue(StatisticType.efficiency) > 0) {
@@ -89,7 +86,7 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
     public double increase(StatisticType statistic) {
         if (statistic == StatisticType.attackSpeed) return 0.04;
         if (statistic == StatisticType.attackDamage) return 0.05;
-        if (statistic == StatisticType.criticalStrikeRate) return 0.02;
+        if (statistic == StatisticType.criticalHitRate) return 0.02;
         if (statistic == StatisticType.efficiency) return 0.06;
 
         return 0;

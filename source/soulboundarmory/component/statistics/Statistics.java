@@ -90,7 +90,7 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
 
     public Statistics max(double max, StatisticType... types) {
         for (var type : types) {
-            this.get(type).max(max);
+            this.get(type).defaultMax(max);
         }
 
         return this;

@@ -7,6 +7,7 @@ import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Hand;
 import net.minecraft.world.GameRules;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
@@ -70,7 +71,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
      Find this component's item component of the given type.
 
      @param type the item component type
-     @param <S> the class of the item component
+     @param <S>  the class of the item component
      @return the item component if it exists or null.
      */
     public <S extends ItemComponent<S>> S item(ItemComponentType<S> type) {
@@ -106,20 +107,15 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
 
      @return whether a GUI was opened.
      */
-    public boolean tryOpenGUI() {
-        var handStacks = ItemUtil.handStacks(this.player).toList().listIterator();
+    public boolean tryOpenGUI(Hand hand) {
+        var stack = this.player.getStackInHand(hand);
+        var match = this.items.values().stream().filter(storage -> storage.accepts(stack)).findAny();
+        var slot = hand == Hand.OFF_HAND ? 40 : this.player.getInventory().selectedSlot;
 
-        while (handStacks.hasNext()) {
-            var stack = handStacks.next();
-            var match = this.items.values().stream().filter(storage -> storage.accepts(stack)).findAny();
-            var slot = handStacks.previousIndex();
-            slot = slot == 1 ? 40 : this.player.getInventory().selectedSlot;
+        if (match.isPresent() || this.items.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
+            new SoulboundScreen(this, slot).open();
 
-            if (match.isPresent() || this.items.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
-                new SoulboundScreen(this, slot).open();
-
-                return true;
-            }
+            return true;
         }
 
         return false;
