@@ -46,6 +46,10 @@ public final class Configuration {
     public double attackDamageMultiplier = 0.35;
 
     @Category(MULTIPLIERS)
+    @Comment("1 + (attack speed multiplier) * damage")
+    public double attackSpeedMultiplier = 0.5;
+
+    @Category(MULTIPLIERS)
     @Comment({"(difficulty multiplier) * difficulty", "Difficulty ranges from 0 to 3."})
     public double difficultyMultiplier = 0.5;
 
@@ -132,7 +136,7 @@ public final class Configuration {
         public boolean levelupNotifications = false;
 
         @Comment("display option button and sliders in the menu")
-        public boolean displayOptions = true;
+        public boolean displayOptions = false;
 
         @Comment("replace the default XP bar with an XP bar for the currently held soulbound item")
         public boolean overlayExperienceBar = true;

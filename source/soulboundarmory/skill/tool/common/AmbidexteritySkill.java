@@ -1,11 +1,10 @@
 package soulboundarmory.skill.tool.common;
 
-import net.minecraft.util.Identifier;
 import soulboundarmory.skill.Skill;
 
-public class AmbidexteritySkill extends Skill {
-    public AmbidexteritySkill(Identifier identifier) {
-        super(identifier);
+public final class AmbidexteritySkill extends Skill {
+    public AmbidexteritySkill() {
+        super("ambidexterity");
     }
 
     @Override

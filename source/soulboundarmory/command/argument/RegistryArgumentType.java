@@ -28,7 +28,10 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<?>> implements A
         return new RegistryArgumentType<>(registry);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T extends IForgeRegistryEntry> Set<T> get(CommandContext<?> context, String name) {
+        return context.getArgument(name, Set.class);
+    }
+
     @Override
     public Set<T> parse(StringReader reader) throws CommandSyntaxException {
         var input = reader.readString();

@@ -36,7 +36,7 @@ public class SelectionTab extends SoulboundTab {
                 .width(buttonWidth)
                 .height(buttonHeight)
                 .text(storage.name())
-                .primaryAction(widget -> Packets.serverSelectItem.send(new ExtendedPacketBuffer(storage).writeInt(this.parent().slot)))
+                .primaryAction(() -> Packets.serverSelectItem.send(new ExtendedPacketBuffer(storage).writeInt(this.parent().slot)))
                 .active(!this.parent().displayTabs() || ItemUtil.inventory(this.parent().player).noneMatch(storage::accepts))
             );
         }

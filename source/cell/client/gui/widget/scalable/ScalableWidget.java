@@ -273,7 +273,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     @Override
-    public void renderWidget() {
+    public void render() {
         bind(this.texture);
         this.resetColor();
 

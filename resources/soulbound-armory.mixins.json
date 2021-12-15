@@ -8,6 +8,7 @@
         "ServerPlayerInteractionManagerMixin",
         "BlockMixin",
         "ItemStackMixin",
+        "MiningToolItemMixin",
         "AbstractBlockStateMixin",
         "access.PlayerInventoryAccess",
         "entity.LightningEntityMixin",

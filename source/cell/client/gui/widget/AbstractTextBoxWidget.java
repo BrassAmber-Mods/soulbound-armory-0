@@ -55,7 +55,7 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
     }
 
     @Override
-    protected void renderWidget() {
+    protected void render() {
         this.renderText();
         this.renderCaret();
     }

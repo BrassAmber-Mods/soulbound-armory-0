@@ -61,7 +61,10 @@ public class Slider extends ScalableWidget<Slider> {
         return this.max - this.min;
     }
 
+    @Override
     public void scroll(double amount) {
+        super.scroll(amount);
+
         var addition = Screen.hasShiftDown() ? 0.05 * this.range()
             : Screen.hasControlDown() ? 1
                 : 0.01 * this.range();

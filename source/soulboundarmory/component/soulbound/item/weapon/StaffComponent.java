@@ -1,7 +1,6 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
 import com.google.common.collect.Multimap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
@@ -35,10 +33,10 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
 
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalHitRate)
             .min(0.48, StatisticType.attackSpeed)
             .min(8, StatisticType.attackDamage)
-            .max(1, StatisticType.criticalStrikeRate)
+            .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> {
@@ -97,15 +95,6 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     }
 
     @Override
-    public List<StatisticEntry> screenAttributes() {
-        return new ReferenceArrayList<>(List.of(
-            new StatisticEntry(this.statistic(StatisticType.attackSpeed), Translations.guiAttackSpeed.format(this.formatStatistic(StatisticType.attackSpeed))),
-            new StatisticEntry(this.statistic(StatisticType.attackDamage), Translations.guiAttackDamage.format(this.formatStatistic(StatisticType.attackDamage))),
-            new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), Translations.guiCriticalStrikeRate.format(this.formatStatistic(StatisticType.criticalStrikeRate)))
-        ));
-    }
-
-    @Override
     public List<Text> tooltip() {
         var format = DecimalFormat.getInstance();
         var tooltip = new ArrayList<>(List.of(
@@ -115,8 +104,8 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
             LiteralText.EMPTY
         ));
 
-        if (this.doubleValue(StatisticType.criticalStrikeRate) > 0) {
-            tooltip.add(Translations.tooltipCriticalStrikeRate.translate(format.format(this.formatStatistic(StatisticType.criticalStrikeRate))));
+        if (this.doubleValue(StatisticType.criticalHitRate) > 0) {
+            tooltip.add(Translations.tooltipCriticalHitRate.translate(format.format(this.formatStatistic(StatisticType.criticalHitRate))));
         }
 
         return tooltip;
@@ -131,7 +120,7 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     public double increase(StatisticType statistic) {
         if (statistic == StatisticType.attackSpeed) return 0.08;
         if (statistic == StatisticType.attackDamage) return 0.2;
-        if (statistic == StatisticType.criticalStrikeRate) return 0.04;
+        if (statistic == StatisticType.criticalHitRate) return 0.04;
 
         return 0;
     }

@@ -5,7 +5,9 @@ import cell.client.gui.screen.ScreenDelegate;
 import cell.client.gui.widget.Coordinate;
 import cell.client.gui.widget.Length;
 import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -66,6 +68,14 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
 
     public static double mouseY() {
         return mouse.getY() * (double) window.getScaledHeight() / window.getHeight();
+    }
+
+    public static int width(Text text) {
+        return textDrawer.getWidth(text);
+    }
+
+    public static int width(Stream<? extends Text> text) {
+        return text.map(CellElement::width).max(Comparator.naturalOrder()).orElse(0);
     }
 
     /**

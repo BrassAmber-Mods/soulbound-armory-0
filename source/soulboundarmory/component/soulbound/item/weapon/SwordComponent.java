@@ -3,8 +3,8 @@ package soulboundarmory.component.soulbound.item.weapon;
 import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -14,15 +14,16 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import soulboundarmory.client.gui.screen.StatisticEntry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
+import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.AttributeModifierIdentifiers;
+import soulboundarmory.util.Util;
 
 public class SwordComponent extends WeaponComponent<SwordComponent> {
     protected int lightningCooldown;
@@ -32,11 +33,11 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
 
         this.statistics
             .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalStrikeRate, StatisticType.efficiency, StatisticType.reach)
+            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalHitRate, StatisticType.efficiency, StatisticType.reach)
             .min(1.6, StatisticType.attackSpeed)
             .min(3, StatisticType.attackDamage)
             .min(3, StatisticType.reach)
-            .max(1, StatisticType.criticalStrikeRate)
+            .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
 
         this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
@@ -77,13 +78,8 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
     }
 
     @Override
-    public List<StatisticEntry> screenAttributes() {
-        return Arrays.asList(
-            new StatisticEntry(this.statistic(StatisticType.attackSpeed), Translations.guiAttackSpeed.format(this.formatStatistic(StatisticType.attackSpeed))),
-            new StatisticEntry(this.statistic(StatisticType.attackDamage), Translations.guiAttackDamage.format(this.formatStatistic(StatisticType.attackDamage))),
-            new StatisticEntry(this.statistic(StatisticType.criticalStrikeRate), Translations.guiCriticalStrikeRate.format(this.formatStatistic(StatisticType.criticalStrikeRate))),
-            new StatisticEntry(this.statistic(StatisticType.efficiency), Translations.guiWeaponEfficiency.format(this.formatStatistic(StatisticType.efficiency)))
-        );
+    public Map<Statistic, Text> screenAttributes() {
+        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiWeaponEfficiency));
     }
 
     @Override
@@ -95,7 +91,7 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
             Translations.tooltipAttackDamage.translate(format.format(this.attributeTotal(StatisticType.attackDamage))),
             LiteralText.EMPTY,
             LiteralText.EMPTY,
-            Translations.tooltipCriticalStrikeRate.translate(format.format(this.doubleValue(StatisticType.criticalStrikeRate) * 100)),
+            Translations.tooltipCriticalHitRate.translate(format.format(this.doubleValue(StatisticType.criticalHitRate) * 100)),
             Translations.tooltipToolEfficiency.translate(format.format(this.doubleValue(StatisticType.efficiency)))
         ));
     }
@@ -104,7 +100,7 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
     public double increase(StatisticType statistic) {
         if (statistic == StatisticType.attackSpeed) return 0.03;
         if (statistic == StatisticType.attackDamage) return 0.07;
-        if (statistic == StatisticType.criticalStrikeRate) return 0.015;
+        if (statistic == StatisticType.criticalHitRate) return 0.015;
         if (statistic == StatisticType.efficiency) return 0.04;
 
         return 0;

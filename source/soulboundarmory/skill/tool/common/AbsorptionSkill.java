@@ -2,9 +2,9 @@ package soulboundarmory.skill.tool.common;
 
 import soulboundarmory.skill.Skill;
 
-public final class CircumspectionSkill extends Skill {
-    public CircumspectionSkill() {
-        super("circumspection");
+public final class AbsorptionSkill extends Skill {
+    public AbsorptionSkill() {
+        super("absorption");
     }
 
     @Override
