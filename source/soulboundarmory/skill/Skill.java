@@ -1,12 +1,11 @@
 package soulboundarmory.skill;
 
 import cell.client.gui.screen.CellScreen;
+import cell.client.gui.widget.Widget;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
@@ -17,8 +16,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.SoulboundArmory;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.registry.RegistryEntry;
-import soulboundarmory.text.Translation;
 import soulboundarmory.util.Util;
 
 /**
@@ -89,19 +88,18 @@ public abstract class Skill extends RegistryEntry<Skill> {
     }
 
     public Text name() {
-        var name = I18n.translate("skill.%s.%s.name".formatted(this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
-        return Text.of(name.substring(0, 1).toUpperCase() + name.substring(1));
+        return Translations.skillName(this);
     }
 
     public List<? extends StringVisitable> tooltip() {
-        return Stream.of(I18n.translate("skill.%s.%s.desc".formatted(this.getRegistryName().getNamespace(), this.getRegistryName().getPath())).split("\\\\n")).map(Translation::new).toList();
+        return Translations.skillDescription(this);
     }
 
     /**
      Render an icon of this skill.
      */
     public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
-        CellScreen.textureManager.bindTexture(this.texture);
+        Widget.bind(this.texture);
         DrawableHelper.drawTexture(matrixes, x, y, zOffset, 0, 0, 16, 16, 16, 16);
     }
 

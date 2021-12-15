@@ -31,7 +31,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
         this.caster = caster;
         this.setPosition(x, y, z);
 
-        AreaHelper.method_30485(world, this.getBlockPos(), null).ifPresent(AreaHelper::createPortal);
+        AreaHelper.getNewPortal(world, this.getBlockPos(), null).ifPresent(AreaHelper::createPortal);
     }
 
     public SoulboundLightningEntity(World world, Vec3d pos, UUID caster) {
@@ -55,7 +55,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
 
         if (this.life() < 0) {
             if (this.flashes() == 0) {
-                this.remove();
+                this.discard();
             } else if (this.life() < -this.random.nextInt(10)) {
                 this.flashes(this.flashes() - 1);
                 this.life(1);
@@ -108,7 +108,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
                                     var player = (PlayerEntity) caster;
 
                                     if (knockbackModifier > 0) {
-                                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(caster.yaw * 0.017453292F), -MathHelper.cos(caster.yaw * 0.017453292F));
+                                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(caster.getYaw() * 0.017453292F), -MathHelper.cos(caster.getYaw() * 0.017453292F));
                                     }
 
                                     if (attackDamageModifier > 0) {

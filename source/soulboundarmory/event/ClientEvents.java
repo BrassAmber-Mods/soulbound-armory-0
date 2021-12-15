@@ -1,7 +1,6 @@
 package soulboundarmory.event;
 
 import cell.client.gui.CellElement;
-import cell.client.gui.screen.CellScreen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import net.minecraft.client.gui.screen.Screen;
@@ -13,20 +12,15 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.bar.ExperienceBar;
-import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.config.Configuration;
-import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.ItemUtil;
 
 @OnlyIn(Dist.CLIENT)
@@ -54,15 +48,6 @@ public final class ClientEvents {
                     }
                 }
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.EXPERIENCE
-            && (CellScreen.cellScreen() instanceof SoulboundScreen || Configuration.instance().client.overlayExperienceBar && overlayBar.render(event.getMatrixStack(), event.getWindow()))
-        ) {
-            event.setCanceled(true);
         }
     }
 
@@ -104,13 +89,6 @@ public final class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderTooltip(RenderTooltipEvent.PostBackground event) {
-        if (event.getStack().getItem() instanceof SoulboundItem) {
-            tooltipBar.drawTooltip(event.getMatrixStack(), event.getStack(), event.getX(), event.getY(), event.getWidth());
-        }
-    }
-
-    @SubscribeEvent
     public static void onLoadResources(AddReloadListenerEvent event) {
         event.addListener(new ExperienceBarReloader());
     }
@@ -124,9 +102,8 @@ public final class ClientEvents {
         @Override
         protected void apply(Void nothing, ResourceManager manager, Profiler profiler) {
             RenderSystem.recordRenderCall(() -> {
-                overlayBar = new ExperienceBar();
+                overlayBar = new ExperienceBar().center();
                 tooltipBar = new ExperienceBar();
-                overlayBar.width(182).height(5).center();
             });
         }
     }

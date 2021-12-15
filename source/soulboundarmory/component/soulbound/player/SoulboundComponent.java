@@ -113,7 +113,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
             var stack = handStacks.next();
             var match = this.items.values().stream().filter(storage -> storage.accepts(stack)).findAny();
             var slot = handStacks.previousIndex();
-            slot = slot == 1 ? 40 : this.player.inventory.selectedSlot;
+            slot = slot == 1 ? 40 : this.player.getInventory().selectedSlot;
 
             if (match.isPresent() || this.items.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
                 new SoulboundScreen(this, slot).open();

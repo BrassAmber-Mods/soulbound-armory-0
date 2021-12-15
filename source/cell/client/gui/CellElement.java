@@ -10,8 +10,11 @@ import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -20,9 +23,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
-import net.minecraftforge.client.model.animation.Animation;
-import net.minecraftforge.fml.client.gui.GuiUtils;
-import org.lwjgl.opengl.GL11;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 public abstract class CellElement<T extends CellElement<T>> extends DrawableHelper implements DrawableElement, Cloneable {
     public Coordinate x = new Coordinate();
@@ -56,7 +57,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     }
 
     public static float tickDelta() {
-        return Animation.getPartialTickTime();
+        return MinecraftForgeClient.getPartialTick();
     }
 
     public static double mouseX() {
@@ -78,8 +79,24 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         return InputUtil.isKeyPressed(minecraft.getWindow().getHandle(), keyCode);
     }
 
+    public static void bind(AbstractTexture texture) {
+        RenderSystem.setShaderTexture(0, texture.getGlId());
+    }
+
+    public static void bind(Identifier texture) {
+        RenderSystem.setShaderTexture(0, texture);
+    }
+
+    public static void setPositionColorShader() {
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+    }
+
+    public static void setPositionColorTextureShader() {
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+    }
+
     public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, float z, int color) {
-        fill(matrices.peek().getModel(), x1, y1, x2, y2, z, color);
+        fill(matrices.peek().getPositionMatrix(), x1, y1, x2, y2, z, color);
     }
 
     public static void fill(Matrix4f matrix, int x1, int y1, int x2, int y2, float z, int color) {
@@ -103,11 +120,12 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         var b = (color & 255) / 255F;
         var bufferBuilder = Tessellator.getInstance().getBuffer();
 
+        setPositionColorShader();
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
-        bufferBuilder.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
         bufferBuilder.vertex(matrix, x1, y2, z).color(r, g, b, a).next();
         bufferBuilder.vertex(matrix, x2, y2, z).color(r, g, b, a).next();
         bufferBuilder.vertex(matrix, x2, y1, z).color(r, g, b, a).next();
@@ -199,20 +217,12 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         drawStrokedText(matrixes, text, x, y, color, 0);
     }
 
-    public static void renderTooltip(MatrixStack matrixes, List<? extends StringVisitable> lines, double x, double y, int maxTextWidth) {
-        GuiUtils.drawHoveringText(matrixes, lines, (int) x, (int) y, window.getScaledWidth(), window.getScaledHeight(), maxTextWidth, textDrawer);
-    }
-
     public static void renderTooltip(MatrixStack matrixes, List<? extends StringVisitable> lines, double x, double y) {
-        GuiUtils.drawHoveringText(matrixes, lines, (int) x, (int) y, window.getScaledWidth(), window.getScaledHeight(), -1, textDrawer);
-    }
-
-    public static void renderTooltip(MatrixStack matrixes, StringVisitable text, double x, double y, int maxTextWidth) {
-        GuiUtils.drawHoveringText(matrixes, List.of(text), (int) x, (int) y, window.getScaledWidth(), window.getScaledHeight(), maxTextWidth, textDrawer);
+        screen().renderComponentTooltip(matrixes, lines, (int) x, (int) y, textDrawer, ItemStack.EMPTY);
     }
 
     public static void renderTooltip(MatrixStack matrixes, StringVisitable text, double x, double y) {
-        GuiUtils.drawHoveringText(matrixes, List.of(text), (int) x, (int) y, window.getScaledWidth(), window.getScaledHeight(), -1, textDrawer);
+        renderTooltip(matrixes, List.of(text), (int) x, (int) y);
     }
 
     public static void renderBackground(Identifier identifier, int x, int y, int width, int height, int chroma, int alpha) {
@@ -222,10 +232,11 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         float endX = x + width;
         float endY = y + height;
 
-        textureManager.bindTexture(identifier);
-        RenderSystem.color4f(1, 1, 1, 1);
+        bind(identifier);
+        setPositionColorTextureShader();
+        RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        builder.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
+        builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
         builder.vertex(x, endY, 0).color(chroma, chroma, chroma, 255).texture(0, endY / f + alpha).next();
         builder.vertex(endX, endY, 0).color(chroma, chroma, chroma, 255).texture(endX / f, endY / f + alpha).next();
         builder.vertex(endX, y, 0).color(chroma, chroma, chroma, 255).texture(endX / f, alpha).next();

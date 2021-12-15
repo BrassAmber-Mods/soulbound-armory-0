@@ -86,7 +86,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
         }
     }
 
-    @Inject(method = "areTagsEqual", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "areNbtEqual", at = @At("RETURN"), cancellable = true)
     private static void compareComponents(ItemStack stack, ItemStack other, CallbackInfoReturnable<Boolean> info) {
         var mixin = (ItemStackMixin) (Object) stack;
 

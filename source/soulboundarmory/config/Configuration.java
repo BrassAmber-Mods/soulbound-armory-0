@@ -1,14 +1,15 @@
 package soulboundarmory.config;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import net.auoeke.reflect.Accessor;
-import soulboundarmory.client.gui.bar.BarStyle;
+import net.auoeke.reflect.Fields;
+import net.auoeke.reflect.Flags;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
+import soulboundarmory.client.gui.bar.BarStyle;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
@@ -80,9 +81,9 @@ public final class Configuration {
     private static ForgeConfigSpec configuration(Class<?> type) {
         var builder = new ForgeConfigSpec.Builder();
 
-        for (var field : type.getDeclaredFields()) {
-            if ((field.getModifiers() & (Modifier.TRANSIENT | ~Modifier.STATIC)) != 0) {
-                continue;
+        Fields.of(type).forEach(field -> {
+            if (Flags.isTransient(field) || Flags.isInstance(field)) {
+                return;
             }
 
             var category = field.getAnnotation(Category.class);
@@ -111,27 +112,19 @@ public final class Configuration {
             if (category != null) {
                 builder.pop();
             }
-        }
+        });
 
         return builder.build();
     }
 
     public static void paths(String mod, Class<?> holder) {
-        Map<Field, String> paths = new HashMap<>();
-
-        for (var field : holder.getDeclaredFields()) {
-            paths(paths, field, String.format("config.%s.%s", mod, field.getName()));
-        }
+        var paths = new HashMap<Field, String>();
+        Fields.of(holder).forEach(field -> paths(paths, field, String.format("config.%s.%s", mod, field.getName())));
     }
 
     public static void paths(Map<Field, String> paths, Field field, String path) {
         paths.put(field, path);
-
-        for (var child : field.getType().getDeclaredFields()) {
-            if (Accessor.get(child) != null) {
-                paths(paths, child, path + "." + child.getName());
-            }
-        }
+        Fields.of(field.getType()).filter(child -> Accessor.get(child) != null).forEach(child -> paths(paths, child, path + "." + child.getName()));
     }
 
     public static class Client {

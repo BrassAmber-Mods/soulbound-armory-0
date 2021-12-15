@@ -1,6 +1,6 @@
 package soulboundarmory.entity;
 
-import soulboundarmory.mixin.access.AbstractArrowEntityAccess;
+import soulboundarmory.mixin.access.PersistentProjectileEntityAccess;
 import soulboundarmory.util.Math2;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -38,11 +38,7 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     }
 
     public double getSpeed() {
-        return Math.sqrt(
-            this.velocityX() * this.velocityX()
-                + this.velocityY() * this.velocityY()
-                + this.velocityZ() * this.velocityZ()
-        );
+        return Math.sqrt(Math2.square(this.velocityX()) + Math2.square(this.velocityY()) + Math2.square(this.velocityZ()));
     }
 
     public double velocityX() {
@@ -62,6 +58,6 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     }
 
     protected int life() {
-        return ((AbstractArrowEntityAccess) this).life();
+        return ((PersistentProjectileEntityAccess) this).life();
     }
 }

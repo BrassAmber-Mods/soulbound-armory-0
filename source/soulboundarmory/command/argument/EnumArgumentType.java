@@ -7,33 +7,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import net.auoeke.reflect.Accessor;
+import net.auoeke.reflect.Fields;
 
 public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T>{
     protected final Class<T> type;
     protected final List<T> values;
 
-    protected EnumArgumentType(Class<T> type, Predicate<T> include) {
+    protected EnumArgumentType(Class<T> type, Predicate<? super T> include) {
         this.type = type;
+        this.values = new ArrayList<>();
 
-        var values = this.values = new ArrayList<>();
-
-        for (var field : type.getDeclaredFields()) {
-            var value = (T) Accessor.getObject(field);
-
-            if (include.test(value)) {
-                values.add(value);
-            }
-        }
+        Fields.of(type).map(field1 -> (T) Accessor.getReference(field1)).filter(include).forEach(this.values::add);
     }
 
-    protected EnumArgumentType(Class<T> enumClass) {
-        this.type = enumClass;
-        var values = this.values = new ArrayList<>();
+    protected EnumArgumentType(Class<T> type) {
+        this.type = type;
+        this.values = new ArrayList<>();
 
-        for (var field : enumClass.getDeclaredFields()) {
-            //noinspection unchecked
-            values.add((T) Accessor.getObject(field));
-        }
+        Fields.of(type).forEach(field -> this.values.add((T) Accessor.getReference(field)));
     }
 
     @Override

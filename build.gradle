@@ -6,6 +6,10 @@ plugins {
 group = "net.auoeke"
 version = "3.0.0"
 
+def gameVersion = "1.18.1"
+def yarn = "3"
+def forgeVersion = "39.0.5"
+
 sourceCompatibility = 17
 targetCompatibility = 17
 
@@ -30,12 +34,22 @@ loom {
     }
 }
 
-dependencies {
-    minecraft("com.mojang:minecraft:1.16.5")
-    mappings("net.fabricmc:yarn:1.16.5+build.10:v2")
-    forge("net.minecraftforge:forge:1.16.5-36.2.20")
+configurations {
+    library {
+        implementation.extendsFrom(it)
 
-    implementation("net.auoeke:reflect:latest.integration")
+        afterEvaluate {
+            new File(loom.files.projectPersistentCache, "forge_minecraft_classpath.txt") << resolvedConfiguration.files.collect {'\n' + it}.join()
+        }
+    }
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:$gameVersion")
+    mappings("net.fabricmc:yarn:$gameVersion+build.$yarn:v2")
+    forge("net.minecraftforge:forge:$gameVersion-$forgeVersion")
+
+    library("net.auoeke:reflect:latest.integration")
 }
 
 tasks.withType(JavaCompile) {

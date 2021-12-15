@@ -7,15 +7,15 @@
         "ServerPlayNetworkHandlerMixin",
         "ServerPlayerInteractionManagerMixin",
         "BlockMixin",
+        "ItemStackMixin",
         "AbstractBlockStateMixin",
+        "access.PlayerInventoryAccess",
         "entity.LightningEntityMixin",
         "entity.LivingEntityMixin",
-        "entity.attribute.EntityAttributeModifierMixin",
-        "entity.attribute.OperationMixin",
-        "entity.player.PlayerInventoryAccess",
-        "entity.player.PlayerInventoryMixin",
-        "entity.projectile.AbstractArrowEntityMixin",
-        "item.ItemStackMixin"
+        "entity.EntityAttributeModifierMixin",
+        "entity.OperationMixin",
+        "entity.PlayerInventoryMixin",
+        "entity.PersistentProjectileEntityMixin"
     ],
     "injectors": {
         "defaultRequire": 1,
@@ -23,6 +23,7 @@
     },
     "client": [
         "client.GameRendererMixin",
+        "client.InGameHudMixin",
         "client.LivingEntityRendererMixin"
     ]
 }

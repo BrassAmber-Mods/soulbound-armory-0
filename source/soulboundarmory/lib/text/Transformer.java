@@ -3,6 +3,7 @@ package soulboundarmory.lib.text;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
+import net.auoeke.reflect.Flags;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -44,7 +45,7 @@ public class Transformer implements IMixinConfigPlugin {
     public void preApply(String targetClassName, ClassNode target, String mixinClassName, IMixinInfo mixinInfo) {
         switch (mixinClassName) {
             case "soulboundarmory.lib.text.mixin.StyleMixin" -> {
-                var methodNames = Util.hashSet(Util.mapMethod("func_240720_a_"), Util.mapMethod("func_240721_b_"), Util.mapMethod("func_240723_c_"));
+                var methodNames = Util.hashSet(Util.mapMethod(131152), Util.mapMethod(131157), Util.mapMethod(131164));
 
                 target.methods.stream().filter(method -> methodNames.contains(method.name)).forEach(method -> {
                     for (var instruction : method.instructions) {
@@ -64,72 +65,62 @@ public class Transformer implements IMixinConfigPlugin {
                 });
             }
             case "soulboundarmory.lib.text.mixin.TextColorMixin" -> {
-                var getRgb = Util.mapMethod("func_240742_a_");
+                var value = Util.mapField(131257);
+                var getRgb = Util.mapMethod(131265);
 
-                for (var method : target.methods) {
-                    if (getRgb.equals(method.name)) {
-                        var internalName = targetClassName.replace('.', '/');
-                        var value = Util.mapField("field_240740_c_");
+                var method = target.methods.stream().filter(m -> m.name.equals(getRgb)).findAny().get();
+                var internalName = targetClassName.replace('.', '/');
+                var insertion = new InsnList();
 
-                        var insertion = new InsnList();
-                        var endIf = new LabelNode();
+                /*if (this.phormat_hasColorFunction) {
+                    return this.phormat_previousColor = this.phormat_colorFunction.apply(this.phormat_previousColor);
+                }*/
 
-                        /*if (this.phormat_hasColorFunction) {
-                            return this.phormat_previousColor = this.phormat_colorFunction.apply(this.phormat_previousColor);
-                        }*/
+                var endIf = new LabelNode();
+                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this
+                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
+                insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_hasColorFunction", "Z")); // this boolean
+                insertion.add(new JumpInsnNode(Opcodes.IFEQ, endIf)); // this
+                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
+                insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_colorFunction", "Lsoulboundarmory/lib/text/ColorFunction;")); // this ColorFunction
+                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this ColorFunction this
+                insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_previousColor", "I")); // this ColorFunction int
+                insertion.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "soulboundarmory/lib/text/ColorFunction", "apply", "(I)I", true)); // this int
+                insertion.add(new InsnNode(Opcodes.DUP_X1)); // int this int
+                insertion.add(new FieldInsnNode(Opcodes.PUTFIELD, internalName, "phormat_previousColor", "I")); // int
+                insertion.add(new InsnNode(Opcodes.IRETURN));
+                insertion.add(endIf);
 
-                        insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this
-                        insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
-                        insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_hasColorFunction", "Z")); // this boolean
-                        insertion.add(new JumpInsnNode(Opcodes.IFEQ, endIf)); // this
-                        insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
-                        insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_colorFunction", "Lsoulboundarmory/lib/text/ColorFunction;")); // this ColorFunction
-                        insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this ColorFunction this
-                        insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_previousColor", "I")); // this ColorFunction int
-                        insertion.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "soulboundarmory/lib/text/ColorFunction", "apply", "(I)I", true)); // this int
-                        insertion.add(new InsnNode(Opcodes.DUP_X1)); // int this int
-                        insertion.add(new FieldInsnNode(Opcodes.PUTFIELD, internalName, "phormat_previousColor", "I")); // int
-                        insertion.add(new InsnNode(Opcodes.IRETURN));
-                        insertion.add(endIf);
-
-                        method.instructions.insertBefore(method.instructions.getFirst(), insertion);
-
-                        break;
-                    }
-                }
+                method.instructions.insertBefore(method.instructions.getFirst(), insertion);
             }
             case "soulboundarmory.lib.text.mixin.dummy.LanguageDummyMixin" -> {
-                for (var method : target.methods) {
-                    if (method.name.equals(Util.mapMethod("func_230503_a_"))) {
-                        var instructions = new InsnList();
-                        var end = new LabelNode();
+                var get = Util.mapMethod(6834);
+                var method = target.methods.stream().filter(m -> m.name.equals(get)).findAny().get();
+                var instructions = new InsnList();
+                var end = new LabelNode();
 
-                        instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                        instructions.add(new LdcInsnNode("enchantment\\.level\\.\\d+"));
-                        instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "matches", "(Ljava/lang/String;)Z", false));
-                        instructions.add(new JumpInsnNode(Opcodes.IFEQ, end));
-                        instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                        instructions.add(new LdcInsnNode("\\D"));
-                        instructions.add(new LdcInsnNode(""));
-                        instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "replaceAll", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", false));
-                        instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I"));
-                        instructions.add(new InsnNode(Opcodes.I2L));
-                        instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "soulboundarmory/lib/text/RomanNumerals", "fromDecimal", "(J)Ljava/lang/String;"));
-                        instructions.add(new InsnNode(Opcodes.ARETURN));
-                        instructions.add(end);
+                instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                instructions.add(new LdcInsnNode("enchantment\\.level\\.\\d+"));
+                instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "matches", "(Ljava/lang/String;)Z", false));
+                instructions.add(new JumpInsnNode(Opcodes.IFEQ, end));
+                instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                instructions.add(new LdcInsnNode("\\D"));
+                instructions.add(new LdcInsnNode(""));
+                instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "replaceAll", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", false));
+                instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I"));
+                instructions.add(new InsnNode(Opcodes.I2L));
+                instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "soulboundarmory/lib/text/RomanNumerals", "fromDecimal", "(J)Ljava/lang/String;"));
+                instructions.add(new InsnNode(Opcodes.ARETURN));
+                instructions.add(end);
 
-                        method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-
-                        break;
-                    }
-                }
+                method.instructions.insertBefore(method.instructions.getFirst(), instructions);
             }
             case "soulboundarmory.lib.text.mixin.FormattingMixin" -> {
                 target.access &= ~Opcodes.ACC_FINAL;
 
                 target.fields.forEach(field -> {
                     switch (field.name) {
-                        case ExtendedFormatting.VALUES, "code" -> field.access = field.access & ~Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC;
+                        case ExtendedFormatting.VALUES, "code" -> field.access = Flags.visibility(field.access, Opcodes.ACC_PUBLIC);
                     }
                 });
 

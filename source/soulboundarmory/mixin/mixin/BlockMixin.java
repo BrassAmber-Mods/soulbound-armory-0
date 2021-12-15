@@ -1,5 +1,6 @@
 package soulboundarmory.mixin.mixin;
 
+import java.util.function.Supplier;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -45,21 +46,21 @@ abstract class BlockMixin {
         miner = null;
     }
 
-    @Inject(method = "dropStack",
+    @Inject(method = "dropStack(Lnet/minecraft/world/World;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemStack;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z"))
-    private static void insertEnderPullStackIntoInventory(World world, BlockPos pos, ItemStack stack, CallbackInfo info) {
+    private static void insertEnderPullStackIntoInventory(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack, CallbackInfo info) {
         if (miner != null) {
-            miner.inventory.insertStack(stack);
+            miner.getInventory().insertStack(stack);
         }
     }
 
     /**
      This callback will be invoked if the item stack is still not empty from the previous callback.
      */
-    @Inject(method = "dropStack",
+    @Inject(method = "dropStack(Lnet/minecraft/world/World;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemStack;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private static void dropRemainingEnderPullStackAtMiner(World world, BlockPos pos, ItemStack stack, CallbackInfo info, float d, double dx, double dy, double dz, ItemEntity drop) {
+    private static void dropRemainingEnderPullStackAtMiner(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack, CallbackInfo info, ItemEntity drop) {
         if (miner != null) {
             drop.setPosition(miner.getX(), miner.getY(), miner.getZ());
         }

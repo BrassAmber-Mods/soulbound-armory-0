@@ -24,8 +24,6 @@ public interface FontRenderer$DrawerAccess {
 
     boolean shadow();
 
-    boolean translucent();
-
     Matrix4f pose();
 
     List<GlyphRenderer.Rectangle> rectangles();

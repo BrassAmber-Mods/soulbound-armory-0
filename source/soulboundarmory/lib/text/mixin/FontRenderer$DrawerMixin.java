@@ -60,10 +60,6 @@ abstract class FontRenderer$DrawerMixin implements FontRenderer$DrawerAccess {
     public abstract boolean shadow();
 
     @Override
-    @Accessor("seeThrough")
-    public abstract boolean translucent();
-
-    @Override
     @Accessor("matrix")
     public abstract Matrix4f pose();
 

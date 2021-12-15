@@ -107,7 +107,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
     }
 
     public ExtendedPacketBuffer writeEntity(Entity entity) {
-        return this.writeInt(entity.getEntityId());
+        return this.writeInt(entity.getId());
     }
 
     public Entity readEntity() {

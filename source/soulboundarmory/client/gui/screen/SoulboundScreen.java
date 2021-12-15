@@ -5,7 +5,6 @@ import cell.client.gui.widget.Widget;
 import cell.client.gui.widget.callback.PressCallback;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import cell.client.gui.widget.slider.SliderWidget;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
 import net.minecraft.entity.player.PlayerEntity;
@@ -59,11 +58,11 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         this.options.clear();
         this.sliders.clear();
 
-        this.stack = this.player.inventory.getStack(this.slot);
+        this.stack = this.player.getInventory().getStack(this.slot);
         this.item = ItemComponent.get(this.player, this.stack).orElse(null);
 
         if (this.displayTabs()) {
-            this.add(this.xpBar = new ExperienceBar(this.item).width(182).height(5).x(this.width() / 2).y(this.height() - 27).center().primaryAction(bar -> {
+            this.add(this.xpBar = new ExperienceBar(this.item).x(this.width() / 2).y(this.height() - 27).center().primaryAction(bar -> {
                 configuration.displayOptions ^= true;
                 this.refresh();
             }).tooltip((bar, matrixes, x, y) -> {
@@ -136,7 +135,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 this.renderTooltip(Translations.barLevel.format(level, maxLevel));
             }
 
-            RenderSystem.disableLighting();
+            // RenderSystem.disableLighting();
         }
     }
 

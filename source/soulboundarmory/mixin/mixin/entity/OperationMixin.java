@@ -1,4 +1,4 @@
-package soulboundarmory.mixin.mixin.entity.attribute;
+package soulboundarmory.mixin.mixin.entity;
 
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import org.spongepowered.asm.mixin.Final;

@@ -1,5 +1,5 @@
 package soulboundarmory.mixin.access;
 
-public interface AbstractArrowEntityAccess {
+public interface PersistentProjectileEntityAccess {
     int life();
 }

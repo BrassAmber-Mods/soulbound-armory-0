@@ -20,8 +20,8 @@ import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.entity.Attributes;
-import soulboundarmory.item.SoulboundToolMaterial;
 import soulboundarmory.registry.Skills;
+import soulboundarmory.registry.SoulboundItems;
 
 public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
     public ToolComponent(SoulboundComponent<?> component) {
@@ -36,10 +36,10 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
 
     public Text miningLevelName(int level) {
         return switch (level) {
-            case 0 -> Translations.miningLevelCoal;
-            case 1 -> Translations.miningLevelIron;
-            case 2 -> Translations.miningLevelDiamond;
-            case 3 -> Translations.miningLevelObsidian;
+            case 0 -> Translations.miningLevelWood;
+            case 1 -> Translations.miningLevelStone;
+            case 2 -> Translations.miningLevelIron;
+            case 3 -> Translations.miningLevelDiamond;
             default -> Text.of(String.valueOf(level));
         };
     }
@@ -53,16 +53,17 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
 
     @Override
     public void mined(BlockState state, BlockPos position) {
-        if (!this.isClient() && this.itemStack.isSuitableFor(state) && this.itemStack.getToolTypes().contains(state.getHarvestTool())) {
-            var xp = Math.round(state.getHardness(this.player.world, position)) + state.getHarvestLevel();
-            this.incrementStatistic(StatisticType.experience, state.calcBlockBreakingDelta(this.player, this.player.world, position) >= 1 ? Math.min(10, xp) : xp);
+        if (!this.isClient() && this.itemStack.isSuitableFor(state)) {
+            var delta = Math.max(1, state.calcBlockBreakingDelta(this.player, this.player.world, position));
+            var xp = Math.round(state.getHardness(this.player.world, position)) + 4 * (1 - delta);
+            this.incrementStatistic(StatisticType.experience, delta == 1 ? Math.min(10, xp) : xp);
         }
     }
 
     @Override
     public double attributeTotal(StatisticType attribute) {
         var value = super.attributeTotal(attribute);
-        return attribute == StatisticType.efficiency ? value + SoulboundToolMaterial.SOULBOUND.getMiningSpeedMultiplier() : value;
+        return attribute == StatisticType.efficiency ? value + SoulboundItems.material.getMiningSpeedMultiplier() : value;
     }
 
     @Override

@@ -8,13 +8,14 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.SwordItem;
+import soulboundarmory.registry.SoulboundItems;
 
 public abstract class SoulboundMeleeWeapon extends SwordItem implements SoulboundWeaponItem {
     protected final float reach;
     protected final float attackSpeed;
 
     public SoulboundMeleeWeapon(int attackDamage, float attackSpeed, float reach) {
-        super(SoulboundToolMaterial.SOULBOUND, attackDamage, attackSpeed, new Settings().group(ItemGroup.COMBAT));
+        super(SoulboundItems.material, attackDamage, attackSpeed, new Settings().group(ItemGroup.COMBAT));
 
         this.reach = reach;
         this.attackSpeed = attackSpeed;

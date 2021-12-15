@@ -56,7 +56,7 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
             world.spawnEntity(new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity));
 
             if (!player.isCreative()) {
-                player.inventory.removeOne(itemStack);
+                player.getInventory().removeOne(itemStack);
             }
         }
     }

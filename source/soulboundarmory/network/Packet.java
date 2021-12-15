@@ -3,7 +3,7 @@ package soulboundarmory.network;
 import cell.client.gui.CellElement;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 /**
  The base packet type.

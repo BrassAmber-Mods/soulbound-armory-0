@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,6 +17,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import net.auoeke.reflect.Accessor;
+import net.auoeke.reflect.Fields;
+import net.auoeke.reflect.Flags;
 import net.minecraft.command.CommandSource;
 
 public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
@@ -36,28 +37,16 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     public static <T> ConstantArgumentType<T> allConstants(Class<T> type) {
         var argumentType = new ConstantArgumentType<>(type);
-
-        for (var field : type.getDeclaredFields()) {
-            var modifiers = field.getModifiers();
-
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
-                argumentType.validFields.put(field.getName(), field);
-            }
-        }
+        Fields.of(type).filter(field -> Flags.all(field, Flags.PUBLIC | Flags.STATIC | Flags.FINAL)).forEach(field -> argumentType.validFields.put(field.getName(), field));
 
         return argumentType;
     }
 
-    public static <T, U> ConstantArgumentType<T> allConstants(Class<T> holderClass, Class<U> fieldClass) {
-        var type = new ConstantArgumentType<>(holderClass);
-
-        for (var field : type.type.getDeclaredFields()) {
-            var modifiers = field.getModifiers();
-
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && fieldClass.isInstance(Accessor.get(field))) {
-                type.validFields.put(field.getName(), field);
-            }
-        }
+    public static <T, U> ConstantArgumentType<T> allConstants(Class<T> holder, Class<U> fieldType) {
+        var type = new ConstantArgumentType<>(holder);
+        Fields.of(type.type)
+            .filter(field -> Flags.all(field, Flags.PUBLIC | Flags.STATIC | Flags.FINAL) && fieldType.isInstance(Accessor.get(field)))
+            .forEach(field -> type.validFields.put(field.getName(), field));
 
         return type;
     }
@@ -86,14 +75,9 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
     public static <T> ConstantArgumentType<T> includeConstants(Class<T> type, Predicate<T> include) {
         var argumentType = new ConstantArgumentType<>(type);
-
-        for (var field : type.getDeclaredFields()) {
-            var modifiers = field.getModifiers();
-
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && include.test((T) Accessor.get(field))) {
-                argumentType.validFields.put(field.getName(), field);
-            }
-        }
+        Fields.of(type)
+            .filter(field -> Flags.all(field, Flags.PUBLIC | Flags.STATIC | Flags.FINAL) && include.test((T) Accessor.get(field)))
+            .forEach(field -> argumentType.validFields.put(field.getName(), field));
 
         return argumentType;
     }
@@ -110,7 +94,7 @@ public class ConstantArgumentType<T> implements ArgumentType<List<T>> {
 
         for (var name : fields.keySet()) {
             if (Pattern.compile(Pattern.quote(name), Pattern.CASE_INSENSITIVE).matcher(input).find()) {
-                return Collections.singletonList((T) Accessor.getObject(fields.get(name)));
+                return Collections.singletonList((T) Accessor.getReference(fields.get(name)));
             }
         }
 
