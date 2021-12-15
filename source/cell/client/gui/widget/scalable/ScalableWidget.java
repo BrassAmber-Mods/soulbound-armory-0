@@ -14,8 +14,8 @@ import net.minecraft.util.Identifier;
  */
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
-    private static final Identifier advancementWidgets = new Identifier("textures/gui/advancements/widgets.png");
-    private static final Identifier window = new Identifier("textures/gui/advancements/window.png");
+    private static final Identifier widgetsID = new Identifier("textures/gui/advancements/widgets.png");
+    private static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
 
     public final int[][][] middles = new int[5][4][2];
     public final int[][][] corners = new int[4][4][2];
@@ -245,23 +245,23 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T window() {
-        return this.texture(window).slice(14, 238, 252, 22, 126, 140);
+        return this.texture(windowID).slice(14, 238, 252, 22, 126, 140);
     }
 
     public T longRectangle(int index) {
-        return this.texture(advancementWidgets).v(3 + index * 26).slice(2, 198, 200, 2, 18, 20);
+        return this.texture(widgetsID).v(3 + index * 26).slice(2, 198, 200, 2, 18, 20);
     }
 
     public T rectangle(int index) {
-        return this.texture(advancementWidgets).uv(1, 129 + index * 26).slice(2, 22, 24, 2, 22, 24);
+        return this.texture(widgetsID).uv(1, 129 + index * 26).slice(2, 22, 24, 2, 22, 24);
     }
 
     public T spikedRectangle(int index) {
-        return this.texture(advancementWidgets).uv(26, 128 + index * 26).slice(10, 16, 26, 10, 16, 26);
+        return this.texture(widgetsID).uv(26, 128 + index * 26).slice(10, 16, 26, 10, 16, 26);
     }
 
     public T roundedRectangle(int index) {
-        return this.texture(advancementWidgets).uv(54, 129 + index * 26).slice(7, 15, 22, 4, 21, 26);
+        return this.texture(widgetsID).uv(54, 129 + index * 26).slice(7, 15, 22, 4, 21, 26);
     }
 
     public T button(int index) {
@@ -274,7 +274,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     @Override
     public void renderWidget() {
-        this.texture.bindTexture();
+        bind(this.texture);
         this.resetColor();
 
         RenderSystem.enableBlend();
@@ -363,10 +363,10 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     protected void resetColor() {
         if (this.active()) {
-            RenderSystem.color4f(this.r, this.g, this.b, this.a);
+            RenderSystem.setShaderColor(this.r, this.g, this.b, this.a);
         } else {
             var chroma = 160F / 255;
-            RenderSystem.color4f(this.r * chroma, this.g * chroma, this.b * chroma, this.a);
+            RenderSystem.setShaderColor(this.r * chroma, this.g * chroma, this.b * chroma, this.a);
         }
     }
 }

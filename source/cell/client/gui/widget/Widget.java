@@ -259,7 +259,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
     }
 
     public int replace(Widget<?> original, Widget<?> replacement) {
-        var index = original.index();
+        var index = original == null ? -1 : original.index();
 
         if (index >= 0) {
             this.children.set(index, replacement);
@@ -470,10 +470,6 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         }
     }
 
-    public void render(MatrixStack matrixes, float delta) {
-        this.render(matrixes, -1, -1, delta);
-    }
-
     public void render(MatrixStack matrixes) {
         this.render(matrixes, -1, -1, 0);
     }
@@ -562,36 +558,20 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         return keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER;
     }
 
-    public void renderTooltip(List<? extends StringVisitable> lines, int maxTextWidth) {
-        renderTooltip(this.matrixes, lines, mouseX(), mouseY(), maxTextWidth);
-    }
-
     public void renderTooltip(List<? extends StringVisitable> lines) {
-        renderTooltip(this.matrixes, lines, mouseX(), mouseY(), -1);
-    }
-
-    public void renderTooltip(StringVisitable text, int maxTextWidth) {
-        renderTooltip(this.matrixes, text, mouseX(), mouseY(), maxTextWidth);
+        renderTooltip(this.matrixes, lines, mouseX(), mouseY());
     }
 
     public void renderTooltip(StringVisitable text) {
-        renderTooltip(this.matrixes, text, mouseX(), mouseY(), -1);
-    }
-
-    public void renderTooltip(double x, double y, List<? extends StringVisitable> lines, int maxTextWidth) {
-        renderTooltip(this.matrixes, lines, x, y, maxTextWidth);
+        renderTooltip(this.matrixes, text, mouseX(), mouseY());
     }
 
     public void renderTooltip(double x, double y, List<? extends StringVisitable> lines) {
-        renderTooltip(this.matrixes, lines, x, y, -1);
-    }
-
-    public void renderTooltip(double x, double y, StringVisitable text, int maxTextWidth) {
-        renderTooltip(this.matrixes, text, x, y, maxTextWidth);
+        renderTooltip(this.matrixes, lines, x, y);
     }
 
     public void renderTooltip(double x, double y, StringVisitable text) {
-        renderTooltip(this.matrixes, text, x, y, -1);
+        renderTooltip(this.matrixes, text, x, y);
     }
 
     @Override

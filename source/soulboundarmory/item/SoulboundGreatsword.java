@@ -29,9 +29,13 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        player.setCurrentHand(hand);
+        if (ItemComponentType.greatsword.of(player).hasSkill(Skills.leaping)) {
+            player.setCurrentHand(hand);
 
-        return ItemComponentType.greatsword.of(player).hasSkill(Skills.leaping) ? TypedActionResult.consume(player.getStackInHand(hand)) : TypedActionResult.fail(player.getStackInHand(hand));
+            return TypedActionResult.consume(player.getStackInHand(hand));
+        }
+
+        return TypedActionResult.fail(player.getStackInHand(hand));
     }
 
     @Override

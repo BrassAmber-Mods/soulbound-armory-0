@@ -585,7 +585,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @throws IndexOutOfBoundsException if no slot is bound.
      */
     public final ItemStack stackInBoundSlot() {
-        return this.player.inventory.getStack(this.boundSlot);
+        return this.player.getInventory().getStack(this.boundSlot);
     }
 
     /**
@@ -630,16 +630,16 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
                             this.bindSlot(slot);
                         }
                     } else if (inventory.previousIndex() != slot) {
-                        this.player.inventory.removeOne(stack);
+                        this.player.getInventory().removeOne(stack);
 
                         continue;
                     }
 
                     if (!stack.equals(this.itemStack, false)) {
-                        this.player.inventory.setStack(slot, this.stack());
+                        this.player.getInventory().setStack(slot, this.stack());
                     }
                 } else if (!this.player.isCreative()) {
-                    this.player.inventory.removeOne(stack);
+                    this.player.getInventory().removeOne(stack);
                 }
             }
         }

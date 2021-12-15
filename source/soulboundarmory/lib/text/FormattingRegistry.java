@@ -2,21 +2,20 @@ package soulboundarmory.lib.text;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.auoeke.reflect.Pointer;
-import net.minecraft.util.Formatting;
 import net.minecraft.text.TextColor;
-import soulboundarmory.lib.text.mixin.access.TextColorAccess;
+import net.minecraft.util.Formatting;
 import soulboundarmory.lib.text.mixin.access.FormattingAccess;
+import soulboundarmory.lib.text.mixin.access.TextColorAccess;
 import soulboundarmory.util.Util;
 
 public class FormattingRegistry {
-    private static final Pointer pattern = new Pointer().staticField(Formatting.class, Util.mapField("field_96330_y"));
+    private static final Pointer pattern = new Pointer().staticField(Formatting.class, Util.mapField(126620));
     private static final Pointer values = new Pointer().staticField(Formatting.class, ExtendedFormatting.VALUES);
-    private static final Pointer colors = new Pointer().staticField(TextColor.class, Util.mapField("field_240738_a_"));
+    private static final Pointer colors = new Pointer().staticField(TextColor.class, Util.mapField(131255));
 
     private static final Map<String, Formatting> nameMap = FormattingAccess.nameMap();
     private static final Reference2ObjectOpenHashMap<Formatting, TextColor> colorMap = new Reference2ObjectOpenHashMap<>(TextColorAccess.formattingColors());
@@ -34,7 +33,7 @@ public class FormattingRegistry {
     }
 
     private static ExtendedFormatting register(ExtendedFormatting formatting, char code) {
-        if (Character.toString(code).toLowerCase(Locale.ROOT).charAt(0) != code) {
+        if (Character.toLowerCase(code) != code) {
             throw new IllegalArgumentException(String.format("%s; uppercase codes are not allowed.", code));
         }
 
@@ -46,15 +45,15 @@ public class FormattingRegistry {
             throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", formatting.cast().getName()));
         }
 
-        var oldValues = (Formatting[]) values.getObject();
+        var oldValues = (Formatting[]) values.getT();
         var valueCount = oldValues.length;
         var newValues = Arrays.copyOf(oldValues, valueCount + 1);
         newValues[valueCount] = formatting.cast();
-        values.putObject(newValues);
+        values.putReference(newValues);
 
         nameMap.put(FormattingAccess.sanitize(formatting.cast().name()), formatting.cast());
 
-        pattern.putObject(Pattern.compile(pattern.getObject().toString().replace("]", code + "]")));
+        pattern.putReference(Pattern.compile(pattern.getT().toString().replace("]", code + "]")));
 
         if (formatting.cast().isColor()) {
             colorMap.put(formatting.cast(), TextColorAccess.instantiate(formatting.cast().getColorValue(), formatting.cast().getName()));
@@ -64,6 +63,6 @@ public class FormattingRegistry {
     }
 
     static {
-        colors.putObject(colorMap);
+        colors.putReference(colorMap);
     }
 }

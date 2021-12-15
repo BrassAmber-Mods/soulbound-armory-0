@@ -1,4 +1,4 @@
-package soulboundarmory.mixin.mixin.item;
+package soulboundarmory.mixin.mixin;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.block.BlockState;
@@ -19,10 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.util.AttributeModifierIdentifiers;
-import soulboundarmory.util.Util;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
@@ -61,7 +59,7 @@ abstract class ItemStackMixin {
     @Inject(method = "isSuitableFor", at = @At("RETURN"), cancellable = true)
     private void checkSoulboundItemHasSuitableMiningLevel(BlockState state, CallbackInfoReturnable<Boolean> info) {
         if (info.getReturnValueZ()) {
-            Components.marker.nullable(Util.cast(this)).ifPresent(marker -> info.setReturnValue(marker.item.intValue(StatisticType.miningLevel) >= state.getHarvestLevel()));
+            // Components.marker.nullable(Util.cast(this)).ifPresent(marker -> info.setReturnValue(marker.item.intValue(StatisticType.miningLevel) >= state.getMaterial().getHarvestLevel()));
         }
     }
 }

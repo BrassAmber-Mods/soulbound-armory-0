@@ -38,7 +38,7 @@ public class SoulboundFireballEntity extends SmallFireballEntity {
 
         this.updatePlayer();
         this.setPosition(shooter.getX(), shooter.getEyeY(), shooter.getZ());
-        this.setRotation(shooter.pitch, shooter.yaw);
+        this.setRotation(shooter.getPitch(), shooter.getYaw());
         this.setVelocity(shooter.getRotationVector().multiply(1.5, 1.5, 1.5));
     }
 
@@ -90,11 +90,11 @@ public class SoulboundFireballEntity extends SmallFireballEntity {
                     if (penetration.learned() && this.hitCount < penetration.level() + 1) {
                         this.hitCount++;
                     } else {
-                        this.remove();
+                        this.discard();
                     }
                 }
             } else {
-                this.remove();
+                this.discard();
             }
         }
     }

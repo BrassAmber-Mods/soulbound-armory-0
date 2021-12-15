@@ -9,7 +9,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.living.EntityTeleportEvent;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -53,7 +53,7 @@ public final class CommonEvents {
         } else {
             ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> {
                 if (component.hasSkill(Skills.enderPull)) {
-                    event.getDrops().forEach(drop -> component.player.inventory.insertStack(drop.getStack()));
+                    event.getDrops().forEach(drop -> component.player.getInventory().insertStack(drop.getStack()));
                 }
             });
         }
@@ -164,7 +164,7 @@ public final class CommonEvents {
                     }
 
                     if (froze && !nearbyEntities.isEmpty()) {
-                        var world = player.getServerWorld();
+                        var world = player.getWorld();
 
                         for (double i = 0; i <= 2 * radiusXZ; i += radiusXZ / 48D) {
                             var x = radiusXZ - i;
@@ -229,7 +229,7 @@ public final class CommonEvents {
         SoulboundArmoryCommand.register(event);
 
         if (ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(argument -> argument.startsWith("-agentlib:jdwp"))) {
-            Accessor.<Logger>getObject(CommandManager.class, "LOGGER").setLevel(Level.DEBUG);
+            Accessor.<Logger>getReference(CommandManager.class, "LOGGER").setLevel(Level.DEBUG);
         }
     }
 }

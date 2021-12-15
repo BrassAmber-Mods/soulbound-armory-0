@@ -6,19 +6,22 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleType;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.SoulboundArmoryClient;
+import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.render.SoulboundDaggerEntityRenderer;
 import soulboundarmory.client.render.SoulboundFireballEntityRenderer;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
+import soulboundarmory.component.soulbound.item.ItemMarkerComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
@@ -40,10 +43,13 @@ public final class ModEvents {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         ClientRegistry.registerKeyBinding(SoulboundArmoryClient.guiKeyBinding);
-        // ClientRegistry.registerKeyBinding(SoulboundArmoryClient.toggleXPBarKeyBinding);
+        MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar(component.item).width(144));
+    }
 
-        RenderingRegistry.registerEntityRenderingHandler(SoulboundDaggerEntity.type, SoulboundDaggerEntityRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(SoulboundFireballEntity.type, SoulboundFireballEntityRenderer::new);
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(SoulboundDaggerEntity.type, SoulboundDaggerEntityRenderer::new);
+        event.registerEntityRenderer(SoulboundFireballEntity.type, SoulboundFireballEntityRenderer::new);
     }
 
     @SubscribeEvent

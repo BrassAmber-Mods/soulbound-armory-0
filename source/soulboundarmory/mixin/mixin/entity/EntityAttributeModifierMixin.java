@@ -1,4 +1,4 @@
-package soulboundarmory.mixin.mixin.entity.attribute;
+package soulboundarmory.mixin.mixin.entity;
 
 import java.util.UUID;
 import net.minecraft.entity.attribute.EntityAttributeModifier;

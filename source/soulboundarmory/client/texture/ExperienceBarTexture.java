@@ -67,7 +67,7 @@ public class ExperienceBarTexture extends ResourceTexture {
                         var color = (int) (multipliers[bar] * Math.round(Math.sqrt(0.299F * pixel[0] * pixel[0] + 0.587F * pixel[1] * pixel[1] + 0.114F * pixel[2] * pixel[2])));
 
                         if (pixel[3] > 0) {
-                            nativeImage.setPixelColor(u, v, Math2.pack(color, color, color));
+                            nativeImage.setColor(u, v, Math2.pack(color, color, color));
                         }
                     }
                 }

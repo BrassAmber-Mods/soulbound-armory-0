@@ -35,17 +35,17 @@ public final class SoulboundArmoryCommand {
         event.getDispatcher().register(
             literal("sa").requires(source -> source.hasPermissionLevel(2))
                 .then(literal("add")
-                    .then(argument("storage", itemComponents())
+                    .then(argument("item", itemComponents())
                         .then(argument("statistic", statisticTypes())
                             .then(argument("value", doubleArg()).executes(context -> add(context, false))
                                 .then(argument("players", EntityArgumentType.players()).executes(context -> add(context, true)))))))
                 .then(literal("set")
-                    .then(argument("storage", itemComponents())
+                    .then(argument("item", itemComponents())
                         .then(argument("statistic", statisticTypes())
                             .then(argument("value", doubleArg()).executes(context -> set(context, false))
                                 .then(argument("players", EntityArgumentType.players()).executes(context -> set(context, true)))))))
                 .then(literal("reset")
-                    .then(argument("storage", itemComponents()).executes(context -> reset(context, false, false))
+                    .then(argument("item", itemComponents()).executes(context -> reset(context, false, false))
                         .then(argument("category", registry(Category.registry)).executes(context -> reset(context, false, true))
                             .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, true))))
                         .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, false)))))
@@ -54,12 +54,12 @@ public final class SoulboundArmoryCommand {
 
     private static int add(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
         var players = players(context, hasPlayerArgument);
-        var types = ItemComponentArgumentType.get(context, "storage");
+        var types = ItemComponentArgumentType.get(context, "item");
 
         for (var player : players) {
             for (var statistic : StatisticArgumentType.get(context, "statistic")) {
                 if (types.isEmpty()) {
-                    storage(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
+                    item(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
                 } else for (var type : types) {
                     type.of(player).incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value"));
                 }
@@ -71,12 +71,12 @@ public final class SoulboundArmoryCommand {
 
     private static int set(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
         var players = players(context, hasPlayerArgument);
-        var types = ItemComponentArgumentType.get(context, "storage");
+        var types = ItemComponentArgumentType.get(context, "item");
 
         for (var player : players) {
             for (var statistic : StatisticArgumentType.get(context, "statistic")) {
                 if (types.isEmpty()) {
-                    storage(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
+                    item(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
                 } else for (var type : types) {
                     type.of(player).set(statistic, DoubleArgumentType.getDouble(context, "value"));
                 }
@@ -88,11 +88,11 @@ public final class SoulboundArmoryCommand {
 
     private static int reset(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument, boolean hasCategoryArgument) throws CommandSyntaxException {
         var players = players(context, hasPlayerArgument);
-        var types = ItemComponentArgumentType.get(context, "storage");
+        var types = ItemComponentArgumentType.get(context, "item");
 
         for (var player : players) {
             if (types.isEmpty()) {
-                types.add(storage(player).type());
+                types.add(item(player).type());
             }
 
             for (var type : types) {
@@ -117,7 +117,7 @@ public final class SoulboundArmoryCommand {
         return (ServerPlayerEntity) context.getSource().getEntity();
     }
 
-    private static ItemComponent<?> storage(PlayerEntity player) throws CommandSyntaxException {
+    private static ItemComponent<?> item(PlayerEntity player) throws CommandSyntaxException {
         return Components.soulbound(player).map(SoulboundComponent::heldItemComponent).filter(Optional::isPresent).findAny().orElseThrow(() -> noItemException.create(player)).get();
     }
 }

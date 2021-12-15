@@ -18,7 +18,6 @@ import net.minecraft.world.World;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
-import soulboundarmory.component.soulbound.player.SoulboundItemUtil;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
 
@@ -31,20 +30,20 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     public ItemStack itemStack;
 
     protected boolean spawnClone;
-    protected boolean isClone;
+    protected boolean clone;
     protected double attackDamageRatio;
-    protected int ticksToSeek;
+    protected int ticksToSeek = -1;
     protected int ticksSeeking;
     protected int ticksInGround;
-    protected DaggerComponent storage;
+    protected DaggerComponent component;
 
     public SoulboundDaggerEntity(SoulboundDaggerEntity original, boolean spawnClone) {
         this(original.world, (LivingEntity) original.getOwner(), original.itemStack, spawnClone, original.getVelocityD(), original.getVelocityD());
 
-        this.isClone = true;
+        this.clone = true;
         this.setPosition(original.getX(), original.getY(), original.getZ());
         this.setVelocity(original.getVelocity());
-        this.setRotation(original.pitch, original.yaw);
+        this.setRotation(original.getPitch(), original.getYaw());
         this.prevPitch = original.prevPitch;
         this.prevYaw = original.prevYaw;
         this.attackDamageRatio = original.attackDamageRatio;
@@ -53,15 +52,12 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     public SoulboundDaggerEntity(World world, LivingEntity shooter, ItemStack itemStack, boolean spawnClone, double velocity, double maxVelocity) {
         super(type, shooter, world);
 
-        this.ticksToSeek = -1;
-
         if (shooter instanceof PlayerEntity) {
             this.pickupType = PickupPermission.ALLOWED;
         }
 
         this.itemStack = itemStack;
         this.spawnClone = spawnClone;
-
         this.attackDamageRatio = velocity / maxVelocity;
 
         this.updateShooter();
@@ -73,12 +69,12 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     public void setDamage() {
-        this.setDamage(this.storage.doubleValue(StatisticType.attackDamage) * this.attackDamageRatio);
+        this.setDamage(this.component.doubleValue(StatisticType.attackDamage) * this.attackDamageRatio);
     }
 
     protected void updateShooter() {
         if (this.getOwner() instanceof PlayerEntity player) {
-            this.storage = ItemComponentType.dagger.of(player);
+            this.component = ItemComponentType.dagger.of(player);
         }
     }
 
@@ -97,15 +93,15 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
             this.world.spawnEntity(new SoulboundDaggerEntity(this, false));
         }
 
-        if (!this.isClone && this.ticksSeeking == 0) {
+        if (!this.clone && this.ticksSeeking == 0) {
             this.setVelocity(this.getVelocity().multiply(-0.1, 1, 1));
-            this.yaw += 180;
+            this.setYaw(this.getYaw() + 180);
             this.prevYaw += 180;
         }
 
         if (owner instanceof PlayerEntity player) {
             var damageSource = DamageSource.arrow(this, owner);
-            var attackDamage = this.storage.attributeTotal(StatisticType.attackDamage);
+            var attackDamage = this.component.attributeTotal(StatisticType.attackDamage);
             var burnTime = 0;
 
             if (attackDamage > 0) {
@@ -129,7 +125,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
                 if (target.damage(damageSource, (float) attackDamage)) {
                     if (knockbackModifier > 0) {
-                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(player.yaw * 0.017453292F), -MathHelper.cos(player.yaw * 0.017453292F));
+                        target.takeKnockback(knockbackModifier * 0.5F, MathHelper.sin(player.getYaw() * 0.017453292F), -MathHelper.cos(player.getYaw() * 0.017453292F));
                     }
                 }
 
@@ -166,15 +162,13 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     @Override
     public void onPlayerCollision(PlayerEntity player) {
         if (!this.world.isClient && player == this.getOwner()) {
-            if (this.isClone
-                || this.storage != null
-                && player.isCreative()
-                && this.life() >= Math.max(1, 20 / this.storage.doubleValue(StatisticType.attackSpeed))
-                && SoulboundItemUtil.hasSoulboundWeapon(player)
-                || SoulboundItemUtil.addItemStack(this.asItemStack(), player, true)
+            if (this.clone
+                || this.component != null
+                && this.life() >= Math.max(1, 20 / this.component.doubleValue(StatisticType.attackSpeed))
+                && player.giveItemStack(this.asItemStack())
             ) {
                 player.sendPickup(this, 1);
-                this.remove();
+                this.discard();
             }
         }
     }
@@ -198,18 +192,16 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     @Override
     protected ItemStack asItemStack() {
-        return this.storage == null ? ItemStack.EMPTY : this.storage.stack();
+        return this.component == null ? ItemStack.EMPTY : this.component.stack();
     }
 
     protected boolean tryReturn() {
-        var owner = this.getOwner();
+        if (this.getOwner() instanceof PlayerEntity owner) {
+            var attackSpeed = this.component.doubleValue(StatisticType.attackSpeed);
 
-        if (owner instanceof PlayerEntity) {
-            var attackSpeed = this.storage.doubleValue(StatisticType.attackSpeed);
-
-            if (this.storage.hasSkill(Skills.sneakReturn) && owner.isSneaking()
+            if (this.component.hasSkill(Skills.sneakReturn) && owner.isSneaking()
                 && this.life() >= 60 / attackSpeed
-                || this.storage.hasSkill(Skills.returning)
+                || this.component.hasSkill(Skills.returning)
                 && (this.life() >= 300
                 || this.ticksInGround > 20 / attackSpeed
                 || owner.distanceTo(this) >= 16 * (this.world.getServer().getPlayerManager().getViewDistance() - 1)
@@ -228,7 +220,6 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
                 if (this.ticksToSeek > 0 && !this.inGround) {
                     this.setVelocity(this.velocityX() * multiplier, this.velocityY() * multiplier, this.velocityZ() * multiplier);
-
                     this.ticksToSeek--;
                 } else {
                     var normalized = new Vec3d(dX, dY, dZ).normalize();
@@ -270,7 +261,6 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         super.deserializeNBT(tag);
 
         this.itemStack = ItemStack.fromNbt(tag.getCompound("itemStack"));
-
         this.updateShooter();
     }
 
@@ -278,7 +268,6 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     public NbtCompound serializeNBT() {
         var tag = super.serializeNBT();
         tag.put("itemStack", this.itemStack.serializeNBT());
-
         this.updateShooter();
 
         return tag;

@@ -1,4 +1,4 @@
-package soulboundarmory.mixin.mixin.entity.player;
+package soulboundarmory.mixin.mixin.access;
 
 import java.util.List;
 import net.minecraft.entity.player.PlayerInventory;

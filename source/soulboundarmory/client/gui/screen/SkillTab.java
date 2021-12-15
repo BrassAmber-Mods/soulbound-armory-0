@@ -55,7 +55,7 @@ public class SkillTab extends SoulboundTab {
         this.window = new ScalableWidget<>().window().width(512).height(288).z(-200);
         this.centerX = Math.max(this.button.endX() + this.window.width() / 2 + 4, this.width() / 2);
         this.centerY = Math.min(this.parent().xpBar.y() - 16 - this.window.height() / 2, this.height() / 2);
-        this.window.x(this.centerX).y(this.centerY).center();
+        this.window.x(this.centerX).y(this.centerY).addZ(-500).center();
         this.insideWidth = this.window.width() - 18;
         this.insideHeight = this.window.height() - 29;
         this.insideCenterX = this.centerX;
@@ -153,7 +153,7 @@ public class SkillTab extends SoulboundTab {
 
             (skill.learned() ? yellowFrame : whiteFrame).x(x - 4).y(y - 4).z(this.getZOffset()).width(24).height(24).render(matrixes);
 
-            RenderSystem.color3f(chroma, chroma, chroma);
+            RenderSystem.setShaderColor(chroma, chroma, chroma, -1);
             skill.render(this.parent(), matrixes, x, y, this.getZOffset());
             this.setZOffset(0);
         }
@@ -211,7 +211,7 @@ public class SkillTab extends SoulboundTab {
     }
 
     protected void chroma(float chroma) {
-        RenderSystem.color3f(chroma, chroma, chroma);
+        RenderSystem.setShaderColor(chroma, chroma, chroma, -1);
     }
 
     protected SkillContainer selectedSkill() {

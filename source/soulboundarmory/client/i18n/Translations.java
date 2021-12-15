@@ -1,73 +1,101 @@
 package soulboundarmory.client.i18n;
 
+import java.util.List;
+import java.util.stream.Stream;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
+import soulboundarmory.SoulboundArmory;
+import soulboundarmory.skill.Skill;
 import soulboundarmory.text.Translation;
+import soulboundarmory.util.Util;
 
 public class Translations {
-    public static final Translation guiDagger = new Translation("gui.soulbound-armory.dagger");
-    public static final Translation guiSword = new Translation("gui.soulbound-armory.sword");
-    public static final Translation guiGreatsword = new Translation("gui.soulbound-armory.greatsword");
-    public static final Translation guiStaff = new Translation("gui.soulbound-armory.staff");
-    public static final Translation guiPick = new Translation("gui.soulbound-armory.pick");
+    public static final Translation tooltipToolEfficiency = attribute("tool_efficiency");
+    public static final Translation tooltipWeaponEfficiency = attribute("weapon_efficiency");
+    public static final Translation tooltipReach = attribute("reach");
+    public static final Translation tooltipMiningLevel = attribute("harvest_level");
+    public static final Translation tooltipAttackSpeed = attribute("attack_speed");
+    public static final Translation tooltipAttackDamage = attribute("attack_damage");
+    public static final Translation tooltipCriticalStrikeRate = attribute("critical_strike_rate");
+    public static final Translation tooltipAttackRange = attribute("attack_range");
 
-    public static final Translation guiKey = new Translation("key.soulbound-armory.gui");
-    public static final Translation toggleXPBar = new Translation("key.soulbound-armory.bar");
+    public static final Translation guiDagger = gui("dagger");
+    public static final Translation guiSword = gui("sword");
+    public static final Translation guiGreatsword = gui("greatsword");
+    public static final Translation guiStaff = gui("staff");
+    public static final Translation guiPick = gui("pick");
+    public static final Translation guiToolSelection = gui("tool_selection");
+    public static final Translation guiWeaponSelection = gui("weapon_selection");
+    public static final Translation guiButtonAttributes = gui("attributes");
+    public static final Translation guiButtonEnchantments = gui("enchantments");
+    public static final Translation guiSkills = gui("skills");
+    public static final Translation guiButtonReset = gui("reset");
+    public static final Translation guiButtonBind = gui("bind");
+    public static final Translation guiButtonUnbind = gui("unbind");
+    public static final Translation guiUnspentPoints = gui("unspent_points");
+    public static final Translation guiUnspentPoint = gui("unspent_point");
+    public static final Translation guiPoints = gui("points");
+    public static final Translation guiPoint = gui("point");
+    public static final Translation guiSkillLearnCostSingular = gui("learn_cost_singular");
+    public static final Translation guiSkillLearnCostPlural = gui("learn_cost_plural");
+    public static final Translation guiSkillUpgradeCostSingular = gui("upgrade_cost_singular");
+    public static final Translation guiSkillUpgradeCostPlural = gui("upgrade_cost_plural");
+    public static final Translation guiLevel = gui("level");
+    public static final Translation red = gui("red");
+    public static final Translation green = gui("green");
+    public static final Translation blue = gui("blue");
+    public static final Translation alpha = gui("alpha");
+    public static final Translation guiToolEfficiency = gui("tool_efficiency");
+    public static final Translation guiWeaponEfficiency = gui("weapon_efficiency");
+    public static final Translation guiReach = gui("reach");
+    public static final Translation guiMiningLevel = gui("harvest_level");
+    public static final Translation guiAttackSpeed = gui("attack_speed");
+    public static final Translation guiAttackDamage = gui("attack_damage");
+    public static final Translation guiCriticalStrikeRate = gui("critical_strike_rate");
+    public static final Translation guiAttackRange = gui("attack_range");
+    public static final Translation barLevel = gui("bar.level");
+    public static final Translation barXP = gui("bar.xp");
+    public static final Translation barFullXP = gui("bar.full_xp");
+    public static final Translation style = gui("style");
+    public static final Translation xpStyle = gui("style.experience");
+    public static final Translation bossStyle = gui("style.boss");
+    public static final Translation horseStyle = gui("style.horse");
 
-    public static final Translation guiToolSelection = new Translation("gui.soulbound-armory.tool_selection");
-    public static final Translation guiWeaponSelection = new Translation("gui.soulbound-armory.weapon_selection");
-    public static final Translation guiButtonAttributes = new Translation("gui.soulbound-armory.attributes");
-    public static final Translation guiButtonEnchantments = new Translation("gui.soulbound-armory.enchantments");
-    public static final Translation guiSkills = new Translation("gui.soulbound-armory.skills");
-    public static final Translation guiButtonReset = new Translation("gui.soulbound-armory.reset");
-    public static final Translation guiButtonBind = new Translation("gui.soulbound-armory.bind");
-    public static final Translation guiButtonUnbind = new Translation("gui.soulbound-armory.unbind");
-    public static final Translation guiUnspentPoints = new Translation("gui.soulbound-armory.unspent_points");
-    public static final Translation guiUnspentPoint = new Translation("gui.soulbound-armory.unspent_point");
-    public static final Translation guiPoints = new Translation("gui.soulbound-armory.points");
-    public static final Translation guiPoint = new Translation("gui.soulbound-armory.point");
-    public static final Translation guiSkillLearnCostSingular = new Translation("gui.soulbound-armory.learn_cost_singular");
-    public static final Translation guiSkillLearnCostPlural = new Translation("gui.soulbound-armory.learn_cost_plural");
-    public static final Translation guiSkillUpgradeCostSingular = new Translation("gui.soulbound-armory.upgrade_cost_singular");
-    public static final Translation guiSkillUpgradeCostPlural = new Translation("gui.soulbound-armory.upgrade_cost_plural");
-    public static final Translation guiLevel = new Translation("gui.soulbound-armory.level");
-    public static final Translation red = new Translation("gui.soulbound-armory.red");
-    public static final Translation green = new Translation("gui.soulbound-armory.green");
-    public static final Translation blue = new Translation("gui.soulbound-armory.blue");
-    public static final Translation alpha = new Translation("gui.soulbound-armory.alpha");
-    public static final Translation guiToolEfficiency = new Translation("gui.soulbound-armory.tool_efficiency");
-    public static final Translation guiWeaponEfficiency = new Translation("gui.soulbound-armory.weapon_efficiency");
-    public static final Translation guiReach = new Translation("gui.soulbound-armory.reach");
-    public static final Translation guiMiningLevel = new Translation("gui.soulbound-armory.mining_level");
-    public static final Translation guiAttackSpeed = new Translation("gui.soulbound-armory.attack_speed");
-    public static final Translation guiAttackDamage = new Translation("gui.soulbound-armory.attack_damage");
-    public static final Translation guiCriticalStrikeRate = new Translation("gui.soulbound-armory.critical_strike_rate");
-    public static final Translation guiAttackRange = new Translation("gui.soulbound-armory.attack_range");
+    public static final Translation miningLevelWood = harvestLevel("wood");
+    public static final Translation miningLevelStone = harvestLevel("stone");
+    public static final Translation miningLevelIron = harvestLevel("iron");
+    public static final Translation miningLevelDiamond = harvestLevel("diamond");
+    public static final Translation miningLevelNetherite = harvestLevel("netherite");
 
-    public static final Translation hudSpell = new Translation("hud.soulbound-armory.spell");
+    public static final Translation hudSpell = of("hud", "spell");
 
-    public static final Translation barLevel = new Translation("gui.soulbound-armory.bar.world");
-    public static final Translation barXP = new Translation("gui.soulbound-armory.bar.xp");
-    public static final Translation barFullXP = new Translation("gui.soulbound-armory.bar.full_xp");
+    public static final Translation guiKey = of("key", "gui");
 
-    public static final Translation style = new Translation("gui.soulbound-armory.style");
-    public static final Translation xpStyle = new Translation("gui.soulbound-armory.style.experience");
-    public static final Translation bossStyle = new Translation("gui.soulbound-armory.style.boss");
-    public static final Translation horseStyle = new Translation("gui.soulbound-armory.style.horse");
+    public static final Translation levelupMessage = of("message", "levelup");
 
-    public static final Translation tooltipToolEfficiency = new Translation("attribute.soulbound-armory.tool_efficiency");
-    public static final Translation tooltipWeaponEfficiency = new Translation("attribute.soulbound-armory.weapon_efficiency");
-    public static final Translation tooltipReach = new Translation("attribute.soulbound-armory.reach");
-    public static final Translation tooltipMiningLevel = new Translation("attribute.soulbound-armory.mining_level");
-    public static final Translation tooltipAttackSpeed = new Translation("attribute.soulbound-armory.attack_speed");
-    public static final Translation tooltipAttackDamage = new Translation("attribute.soulbound-armory.attack_damage");
-    public static final Translation tooltipCriticalStrikeRate = new Translation("attribute.soulbound-armory.critical_strike_rate");
-    public static final Translation tooltipAttackRange = new Translation("attribute.soulbound-armory.attack_range");
+    public static final Translation commandNoItem = of("command", "no_item");
 
-    public static final Translation levelupMessage = new Translation("message.soulbound-armory.levelup");
+    public static Text skillName(Skill skill) {
+        return Text.of(Util.capitalize(I18n.translate("skill.%s.%s.name".formatted(skill.getRegistryName().getNamespace(), skill.getRegistryName().getPath()))));
+    }
 
-    public static final Translation miningLevelCoal = new Translation("mining_level.soulbound-armory.coal");
-    public static final Translation miningLevelIron = new Translation("mining_level.soulbound-armory.iron");
-    public static final Translation miningLevelDiamond = new Translation("mining_level.soulbound-armory.diamond");
-    public static final Translation miningLevelObsidian = new Translation("mining_level.soulbound-armory.obsidian");
+    public static List<Text> skillDescription(Skill skill) {
+        return Stream.of(Util.capitalize(I18n.translate("skill.%s.%s.desc".formatted(skill.getRegistryName().getNamespace(), skill.getRegistryName().getPath()))).split("\n")).map(Text::of).toList();
+    }
 
-    public static final Translation commandNoItem = new Translation("command.soulbound-armory.no_item");
+    private static Translation of(String category, String path) {
+        return Translation.of("%s.%s.%s", category, SoulboundArmory.ID, path);
+    }
+
+    private static Translation attribute(String path) {
+        return of("attribute", path);
+    }
+
+    private static Translation gui(String path) {
+        return of("gui", path);
+    }
+
+    private static Translation harvestLevel(String path) {
+        return of("harvest_level", path);
+    }
 }

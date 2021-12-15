@@ -1,4 +1,4 @@
-package soulboundarmory.mixin.mixin.entity.player;
+package soulboundarmory.mixin.mixin.entity;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;

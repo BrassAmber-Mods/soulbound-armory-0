@@ -1,39 +1,46 @@
 package soulboundarmory.client.gui.bar;
 
 import cell.client.gui.widget.scalable.ScalableWidget;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.awt.Color;
-import net.minecraft.client.util.Window;
+import java.util.Optional;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.item.SoulboundItem;
 
-public class ExperienceBar extends ScalableWidget<ExperienceBar> {
+public class ExperienceBar extends ScalableWidget<ExperienceBar> implements TooltipComponent {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Colors colors = configuration.colors;
 
-    protected ItemStack itemStack;
-    protected ItemComponent<?> storage;
+    protected ItemStack stack;
+    protected ItemComponent<?> component;
 
     protected int row;
     protected int length;
 
+    @Override
+    public int getHeight() {
+        return this.height();
+    }
+
+    @Override
+    public int getWidth(TextRenderer textRenderer) {
+        return this.width() + 8;
+    }
+
     {
-        this.experienceBar().texture(ExperienceBarTexture.instance);
+        this.experienceBar().texture(ExperienceBarTexture.instance).width(182).height(5);
     }
 
     public ExperienceBar() {}
 
-    public ExperienceBar(ItemStack itemStack) {
-        this.update(itemStack);
-    }
-
-    public ExperienceBar(ItemComponent<?> storage) {
-        this.update(storage);
+    public ExperienceBar(ItemComponent<?> component) {
+        this.item(component);
     }
 
     public void data(int row, int length) {
@@ -41,32 +48,8 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
         this.length = length;
     }
 
-    public void drawTooltip(MatrixStack stack, ItemStack itemStack, int x, int y, int width) {
-        if (this.update(itemStack)) {
-            this.x(x + 4).y(y + this.row * 10).width(width - 8);
-            this.render(stack);
-        }
-    }
-
-    private boolean update(ItemStack itemStack) {
-        if (this.update(ItemComponent.get(minecraft.player, itemStack).orElse(null))) {
-            if (itemStack.getItem() instanceof SoulboundItem && this.itemStack != itemStack) {
-                this.itemStack = itemStack;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean update(ItemComponent<?> component) {
-        return (this.storage = component) != null;
-    }
-
-    public boolean render(MatrixStack matrixes, Window window) {
-        var component = ItemComponent.fromHands(minecraft.player);
-
-        if (component.isPresent()) {
-            this.update(component.get());
+    public boolean renderOverlay(MatrixStack matrixes) {
+        if (this.item(ItemComponent.fromHands(minecraft.player))) {
             this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes);
 
             return true;
@@ -85,21 +68,34 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
             this.v(style.v).widthLimit(1F).color4f(components[0], components[1], components[2], components[3]);
             super.renderWidget();
 
-            if (this.storage.canLevelUp()) {
-                this.widthLimit(Math.min(1, this.storage.floatValue(StatisticType.experience) / this.storage.nextLevelXP()));
+            if (this.component.canLevelUp()) {
+                this.widthLimit(Math.min(1, this.component.floatValue(StatisticType.experience) / this.component.nextLevelXP()));
             }
 
             this.v(style.v + 5);
             super.renderWidget();
 
-            var level = this.storage.intValue(StatisticType.level);
+            var level = this.component.intValue(StatisticType.level);
 
             if (level > 0) {
                 drawStrokedText(this.matrixes, String.valueOf(level), this.middleX() - textDrawer.getWidth(String.valueOf(level)) / 2F, this.y() - 8, color.getRGB());
             }
 
-            RenderSystem.disableLighting();
+            // RenderSystem.disableLighting();
         }
+    }
+
+    @Override
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrixes, ItemRenderer itemRenderer, int z) {
+        this.z(z).x(x + 4).y(y + this.row * 10).render(matrixes);
+    }
+
+    private boolean item(ItemComponent<?> component) {
+        return (this.component = component) != null;
+    }
+
+    private boolean item(Optional<ItemComponent<?>> component) {
+        return this.item(component.orElse(null));
     }
 
     /*

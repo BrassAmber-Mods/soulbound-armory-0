@@ -21,8 +21,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -39,6 +39,10 @@ public class Util {
         return (T) object;
     }
 
+    public static String capitalize(String string) {
+        return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+    }
+
     public static boolean isClient() {
         var threadName = Thread.currentThread().getName();
         return threadName.equals("Render thread") || threadName.equals("Game thread");
@@ -49,7 +53,7 @@ public class Util {
     }
 
     public static MinecraftServer server() {
-        return LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        return (MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER);
     }
 
     public static boolean containsIgnoreCase(String string, String substring) {
@@ -79,8 +83,12 @@ public class Util {
         return union;
     }
 
+    public static String namespace() {
+        return ModLoadingContext.get().getActiveNamespace();
+    }
+
     public static Identifier id(String path) {
-        return new Identifier(ModLoadingContext.get().getActiveNamespace(), path);
+        return new Identifier(namespace(), path);
     }
 
     public static void ifPresent(NbtCompound tag, String key, Consumer<NbtCompound> action) {
@@ -132,12 +140,12 @@ public class Util {
         return mapper().apply(INameMappingService.Domain.CLASS, name);
     }
 
-    public static String mapMethod(String name) {
-        return mapper().apply(INameMappingService.Domain.METHOD, name);
+    public static String mapMethod(int number) {
+        return mapper().apply(INameMappingService.Domain.METHOD, "m_%s_".formatted(number));
     }
 
-    public static String mapField(String name) {
-        return mapper().apply(INameMappingService.Domain.FIELD, name);
+    public static String mapField(int number) {
+        return mapper().apply(INameMappingService.Domain.FIELD, "f_%s_".formatted(number));
     }
 
     private static BiFunction<INameMappingService.Domain, String, String> mapper() {

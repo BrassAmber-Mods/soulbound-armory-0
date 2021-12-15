@@ -1,15 +1,15 @@
 package soulboundarmory.client.render;
 
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.util.Identifier;
 import soulboundarmory.entity.SoulboundFireballEntity;
 
 public class SoulboundFireballEntityRenderer extends EntityRenderer<SoulboundFireballEntity> {
     private static final Identifier id = new Identifier("item/fire_charge.png");
 
-    public SoulboundFireballEntityRenderer(EntityRenderDispatcher manager) {
-        super(manager);
+    public SoulboundFireballEntityRenderer(EntityRendererFactory.Context context) {
+        super(context);
     }
 
     @Override

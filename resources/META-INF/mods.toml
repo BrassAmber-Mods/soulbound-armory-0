@@ -4,7 +4,7 @@ issueTrackerURL = "https://github.com/auoeke/soulbound-armory"
 license = "GNU LGPL v3.0"
 
 [[mods]]
-modId = "soulbound-armory"
+modId = "soulboundarmory"
 version = "${file.jarVersion}"
 displayName = "soulbound armory"
 authors = "auoeke"

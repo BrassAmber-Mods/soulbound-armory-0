@@ -32,18 +32,6 @@ public class EntityUtil {
     }
 
     private static boolean isBoss(Class<?> type) {
-        if (type == null) {
-            return false;
-        }
-
-        return bosses.computeBooleanIfAbsent(type, type1 -> {
-            for (var field : Fields.fields(type1)) {
-                if (BossBar.class.isAssignableFrom(field.getType())) {
-                    return true;
-                }
-            }
-
-            return isBoss(type1.getSuperclass());
-        });
+        return type != null && bosses.computeBooleanIfAbsent(type, type1 -> Fields.of(type1).anyMatch(field -> BossBar.class.isAssignableFrom(field.getType())) || isBoss(type1.getSuperclass()));
     }
 }

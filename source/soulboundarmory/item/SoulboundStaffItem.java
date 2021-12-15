@@ -16,10 +16,11 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.entity.SoulboundFireballEntity;
+import soulboundarmory.registry.SoulboundItems;
 
 public class SoulboundStaffItem extends ToolItem implements SoulboundWeaponItem {
     public SoulboundStaffItem() {
-        super(SoulboundToolMaterial.SOULBOUND, new Settings().group(ItemGroup.COMBAT));
+        super(SoulboundItems.material, new Settings().group(ItemGroup.COMBAT));
     }
 
     @Override

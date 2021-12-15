@@ -17,7 +17,7 @@ public final class C2SSelectItem extends ItemComponentPacket {
     protected void execute(ItemComponent<?> component) {
         var slot = this.message.readInt();
 
-        if (component.isUnlocked() || component.canConsume(component.player.inventory.getStack(slot))) {
+        if (component.isUnlocked() || component.canConsume(component.player.getInventory().getStack(slot))) {
             set(component, slot);
 
             if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -32,7 +32,7 @@ public final class C2SSelectItem extends ItemComponentPacket {
     }
 
     private static void set(ItemComponent<?> storage, int slot) {
-        storage.player.inventory.setStack(slot, storage.stack());
+        storage.player.getInventory().setStack(slot, storage.stack());
         storage.component.currentItem(storage);
         storage.updateInventory(slot);
     }

@@ -1,6 +1,6 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "soulbound-armory:item/sword"
+        "layer0": "soulboundarmory:item/pick"
     }
 }
