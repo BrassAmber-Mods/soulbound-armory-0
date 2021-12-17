@@ -1,7 +1,7 @@
 package soulboundarmory.component.soulbound.player;
 
 import cell.client.gui.screen.CellScreen;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +24,7 @@ import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Util;
 
 public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implements EntityComponent<C> {
-    public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> items = new Reference2ReferenceOpenHashMap<>();
+    public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> items = new Reference2ReferenceLinkedOpenHashMap<>();
     public final PlayerEntity player;
 
     /**

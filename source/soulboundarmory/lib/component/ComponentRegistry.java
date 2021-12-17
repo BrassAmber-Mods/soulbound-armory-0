@@ -2,6 +2,7 @@ package soulboundarmory.lib.component;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import it.unimi.dsi.fastutil.objects.ReferenceLists;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public final class ComponentRegistry {
     public static final Map<Identifier, ItemStackComponentKey<?>> item = new Object2ReferenceOpenHashMap<>();
     private static final Map<Identifier, EntityComponentKey<?>> entity = new Object2ReferenceOpenHashMap<>();
 
-    static final List<WeakReference<ItemStackComponent<?>>> ticking = new ReferenceArrayList<>();
+    static final List<WeakReference<ItemStackComponent<?>>> ticking = ReferenceLists.synchronize(new ReferenceArrayList<>());
 
     /**
      Register a component to attach to entities of a specified base type.
