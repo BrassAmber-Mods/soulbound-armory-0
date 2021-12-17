@@ -10,6 +10,7 @@ import soulboundarmory.network.client.S2CFreeze;
 import soulboundarmory.network.client.S2CRefresh;
 import soulboundarmory.network.client.S2CSync;
 import soulboundarmory.network.client.S2CSyncItem;
+import soulboundarmory.network.client.S2CUnlock;
 import soulboundarmory.network.server.C2SAttribute;
 import soulboundarmory.network.server.C2SBindSlot;
 import soulboundarmory.network.server.C2SConfig;
@@ -38,6 +39,7 @@ public final class Packets {
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CRefresh> clientRefresh = client(S2CRefresh.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CSync> clientSync = client(S2CSync.class);
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CSyncItem> clientSyncItem = client(S2CSyncItem.class);
+    public static final PacketKey.Client<ExtendedPacketBuffer, S2CUnlock> clientUnlock = client(S2CUnlock.class);
 
     private static byte id;
 

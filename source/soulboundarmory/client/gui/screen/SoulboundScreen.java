@@ -6,7 +6,6 @@ import cell.client.gui.widget.scalable.ScalableWidget;
 import cell.client.gui.widget.slider.SliderWidget;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -16,12 +15,9 @@ import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-
-import static soulboundarmory.component.statistics.StatisticType.experience;
 
 /**
  The main menu of this mod.
@@ -31,13 +27,21 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Colors colors = configuration.colors;
 
-    protected final PlayerEntity player = minecraft.player;
+    protected final ExperienceBar xpBar = new ExperienceBar().center()
+        .tooltip((bar, matrixes, x, y) -> {
+            var xp = (int) this.item.experience();
+            this.renderTooltip(x, y, this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp));
+        }).primaryAction(() -> {
+            configuration.displayOptions ^= true;
+            this.refresh();
+        }).secondaryAction(() -> configuration.overlayExperienceBar ^= true)
+        .scrollAction(amount -> this.cycleStyle((int) amount));
+
     protected final List<Widget<?>> options = new ReferenceArrayList<>(5);
     protected final List<Widget<?>> sliders = new ReferenceArrayList<>(4);
     protected final SoulboundComponent<?> component;
     protected final int slot;
     protected ItemComponent<?> item;
-    protected ExperienceBar xpBar;
     protected ItemStack stack;
 
     private final List<Widget<?>> tabButtons = new ReferenceArrayList<>();
@@ -57,19 +61,11 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         this.options.clear();
         this.sliders.clear();
 
-        this.stack = this.player.getInventory().getStack(this.slot);
-        this.item = ItemComponent.get(this.player, this.stack).orElse(null);
+        this.stack = player().getInventory().getStack(this.slot);
+        this.item = ItemComponent.get(player(), this.stack).orElse(null);
 
         if (this.displayTabs()) {
-            this.add(this.xpBar = new ExperienceBar(this.item).x(this.width() / 2).y(this.height() - 27).center()
-                .tooltip((bar, matrixes, x, y) -> {
-                    var xp = this.item.intValue(experience);
-                    this.renderTooltip(x, y, this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp));
-                }).primaryAction(() -> {
-                    configuration.displayOptions ^= true;
-                    this.refresh();
-                }).secondaryAction(() -> configuration.overlayExperienceBar ^= true)
-                .scrollAction(amount -> this.cycleStyle((int) amount)));
+            this.add(this.xpBar.item(this.item).x(this.width() / 2).y(this.height() - 27));
 
             var tabs = this.item.tabs();
             this.tab = tabs.get(this.component.tab);
@@ -88,7 +84,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
 
             var unbind = this.item.boundSlot() == this.slot;
             var text = unbind ? Translations.guiButtonUnbind : Translations.guiButtonBind;
-            var buttonWidth = Math.max(this.button.width(), textDrawer.getWidth(text) + 8);
+            var buttonWidth = Math.max(this.button.width(), textRenderer.getWidth(text) + 8);
 
             this.add(new ScalableWidget<>().button()
                 .x(this.button.endX() - buttonWidth)
@@ -131,13 +127,11 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
 
         if (this.displayTabs()) {
             var maxLevel = Configuration.instance().maxLevel;
-            var level = this.item.intValue(StatisticType.level);
+            var level = this.item.level();
 
             if (maxLevel >= 0 && level > 0 && this.hoveringLevel()) {
                 this.renderTooltip(Translations.barLevel.format(level, maxLevel));
             }
-
-            // RenderSystem.disableLighting();
         }
     }
 
@@ -165,11 +159,6 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         return super.shouldClose(keyCode, scanCode, modifiers) || modifiers == 0 && SoulboundArmoryClient.guiKeyBinding.matchesKey(keyCode, scanCode);
     }
 
-    @Override
-    public boolean shouldPause() {
-        return true;
-    }
-
     public boolean displayTabs() {
         return this.item != null;
     }
@@ -180,11 +169,10 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     }
 
     private boolean hoveringLevel() {
-        var levelString = String.valueOf(this.item.intValue(StatisticType.level));
-        var levelLeftX = (this.width() - textDrawer.getWidth(levelString)) / 2;
-        var levelTopY = this.height() - 35;
+        var levelString = String.valueOf(this.item.level());
+        var levelLeftX = (this.width() - width(levelString)) / 2;
 
-        return contains(mouseX(), mouseY(), levelLeftX - 1, levelTopY - 1, textDrawer.getWidth(levelString) + 2, fontHeight() + 2);
+        return contains(mouseX(), mouseY(), levelLeftX - 1, this.y() - 1, width(levelString) + 2, fontHeight() + 2);
     }
 
     private int optionX() {
@@ -245,8 +233,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
 
         this.renew(this.tab, this.tab = tab);
         tab.preinitialize();
-        this.component.tab = index;
-        Packets.serverTab.send(new ExtendedPacketBuffer().writeIdentifier(this.component.key().id).writeByte(index));
+        this.component.tab(index);
     }
 
     private void cycleStyle(int change) {

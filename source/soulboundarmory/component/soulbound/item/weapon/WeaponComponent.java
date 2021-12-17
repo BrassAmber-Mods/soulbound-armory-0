@@ -1,24 +1,26 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
+import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import soulboundarmory.client.gui.screen.AttributeTab;
-import soulboundarmory.client.gui.screen.EnchantmentTab;
-import soulboundarmory.client.gui.screen.SelectionTab;
-import soulboundarmory.client.gui.screen.SkillTab;
-import soulboundarmory.client.gui.screen.SoulboundTab;
+import net.minecraftforge.common.ForgeMod;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.entity.Attributes;
+import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.EntityUtil;
 import soulboundarmory.util.Util;
 
@@ -27,6 +29,21 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
 
     public WeaponComponent(SoulboundComponent<?> component) {
         super(component);
+    }
+
+    /**
+     @return true if the hit is critical.
+     */
+    public boolean hit() {
+        this.criticalHitProgress += this.doubleValue(StatisticType.criticalHitRate);
+
+        if (this.criticalHitProgress >= 1) {
+            this.criticalHitProgress--;
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -67,37 +84,17 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
                 xp *= configuration.babyMultiplier;
             }
 
-            this.incrementStatistic(StatisticType.experience, Math.round(xp));
+            this.add(StatisticType.experience, Math.round(xp));
         }
     }
 
     @Override
     public double attributeTotal(StatisticType attribute) {
-        if (attribute == StatisticType.efficiency && this.doubleValue(attribute) == this.statistic(attribute).min()) {
-            return super.attributeTotal(attribute) - this.material().getMiningSpeedMultiplier();
+        if (attribute == StatisticType.efficiency && this.statistic(StatisticType.efficiency).min() == 0) {
+            return this.doubleValue(attribute) == 0 ? 0 : super.attributeTotal(attribute) - this.increase(attribute);
         }
 
         return super.attributeTotal(attribute);
-    }
-
-    /**
-     @return true if the hit is critical.
-     */
-    public boolean hit() {
-        this.criticalHitProgress += this.doubleValue(StatisticType.criticalHitRate);
-
-        if (this.criticalHitProgress >= 1) {
-            this.criticalHitProgress--;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public List<SoulboundTab> tabs() {
-        return List.of(new SelectionTab(Translations.guiWeaponSelection), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 
     @Override
@@ -107,6 +104,28 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
             this.statisticEntry(StatisticType.attackSpeed, Translations.guiAttackSpeed),
             this.statisticEntry(StatisticType.criticalHitRate, Translations.guiCriticalHitRate)
         );
+    }
+
+    @Override
+    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
+        }
+    }
+
+    @Override
+    public List<Text> tooltip() {
+        var tooltip = Util.list(
+            Translations.tooltipAttackDamage.translate(this.format(StatisticType.attackDamage)),
+            Translations.tooltipAttackSpeed.translate(this.format(StatisticType.attackSpeed))
+        );
+
+        if (this.criticalHitRate() > 0) tooltip.add(Translations.tooltipCriticalHitRate.translate(this.format(StatisticType.criticalHitRate)));
+        if (this.efficiency() > 0) tooltip.add(Translations.tooltipEfficiency.translate(this.format(StatisticType.efficiency)));
+
+        return tooltip;
     }
 
     @Override

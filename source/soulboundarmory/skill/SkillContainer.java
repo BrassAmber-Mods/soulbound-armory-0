@@ -1,8 +1,9 @@
 package soulboundarmory.skill;
 
 import cell.client.gui.screen.CellScreen;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.StringVisitable;
@@ -11,10 +12,9 @@ import soulboundarmory.component.statistics.SkillStorage;
 import soulboundarmory.serial.Serializable;
 
 public final class SkillContainer implements Comparable<SkillContainer>, Serializable {
-    public final List<SkillContainer> dependencies = new ReferenceArrayList<>();
+    public final Set<SkillContainer> dependencies = new ReferenceOpenHashSet<>();
     public final Skill skill;
 
-    private boolean learned;
     private int level;
 
     public SkillContainer(Skill skill) {
@@ -37,40 +37,42 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
         return this.level;
     }
 
-    public void level(int level) {
-        this.level = level;
+    public boolean dependenciesFulfilled() {
+        return this.dependencies.stream().allMatch(SkillContainer::learned);
     }
 
-    public void upgrade() {
-        this.level++;
+    public boolean canUpgrade() {
+        return this.dependenciesFulfilled() && (this.skill.maxLevel < 1 || this.level < this.skill.maxLevel);
     }
 
     public boolean canUpgrade(int points) {
         return this.canUpgrade() && points >= this.cost();
     }
 
-    public boolean canUpgrade() {
-        return this.learned && (this.cost() >= 0 || this.skill.maxLevel < 0 || this.level < this.skill.maxLevel);
+    public void upgrade() {
+        this.level++;
+    }
+
+    public void downgrade() {
+        this.level--;
     }
 
     public int cost() {
-        return this.skill.cost(this.learned, this.level + 1);
+        return this.skill.cost(this.level + 1);
+    }
+
+    public int spentPoints() {
+        var points = 0;
+
+        for (var level = this.level; level > 0; level--) {
+            points += this.skill.cost(level);
+        }
+
+        return points;
     }
 
     public boolean learned() {
-        return this.learned;
-    }
-
-    public void learn() {
-        this.learned = true;
-    }
-
-    public boolean canLearn() {
-        return !this.learned && this.dependencies.stream().allMatch(SkillContainer::learned);
-    }
-
-    public boolean canLearn(int points) {
-        return this.canLearn() && points >= this.cost();
+        return this.level > 0;
     }
 
     @Override
@@ -93,19 +95,16 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
     }
 
     public void reset() {
-        this.learned = false;
         this.level = 0;
     }
 
     @Override
     public void serialize(NbtCompound tag) {
-        tag.putBoolean("learned", this.learned);
         tag.putInt("level", this.level);
     }
 
     @Override
     public void deserialize(NbtCompound tag) {
-        this.learned = tag.getBoolean("learned");
         this.level = tag.getInt("level");
     }
 }

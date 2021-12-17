@@ -8,7 +8,7 @@ public final class EndermanacleSkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, int level) {
-        return learned ? level : 3;
+    public int cost(int level) {
+        return level == 1 ? 3 : level;
     }
 }

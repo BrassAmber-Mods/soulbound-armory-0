@@ -10,7 +10,7 @@ import soulboundarmory.skill.Skill;
 
 public class SneakReturnSkill extends Skill {
     public SneakReturnSkill() {
-        super("sneak_return");
+        super("sneak_return", 1);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class SneakReturnSkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, int level) {
+    public int cost(int level) {
         return 1;
     }
 

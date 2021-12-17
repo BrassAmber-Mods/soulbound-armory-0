@@ -8,7 +8,7 @@ public class PenetrationSkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, int level) {
-        return learned ? level : 2;
+    public int cost(int level) {
+        return level == 1 ? 2 : level;
     }
 }

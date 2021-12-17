@@ -27,9 +27,10 @@ import soulboundarmory.util.Util;
 public abstract class Skill extends RegistryEntry<Skill> {
     public static final IForgeRegistry<Skill> registry = Util.newRegistry("skill");
 
+    public final int maxLevel;
+
+    protected final Set<Skill> dependencies = new ReferenceOpenHashSet<>();
     protected final Identifier texture;
-    protected Set<Skill> dependencies = new ReferenceOpenHashSet<>();
-    protected int maxLevel;
 
     private int tier = -1;
 
@@ -44,30 +45,25 @@ public abstract class Skill extends RegistryEntry<Skill> {
         this(identifier, new Identifier(identifier.getNamespace(), "textures/skill/%s.png".formatted(identifier.getPath())), maxLevel);
     }
 
-    public Skill(Identifier identifier, Identifier texture) {
-        this(identifier, texture, 0);
-    }
-
-    public Skill(Identifier identifier) {
-        this(identifier, 0);
+    public Skill(String path, int maxLevel) {
+        this(Util.id(path), maxLevel);
     }
 
     public Skill(String path) {
-        this(Util.id(path), 0);
+        this(path, -1);
     }
 
     /**
-     @param learned whether this skill has been learned
-     @param level the next level
-     @return the cost of unlocking this skill if it has not been learned or upgrading it to level `level` from the previous level.
+     @param level the next level; 1 is the level reached after unlocking; never <= 0.
+     @return the cost of unlocking or upgrading this skill; never < 0.
      */
-    public abstract int cost(boolean learned, int level);
+    public abstract int cost(int level);
 
     /**
      @return whether this skill has multiple levels.
      */
     public final boolean isTiered() {
-        return this.cost(true, 1) >= 0;
+        return this.maxLevel != 1;
     }
 
     public Set<Skill> dependencies() {
@@ -99,7 +95,7 @@ public abstract class Skill extends RegistryEntry<Skill> {
      Render an icon of this skill.
      */
     public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
-        Widget.bind(this.texture);
+        Widget.shaderTexture(this.texture);
         DrawableHelper.drawTexture(matrixes, x, y, zOffset, 0, 0, 16, 16, 16, 16);
     }
 

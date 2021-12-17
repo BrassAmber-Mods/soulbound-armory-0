@@ -1,16 +1,12 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
 import com.google.common.collect.Multimap;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
@@ -39,7 +35,7 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
             .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
 
-        this.enchantments.add(enchantment -> {
+        this.enchantments.initialize(enchantment -> {
             var name = enchantment.getTranslationKey().toLowerCase();
             return !name.contains("holding") && (enchantment == SoulboundArmory.impact || !name.contains("soulbound"));
         });
@@ -67,7 +63,7 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     }
 
     public void resetFireballCooldown() {
-        this.fireballCooldown = (int) Math.round(20 / this.doubleValue(StatisticType.attackSpeed));
+        this.fireballCooldown = (int) Math.round(20 / this.attackSpeed());
     }
 
     public int spell() {
@@ -95,32 +91,15 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
     }
 
     @Override
-    public List<Text> tooltip() {
-        var format = DecimalFormat.getInstance();
-        var tooltip = new ArrayList<>(List.of(
-            Translations.tooltipAttackSpeed.translate(format.format(this.doubleValue(StatisticType.attackSpeed))),
-            Translations.tooltipAttackDamage.translate(format.format(this.attributeTotal(StatisticType.attackDamage))),
-            LiteralText.EMPTY,
-            LiteralText.EMPTY
-        ));
-
-        if (this.doubleValue(StatisticType.criticalHitRate) > 0) {
-            tooltip.add(Translations.tooltipCriticalHitRate.translate(format.format(this.formatStatistic(StatisticType.criticalHitRate))));
-        }
-
-        return tooltip;
-    }
-
-    @Override
     public Item consumableItem() {
         return null;
     }
 
     @Override
-    public double increase(StatisticType statistic) {
-        if (statistic == StatisticType.attackSpeed) return 0.08;
-        if (statistic == StatisticType.attackDamage) return 0.2;
-        if (statistic == StatisticType.criticalHitRate) return 0.04;
+    public double increase(StatisticType type) {
+        if (type == StatisticType.attackSpeed) return 0.08;
+        if (type == StatisticType.attackDamage) return 0.2;
+        if (type == StatisticType.criticalHitRate) return 0.04;
 
         return 0;
     }

@@ -1,6 +1,5 @@
 package cell.client.gui.widget.scalable;
 
-import cell.client.gui.DrawableElement;
 import cell.client.gui.widget.Length;
 import cell.client.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -43,11 +42,11 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T texture(Identifier id) {
-        var texture = DrawableElement.textureManager.getTexture(id);
+        var texture = textureManager.getTexture(id);
 
         if (texture == null) {
             texture = new ResourceTexture(id);
-            DrawableElement.textureManager.registerTexture(id, texture);
+            textureManager.registerTexture(id, texture);
         }
 
         return this.texture(texture);
@@ -165,7 +164,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return (T) this;
     }
 
-    public T widthLimit(float width) {
+    public T widthLimit(double width) {
         this.widthLimit.set(width);
 
         return (T) this;
@@ -177,7 +176,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return (T) this;
     }
 
-    public T heightLimit(float height) {
+    public T heightLimit(double height) {
         this.heightLimit.set(height);
 
         return (T) this;
@@ -187,7 +186,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return this.widthLimit(width).heightLimit(height);
     }
 
-    public T limit(float width, float height) {
+    public T limit(double width, double height) {
         return this.widthLimit(width).heightLimit(height);
     }
 
@@ -274,7 +273,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     @Override
     public void render() {
-        bind(this.texture);
+        shaderTexture(this.texture);
         this.resetColor();
 
         RenderSystem.enableBlend();

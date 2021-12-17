@@ -65,12 +65,12 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
 
         for (int i = 0, size = lines.size(); i < size; i++) {
             var line = lines.get(i);
-            textDrawer.draw(this.matrixes, line.getString(), this.textX, this.getY(i), 0xFFFFFF);
+            textRenderer.draw(this.matrixes, line.getString(), this.textX, this.getY(i), 0xFFFFFF);
         }
     }
 
     protected void renderCaret() {
-        textDrawer.drawWithShadow(this.matrixes, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
+        textRenderer.drawWithShadow(this.matrixes, Caret.UNDERSCORE.character, this.caretX, this.caretY, 0xFFFFFF);
     }
 
     protected int getY(int line) {
@@ -173,7 +173,7 @@ public abstract class AbstractTextBoxWidget<T extends AbstractTextBoxWidget<T>> 
             this.caretX = this.textX;
             this.caretY = this.textY;
         } else {
-            this.caretX = this.textX + textDrawer.getWidth(this.lines.get(size - 1).getString().substring(0, this.index));
+            this.caretX = this.textX + textRenderer.getWidth(this.lines.get(size - 1).getString().substring(0, this.index));
             this.caretY = this.getY(this.column);
         }
     }

@@ -1,23 +1,28 @@
 package soulboundarmory.component.soulbound.item.tool;
 
-import java.text.DecimalFormat;
-import java.util.List;
+import com.google.common.collect.Multimap;
 import java.util.stream.Stream;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.ToolActions;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.entity.Attributes;
 import soulboundarmory.registry.SoulboundItems;
+import soulboundarmory.util.AttributeModifierIdentifiers;
 
 public class PickComponent extends ToolComponent<PickComponent> {
     public PickComponent(SoulboundComponent<?> component) {
@@ -29,7 +34,7 @@ public class PickComponent extends ToolComponent<PickComponent> {
             .min(2, StatisticType.reach)
             .max(0, StatisticType.upgradeProgress);
 
-        this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
+        this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
     }
 
     @Override
@@ -53,25 +58,26 @@ public class PickComponent extends ToolComponent<PickComponent> {
     }
 
     @Override
-    public List<Text> tooltip() {
-        var format = DecimalFormat.getInstance();
-
-        return List.of(
-            Translations.tooltipReach.translate(format.format(this.doubleValue(StatisticType.reach))),
-            Translations.tooltipToolEfficiency.translate(format.format(this.doubleValue(StatisticType.efficiency))),
-            Translations.tooltipUpgradeProgress.translate(format.format(this.doubleValue(StatisticType.upgradeProgress))),
-            LiteralText.EMPTY,
-            LiteralText.EMPTY
-        );
-    }
-
-    @Override
-    public double increase(StatisticType statistic) {
-        if (statistic == StatisticType.efficiency) return 0.5;
-        if (statistic == StatisticType.reach) return 0.1;
-        if (statistic == StatisticType.upgradeProgress) return 0.2;
+    public double increase(StatisticType type) {
+        if (type == StatisticType.efficiency) return 0.5;
+        if (type == StatisticType.reach) return 0.1;
+        if (type == StatisticType.upgradeProgress) return 0.2;
 
         return 0;
+    }
+
+    /**
+     Put attribute modifiers into the given map for a new stack of this item.@param modifiers the map into which to put the modifiers
+
+     @param slot
+     */
+    @Override
+    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
+        }
     }
 
     @Override

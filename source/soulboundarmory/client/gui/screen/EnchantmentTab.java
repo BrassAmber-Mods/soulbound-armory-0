@@ -1,6 +1,5 @@
 package soulboundarmory.client.gui.screen;
 
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.client.i18n.Translations;
@@ -19,7 +18,7 @@ public class EnchantmentTab extends SoulboundTab {
     public void initialize() {
         var component = this.parent().item;
         var enchantments = component.enchantments;
-        this.add(this.resetButton(this.resetAction(Category.enchantment))).active(enchantments.values().stream().anyMatch(level -> level > 0));
+        this.add(this.resetButton(Category.enchantment)).active(enchantments.values().stream().anyMatch(level -> level > 0));
 
         Util.enumerate(enchantments, (enchantment, level, row) -> {
             this.add(this.squareButton(this.width() + 122 >> 1, this.height(enchantments.size(), row), "-", this.disenchantAction(enchantment))).active(level > 0);
@@ -28,15 +27,12 @@ public class EnchantmentTab extends SoulboundTab {
     }
 
     @Override
-    public void render(MatrixStack matrixes, int mouseX, int mouseY, float partialTicks) {
-        super.render(matrixes, mouseX, mouseY, partialTicks);
-
+    protected void render() {
         this.displayPoints(this.parent().item.intValue(StatisticType.enchantmentPoints));
 
         var enchantments = this.parent().item.enchantments;
-
-        Util.enumerate(enchantments, (enchantment, level, row) -> textDrawer.drawWithShadow(
-            matrixes,
+        Util.enumerate(enchantments, (enchantment, level, row) -> textRenderer.drawWithShadow(
+            this.matrixes,
             enchantment.getName(level),
             this.width() - 182 >> 1,
             this.height(enchantments.size(), row) - fontHeight() / 2F,

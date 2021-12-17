@@ -13,7 +13,7 @@ import soulboundarmory.skill.Skill;
  */
 public final class C2SSkill extends ItemComponentPacket {
     @Override
-    public void execute(ItemComponent<?> storage) {
-        storage.upgrade(storage.skill(Skill.registry.getValue(this.message.readIdentifier())));
+    public void execute(ItemComponent<?> component) {
+        component.upgrade(component.skill(Skill.registry.getValue(this.message.readIdentifier())));
     }
 }

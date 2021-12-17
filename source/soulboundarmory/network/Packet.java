@@ -37,9 +37,9 @@ public abstract class Packet<T> {
     protected abstract void execute();
 
     /**
-     If this method is invoked by the server, then return the sender of this packet; otherwise, return the player.
+     If this method is in a server context, then return the sender of this packet; otherwise, return the player.
      */
     protected final PlayerEntity player() {
-        return this.context.getDirection().getReceptionSide().isClient() ? CellElement.minecraft.player : this.context.getSender();
+        return this.context.getDirection().getReceptionSide().isClient() ? CellElement.client.player : this.context.getSender();
     }
 }

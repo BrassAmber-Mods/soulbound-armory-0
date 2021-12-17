@@ -1,6 +1,26 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "soulboundarmory:item/sword"
-    }
+        "layer0": "soulboundarmory:item/sword/0"
+    },
+    "overrides": [
+        {
+            "predicate": {
+                "soulboundarmory:animating": 1
+            },
+            "model": "soulboundarmory:item/sword/animation"
+        },
+        {
+            "predicate": {
+                "soulboundarmory:level": 50
+            },
+            "model": "soulboundarmory:item/sword/50"
+        },
+        {
+            "predicate": {
+                "soulboundarmory:level": 100
+            },
+            "model": "soulboundarmory:item/sword/100"
+        }
+    ]
 }

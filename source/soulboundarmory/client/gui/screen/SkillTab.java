@@ -108,7 +108,7 @@ public class SkillTab extends SoulboundTab {
 
         drawStrokedText(this.matrixes, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0xEEEEEE);
         var text = this.pointText(this.parent().item.intValue(StatisticType.skillPoints));
-        drawStrokedText(this.matrixes, text, this.insideEndX - 8 - textDrawer.getWidth(text), this.insideY + 6, 0xEEEEEE);
+        drawStrokedText(this.matrixes, text, this.insideEndX - 8 - textRenderer.getWidth(text), this.insideY + 6, 0xEEEEEE);
 
         var delta = 20F * tickDelta() / 255F;
         this.chroma = this.selectedSkill() == null ? Math.min(this.chroma + delta, 1F) : Math.max(this.chroma - delta, 175F / 255F);
@@ -162,7 +162,7 @@ public class SkillTab extends SoulboundTab {
     protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY) {
         var name = skill.name();
         var tooltip = skill.tooltip();
-        var barWidth = 36 + Math.max(108, textDrawer.getWidth(name));
+        var barWidth = 36 + Math.max(108, textRenderer.getWidth(name));
 
         var belowCenter = centerY > this.insideCenterY;
         var y = centerY + (belowCenter ? -56 : 14);
@@ -180,11 +180,11 @@ public class SkillTab extends SoulboundTab {
                     genericSections.add((cost == 1 ? Translations.guiSkillUpgradeCostSingular : Translations.guiSkillUpgradeCostPlural).format(cost));
                 }
             }
-        } else if (skill.canLearn()) {
+        } else if (skill.dependenciesFulfilled()) {
             genericSections.add((cost == 1 ? Translations.guiSkillLearnCostSingular : Translations.guiSkillLearnCostPlural).format(cost));
         }
 
-        barWidth = Math.max(barWidth, 12 + genericSections.stream().peek(section -> sections.add(List.of(section))).map(textDrawer::getWidth).max(Comparator.naturalOrder()).orElse(0));
+        barWidth = Math.max(barWidth, 12 + genericSections.stream().peek(section -> sections.add(List.of(section))).map(textRenderer::getWidth).max(Comparator.naturalOrder()).orElse(0));
 
         if (tooltip.size() > 0) {
             sections.add(0, tooltip = wrap(tooltip, barWidth - 8));
@@ -196,7 +196,7 @@ public class SkillTab extends SoulboundTab {
             grayRectangle.x(centerX - 8).y(y).width(barWidth).height(height).render(stack);
 
             for (var line : section) {
-                textDrawer.draw(stack, line.getString(), centerX - 3, textY, 0x999999);
+                textRenderer.draw(stack, line.getString(), centerX - 3, textY, 0x999999);
                 textY += fontHeight();
             }
 
@@ -207,7 +207,7 @@ public class SkillTab extends SoulboundTab {
 
         this.chroma(1);
         blueRectangle.x(centerX - 8).y(centerY - 2).width(barWidth).height(20).render(stack);
-        textDrawer.drawWithShadow(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
+        textRenderer.drawWithShadow(stack, name, centerX + 24, centerY + 4, 0xFFFFFF);
     }
 
     protected void chroma(float chroma) {

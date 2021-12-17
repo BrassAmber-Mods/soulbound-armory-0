@@ -7,11 +7,11 @@ import soulboundarmory.skill.Skill;
 
 public class LeapingSkill extends Skill {
     public LeapingSkill() {
-        super("leaping");
+        super("leaping", 1);
     }
 
     @Override
-    public int cost(boolean learned, int level) {
+    public int cost(int level) {
         return 3;
     }
 

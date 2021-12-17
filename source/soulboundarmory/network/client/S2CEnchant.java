@@ -18,9 +18,9 @@ import soulboundarmory.network.ItemComponentPacket;
  */
 public final class S2CEnchant extends ItemComponentPacket {
     @Override
-    public void execute(ItemComponent<?> item) {
-        item.enchantments.put(this.message.readRegistryEntry(ForgeRegistries.ENCHANTMENTS), this.message.readInt());
-        item.set(StatisticType.enchantmentPoints, this.message.readInt());
-        item.component.refresh();
+    public void execute(ItemComponent<?> component) {
+        component.enchantments.put(this.message.readRegistryEntry(ForgeRegistries.ENCHANTMENTS), this.message.readInt());
+        component.set(StatisticType.enchantmentPoints, this.message.readInt());
+        component.component.refresh();
     }
 }

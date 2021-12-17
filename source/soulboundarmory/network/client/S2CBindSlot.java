@@ -12,8 +12,8 @@ import soulboundarmory.network.ItemComponentPacket;
  */
 public final class S2CBindSlot extends ItemComponentPacket {
     @Override
-    protected void execute(ItemComponent<?> storage) {
-        storage.bindSlot(this.message.readInt());
-        storage.component.refresh();
+    protected void execute(ItemComponent<?> component) {
+        component.bindSlot(this.message.readInt());
+        component.component.refresh();
     }
 }

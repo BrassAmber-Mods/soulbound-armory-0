@@ -5,7 +5,7 @@ import soulboundarmory.skill.Skill;
 
 public class ReturnSkill extends Skill {
     public ReturnSkill() {
-        super("return");
+        super("return", 1);
     }
 
     @Override
@@ -16,7 +16,7 @@ public class ReturnSkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, int level) {
+    public int cost(int level) {
         return 2;
     }
 }

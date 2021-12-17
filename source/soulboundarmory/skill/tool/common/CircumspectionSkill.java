@@ -4,11 +4,11 @@ import soulboundarmory.skill.Skill;
 
 public final class CircumspectionSkill extends Skill {
     public CircumspectionSkill() {
-        super("circumspection");
+        super("circumspection", 1);
     }
 
     @Override
-    public int cost(boolean learned, int level) {
-        return learned ? -1 : 1;
+    public int cost(int level) {
+        return 1;
     }
 }

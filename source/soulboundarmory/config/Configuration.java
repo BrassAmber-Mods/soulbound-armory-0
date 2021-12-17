@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import soulboundarmory.client.gui.bar.BarStyle;
+import soulboundarmory.util.Math2;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
@@ -36,6 +37,9 @@ public final class Configuration {
 
     @Comment("the minimum level for soul weapons to be preserved after death")
     public int preservationLevel = 0;
+
+    @Comment("whether point restoration is free")
+    public boolean freeRestoration = true;
 
     @Category(MULTIPLIERS)
     @Comment("1 + (armor multiplier) * armor")
@@ -189,6 +193,14 @@ public final class Configuration {
                     case 3 -> this.alpha;
                     default -> throw new IllegalArgumentException("invalid color component ID: " + id);
                 };
+            }
+
+            public float getf(int id) {
+                return this.get(id) / 255F;
+            }
+
+            public int argb() {
+                return Math2.pack(this.red, this.green, this.blue, this.alpha);
             }
         }
     }

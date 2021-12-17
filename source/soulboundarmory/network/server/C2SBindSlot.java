@@ -7,14 +7,14 @@ import soulboundarmory.network.Packets;
 
 public final class C2SBindSlot extends ItemComponentPacket {
     @Override
-    public void execute(ItemComponent<?> storage) {
+    public void execute(ItemComponent<?> component) {
         var slot = this.message.readInt();
 
-        if (storage.boundSlot() == slot) {
+        if (component.boundSlot() == slot) {
             slot = -1;
         }
 
-        storage.bindSlot(slot);
-        Packets.clientBindSlot.send(storage.player, new ExtendedPacketBuffer(storage).writeInt(slot));
+        component.bindSlot(slot);
+        Packets.clientBindSlot.send(component.player, new ExtendedPacketBuffer(component).writeInt(slot));
     }
 }

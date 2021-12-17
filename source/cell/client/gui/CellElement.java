@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -20,12 +21,13 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
-import net.minecraftforge.client.MinecraftForgeClient;
+import soulboundarmory.function.BiFloatIntConsumer;
 
 public abstract class CellElement<T extends CellElement<T>> extends DrawableHelper implements DrawableElement, Cloneable {
     public Coordinate x = new Coordinate();
@@ -35,15 +37,23 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     protected Length height = new Length();
 
     public static Screen screen() {
-        return minecraft.currentScreen;
+        return client.currentScreen;
     }
 
     public static CellScreen<?> cellScreen() {
-        return minecraft.currentScreen instanceof ScreenDelegate screen ? screen.screen : null;
+        return client.currentScreen instanceof ScreenDelegate screen ? screen.screen : null;
     }
 
     public static int fontHeight() {
-        return textDrawer.fontHeight;
+        return textRenderer.fontHeight;
+    }
+
+    public static float tickDelta() {
+        return client.getLastFrameDuration();
+    }
+
+    public static ClientPlayerEntity player() {
+        return client.player;
     }
 
     public static boolean isShiftDown() {
@@ -58,10 +68,6 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         return Screen.hasAltDown();
     }
 
-    public static float tickDelta() {
-        return MinecraftForgeClient.getPartialTick();
-    }
-
     public static double mouseX() {
         return mouse.getX() * (double) window.getScaledWidth() / window.getWidth();
     }
@@ -70,11 +76,19 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         return mouse.getY() * (double) window.getScaledHeight() / window.getHeight();
     }
 
-    public static int width(Text text) {
-        return textDrawer.getWidth(text);
+    public static int width(String string) {
+        return textRenderer.getWidth(string);
     }
 
-    public static int width(Stream<? extends Text> text) {
+    public static int width(StringVisitable text) {
+        return textRenderer.getWidth(text);
+    }
+
+    public static int width(OrderedText text) {
+        return textRenderer.getWidth(text);
+    }
+
+    public static int width(Stream<? extends StringVisitable> text) {
         return text.map(CellElement::width).max(Comparator.naturalOrder()).orElse(0);
     }
 
@@ -86,15 +100,19 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     }
 
     public static boolean isPressed(int keyCode) {
-        return InputUtil.isKeyPressed(minecraft.getWindow().getHandle(), keyCode);
+        return InputUtil.isKeyPressed(client.getWindow().getHandle(), keyCode);
     }
 
-    public static void bind(AbstractTexture texture) {
+    public static void shaderTexture(AbstractTexture texture) {
         RenderSystem.setShaderTexture(0, texture.getGlId());
     }
 
-    public static void bind(Identifier texture) {
+    public static void shaderTexture(Identifier texture) {
         RenderSystem.setShaderTexture(0, texture);
+    }
+
+    public static void bind(Identifier texture) {
+        textureManager.bindTexture(texture);
     }
 
     public static void setPositionColorShader() {
@@ -169,6 +187,18 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         fill(matrices, x, y1 + 1, x + 1, y2, z, color);
     }
 
+    public static void stroke(float x, float y, int color, int strokeColor, BiFloatIntConsumer draw) {
+        draw.accept(x + 1, y, strokeColor);
+        draw.accept(x - 1, y, strokeColor);
+        draw.accept(x, y + 1, strokeColor);
+        draw.accept(x, y - 1, strokeColor);
+        draw.accept(x, y, color);
+    }
+
+    public static void stroke(float x, float y, int color, BiFloatIntConsumer draw) {
+        stroke(x, y, color, 0, draw);
+    }
+
     /**
      Draw text with stroke.
 
@@ -179,11 +209,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
      @param strokeColor the color of the stroke
      */
     public static void drawStrokedText(MatrixStack matrixes, Text text, float x, float y, int color, int strokeColor) {
-        textDrawer.draw(matrixes, text, x + 1, y, strokeColor);
-        textDrawer.draw(matrixes, text, x - 1, y, strokeColor);
-        textDrawer.draw(matrixes, text, x, y + 1, strokeColor);
-        textDrawer.draw(matrixes, text, x, y - 1, strokeColor);
-        textDrawer.draw(matrixes, text, x, y, color);
+        stroke(x, y, color, strokeColor, (i, j, color1) -> textRenderer.draw(matrixes, text, i, j, color1));
     }
 
     /**
@@ -196,11 +222,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
      @param strokeColor the color of the stroke
      */
     public static void drawStrokedText(MatrixStack matrixes, String string, float x, float y, int color, int strokeColor) {
-        textDrawer.draw(matrixes, string, x + 1, y, strokeColor);
-        textDrawer.draw(matrixes, string, x - 1, y, strokeColor);
-        textDrawer.draw(matrixes, string, x, y + 1, strokeColor);
-        textDrawer.draw(matrixes, string, x, y - 1, strokeColor);
-        textDrawer.draw(matrixes, string, x, y, color);
+        stroke(x, y, color, strokeColor, (i, j, color1) -> textRenderer.draw(matrixes, string, i, j, color1));
     }
 
     /**
@@ -228,7 +250,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     }
 
     public static void renderTooltip(MatrixStack matrixes, List<? extends StringVisitable> lines, double x, double y) {
-        screen().renderComponentTooltip(matrixes, lines, (int) x, (int) y, textDrawer, ItemStack.EMPTY);
+        screen().renderComponentTooltip(matrixes, lines, (int) x, (int) y, textRenderer, ItemStack.EMPTY);
     }
 
     public static void renderTooltip(MatrixStack matrixes, StringVisitable text, double x, double y) {
@@ -242,7 +264,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         float endX = x + width;
         float endY = y + height;
 
-        bind(identifier);
+        shaderTexture(identifier);
         setPositionColorTextureShader();
         RenderSystem.setShaderColor(1, 1, 1, 1);
 

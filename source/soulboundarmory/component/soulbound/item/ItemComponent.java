@@ -1,5 +1,6 @@
 package soulboundarmory.component.soulbound.item;
 
+import cell.client.gui.widget.Widget;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import java.math.BigDecimal;
@@ -30,9 +31,15 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import soulboundarmory.client.gui.screen.AttributeTab;
+import soulboundarmory.client.gui.screen.EnchantmentTab;
+import soulboundarmory.client.gui.screen.SelectionTab;
+import soulboundarmory.client.gui.screen.SkillTab;
+import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.EnchantmentStorage;
@@ -61,12 +68,13 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public final SoulboundComponent<?> component;
     public final PlayerEntity player;
     public final EnchantmentStorage enchantments = new EnchantmentStorage(this);
-    public final Statistics statistics = new Statistics();
+    public final Statistics statistics = new Statistics(this);
 
-    protected final SkillStorage skills = new SkillStorage();
+    protected final SkillStorage skills = new SkillStorage(this);
     protected ItemStack itemStack;
     protected boolean unlocked;
     protected int boundSlot;
+    protected int animationTime;
 
     public ItemComponent(SoulboundComponent<?> component) {
         this.component = component;
@@ -122,6 +130,11 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     public static Optional<? extends ItemComponent<?>> fromAttacker(LivingEntity target, DamageSource source) {
         var entity = source.getSource();
+
+        if (entity instanceof PlayerEntity) {
+            return fromHands(entity).filter(WeaponComponent.class::isInstance);
+        }
+
         var attacker = source.getAttacker();
 
         if (attacker == null) {
@@ -131,7 +144,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         return entity instanceof SoulboundDaggerEntity ? ItemComponentType.dagger.nullable(attacker)
             : entity instanceof SoulboundLightningEntity ? ItemComponentType.sword.nullable(attacker)
                 : entity instanceof SoulboundFireballEntity ? ItemComponentType.staff.nullable(attacker)
-                    : Components.weapon.nullable(attacker).map(SoulboundComponent::item);
+                    : Optional.empty();
     }
 
     /**
@@ -156,8 +169,9 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
     /**
      @return the increase in `statistic` per point.
+     @param type
      */
-    public abstract double increase(StatisticType statistic);
+    public abstract double increase(StatisticType type);
 
     /**
      @param level a level
@@ -173,11 +187,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public abstract void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot);
 
     /**
-     @return the tabs to display in the menu for this item.
-     */
-    public abstract List<SoulboundTab> tabs();
-
-    /**
      @return a list of attributes to be displayed on the attribute tab for this item.
      */
     public abstract Map<Statistic, Text> screenAttributes();
@@ -187,11 +196,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     public abstract List<Text> tooltip();
 
-    /**
-     Invoked every tick.
-     */
-    public void tick() {}
-
     public void killed(LivingEntity entity) {}
 
     public void mined(BlockState state, BlockPos position) {}
@@ -200,6 +204,49 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         return this.player.world.isClient;
     }
 
+    public final int level() {
+        return this.intValue(StatisticType.level);
+    }
+
+    public final double experience() {
+        return this.doubleValue(StatisticType.experience);
+    }
+
+    public final int attributePoints() {
+        return this.intValue(StatisticType.attributePoints);
+    }
+
+    public final int enchantmentPoints() {
+        return this.intValue(StatisticType.enchantmentPoints);
+    }
+
+    public final int skillPoints() {
+        return this.intValue(StatisticType.skillPoints);
+    }
+
+    public final double attackDamage() {
+        return this.doubleValue(StatisticType.attackDamage);
+    }
+
+    public final double attackSpeed() {
+        return this.doubleValue(StatisticType.attackSpeed);
+    }
+
+    public final double criticalHitRate() {
+        return this.doubleValue(StatisticType.criticalHitRate);
+    }
+
+    public final double efficiency() {
+        return this.doubleValue(StatisticType.efficiency);
+    }
+
+    public final int animationTime() {
+        return this.animationTime;
+    }
+
+    /**
+     @return this item's current tool material.
+     */
     public ToolMaterial material() {
         return SoulboundItems.material;
     }
@@ -215,6 +262,13 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
+     @return the tabs to display in the menu for this item.
+     */
+    public List<SoulboundTab> tabs() {
+        return List.of(new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab());
+    }
+
+    /**
      @return whether the user has permanently unlocked this item.
      */
     public boolean isUnlocked() {
@@ -222,19 +276,39 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     public void unlock() {
-        this.unlocked = true;
+        if (!this.unlocked) {
+            this.unlocked = true;
+
+            if (this.isClient()) {
+                if (Widget.cellScreen() instanceof SoulboundScreen screen) {
+                    screen.close();
+                    this.component.tab(1);
+                }
+            } else {
+                Packets.clientUnlock.sendNearby(this.player, new ExtendedPacketBuffer().writeEntity(this.player).writeItemStack(this.itemStack));
+            }
+        }
     }
 
-    public int size(Category category) {
-        return this.statistics.size(category);
+    public void select(int slot) {
+        if (this.isClient()) {
+            Packets.serverSelectItem.send(new ExtendedPacketBuffer(this).writeInt(slot));
+        }
+
+        if (this.isUnlocked() || this.canConsume(this.player.getInventory().getStack(slot))) {
+            this.player.getInventory().setStack(slot, this.stack());
+            this.component.select(this);
+            this.updateInventory(slot);
+            this.synchronize();
+            this.component.refresh();
+        }
     }
 
+    /**
+     @return this component's instance of a statistic type if it is present or null.
+     */
     public Statistic statistic(StatisticType statistic) {
         return this.statistics.get(statistic);
-    }
-
-    public Statistic statistic(Category category, StatisticType statistic) {
-        return this.statistics.get(category, statistic);
     }
 
     /**
@@ -247,27 +321,20 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         var doubleValue = this.doubleValue(attribute);
 
         if (attribute == StatisticType.attackDamage) {
-            var attackDamage = doubleValue;
-
             for (var entry : this.enchantments.reference2IntEntrySet()) {
                 var enchantment = entry.getKey();
 
                 if (entry.getValue() > 0) {
-                    attackDamage += enchantment.getAttackDamage(this.enchantment(enchantment), EntityGroup.DEFAULT);
+                    doubleValue += enchantment.getAttackDamage(this.enchantment(enchantment), EntityGroup.DEFAULT);
                 }
             }
-
-            return attackDamage;
-        }
-
-        if (attribute == StatisticType.efficiency) {
+        } else if (attribute == StatisticType.efficiency) {
             var efficiency = this.enchantment(Enchantments.EFFICIENCY);
+            doubleValue += this.material().getMiningSpeedMultiplier() + Math2.square(efficiency);
 
             if (efficiency > 0) {
-                efficiency = 1 + efficiency * efficiency;
+                doubleValue++;
             }
-
-            return efficiency + doubleValue + this.material().getMiningSpeedMultiplier();
         }
 
         return doubleValue;
@@ -280,9 +347,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @return the relative value of the attribute.
      */
     public double attributeRelative(StatisticType attribute) {
-        if (attribute == StatisticType.attackSpeed) return this.doubleValue(StatisticType.attackSpeed) - 4;
-        if (attribute == StatisticType.attackDamage) return this.doubleValue(StatisticType.attackDamage) - 1;
+        if (attribute == StatisticType.attackSpeed) return this.attackSpeed() - 4;
+        if (attribute == StatisticType.attackDamage) return this.attackDamage() - 1;
         if (attribute == StatisticType.reach) return this.doubleValue(StatisticType.reach) - 3;
+        if (attribute == StatisticType.efficiency) return this.efficiency() - this.material().getMiningSpeedMultiplier();
 
         return this.doubleValue(attribute);
     }
@@ -318,7 +386,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @param type   the type of the statistic
      @param amount the amount to add
      */
-    public void incrementStatistic(StatisticType type, double amount) {
+    public void add(StatisticType type, double amount) {
         var leveledUp = false;
 
         if (type == StatisticType.experience) {
@@ -329,15 +397,15 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             if (xp >= this.nextLevelXP() && this.canLevelUp()) {
                 var nextLevelXP = this.nextLevelXP();
 
-                this.incrementStatistic(StatisticType.level, 1);
-                this.incrementStatistic(StatisticType.experience, -nextLevelXP);
+                this.add(StatisticType.level, 1);
+                this.add(StatisticType.experience, -nextLevelXP);
 
                 leveledUp = true;
             }
 
             if (xp < 0) {
-                this.incrementStatistic(StatisticType.level, -1);
-                this.incrementStatistic(StatisticType.experience, this.getLevelXP(this.intValue(StatisticType.level) - 1));
+                this.add(StatisticType.level, -1);
+                this.add(StatisticType.experience, this.getLevelXP(this.level() - 1));
             }
         } else if (type == StatisticType.level) {
             var sign = Math2.signum(amount);
@@ -353,7 +421,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         this.synchronize();
 
         if (leveledUp && Components.config.of(this.player).levelupNotifications) {
-            this.player.sendMessage(Translations.levelupMessage.format(this.itemStack.getName(), this.intValue(StatisticType.level)), true);
+            this.player.sendMessage(Translations.levelupMessage.format(this.itemStack.getName(), this.level()), true);
         }
     }
 
@@ -363,7 +431,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @param type   the type of the attribute.
      @param points the number of points to add; will be clamped in order to not exceed the attribute's bounds and available attribute points.
      */
-    public void incrementAttributePoints(StatisticType type, int points) {
+    public void addAttribute(StatisticType type, int points) {
         var attributePoints = this.statistic(StatisticType.attributePoints);
         var attribute = this.statistic(type);
         var bigPoints = BigDecimal.valueOf(points);
@@ -395,7 +463,16 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             return;
         }
 
-        attributePoints.add(-points);
+        if (points > 0 || Configuration.instance().freeRestoration) {
+            attributePoints.add(-points);
+
+            if (points > 0) {
+                this.statistics.history.record(type, points);
+            }
+        } else {
+            this.add(StatisticType.level, points);
+        }
+
         attribute.add(change);
 
         this.updateItemStack();
@@ -415,7 +492,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     public boolean canLevelUp() {
         var configuration = Configuration.instance();
-        return this.intValue(StatisticType.level) < configuration.maxLevel || configuration.maxLevel < 0;
+        return this.level() < configuration.maxLevel || configuration.maxLevel < 0;
     }
 
     /**
@@ -429,21 +506,21 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         var configuration = Configuration.instance();
 
         if (level.intValue() % configuration.levelsPerEnchantment == 0) {
-            this.incrementStatistic(StatisticType.enchantmentPoints, sign);
+            this.add(StatisticType.enchantmentPoints, sign);
         }
 
         if (level.intValue() % configuration.levelsPerSkillPoint == 0) {
-            this.incrementStatistic(StatisticType.skillPoints, sign);
+            this.add(StatisticType.skillPoints, sign);
         }
 
-        this.incrementStatistic(StatisticType.attributePoints, sign);
+        this.add(StatisticType.attributePoints, sign);
     }
 
     /**
      @return the XP required in order to reach the next level.
      */
     public int nextLevelXP() {
-        return this.getLevelXP(this.intValue(StatisticType.level));
+        return this.getLevelXP(this.level());
     }
 
     public Collection<SkillContainer> skills() {
@@ -474,19 +551,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public void upgrade(SkillContainer skill) {
         if (this.isClient()) {
             Packets.serverSkill.send(new ExtendedPacketBuffer(this).writeIdentifier(skill.skill.getRegistryName()));
-        } else {
-            var points = this.intValue(StatisticType.skillPoints);
-
-            if (skill.canLearn(points)) {
-                skill.learn();
-            } else if (skill.canUpgrade(points)) {
-                skill.upgrade();
-            } else {
-                return;
-            }
-
-            // Synchronization is handled by incrementStatistic.
-            this.incrementStatistic(StatisticType.skillPoints, -skill.cost());
+        } else if (skill.canUpgrade(this.skillPoints())) {
+            this.add(StatisticType.skillPoints, -skill.cost());
+            skill.upgrade();
+            this.synchronize();
         }
     }
 
@@ -514,13 +582,17 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         }
 
         var change = Math.max(0, current + levels) - current;
-        enchantmentPoints.add(-change);
         this.enchantments.add(enchantment, change);
 
-        this.updateItemStack();
-        // this.synchronize();
+        if (change > 0 || Configuration.instance().freeRestoration) {
+            enchantmentPoints.add(-change);
+        } else {
+            this.add(StatisticType.level, Configuration.instance().levelsPerEnchantment * change);
+        }
 
-        Packets.clientEnchant.send(this.player, new ExtendedPacketBuffer(this)
+        this.updateItemStack();
+
+        Packets.clientEnchant.sendIfServer(this.player, new ExtendedPacketBuffer(this)
             .writeRegistryEntry(enchantment)
             .writeInt(current + change)
             .writeInt(enchantmentPoints.intValue())
@@ -536,17 +608,24 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         if (category == Category.datum) {
             this.statistics.reset(Category.datum);
         } else if (category == Category.attribute) {
-            for (var statistic : this.statistics.get(Category.attribute).values()) {
-                this.incrementAttributePoints(statistic.type, Integer.MIN_VALUE);
-                statistic.reset();
+            for (var attribute : this.statistics.get(Category.attribute).values()) {
+                this.addAttribute(attribute.type, Integer.MIN_VALUE);
+                attribute.reset();
             }
         } else if (category == Category.enchantment) {
             for (var enchantment : this.enchantments) {
-                this.incrementStatistic(StatisticType.enchantmentPoints, this.enchantments.put(enchantment, 0));
+                this.addEnchantment(enchantment, Integer.MIN_VALUE);
             }
         } else if (category == Category.skill) {
-            this.skills.reset();
-            this.statistic(StatisticType.skillPoints).setToMin();
+            this.skills.values().forEach(skill -> {
+                if (Configuration.instance().freeRestoration) {
+                    this.statistic(StatisticType.skillPoints).add(skill.spentPoints());
+                } else {
+                    this.add(StatisticType.level, Configuration.instance().levelsPerSkillPoint * -skill.spentPoints());
+                }
+
+                skill.reset();
+            });
         }
 
         this.synchronize();
@@ -689,6 +768,13 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
+     Invoked every tick.
+     */
+    public void tick() {
+        this.animationTime--;
+    }
+
+    /**
      @return a new item stack with all statistics applied.
      */
     protected ItemStack newItemStack() {
@@ -722,7 +808,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @param statistic the statistic type
      @return the formatted value.
      */
-    protected String formatStatistic(StatisticType statistic) {
+    protected String format(StatisticType statistic) {
         if (statistic == StatisticType.upgradeProgress || statistic == StatisticType.criticalHitRate) {
             return this.formatPercentage(statistic);
         }
@@ -735,7 +821,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     protected Map.Entry<Statistic, Text> statisticEntry(StatisticType type, Translation translation, Object... arguments) {
-        return Map.entry(this.statistic(type), translation.format(Util.prepend(this.formatStatistic(type), arguments)));
+        return Map.entry(this.statistic(type), translation.format(Util.add(this.format(type), arguments)));
     }
 
     /**

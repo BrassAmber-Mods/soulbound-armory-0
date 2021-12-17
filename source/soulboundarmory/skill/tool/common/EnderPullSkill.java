@@ -7,11 +7,11 @@ import soulboundarmory.skill.Skill;
 
 public final class EnderPullSkill extends Skill {
     public EnderPullSkill() {
-        super("ender_pull");
+        super("ender_pull", 1);
     }
 
     @Override
-    public int cost(boolean learned, int level) {
+    public int cost(int level) {
         return 3;
     }
 

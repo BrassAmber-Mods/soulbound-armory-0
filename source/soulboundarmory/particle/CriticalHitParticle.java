@@ -1,30 +1,28 @@
 package soulboundarmory.particle;
 
+import net.minecraft.client.particle.DamageParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleFactory;
-import net.minecraft.client.particle.ParticleTextureSheet;
-import net.minecraft.client.particle.SpriteBillboardParticle;
 import net.minecraft.client.particle.SpriteProvider;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
 import org.jetbrains.annotations.Nullable;
+import soulboundarmory.util.Math2;
 
-public class CriticalHitParticle extends SpriteBillboardParticle {
-    public CriticalHitParticle(ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+public class CriticalHitParticle extends DamageParticle {
+    public CriticalHitParticle(ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, SpriteProvider sprite) {
         super(world, x, y, z, velocityX, velocityY, velocityZ);
 
-        this.colorGreen = 0;
-        this.colorBlue = 0;
-        // 6B0303
+        this.setSprite(sprite);
+
+        var color = 0x6B0303;
+        this.colorRed = Math2.red(color);
+        this.colorGreen = Math2.green(color);
+        this.colorBlue = Math2.blue(color);
     }
 
-    @Override
-    public ParticleTextureSheet getType() {
-        return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE;
-    }
-
-    public static class Factory implements ParticleFactory<DefaultParticleType> {
-        public final SpriteProvider sprite;
+    public static final class Factory implements ParticleFactory<DefaultParticleType> {
+        private final SpriteProvider sprite;
 
         public Factory(SpriteProvider sprite) {
             this.sprite = sprite;
@@ -33,10 +31,7 @@ public class CriticalHitParticle extends SpriteBillboardParticle {
         @Nullable
         @Override
         public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
-            var particle = new CriticalHitParticle(world, x, y, z, velocityX, velocityY, velocityZ);
-            particle.setSprite(this.sprite);
-
-            return particle;
+            return new CriticalHitParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.sprite);
         }
     }
 }

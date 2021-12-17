@@ -9,11 +9,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameRules;
+import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.lib.component.ComponentRegistry;
 import soulboundarmory.lib.component.EntityComponent;
@@ -44,11 +44,6 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     public abstract EntityComponentKey<? extends SoulboundComponent<?>> key();
 
     /**
-     @return the selection tab for this component.
-     */
-    public abstract SoulboundTab selectionTab();
-
-    /**
      @return whether the given item stack matches any of this component's items.
      */
     public abstract boolean accepts(ItemStack stack);
@@ -58,6 +53,14 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
      */
     public final boolean isClient() {
         return this.player.world.isClient;
+    }
+
+    public void tab(int index) {
+        this.tab = index;
+
+        if (this.isClient()) {
+            Packets.serverTab.send(new ExtendedPacketBuffer(this).writeByte(index));
+        }
     }
 
     /**
@@ -81,11 +84,18 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     /**
      Set the currently active soulbound item and unlock it if it is locked.
 
-     @param component the item's component.
+     @param item the item's component.
      */
-    public void currentItem(ItemComponent<?> component) {
-        this.item = component;
-        component.unlock();
+    public void select(ItemComponent<?> item) {
+        this.item = item;
+        item.unlock();
+    }
+
+    /**
+     @return the selection tab for this component.
+     */
+    public SoulboundTab selectionTab() {
+        return new SelectionTab();
     }
 
     /**
@@ -134,16 +144,14 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
         }
     }
 
-    /**
-     Invoked every tick.
-     */
-    public void tick() {
+    @Override
+    public void tickStart() {
         var storage = this.heldItemComponent().orElse(null);
 
         if (storage == null) {
             storage = this.item;
         } else {
-            this.currentItem(storage);
+            this.select(storage);
         }
 
         if (storage != null) {
@@ -178,10 +186,10 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
         EntityComponent.super.copy(copy);
 
         if (!this.player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
-            var storage = this.item();
+            var item = this.item();
 
-            if (storage != null && storage.intValue(StatisticType.level) >= Configuration.instance().preservationLevel) {
-                this.player.giveItemStack(storage.stack());
+            if (item != null && item.level() >= Configuration.instance().preservationLevel) {
+                this.player.getInventory().insertStack(item.stack());
             }
         }
     }

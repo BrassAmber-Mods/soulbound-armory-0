@@ -1,5 +1,6 @@
 package soulboundarmory.command.argument;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,9 +14,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.serialize.ArgumentSerializer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
 
 public class RegistryArgumentType<T extends IForgeRegistryEntry<?>> implements ArgumentType<Set<T>> {
     protected final IForgeRegistry<?> registry;
@@ -56,5 +60,22 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<?>> implements A
 
     protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return Stream.concat(this.registry.getKeys().stream().map(Identifier::getPath), Stream.of("all"));
+    }
+
+    public static class Serializer implements ArgumentSerializer<RegistryArgumentType<?>> {
+        @Override
+        public void toPacket(RegistryArgumentType<?> type, PacketByteBuf buf) {
+            buf.writeIdentifier(type.registry.getRegistryName());
+        }
+
+        @Override
+        public RegistryArgumentType<?> fromPacket(PacketByteBuf buf) {
+            return new RegistryArgumentType<>(RegistryManager.ACTIVE.getRegistry(buf.readIdentifier()));
+        }
+
+        @Override
+        public void toJson(RegistryArgumentType<?> type, JsonObject json) {
+            json.addProperty("registry", type.registry.getRegistryName().toString());
+        }
     }
 }

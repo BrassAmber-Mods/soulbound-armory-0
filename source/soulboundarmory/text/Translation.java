@@ -1,6 +1,8 @@
 package soulboundarmory.text;
 
+import java.util.stream.Stream;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
@@ -22,7 +24,7 @@ public class Translation extends TranslatableText {
     }
 
     public Text translate(Object... args) {
-        return Text.of(I18n.translate(this.getKey(), args));
+        return Text.of(I18n.translate(this.getKey(), Stream.of(args).map(arg -> arg instanceof StringVisitable text ? text.getString() : arg).toArray()));
     }
 
     @Override

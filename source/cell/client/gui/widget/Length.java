@@ -1,7 +1,7 @@
 package cell.client.gui.widget;
 
 public class Length {
-    public float value = 1F;
+    public double value = 1F;
     public boolean absolute;
 
     public int get() {
@@ -12,7 +12,7 @@ public class Length {
         return (int) (this.absolute ? this.value : this.value * max);
     }
 
-    public Length set(float value) {
+    public Length set(double value) {
         this.value = value;
 
         return this.absolute(false);

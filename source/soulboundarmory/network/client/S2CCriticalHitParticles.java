@@ -1,6 +1,6 @@
 package soulboundarmory.network.client;
 
-import cell.client.gui.CellElement;
+import cell.client.gui.widget.Widget;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.BufferPacket;
 
@@ -13,10 +13,6 @@ import soulboundarmory.network.BufferPacket;
 public final class S2CCriticalHitParticles extends BufferPacket {
     @Override
     protected void execute() {
-        var entity = this.message.readEntity();
-
-        if (entity != null) {
-            CellElement.minecraft.particleManager.addEmitter(entity, SoulboundArmory.criticalHitParticleType);
-        }
+        this.message.readEntity().ifPresent(value -> Widget.client.particleManager.addEmitter(value, SoulboundArmory.criticalHitParticleType));
     }
 }

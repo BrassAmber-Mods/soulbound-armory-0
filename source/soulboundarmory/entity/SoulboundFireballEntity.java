@@ -16,18 +16,18 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import soulboundarmory.SoulboundArmory;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
+import soulboundarmory.util.Util;
 
 public class SoulboundFireballEntity extends SmallFireballEntity {
     public static final EntityType<SoulboundFireballEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundFireballEntity>) SoulboundFireballEntity::new, SpawnGroup.MISC)
         .setDimensions(1, 1)
-        .build(SoulboundArmory.id("fireball").toString());
+        .build(Util.id("fireball").toString());
 
     protected StaffComponent component;
     protected int hitCount;

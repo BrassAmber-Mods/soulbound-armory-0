@@ -26,7 +26,7 @@ public abstract class CellScreen<T extends CellScreen<T>> extends Widget<T> {
     }
 
     public void open() {
-        minecraft.setScreen(this.asScreen());
+        client.setScreen(this.asScreen());
     }
 
     public boolean shouldPause() {
@@ -38,7 +38,7 @@ public abstract class CellScreen<T extends CellScreen<T>> extends Widget<T> {
     }
 
     public void close() {
-        minecraft.setScreen(this.screen.parent);
+        client.setScreen(this.screen.parent);
     }
 
     @Override

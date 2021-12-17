@@ -50,10 +50,10 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
         if (entity instanceof ServerPlayerEntity player) {
             var component = ItemComponentType.dagger.of(player);
             var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
-            var velocity = maxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
-            var maxVelocity = velocity / attackSpeed;
+            var speed = maxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
+            var maxSpeed = speed / attackSpeed;
 
-            world.spawnEntity(new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), velocity, maxVelocity));
+            world.spawnEntity(new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), speed, maxSpeed));
 
             if (!player.isCreative()) {
                 player.getInventory().removeOne(itemStack);

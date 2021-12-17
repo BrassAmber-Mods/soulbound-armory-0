@@ -20,11 +20,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.TierSortingRegistry;
-import soulboundarmory.client.gui.screen.AttributeTab;
-import soulboundarmory.client.gui.screen.EnchantmentTab;
-import soulboundarmory.client.gui.screen.SelectionTab;
-import soulboundarmory.client.gui.screen.SkillTab;
-import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
@@ -43,7 +38,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     public ToolComponent(SoulboundComponent<?> component) {
         super(component);
 
-        this.skills.add(Skills.circumspection, Skills.enderPull);
+        this.skills.add(Skills.absorption, Skills.circumspection, Skills.enderPull);
     }
 
     public Text materialName() {
@@ -56,7 +51,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
         if (stack.getItem() instanceof ToolItem tool && this.canAbsorb(stack)) {
             var tiers = TierSortingRegistry.getSortedTiers();
 
-            if (tiers.indexOf(this.material) >= tiers.indexOf(tool.getMaterial())) {
+            if (tiers.indexOf(this.nextMaterial == null ? this.material : this.nextMaterial) >= tiers.indexOf(tool.getMaterial())) {
                 this.player.sendMessage(Translations.cannotAbsorbWeaker, true);
             } else {
                 if (stack.isDamaged()) {
@@ -83,7 +78,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
         if (!this.isClient() && this.itemStack.isSuitableFor(state)) {
             var delta = Math.max(1, state.calcBlockBreakingDelta(this.player, this.player.world, position));
             var xp = Math.round(state.getHardness(this.player.world, position)) + 4 * (1 - delta);
-            this.incrementStatistic(StatisticType.experience, delta == 1 ? Math.min(10, xp) : xp);
+            this.add(StatisticType.experience, delta == 1 ? Math.min(10, xp) : xp);
         }
     }
 
@@ -93,8 +88,8 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     }
 
     @Override
-    public void incrementAttributePoints(StatisticType type, int points) {
-        super.incrementAttributePoints(type, points);
+    public void addAttribute(StatisticType type, int points) {
+        super.addAttribute(type, points);
 
         var progress = this.statistic(StatisticType.upgradeProgress);
 
@@ -102,16 +97,24 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
             progress.setToMin();
             progress.max();
             this.material = this.nextMaterial;
+            this.nextMaterial = null;
             this.synchronize();
         }
     }
 
     @Override
     public void reset() {
+        var level = this.level();
+
         super.reset();
 
         this.nextMaterial = null;
         this.material = ToolMaterials.WOOD;
+
+        if (Configuration.instance().freeRestoration) {
+            this.set(StatisticType.attributePoints, level);
+        }
+
         this.synchronize();
     }
 
@@ -123,14 +126,9 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     }
 
     @Override
-    public List<SoulboundTab> tabs() {
-        return List.of(new SelectionTab(Translations.guiToolSelection), new AttributeTab(), new EnchantmentTab(), new SkillTab());
-    }
-
-    @Override
     public Map<Statistic, Text> screenAttributes() {
         var attributes = Util.map(
-            this.statisticEntry(StatisticType.efficiency, Translations.guiToolEfficiency),
+            this.statisticEntry(StatisticType.efficiency, Translations.guiEfficiency),
             this.statisticEntry(StatisticType.reach, Translations.guiReach)
         );
 
@@ -139,6 +137,15 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
         }
 
         return attributes;
+    }
+
+    @Override
+    public List<Text> tooltip() {
+        return List.of(
+            Translations.tooltipReach.translate(this.format(StatisticType.reach)),
+            Translations.tooltipEfficiency.translate(this.format(StatisticType.efficiency)),
+            this.nextMaterial == null ? Translations.tier.translate(this.materialName()) : Translations.tooltipUpgradeProgress.translate(this.format(StatisticType.upgradeProgress), this.materialName())
+        );
     }
 
     @Override
