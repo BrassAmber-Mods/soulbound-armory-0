@@ -76,10 +76,14 @@ public class TextWidget extends Widget<TextWidget> {
         }
 
         if ((color & 0xFF000000) == 0) {
-            color |= 0xFF;
+            color |= 0xFF000000;
         }
 
-        return this.active() ? color : color & ~0xFF | (Math2.alpha(color) >> 2) * 160 / 255 << 8;
+        if (!this.active()) {
+            color = color & 0xFFFFFF | Math2.alpha(color) * 160 / 255 << 24;
+        }
+
+        return color;
     }
 
     @Override

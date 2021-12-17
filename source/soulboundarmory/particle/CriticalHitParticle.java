@@ -16,9 +16,9 @@ public class CriticalHitParticle extends DamageParticle {
         this.setSprite(sprite);
 
         var color = 0x6B0303;
-        this.colorRed = Math2.red(color);
-        this.colorGreen = Math2.green(color);
-        this.colorBlue = Math2.blue(color);
+        this.colorRed = Math2.redf(color);
+        this.colorGreen = Math2.greenf(color);
+        this.colorBlue = Math2.bluef(color);
     }
 
     public static final class Factory implements ParticleFactory<DefaultParticleType> {
