@@ -12,22 +12,20 @@ import soulboundarmory.text.Translation;
 import soulboundarmory.util.Util;
 
 public class Translations {
-    public static final Translation tooltipToolEfficiency = attribute("tool_efficiency");
-    public static final Translation tooltipWeaponEfficiency = attribute("weapon_efficiency");
+    public static final Translation tooltipEfficiency = attribute("efficiency");
     public static final Translation tooltipReach = attribute("reach");
     public static final Translation tooltipUpgradeProgress = attribute("upgrade_progress");
     public static final Translation tooltipAttackSpeed = attribute("attack_speed");
     public static final Translation tooltipAttackDamage = attribute("attack_damage");
     public static final Translation tooltipCriticalHitRate = attribute("critical_hit_rate");
-    public static final Translation tooltipAttackRange = attribute("attack_range");
 
     public static final Translation guiDagger = gui("dagger");
     public static final Translation guiSword = gui("sword");
     public static final Translation guiGreatsword = gui("greatsword");
+    public static final Translation guiBigsword = gui("bigsword");
     public static final Translation guiStaff = gui("staff");
     public static final Translation guiPick = gui("pick");
-    public static final Translation guiToolSelection = gui("tool_selection");
-    public static final Translation guiWeaponSelection = gui("weapon_selection");
+    public static final Translation guiToolSelection = gui("selection");
     public static final Translation guiButtonAttributes = gui("attributes");
     public static final Translation guiButtonEnchantments = gui("enchantments");
     public static final Translation guiSkills = gui("skills");
@@ -47,14 +45,12 @@ public class Translations {
     public static final Translation green = gui("green");
     public static final Translation blue = gui("blue");
     public static final Translation alpha = gui("alpha");
-    public static final Translation guiToolEfficiency = gui("tool_efficiency");
-    public static final Translation guiWeaponEfficiency = gui("weapon_efficiency");
+    public static final Translation guiEfficiency = gui("efficiency");
     public static final Translation guiReach = gui("reach");
     public static final Translation guiUpgradeProgress = gui("upgrade_progress");
     public static final Translation guiAttackSpeed = gui("attack_speed");
     public static final Translation guiAttackDamage = gui("attack_damage");
     public static final Translation guiCriticalHitRate = gui("critical_hit_rate");
-    public static final Translation guiAttackRange = gui("attack_range");
     public static final Translation toggleBar = gui("bar.toggle");
     public static final Translation barLevel = gui("bar.level");
     public static final Translation barXP = gui("bar.xp");
@@ -64,13 +60,15 @@ public class Translations {
     public static final Translation bossStyle = gui("style.boss");
     public static final Translation horseStyle = gui("style.horse");
 
+    public static final Translation levelupMessage = message("levelup");
+    public static final Translation cannotAbsorbDamaged = message("cannot_absorb_damaged");
+    public static final Translation cannotAbsorbWeaker = message("cannot_absorb_weaker");
+
     public static final Translation hudSpell = of("hud", "spell");
 
     public static final Translation guiKey = of("key", "gui");
 
-    public static final Translation levelupMessage = message("levelup");
-    public static final Translation cannotAbsorbDamaged = message("cannot_absorb_damaged");
-    public static final Translation cannotAbsorbWeaker = message("cannot_absorb_weaker");
+    public static final Translation tier = of("tier");
 
     public static final Translation commandNoItem = of("command", "no_item");
 
@@ -84,6 +82,10 @@ public class Translations {
 
     public static List<Text> skillDescription(Skill skill) {
         return Stream.of(Util.capitalize(I18n.translate("skill.%s.%s.desc".formatted(skill.getRegistryName().getNamespace(), skill.getRegistryName().getPath()))).split("\n")).map(Text::of).toList();
+    }
+
+    private static Translation of(String path) {
+        return Translation.of("%s.%s", SoulboundArmory.ID, path);
     }
 
     private static Translation of(String category, String path) {

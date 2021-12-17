@@ -10,6 +10,16 @@ import soulboundarmory.serial.Serializable;
  */
 public interface Component<C extends Component<C>> extends Serializable {
     /**
+     Invoked at the beginning of every tick.
+     */
+    default void tickStart() {}
+
+    /**
+     Invoked at the end of every tick.
+     */
+    default void tickEnd() {}
+
+    /**
      Serialize this component into `tag`.
 
      @param tag an empty compound tag for this component

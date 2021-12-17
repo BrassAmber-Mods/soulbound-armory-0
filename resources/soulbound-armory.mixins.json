@@ -7,6 +7,7 @@
         "ServerPlayNetworkHandlerMixin",
         "ServerPlayerInteractionManagerMixin",
         "BlockMixin",
+        "ItemMixin",
         "ItemStackMixin",
         "MiningToolItemMixin",
         "AbstractBlockStateMixin",
@@ -15,8 +16,8 @@
         "entity.LivingEntityMixin",
         "entity.EntityAttributeModifierMixin",
         "entity.OperationMixin",
-        "entity.PlayerInventoryMixin",
-        "entity.PersistentProjectileEntityMixin"
+        "entity.PlayerEntityMixin",
+        "entity.PlayerInventoryMixin"
     ],
     "injectors": {
         "defaultRequire": 1,

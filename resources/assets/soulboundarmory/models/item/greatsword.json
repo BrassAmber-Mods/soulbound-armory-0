@@ -1,8 +1,28 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "soulboundarmory:item/greatsword"
+        "layer0": "soulboundarmory:item/greatsword/0"
     },
+    "overrides": [
+        {
+            "predicate": {
+                "soulboundarmory:animating": 1
+            },
+            "model": "soulboundarmory:item/greatsword/animation"
+        },
+        {
+            "predicate": {
+                "soulboundarmory:level": 50
+            },
+            "model": "soulboundarmory:item/greatsword/50"
+        },
+        {
+            "predicate": {
+                "soulboundarmory:level": 100
+            },
+            "model": "soulboundarmory:item/greatsword/100"
+        }
+    ],
     "display": {
         "thirdperson_righthand": {
             "rotation": [

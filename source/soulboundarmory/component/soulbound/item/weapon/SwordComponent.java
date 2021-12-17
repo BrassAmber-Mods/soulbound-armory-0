@@ -1,9 +1,6 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
 import com.google.common.collect.Multimap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.entity.EquipmentSlot;
@@ -12,7 +9,6 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
@@ -40,7 +36,8 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
             .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
 
-        this.enchantments.add(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
+
+        this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
         this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.summonLightning);
     }
 
@@ -65,7 +62,7 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
 
     public void resetLightningCooldown() {
         if (!this.player.isCreative()) {
-            this.lightningCooldown = (int) Math.round(96 / this.doubleValue(StatisticType.attackSpeed));
+            this.lightningCooldown = (int) Math.round(96 / this.attackSpeed());
         }
     }
 
@@ -79,29 +76,15 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
 
     @Override
     public Map<Statistic, Text> screenAttributes() {
-        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiWeaponEfficiency));
+        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiEfficiency));
     }
 
     @Override
-    public List<Text> tooltip() {
-        var format = DecimalFormat.getInstance();
-
-        return new ReferenceArrayList<>(List.of(
-            Translations.tooltipAttackSpeed.translate(format.format(this.doubleValue(StatisticType.attackSpeed))),
-            Translations.tooltipAttackDamage.translate(format.format(this.attributeTotal(StatisticType.attackDamage))),
-            LiteralText.EMPTY,
-            LiteralText.EMPTY,
-            Translations.tooltipCriticalHitRate.translate(format.format(this.doubleValue(StatisticType.criticalHitRate) * 100)),
-            Translations.tooltipToolEfficiency.translate(format.format(this.doubleValue(StatisticType.efficiency)))
-        ));
-    }
-
-    @Override
-    public double increase(StatisticType statistic) {
-        if (statistic == StatisticType.attackSpeed) return 0.03;
-        if (statistic == StatisticType.attackDamage) return 0.07;
-        if (statistic == StatisticType.criticalHitRate) return 0.015;
-        if (statistic == StatisticType.efficiency) return 0.04;
+    public double increase(StatisticType type) {
+        if (type == StatisticType.attackSpeed) return 0.03;
+        if (type == StatisticType.attackDamage) return 0.07;
+        if (type == StatisticType.criticalHitRate) return 0.015;
+        if (type == StatisticType.efficiency) return 0.04;
 
         return 0;
     }

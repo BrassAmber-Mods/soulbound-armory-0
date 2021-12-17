@@ -10,17 +10,21 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.statistics.history.EnchantmentHistory;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.util.Util;
 
 public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantment> implements Iterable<Enchantment>, Serializable {
+    public final EnchantmentHistory history;
+
     protected final ItemComponent<?> component;
 
     public EnchantmentStorage(ItemComponent<?> component) {
         this.component = component;
+        this.history = new EnchantmentHistory(component);
     }
 
-    public void add(Predicate<Enchantment> predicate) {
+    public void initialize(Predicate<Enchantment> predicate) {
         ForgeRegistries.ENCHANTMENTS.getValues().stream()
             .filter(enchantment -> enchantment.type.isAcceptableItem(this.component.item())
                 && !enchantment.isCursed()
@@ -36,8 +40,9 @@ public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantme
         return level == null ? 0 : level;
     }
 
-    public void add(Enchantment enchantment, int value) {
-        this.put(enchantment, this.get(enchantment) + value);
+    public void add(Enchantment enchantment, int levels) {
+        this.put(enchantment, this.get(enchantment) + levels);
+        this.history.record(enchantment, levels);
     }
 
     public void reset() {
@@ -62,12 +67,12 @@ public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantme
     }
 
     @Override
-    public void deserialize(NbtCompound nbt) {
-        for (var key : nbt.getKeys()) {
+    public void deserialize(NbtCompound tag) {
+        for (var key : tag.getKeys()) {
             var enchantment = Registry.ENCHANTMENT.get(new Identifier(key));
 
             if (this.containsKey(enchantment)) {
-                this.put(enchantment, nbt.getInt(key));
+                this.put(enchantment, tag.getInt(key));
             }
         }
     }

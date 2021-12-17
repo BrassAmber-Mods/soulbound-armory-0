@@ -3,13 +3,11 @@ package soulboundarmory.client.gui.screen;
 import java.util.Map;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.Statistic;
-import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.util.Util;
-
-import static soulboundarmory.component.statistics.Category.attribute;
 
 public class AttributeTab extends SoulboundTab {
     protected Map<Statistic, Text> attributes;
@@ -23,24 +21,14 @@ public class AttributeTab extends SoulboundTab {
     public void initialize() {
         this.attributes = this.parent().item.screenAttributes();
         this.length = Math.max(182, width(this.attributes.values().stream()) + 40);
-        this.add(this.resetButton(this.resetAction(attribute))).active(this.parent().item.statistics.get(attribute).values().stream().anyMatch(Statistic::aboveMin));
+        this.add(this.resetButton(Category.attribute)).active(this.parent().item.statistics.get(Category.attribute).values().stream().anyMatch(Statistic::aboveMin));
 
         Util.enumerate(this.attributes, (statistic, text, row) -> {
             var x = this.middleX() + this.length / 2;
             var y = this.height(this.attributes.size(), row) + 4;
             this.add(this.squareButton(x - 20, y, "-", this.removePointAction(statistic))).active(statistic.aboveMin());
-            this.add(this.squareButton(x, y, "+", this.addPointAction(statistic))).active(this.parent().item.intValue(StatisticType.attributePoints) > 0 && statistic.belowMax());
+            this.add(this.squareButton(x, y, "+", this.addPointAction(statistic))).active(this.parent().item.attributePoints() > 0 && statistic.belowMax());
         });
-    }
-
-    @Override
-    protected void render() {
-        this.displayPoints(this.parent().item.intValue(StatisticType.attributePoints));
-        Util.enumerate(this.attributes, (entry, text, row) -> this.drawAttribute(text, row, this.attributes.size()));
-    }
-
-    public void drawAttribute(Text format, int row, int rows) {
-        textDrawer.drawWithShadow(this.matrixes, format, this.middleX() - this.length / 2F, this.height(rows, row), 0xFFFFFF);
     }
 
     protected Runnable addPointAction(Statistic statistic) {
@@ -55,5 +43,11 @@ public class AttributeTab extends SoulboundTab {
             .writeIdentifier(statistic.type.id())
             .writeInt(isShiftDown() ? Integer.MIN_VALUE : -1)
         );
+    }
+
+    @Override
+    protected void render() {
+        this.displayPoints(this.parent().item.attributePoints());
+        Util.enumerate(this.attributes, (entry, text, row) -> textRenderer.drawWithShadow(this.matrixes, text, this.middleX() - this.length / 2F, this.height(this.attributes.size(), row), 0xFFFFFF));
     }
 }

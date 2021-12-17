@@ -6,9 +6,17 @@ import java.util.Iterator;
 import java.util.Map;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
+import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.component.statistics.history.AttributeHistory;
 import soulboundarmory.serial.Serializable;
 
 public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements Serializable, Iterable<Statistic> {
+    public final AttributeHistory history;
+
+    public Statistics(ItemComponent<?> component) {
+        this.history = new AttributeHistory(component);
+    }
+
     public Statistic get(Category category, StatisticType statistic) {
         return this.get(category).get(statistic);
     }

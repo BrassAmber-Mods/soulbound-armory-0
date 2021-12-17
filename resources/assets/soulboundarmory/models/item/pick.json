@@ -1,6 +1,26 @@
 {
     "parent": "item/handheld",
     "textures": {
-        "layer0": "soulboundarmory:item/pick"
-    }
+        "layer0": "soulboundarmory:item/pick/0"
+    },
+    "overrides": [
+        {
+            "predicate": {
+                "soulboundarmory:animating": 1
+            },
+            "model": "soulboundarmory:item/pick/animation"
+        },
+        {
+            "predicate": {
+                "soulboundarmory:level": 50
+            },
+            "model": "soulboundarmory:item/pick/50"
+        },
+        {
+            "predicate": {
+                "soulboundarmory:level": 100
+            },
+            "model": "soulboundarmory:item/pick/100"
+        }
+    ]
 }

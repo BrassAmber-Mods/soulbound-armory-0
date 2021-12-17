@@ -34,6 +34,8 @@ import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.lib.component.EntityComponent;
+import soulboundarmory.lib.component.access.EntityAccess;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.registry.Skills;
@@ -50,8 +52,8 @@ public final class CommonEvents {
             if (!player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
                 Components.soulbound(player)
                     .map(SoulboundComponent::item)
-                    .filter(component -> component != null && component.intValue(StatisticType.level) >= Configuration.instance().preservationLevel)
-                    .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.giveItemStack(drop.getStack())));
+                    .filter(component -> component != null && component.level() >= Configuration.instance().preservationLevel)
+                    .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.getInventory().insertStack(drop.getStack())));
             }
         } else {
             ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> {
@@ -227,16 +229,10 @@ public final class CommonEvents {
      */
     @SubscribeEvent
     public static void livingTick(LivingEvent.LivingUpdateEvent event) {
-        var entityData = Components.entityData.of(event.getEntity());
+        ((EntityAccess) event.getEntity()).soulboundarmory$components().values().forEach(EntityComponent::tickStart);
 
-        if (entityData.isFrozen() /*&& !event.getEntity().world.isClient*/) {
+        if (Components.entityData.of(event.getEntity()).isFrozen()) {
             event.setCanceled(true);
-        }
-
-        entityData.tick();
-
-        if (event.getEntity() instanceof PlayerEntity player) {
-            Components.soulbound(player).forEach(SoulboundComponent::tick);
         }
     }
 
@@ -251,7 +247,7 @@ public final class CommonEvents {
     }
 
     /**
-     Register the command and enable command errors debug logging in development environments.
+     Register the command and enable command error debug logging in development environments (why are they not always enabled?).
      */
     @SubscribeEvent
     public static void registerCommand(RegisterCommandsEvent event) {

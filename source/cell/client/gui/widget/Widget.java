@@ -9,6 +9,7 @@ import cell.client.gui.widget.scroll.ContextScrollAction;
 import cell.client.gui.widget.scroll.ScrollAction;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -30,7 +31,7 @@ import org.lwjgl.glfw.GLFW;
  @param <T> the type of the widget
  */
 public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
-    protected static final SoundManager soundManager = minecraft.getSoundManager();
+    protected static final SoundManager soundManager = client.getSoundManager();
 
     public ReferenceArrayList<Widget<?>> children = new ReferenceArrayList<>();
     public Optional<Widget<?>> parent = Optional.empty();
@@ -123,7 +124,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
     }
 
     public T text(Text text) {
-        this.add(new TextWidget().text(text).position(Coordinate.Type.CENTER).width(textDrawer.getWidth(text)).height(fontHeight()).center());
+        this.add(new TextWidget().text(text).position(Coordinate.Type.CENTER).width(textRenderer.getWidth(text)).height(fontHeight()).center());
 
         return (T) this;
     }
@@ -333,8 +334,20 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         return this.y() + this.height();
     }
 
+    public int fullWidth() {
+        return this.descendants().map(Widget::x).max(Comparator.naturalOrder()).orElse(this.endX()) - this.descendants().map(Widget::x).min(Comparator.naturalOrder()).orElse(this.x());
+    }
+
+    public int fullHeight() {
+        return this.descendants().map(Widget::y).max(Comparator.naturalOrder()).orElse(this.endY()) - this.descendants().map(Widget::y).min(Comparator.naturalOrder()).orElse(this.y());
+    }
+
     public boolean active() {
         return this.active && (this.parent.isEmpty() || this.parent.get().active());
+    }
+
+    public boolean visible() {
+        return this.visible;
     }
 
     public boolean hovered() {
@@ -384,6 +397,10 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
 
     public Stream<Widget<?>> hoveredChildren() {
         return this.childrenReverse().filter(Widget::hovered);
+    }
+
+    public Stream<Widget<?>> descendants() {
+        return this.children().flatMap(Widget::descendants);
     }
 
     public Widget<?> child(int index) {
@@ -479,7 +496,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
         this.mouseFocused = false;
         this.tooltipWidget.ifPresent(this.children::remove);
 
-        if (this.visible) {
+        if (this.visible()) {
             if (this.hovered()) {
                 if (this.focusable()) {
                     this.mouseFocused = true;

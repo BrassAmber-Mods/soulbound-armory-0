@@ -1,12 +1,16 @@
 package soulboundarmory.lib.component;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -20,6 +24,8 @@ import soulboundarmory.util.Util;
 public final class ComponentRegistry {
     public static final Map<Identifier, ItemStackComponentKey<?>> item = new Object2ReferenceOpenHashMap<>();
     private static final Map<Identifier, EntityComponentKey<?>> entity = new Object2ReferenceOpenHashMap<>();
+
+    static final List<WeakReference<ItemStackComponent<?>>> ticking = new ReferenceArrayList<>();
 
     /**
      Register a component to attach to entities of a specified base type.
@@ -98,9 +104,27 @@ public final class ComponentRegistry {
     }
 
     @SubscribeEvent
+    public static void clientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            Util.each(ticking, Component::tickStart);
+        } else {
+            Util.each(ticking, Component::tickEnd);
+        }
+    }
+
+    @SubscribeEvent
+    public static void serverTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            Util.each(ticking, Component::tickStart);
+        } else {
+            Util.each(ticking, Component::tickEnd);
+        }
+    }
+
+    @SubscribeEvent
     public static void addComponents(EntityEvent.EntityConstructing event) {
         entity.values().forEach(key -> {
-            if (key.type.isInstance(event.getEntity()) && (key.predicate == null || key.predicate.test(Util.cast(entity)))) {
+            if (key.type.isInstance(event.getEntity()) && (key.predicate == null || key.predicate.test(Util.cast(event.getEntity())))) {
                 key.attach(event.getEntity());
             }
         });

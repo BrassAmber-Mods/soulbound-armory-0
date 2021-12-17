@@ -1,12 +1,11 @@
 package soulboundarmory.entity;
 
-import soulboundarmory.mixin.access.PersistentProjectileEntityAccess;
-import soulboundarmory.util.Math2;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.world.World;
+import soulboundarmory.util.Math2;
 
 public abstract class ExtendedProjectile extends PersistentProjectileEntity {
     protected ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, double x, double y, double z, World world) {
@@ -55,9 +54,5 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
 
     public double getVelocityD() {
         return this.getSpeed() * Math2.signum(this.velocityX(), this.velocityY(), this.velocityZ());
-    }
-
-    protected int life() {
-        return ((PersistentProjectileEntityAccess) this).life();
     }
 }

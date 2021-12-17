@@ -1,5 +1,6 @@
 package soulboundarmory.component.entity;
 
+import java.util.Optional;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -10,6 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import soulboundarmory.component.soulbound.item.ItemMarkerComponent;
 import soulboundarmory.lib.component.EntityComponent;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
@@ -18,6 +20,7 @@ public final class EntityData implements EntityComponent<EntityData> {
     public final Entity entity;
     public float tickDelta;
     public float animationProgress;
+    public Optional<ItemMarkerComponent> unlockedStack = Optional.empty();
 
     private int freezeTicks;
     private int blockTeleportTicks;
@@ -81,7 +84,8 @@ public final class EntityData implements EntityComponent<EntityData> {
         return this.isFrozen() ? 0x3EDBFF : 0;
     }
 
-    public void tick() {
+    @Override
+    public void tickStart() {
         if (!this.entity.world.isClient) {
             if (this.isFrozen()) {
                 if (--this.freezeTicks == 0) {

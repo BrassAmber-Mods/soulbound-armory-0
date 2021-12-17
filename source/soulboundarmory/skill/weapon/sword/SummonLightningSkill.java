@@ -4,11 +4,11 @@ import soulboundarmory.skill.Skill;
 
 public class SummonLightningSkill extends Skill {
     public SummonLightningSkill() {
-        super("summon_lightning");
+        super("summon_lightning", 1);
     }
 
     @Override
-    public int cost(boolean learned, int level) {
+    public int cost(int level) {
         return 3;
     }
 }

@@ -3,9 +3,9 @@ package soulboundarmory.serial;
 import net.minecraft.nbt.NbtCompound;
 
 public interface Serializable {
-    void deserialize(NbtCompound arg);
+    void deserialize(NbtCompound tag);
 
-    default void serialize(NbtCompound tag) {}
+    void serialize(NbtCompound tag);
 
     /**
      @return a new compound tag after passing it to {@link #serialize(NbtCompound)}.

@@ -4,11 +4,11 @@ import soulboundarmory.skill.Skill;
 
 public class PrecisionSkill extends Skill {
     public PrecisionSkill() {
-        super("precision");
+        super("precision", 1);
     }
 
     @Override
-    public int cost(boolean learned, int level) {
-        return learned ? -1 : 1;
+    public int cost(int level) {
+        return 1;
     }
 }

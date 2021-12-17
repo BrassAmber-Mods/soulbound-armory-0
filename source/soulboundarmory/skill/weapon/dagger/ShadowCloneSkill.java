@@ -5,7 +5,7 @@ import soulboundarmory.skill.Skill;
 
 public class ShadowCloneSkill extends Skill {
     public ShadowCloneSkill() {
-        super("shadow_clone");
+        super("shadow_clone", 1);
     }
 
     @Override
@@ -16,7 +16,7 @@ public class ShadowCloneSkill extends Skill {
     }
 
     @Override
-    public int cost(boolean learned, int level) {
+    public int cost(int level) {
         return 2;
     }
 }

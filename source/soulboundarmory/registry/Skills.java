@@ -1,6 +1,7 @@
 package soulboundarmory.registry;
 
 import soulboundarmory.skill.Skill;
+import soulboundarmory.skill.tool.common.AbsorptionSkill;
 import soulboundarmory.skill.tool.common.CircumspectionSkill;
 import soulboundarmory.skill.tool.common.EnderPullSkill;
 import soulboundarmory.skill.weapon.common.NourishmentSkill;
@@ -21,6 +22,7 @@ import soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 public class Skills {
     // Should not be visible in the game if not implemented.
     // public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
+    public static final Skill absorption = new AbsorptionSkill();
     public static final Skill circumspection = new CircumspectionSkill();
     public static final Skill endermanacle = new EndermanacleSkill();
     public static final Skill enderPull = new EnderPullSkill();

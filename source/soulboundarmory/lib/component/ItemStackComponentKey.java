@@ -1,5 +1,6 @@
 package soulboundarmory.lib.component;
 
+import java.lang.ref.WeakReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.item.ItemStack;
@@ -21,6 +22,8 @@ public final class ItemStackComponentKey<C extends ItemStackComponent<C>> extend
             if (previous != null) {
                 throw new IllegalArgumentException("component %s is already attached".formatted(this.key));
             }
+
+            ComponentRegistry.ticking.add(new WeakReference<>(component));
 
             return component;
         }

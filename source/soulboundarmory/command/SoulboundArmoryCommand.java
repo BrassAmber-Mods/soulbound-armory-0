@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -19,6 +20,7 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.util.Util;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -60,7 +62,7 @@ public final class SoulboundArmoryCommand {
 
         for (var player : players) {
             for (var statistic : RegistryArgumentType.<StatisticType>get(context, "statistic")) {
-                items(player, types).forEach(item -> item.incrementStatistic(statistic, DoubleArgumentType.getDouble(context, "value")));
+                items(player, types).forEach(item -> item.add(statistic, DoubleArgumentType.getDouble(context, "value")));
             }
         }
 
@@ -118,5 +120,10 @@ public final class SoulboundArmoryCommand {
 
     private static Stream<ItemComponent<?>> items(PlayerEntity player, Collection<ItemComponentType<?>> types) throws CommandSyntaxException {
         return types.isEmpty() ? Stream.of(item(player)) : types.stream().map(type -> type.of(player));
+    }
+
+    static {
+        ArgumentTypes.register(Util.id("registry").toString(), Util.cast(RegistryArgumentType.class), new RegistryArgumentType.Serializer());
+        ArgumentTypes.register(Util.id("item_component_registry").toString(), Util.cast(ItemComponentArgumentType.class), new ItemComponentArgumentType.Serializer());
     }
 }

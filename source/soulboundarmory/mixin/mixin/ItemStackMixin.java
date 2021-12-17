@@ -24,6 +24,7 @@ import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.item.SoulboundItem;
+import soulboundarmory.registry.Skills;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.Util;
 
@@ -61,11 +62,11 @@ abstract class ItemStackMixin {
         Components.marker.nullable(Util.cast(this)).ifPresent(marker -> marker.item.mined(state, pos));
     }
 
-    @Inject(method = "use", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "use", at = @At("RETURN"))
     private void absorbTool(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> info) {
         if (hand == Hand.MAIN_HAND && info.getReturnValue().getResult() == ActionResult.PASS) {
             Components.marker.nullable(Util.cast(this)).ifPresent(marker -> {
-                if (marker.item instanceof ToolComponent tool) {
+                if (marker.item instanceof ToolComponent tool && tool.hasSkill(Skills.absorption)) {
                     tool.absorb();
                 }
             });

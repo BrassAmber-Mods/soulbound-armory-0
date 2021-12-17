@@ -4,11 +4,11 @@ import soulboundarmory.skill.Skill;
 
 public final class AbsorptionSkill extends Skill {
     public AbsorptionSkill() {
-        super("absorption");
+        super("absorption", 1);
     }
 
     @Override
-    public int cost(boolean learned, int level) {
-        return learned ? -1 : 1;
+    public int cost(int level) {
+        return 1;
     }
 }

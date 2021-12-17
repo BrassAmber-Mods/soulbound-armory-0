@@ -4,15 +4,18 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.network.ItemComponentPacket;
 
+/**
+ A client-to-server packet that is sent when a client requests to reset a category.
+ */
 public final class C2SReset extends ItemComponentPacket {
     @Override
-    public void execute(ItemComponent<?> storage) {
-        var identifier = this.message.readIdentifier();
+    public void execute(ItemComponent<?> component) {
+        var category = this.message.readRegistryEntry(Category.registry);
 
-        if (identifier == null) {
-            storage.reset();
+        if (category == null) {
+            component.reset();
         } else {
-            storage.reset(Category.registry.getValue(identifier));
+            component.reset(category);
         }
     }
 }

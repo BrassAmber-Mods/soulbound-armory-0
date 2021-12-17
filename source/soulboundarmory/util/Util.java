@@ -1,10 +1,13 @@
 package soulboundarmory.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import java.lang.ref.Reference;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -28,15 +30,24 @@ import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryManager;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.util.TriConsumer;
+import soulboundarmory.SoulboundArmory;
 
 public class Util {
+    public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
+
     private static final Map<Class<?>, IForgeRegistry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
+
+    public static <A, B> B nul(A... a) {
+        return null;
+    }
 
     public static <T> T cast(Object object) {
         return (T) object;
@@ -50,6 +61,10 @@ public class Util {
         return elements;
     }
 
+    public static <T> List<T> list(T... elements) {
+        return ReferenceArrayList.wrap(elements);
+    }
+
     public static <K, V> Map<K, V> map(Map.Entry<K, V>... entries) {
         var map = new Reference2ReferenceLinkedOpenHashMap<K, V>();
         Stream.of(entries).forEach(entry -> map.put(entry.getKey(), entry.getValue()));
@@ -59,17 +74,11 @@ public class Util {
 
     public static <K, V, T extends Map<K, V>> T add(T map, Map.Entry<K, V> entry) {
         map.put(entry.getKey(), entry.getValue());
-
         return map;
     }
 
     public static boolean isClient() {
-        var threadName = Thread.currentThread().getName();
-        return threadName.equals("Render thread") || threadName.equals("Game thread");
-    }
-
-    public static boolean isPhysicalClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
+        return isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread"));
     }
 
     public static MinecraftServer server() {
@@ -84,8 +93,8 @@ public class Util {
         return Arrays.asList(items).contains(target);
     }
 
-    public static <T> Stream<T> stream(Spliterator<T> iterator) {
-        return StreamSupport.stream(iterator, false);
+    public static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
     public static <T> Set<T> hashSet(T... elements) {
@@ -96,14 +105,14 @@ public class Util {
         return (Class<T>) array.getClass().getComponentType();
     }
 
-    public static <A> A[] add(A element, A[] array) {
+    public static <A> A[] add(A[] array, A element) {
         var union = Arrays.copyOf(array, array.length + 1);
         union[array.length] = element;
 
         return union;
     }
 
-    public static <A> A[] prepend(A element, A[] array) {
+    public static <A> A[] add(A element, A[] array) {
         var union = (A[]) Array.newInstance(Util.componentType(array), array.length + 1);
         System.arraycopy(array, 0, union, 1, array.length);
         union[0] = element;
@@ -112,7 +121,8 @@ public class Util {
     }
 
     public static String namespace() {
-        return ModLoadingContext.get().getActiveNamespace();
+        var mod = ModLoadingContext.get().getActiveContainer();
+        return mod instanceof MinecraftModContainer ? SoulboundArmory.ID : mod.getNamespace();
     }
 
     public static Identifier id(String path) {
@@ -158,6 +168,24 @@ public class Util {
         }
     }
 
+    public static <T> void each(Iterable<? extends Reference<? extends T>> iterable, Consumer<? super T> action) {
+        var iterator = iterable.iterator();
+
+        while (iterator.hasNext()) {
+            var reference = iterator.next();
+
+            if (reference == null) {
+                LogManager.getLogger("soulbound-armory").warn("\uD83E\uDD28 Something's fishy.");
+            } else if (!reference.refersTo(null)) {
+                action.accept(reference.get());
+
+                continue;
+            }
+
+            iterator.remove();
+        }
+    }
+
     public static List<Type> arguments(Class<?> subtype, Class<?> supertype) {
         for (var type : Classes.supertypes(subtype)) {
             if (type == supertype) {
@@ -177,11 +205,11 @@ public class Util {
     }
 
     public static String mapMethod(int number) {
-        return mapper().apply(INameMappingService.Domain.METHOD, "m_%s_".formatted(number));
+        return mapper().apply(INameMappingService.Domain.METHOD, "m_%d_".formatted(number));
     }
 
     public static String mapField(int number) {
-        return mapper().apply(INameMappingService.Domain.FIELD, "f_%s_".formatted(number));
+        return mapper().apply(INameMappingService.Domain.FIELD, "f_%d_".formatted(number));
     }
 
     private static BiFunction<INameMappingService.Domain, String, String> mapper() {

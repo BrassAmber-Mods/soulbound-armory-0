@@ -14,7 +14,7 @@ import soulboundarmory.network.BufferPacket;
 public class S2CFreeze extends BufferPacket {
     @Override
     protected void execute() {
-        Components.entityData.nullable(this.message.readEntity()).ifPresent(component -> {
+        this.message.readEntity().map(Components.entityData::of).ifPresent(component -> {
             var frozen = this.message.readBoolean();
             component.freeze(this.player(), 0, frozen ? 1 : 0, 0);
 

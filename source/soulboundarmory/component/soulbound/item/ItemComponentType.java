@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.tool.PickComponent;
+import soulboundarmory.component.soulbound.item.weapon.BigswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
@@ -23,6 +24,7 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
     public static final ItemComponentType<DaggerComponent> dagger = new ItemComponentType<>("dagger", Components.weapon);
     public static final ItemComponentType<SwordComponent> sword = new ItemComponentType<>("sword", Components.weapon);
     public static final ItemComponentType<GreatswordComponent> greatsword = new ItemComponentType<>("greatsword", Components.weapon);
+    public static final ItemComponentType<BigswordComponent> bigsword = new ItemComponentType<>("bigsword", Components.weapon);
     public static final ItemComponentType<StaffComponent> staff = new ItemComponentType<>("staff", Components.weapon);
     public static final ItemComponentType<PickComponent> pick = new ItemComponentType<>("pick", Components.tool);
 

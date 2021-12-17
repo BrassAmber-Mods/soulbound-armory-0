@@ -12,11 +12,15 @@ public class Math2 {
         return signum(x) * signum(y) * signum(z);
     }
 
-    public static double square(double value) {
+    public static int square(int value) {
         return value * value;
     }
 
     public static float square(float value) {
+        return value * value;
+    }
+
+    public static double square(double value) {
         return value * value;
     }
 
@@ -26,8 +30,11 @@ public class Math2 {
 
     public static int ceil(double value) {
         var floor = (int) value;
-
         return value == floor ? floor : floor + 1;
+    }
+
+    public static int ceil(double dividend, double divisor) {
+        return ceil(dividend / divisor);
     }
 
     public static double log(double base, double power) {
@@ -40,6 +47,10 @@ public class Math2 {
 
     public static int pack(int r, int g, int b) {
         return pack(r, g, b, 255);
+    }
+
+    public static int alpha(int color) {
+        return color >> 24 & 0xFF;
     }
 
     public static int red(int color) {

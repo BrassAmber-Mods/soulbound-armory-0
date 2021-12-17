@@ -4,15 +4,14 @@ import cell.client.gui.widget.Widget;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -110,11 +109,11 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         return this.writeInt(entity.getId());
     }
 
-    public Entity readEntity() {
+    public <T extends Entity> Optional<T> readEntity() {
         var id = this.readInt();
         return Util.isClient()
-            ? Widget.minecraft.world.getEntityById(id)
-            : ((Collection<ServerWorld>) Util.server().getWorlds()).stream().map(world -> world.getEntityById(id)).filter(Objects::nonNull).findAny().orElse(null);
+            ? Optional.ofNullable((T) Widget.client.world.getEntityById(id))
+            : Util.stream(Util.server().getWorlds()).map(world -> (T) world.getEntityById(id)).filter(Objects::nonNull).findAny();
     }
 
     public ExtendedPacketBuffer writeItemComponent(ItemComponent<?> component) {

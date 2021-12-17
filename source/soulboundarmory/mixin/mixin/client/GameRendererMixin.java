@@ -17,16 +17,16 @@ import soulboundarmory.util.Math2;
 abstract class GameRendererMixin {
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
     private double extendEntityReach(double nine) {
-        return Math2.square(Widget.minecraft.interactionManager.getReachDistance());
+        return Math2.square(Widget.client.interactionManager.getReachDistance());
     }
 
     @ModifyVariable(method = "updateTargetedEntity", at = @At(value = "STORE", ordinal = 3), ordinal = 1)
     private double reachThroughNonCollidableBlocks(double blockDistance, float tickDelta) {
-        return Widget.minecraft.cameraEntity instanceof PlayerEntity player ? ItemComponent.get(player, player.getMainHandStack())
+        return Widget.client.cameraEntity instanceof PlayerEntity player ? ItemComponent.get(player, player.getMainHandStack())
             .filter(component -> component.hasSkill(Skills.precision))
             .map(component -> {
                 var start = player.getCameraPosVec(tickDelta);
-                var reach = Widget.minecraft.interactionManager.getReachDistance();
+                var reach = Widget.client.interactionManager.getReachDistance();
                 var result = player.world.raycast(new RaycastContext(start, start.add(player.getRotationVec(tickDelta).multiply(reach)), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player));
 
                 return result == null ? Math2.square(reach) : result.squaredDistanceTo(player);

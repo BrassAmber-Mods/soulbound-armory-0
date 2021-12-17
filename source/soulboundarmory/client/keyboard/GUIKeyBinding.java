@@ -18,6 +18,6 @@ public class GUIKeyBinding extends KeyBindingBase {
 
     @Override
     protected void press() {
-        Stream.of(Hand.values()).anyMatch(hand -> Components.soulbound(Widget.minecraft.player).anyMatch(component -> component.tryOpenGUI(hand)));
+        Stream.of(Hand.values()).anyMatch(hand -> Components.soulbound(Widget.client.player).anyMatch(component -> component.tryOpenGUI(hand)));
     }
 }

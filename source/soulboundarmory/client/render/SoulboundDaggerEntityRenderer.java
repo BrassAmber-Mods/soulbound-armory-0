@@ -3,11 +3,11 @@ package soulboundarmory.client.render;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.ProjectileEntityRenderer;
 import net.minecraft.util.Identifier;
-import soulboundarmory.SoulboundArmory;
 import soulboundarmory.entity.SoulboundDaggerEntity;
+import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntityRenderer extends ProjectileEntityRenderer<SoulboundDaggerEntity> {
-    private static final Identifier id = SoulboundArmory.id("textures/item/soulbound_dagger.png");
+    private static final Identifier id = Util.id("textures/item/dagger.png");
 
     public SoulboundDaggerEntityRenderer(EntityRendererFactory.Context context) {
         super(context);

@@ -3,8 +3,6 @@ package soulboundarmory.network;
 import net.auoeke.reflect.Constructors;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
 import soulboundarmory.SoulboundArmory;
@@ -60,6 +58,12 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
         public void sendNearby(Entity entity, T message) {
             SoulboundArmory.channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), this.store(message));
         }
+
+        public void sendNearbyIfServer(Entity entity, T message) {
+            if (!entity.world.isClient) {
+                this.sendNearby(entity, message);
+            }
+        }
     }
 
     /**
@@ -73,7 +77,6 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
         /**
          Send a message from the client to the server.
          */
-        @OnlyIn(Dist.CLIENT)
         public void send(T message) {
             SoulboundArmory.channel.sendToServer(this.store(message));
         }
