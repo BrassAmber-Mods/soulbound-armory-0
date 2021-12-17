@@ -1,36 +1,24 @@
 package soulboundarmory.component.statistics;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.history.AttributeHistory;
 import soulboundarmory.serial.Serializable;
 
-public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>> implements Serializable, Iterable<Statistic> {
+public class Statistics extends Reference2ReferenceOpenHashMap<Category, Map<StatisticType, Statistic>> implements Serializable, Iterable<Statistic> {
     public final AttributeHistory history;
 
     public Statistics(ItemComponent<?> component) {
         this.history = new AttributeHistory(component);
     }
 
-    public Statistic get(Category category, StatisticType statistic) {
-        return this.get(category).get(statistic);
-    }
-
     public Statistic get(StatisticType type) {
-        for (var category : this.values()) {
-            var statistic = category.get(type);
-
-            if (statistic != null) {
-                return statistic;
-            }
-        }
-
-        return null;
+        return this.get(type.category).get(type);
     }
 
     public void put(StatisticType type, Number value) {
@@ -56,52 +44,29 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
     }
 
     public void reset(Category category) {
-        for (var statistic : this.get(category).values()) {
-            statistic.reset();
-        }
+        this.get(category).values().forEach(Statistic::reset);
     }
 
-    public Statistics category(Category categoryType, StatisticType... statisticTypes) {
-        var category = new HashMap<StatisticType, Statistic>();
-
-        for (var statisticType : statisticTypes) {
-            category.put(statisticType, new Statistic(categoryType, statisticType));
-            this.put(categoryType, category);
-        }
-
-        return this;
-    }
-
-    public Statistics min(double min, Category category) {
-        for (var statistic : this.get(category).keySet()) {
-            this.min(min, statistic);
-        }
+    public Statistics statistics(StatisticType... types) {
+        Stream.of(types).forEach(this::obtain);
 
         return this;
     }
 
     public Statistics min(double min, StatisticType... types) {
-        for (var type : types) {
-            this.get(type).min(min);
-        }
-
-        return this;
-    }
-
-    public Statistics max(double max, Category category) {
-        for (var type : this.get(category).keySet()) {
-            this.max(max, type);
-        }
+        Stream.of(types).forEach(type -> this.obtain(type).min(min));
 
         return this;
     }
 
     public Statistics max(double max, StatisticType... types) {
-        for (var type : types) {
-            this.get(type).defaultMax(max);
-        }
+        Stream.of(types).forEach(type -> this.obtain(type).defaultMax(max));
 
         return this;
+    }
+
+    public Statistics constant(double value, StatisticType... types) {
+        return this.min(value, types).max(value, types);
     }
 
     public NbtCompound serialize(Category category) {
@@ -130,16 +95,14 @@ public class Statistics extends HashMap<Category, Map<StatisticType, Statistic>>
 
     @Override
     public Iterator<Statistic> iterator() {
-        var statistics = new HashSet<Statistic>();
-
-        for (var category : this.values()) {
-            statistics.addAll(category.values());
-        }
-
-        return statistics.iterator();
+        return this.values().stream().flatMap(category -> category.values().stream()).iterator();
     }
 
-    public void deserialize(NbtCompound tag, Category category) {
+    private Statistic obtain(StatisticType type) {
+        return this.computeIfAbsent(type.category, category -> new Reference2ReferenceOpenHashMap()).computeIfAbsent(type, type1 -> new Statistic(type1.category, type1));
+    }
+
+    private void deserialize(NbtCompound tag, Category category) {
         if (category != null) {
             for (var identifier : tag.getKeys()) {
                 var statistic = this.get(StatisticType.registry.getValue(new Identifier(identifier)));

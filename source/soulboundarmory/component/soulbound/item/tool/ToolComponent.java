@@ -1,14 +1,10 @@
 package soulboundarmory.component.soulbound.item.tool;
 
-import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.item.ToolMaterial;
@@ -18,7 +14,6 @@ import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
@@ -26,7 +21,6 @@ import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.entity.Attributes;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.util.Util;
@@ -67,7 +61,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     }
 
     @Override
-    public int getLevelXP(int level) {
+    public int levelXP(int level) {
         return this.canLevelUp()
             ? Configuration.instance().initialToolXP + (int) Math.round(4 * Math.pow(level, 1.25))
             : -1;
@@ -116,13 +110,6 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
         }
 
         this.synchronize();
-    }
-
-    @Override
-    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.toolModifier(Attributes.reach, StatisticType.reach));
-        }
     }
 
     @Override

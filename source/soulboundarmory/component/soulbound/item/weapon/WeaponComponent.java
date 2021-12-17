@@ -1,26 +1,19 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
-import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraftforge.common.ForgeMod;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.entity.Attributes;
-import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.EntityUtil;
 import soulboundarmory.util.Util;
 
@@ -52,7 +45,7 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
     }
 
     @Override
-    public int getLevelXP(int level) {
+    public int levelXP(int level) {
         return this.canLevelUp()
             ? Configuration.instance().initialWeaponXP + 3 * (int) Math.round(Math.pow(level, 1.65))
             : -1;
@@ -104,15 +97,6 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
             this.statisticEntry(StatisticType.attackSpeed, Translations.guiAttackSpeed),
             this.statisticEntry(StatisticType.criticalHitRate, Translations.guiCriticalHitRate)
         );
-    }
-
-    @Override
-    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
-            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
-        }
     }
 
     @Override

@@ -12,7 +12,6 @@ import net.minecraft.client.texture.TextureTickListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.lib.component.ItemStackComponent;
@@ -40,7 +39,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
     }
 
     public boolean animating() {
-        return this.animationTick < 40;
+        return this.animationTick < 30;
     }
 
     public void unlock() {
@@ -79,7 +78,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
         var animation = this.animation();
         frameTicks.putInt(animation, Integer.MIN_VALUE);
         Widget.bind(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
-        Invoker.invoke(upload, animation, MathHelper.clamp(this.animationTick - 5, 0, 28) / 2);
+        Invoker.invoke(upload, animation, Math.max(0, this.animationTick - 5) / 2);
     }
 
     static {

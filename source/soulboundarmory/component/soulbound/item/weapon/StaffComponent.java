@@ -1,10 +1,5 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
-import com.google.common.collect.Multimap;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -12,13 +7,11 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
-import soulboundarmory.util.AttributeModifierIdentifiers;
 
 public class StaffComponent extends WeaponComponent<StaffComponent> {
     protected int spell;
@@ -28,8 +21,8 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalHitRate)
+            .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
+            .constant(3, StatisticType.reach)
             .min(0.48, StatisticType.attackSpeed)
             .min(8, StatisticType.attackDamage)
             .max(1, StatisticType.criticalHitRate)
@@ -79,14 +72,6 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
 
         if (this.isClient()) {
             Packets.serverSpell.send(new ExtendedPacketBuffer().writeByte(this.spell));
-        }
-    }
-
-    @Override
-    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
         }
     }
 

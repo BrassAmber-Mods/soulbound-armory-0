@@ -175,7 +175,7 @@ public class Util {
             var reference = iterator.next();
 
             if (reference == null) {
-                LogManager.getLogger("soulbound-armory").warn("\uD83E\uDD28 Something's fishy.");
+                LogManager.getLogger("soulbound-armory").error("\uD83E\uDD28 Something's fishy.");
             } else if (!reference.refersTo(null)) {
                 action.accept(reference.get());
 

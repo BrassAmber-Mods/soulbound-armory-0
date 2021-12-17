@@ -22,6 +22,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -31,6 +32,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.ForgeMod;
 import soulboundarmory.client.gui.screen.AttributeTab;
 import soulboundarmory.client.gui.screen.EnchantmentTab;
 import soulboundarmory.client.gui.screen.SelectionTab;
@@ -48,6 +50,7 @@ import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.entity.Attributes;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
@@ -58,6 +61,7 @@ import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
 import soulboundarmory.text.Translation;
+import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Util;
@@ -177,14 +181,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @param level a level
      @return the XP required in order to reach level `level` from the previous level.
      */
-    public abstract int getLevelXP(int level);
-
-    /**
-     Put attribute modifiers into the given map for a new stack of this item.
-
-     @param modifiers the map into which to put the modifiers
-     */
-    public abstract void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot);
+    public abstract int levelXP(int level);
 
     /**
      @return a list of attributes to be displayed on the attribute tab for this item.
@@ -249,6 +246,16 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     public ToolMaterial material() {
         return SoulboundItems.material;
+    }
+
+    public int totalXP(int level) {
+        var total = 0;
+
+        for (; level > 0; level--) {
+            total += this.levelXP(level);
+        }
+
+        return total;
     }
 
     /**
@@ -405,7 +412,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
             if (xp < 0) {
                 this.add(StatisticType.level, -1);
-                this.add(StatisticType.experience, this.getLevelXP(this.level() - 1));
+                this.add(StatisticType.experience, this.levelXP(this.level() - 1));
             }
         } else if (type == StatisticType.level) {
             var sign = Math2.signum(amount);
@@ -520,7 +527,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @return the XP required in order to reach the next level.
      */
     public int nextLevelXP() {
-        return this.getLevelXP(this.level());
+        return this.levelXP(this.level());
     }
 
     public Collection<SkillContainer> skills() {
@@ -730,6 +737,19 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
                     this.player.getInventory().removeOne(stack);
                 }
             }
+        }
+    }
+
+    /**
+     Put attribute modifiers into the given map for a new stack of this item.
+
+     @param modifiers the map into which to put the modifiers
+     */
+    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+        if (slot == EquipmentSlot.MAINHAND) {
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
+            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
+            modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
         }
     }
 

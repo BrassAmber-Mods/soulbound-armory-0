@@ -7,7 +7,6 @@ import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
@@ -19,8 +18,8 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
         super(component);
 
         this.statistics
-            .category(Category.datum, StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .category(Category.attribute, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.criticalHitRate, StatisticType.efficiency, StatisticType.reach)
+            .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
+            .statistics(StatisticType.efficiency)
             .min(2, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.reach)
             .max(1, StatisticType.criticalHitRate)
             .max(4, StatisticType.attackSpeed);
