@@ -64,4 +64,16 @@ public class Math2 {
     public static int blue(int color) {
         return color & 0xFF;
     }
+
+    public static float redf(int color) {
+        return red(color) / 255F;
+    }
+
+    public static float greenf(int color) {
+        return green(color) / 255F;
+    }
+
+    public static float bluef(int color) {
+        return blue(color) / 255F;
+    }
 }
