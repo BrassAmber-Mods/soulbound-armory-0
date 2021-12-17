@@ -99,7 +99,7 @@ public class Statistics extends Reference2ReferenceOpenHashMap<Category, Map<Sta
     }
 
     private Statistic obtain(StatisticType type) {
-        return this.computeIfAbsent(type.category, category -> new Reference2ReferenceOpenHashMap()).computeIfAbsent(type, type1 -> new Statistic(type1.category, type1));
+        return this.computeIfAbsent(type.category, category -> new Reference2ReferenceOpenHashMap<>()).computeIfAbsent(type, type1 -> new Statistic(type1.category, type1));
     }
 
     private void deserialize(NbtCompound tag, Category category) {
