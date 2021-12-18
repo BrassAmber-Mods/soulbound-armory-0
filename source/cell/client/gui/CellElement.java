@@ -69,11 +69,11 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     }
 
     public static double mouseX() {
-        return mouse.getX() * (double) window.getScaledWidth() / window.getWidth();
+        return mouse.getX() * window.getScaledWidth() / window.getWidth();
     }
 
     public static double mouseY() {
-        return mouse.getY() * (double) window.getScaledHeight() / window.getHeight();
+        return mouse.getY() * window.getScaledHeight() / window.getHeight();
     }
 
     public static int width(String string) {

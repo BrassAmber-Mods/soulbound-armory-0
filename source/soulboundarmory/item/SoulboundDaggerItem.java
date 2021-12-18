@@ -8,15 +8,17 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ToolAction;
+import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.registry.Skills;
 
-public class SoulboundDagger extends SoulboundMeleeWeapon {
+public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
     private static final int USE_TIME = 1200;
 
-    public SoulboundDagger() {
+    public SoulboundDaggerItem() {
         super(1, -2, -1);
     }
 
@@ -59,5 +61,10 @@ public class SoulboundDagger extends SoulboundMeleeWeapon {
                 player.getInventory().removeOne(itemStack);
             }
         }
+    }
+
+    @Override
+    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+        return Components.dagger.of(stack) == null && super.canPerformAction(stack, toolAction);
     }
 }

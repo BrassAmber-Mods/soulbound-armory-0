@@ -14,7 +14,7 @@ import net.minecraftforge.common.ForgeTier;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.item.SoulboundBigswordItem;
-import soulboundarmory.item.SoulboundDagger;
+import soulboundarmory.item.SoulboundDaggerItem;
 import soulboundarmory.item.SoulboundGreatsword;
 import soulboundarmory.item.SoulboundPickItem;
 import soulboundarmory.item.SoulboundStaffItem;
@@ -25,7 +25,7 @@ public class SoulboundItems {
 
     public static final ToolMaterial material = material(ToolMaterials.WOOD);
 
-    public static final SoulboundDagger dagger = name(new SoulboundDagger(), "dagger");
+    public static final SoulboundDaggerItem dagger = name(new SoulboundDaggerItem(), "dagger");
     public static final SoulboundSword sword = name(new SoulboundSword(), "sword");
     public static final SoulboundGreatsword greatsword = name(new SoulboundGreatsword(), "greatsword");
     public static final SoulboundStaffItem staff = name(new SoulboundStaffItem(), "staff");
