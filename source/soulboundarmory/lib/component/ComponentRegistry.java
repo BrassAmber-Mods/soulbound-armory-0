@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -63,6 +64,14 @@ public final class ComponentRegistry {
         return entity(type, path, null, instantiate);
     }
 
+    public static <E extends Entity, C extends EntityComponent<C>> EntityComponentKey<C> entity(Class<E> type, String path, Predicate<E> predicate, Supplier<C> instantiate) {
+        return entity(type, path, predicate, entity -> instantiate.get());
+    }
+
+    public static <E extends Entity, C extends EntityComponent<C>> EntityComponentKey<C> entity(Class<E> type, String path, Supplier<C> instantiate) {
+        return entity(type, path, null, entity -> instantiate.get());
+    }
+
     /**
      Register a component to attach to item stacks.
 
@@ -92,6 +101,14 @@ public final class ComponentRegistry {
      */
     public static <C extends ItemStackComponent<C>> ItemStackComponentKey<C> item(String path, Function<ItemStack, C> instantiate) {
         return item(path, null, instantiate);
+    }
+
+    public static <C extends ItemStackComponent<C>> ItemStackComponentKey<C> item(String path, Predicate<ItemStack> predicate, Supplier<C> instantiate) {
+        return item(path, predicate, stack -> instantiate.get());
+    }
+
+    public static <C extends ItemStackComponent<C>> ItemStackComponentKey<C> item(String path, Supplier<C> instantiate) {
+        return item(path, null, stack -> instantiate.get());
     }
 
     /**
