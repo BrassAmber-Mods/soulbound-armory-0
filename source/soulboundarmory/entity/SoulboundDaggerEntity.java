@@ -1,17 +1,21 @@
 package soulboundarmory.entity;
 
+import java.util.Optional;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.registry.Skills;
@@ -20,7 +24,7 @@ import soulboundarmory.util.Util;
 public class SoulboundDaggerEntity extends ExtendedProjectile {
     public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new, SpawnGroup.MISC)
-        .setDimensions(1, 1)
+        .setDimensions(.5F, .5F)
         .build(Util.id("dagger").toString());
 
     public ItemStack itemStack;
@@ -44,11 +48,11 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         this.attackDamageRatio = speed / maxSpeed;
 
         this.setVelocity(shooter.getRotationVector().multiply(speed));
-        this.setDamage(this.component().attackDamage() * this.attackDamageRatio);
+        this.setDamage(this.component().get().attackDamage() * this.attackDamageRatio);
     }
 
     private SoulboundDaggerEntity(SoulboundDaggerEntity original) {
-        this(original.world, (LivingEntity) original.getOwner(), original.itemStack, false, original.getVelocityD(), original.getVelocityD());
+        this(original.world, (LivingEntity) original.getOwner(), original.itemStack, false, original.velocityD(), original.velocityD());
 
         this.clone = true;
         this.setPosition(original.getX(), original.getY(), original.getZ());
@@ -63,57 +67,99 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
         super(type, world);
     }
 
+    public Optional<DaggerComponent> component() {
+        return ItemComponentType.dagger.nullable(this.getOwner());
+    }
+
+    @Override
+    public ItemStack asItemStack() {
+        return this.component().map(ItemComponent::stack).orElse(ItemStack.EMPTY);
+    }
+
     @Override
     public byte getPierceLevel() {
-        return Byte.MAX_VALUE;
+        return -1;
     }
 
     @Override
     public void tick() {
-        if (!this.tryReturn()) {
-            super.tick();
-        }
-    }
+        if (this.isServer()) {
+            top:
+            if (this.component().isPresent()) {
+                var component = this.component().get();
+                var owner = component.player;
+                var attackSpeed = component.attackSpeed();
 
-    @Override
-    protected void onHit(LivingEntity target) {
-        if (this.spawnClone) {
-            this.world.spawnEntity(new SoulboundDaggerEntity(this));
+                if (this.seeking()
+                    || component.hasSkill(Skills.sneakReturn)
+                    && owner.isSneaking()
+                    && this.age >= 60 / attackSpeed
+                    || component.hasSkill(Skills.returning)
+                    && (this.age >= 300
+                    || this.ticksInGround > 20 / attackSpeed
+                    || owner.distanceTo(this) >= 16 * (this.world.getServer().getPlayerManager().getViewDistance() - 1)
+                    || this.getY() <= 0)
+                ) {
+                    var box = owner.getBoundingBox();
+                    var dx = (box.getMax(Direction.Axis.X) + box.getMin(Direction.Axis.X)) / 2 - this.getZ();
+                    var dy = (box.getMax(Direction.Axis.Y) + box.getMin(Direction.Axis.Y)) / 2 - this.getY();
+                    var dz = (box.getMax(Direction.Axis.Z) + box.getMin(Direction.Axis.Z)) / 2 - this.getZ();
+                    var multiplier = 1.8 / attackSpeed;
+
+                    if (this.ticksToSeek == -1 && !this.inGround) {
+                        this.ticksToSeek = (int) Math.round(Math.log(0.05) / Math.log(multiplier));
+                    }
+
+                    if (this.ticksToSeek > 0 && !this.inGround) {
+                        this.setVelocity(this.getVelocity().multiply(multiplier));
+                        this.ticksToSeek--;
+                    } else {
+                        var normalized = new Vec3d(dx, dy, dz).normalize();
+
+                        if (this.ticksToSeek != 0) {
+                            this.ticksToSeek = 0;
+                        }
+
+                        if (this.inGround) {
+                            this.setVelocity(0, 0, 0);
+                            this.inGround = false;
+                        }
+
+                        if (this.ticksSeeking > 5) {
+                            multiplier = Math.min(0.08 * this.ticksSeeking, 5);
+
+                            if (MathHelper.magnitude(dx, dy, dz) <= 5 && this.ticksSeeking > 100) {
+                                this.setVelocity(dx, dy, dz);
+                            } else {
+                                this.setVelocity(normalized.multiply(multiplier));
+                            }
+                        } else {
+                            multiplier = 0.08;
+                            this.setVelocity(this.getVelocity().add(normalized.multiply(multiplier)));
+                        }
+
+                        this.ticksSeeking++;
+
+                        // break top;
+                    }
+
+                    this.move(MovementType.SELF, this.getVelocity());
+                }
+
+                // return;
+            }
         }
 
-        if (!this.clone && this.ticksSeeking == 0) {
-            this.setVelocity(this.getVelocity().multiply(-0.1, 1, 1));
-            this.setYaw(this.getYaw() + 180);
-            this.prevYaw += 180;
-        }
-
-        if (this.getOwner() instanceof ServerPlayerEntity player) {
-            player.attack(target);
-        }
+        super.tick();
     }
 
     @Override
     public void onPlayerCollision(PlayerEntity player) {
         if (!this.world.isClient && player == this.getOwner()) {
-            if (this.clone || this.age >= Math.max(1, 20 / this.component().attackSpeed()) && player.getInventory().insertStack(this.asItemStack())) {
+            if (this.clone || this.age >= Math.max(1, 20 / this.component().get().attackSpeed()) && player.getInventory().insertStack(this.asItemStack())) {
                 player.sendPickup(this, 1);
                 this.discard();
             }
-        }
-    }
-
-    @Override
-    protected void onCollision(HitResult result) {
-        var pos = result.getPos();
-        var blockPos = new BlockPos(pos);
-        var blockState = this.world.getBlockState(blockPos);
-
-        if (this.ticksSeeking == 0) {
-            super.onCollision(result);
-        }
-
-        if (!this.world.isClient) {
-            this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
         }
     }
 
@@ -133,72 +179,46 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     @Override
-    protected ItemStack asItemStack() {
-        return this.component() == null ? ItemStack.EMPTY : this.component().stack();
-    }
-
-    protected boolean tryReturn() {
-        if (this.getOwner() instanceof PlayerEntity owner) {
-            var attackSpeed = this.component().attackSpeed();
-
-            if (this.component().hasSkill(Skills.sneakReturn) && owner.isSneaking()
-                && this.age >= 60 / attackSpeed
-                || this.component().hasSkill(Skills.returning)
-                && (this.age >= 300
-                || this.ticksInGround > 20 / attackSpeed
-                || owner.distanceTo(this) >= 16 * (this.world.getServer().getPlayerManager().getViewDistance() - 1)
-                || this.getY() <= 0)
-                || this.ticksSeeking > 0
-            ) {
-                var box = owner.getBoundingBox();
-                var dX = (box.getMax(Direction.Axis.X) + box.getMin(Direction.Axis.X)) / 2 - this.getZ();
-                var dY = (box.getMax(Direction.Axis.Y) + box.getMin(Direction.Axis.Y)) / 2 - this.getY();
-                var dZ = (box.getMax(Direction.Axis.Z) + box.getMin(Direction.Axis.Z)) / 2 - this.getZ();
-                var multiplier = 1.8 / attackSpeed;
-
-                if (this.ticksToSeek == -1 && !this.inGround) {
-                    this.ticksToSeek = (int) Math.round(Math.log(0.05) / Math.log(multiplier));
-                }
-
-                if (this.ticksToSeek > 0 && !this.inGround) {
-                    this.setVelocity(this.velocityX() * multiplier, this.velocityY() * multiplier, this.velocityZ() * multiplier);
-                    this.ticksToSeek--;
-                } else {
-                    var normalized = new Vec3d(dX, dY, dZ).normalize();
-
-                    if (this.ticksToSeek != 0) {
-                        this.ticksToSeek = 0;
-                    }
-
-                    if (this.inGround) {
-                        this.setVelocity(0, 0, 0);
-                        this.inGround = false;
-                    }
-
-                    if (this.ticksSeeking > 5) {
-                        multiplier = Math.min(0.08 * this.ticksSeeking, 5);
-
-                        if (Math.sqrt(dX * dX + dY * dY + dZ * dZ) <= 5 && this.ticksSeeking > 100) {
-                            this.setVelocity(dX, dY, dZ);
-                        } else {
-                            this.setVelocity(normalized.x * multiplier, normalized.y * multiplier, normalized.z * multiplier);
-                        }
-                    } else {
-                        multiplier = 0.08;
-                        this.addVelocity(normalized.x * multiplier, normalized.y * multiplier, normalized.z * multiplier);
-                    }
-
-                    this.ticksSeeking++;
-
-                    return true;
-                }
-            }
+    protected void onEntityHit(EntityHitResult target) {
+        if (!this.seeking() && this.spawnClone) {
+            this.world.spawnEntity(new SoulboundDaggerEntity(this));
         }
 
-        return false;
+        if (this.getOwner() instanceof ServerPlayerEntity player && target.getEntity() != player) {
+            player.attack(target.getEntity());
+
+            if (!this.clone && !this.seeking()) {
+                this.setVelocity(this.getVelocity().multiply(-.2, 1, -.2));
+                this.setYaw(this.getYaw() + 180);
+                this.prevYaw += 180;
+            }
+        }
     }
 
-    private DaggerComponent component() {
-        return ItemComponentType.dagger.of(this.getOwner());
+    @Override
+    protected void onBlockHit(BlockHitResult result) {
+        if (!this.seeking()) {
+            super.onBlockHit(result);
+
+            if (this.isServer()) {
+                var blockState = this.world.getBlockState(result.getBlockPos());
+                this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+            }
+        }
+    }
+
+    @Override
+    protected void age() {}
+
+    private boolean seeking() {
+        return this.ticksSeeking > 0;
+    }
+
+    private boolean isClient() {
+        return this.world.isClient;
+    }
+
+    private boolean isServer() {
+        return !this.isClient();
     }
 }

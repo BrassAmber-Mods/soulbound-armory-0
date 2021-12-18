@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import soulboundarmory.util.Math2;
 
@@ -36,8 +37,8 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
         return Math.sqrt(this.squaredDistanceTo(x, y, z));
     }
 
-    public double getSpeed() {
-        return Math.sqrt(Math2.square(this.velocityX()) + Math2.square(this.velocityY()) + Math2.square(this.velocityZ()));
+    public double speed() {
+        return MathHelper.magnitude(this.velocityX(), this.velocityY(), this.velocityZ());
     }
 
     public double velocityX() {
@@ -52,7 +53,7 @@ public abstract class ExtendedProjectile extends PersistentProjectileEntity {
         return this.getVelocity().z;
     }
 
-    public double getVelocityD() {
-        return this.getSpeed() * Math2.signum(this.velocityX(), this.velocityY(), this.velocityZ());
+    public double velocityD() {
+        return this.speed() * Math2.signum(this.velocityX(), this.velocityY(), this.velocityZ());
     }
 }
