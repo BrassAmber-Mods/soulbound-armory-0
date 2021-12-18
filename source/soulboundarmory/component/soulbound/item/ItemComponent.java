@@ -342,6 +342,8 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             if (efficiency > 0) {
                 doubleValue++;
             }
+        } else if (attribute == StatisticType.reach) {
+            doubleValue += 3;
         }
 
         return doubleValue;

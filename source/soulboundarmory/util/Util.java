@@ -182,7 +182,9 @@ public class Util {
                 continue;
             }
 
-            iterator.remove();
+            try {
+                iterator.remove();
+            } catch (IndexOutOfBoundsException __)  {}
         }
     }
 
