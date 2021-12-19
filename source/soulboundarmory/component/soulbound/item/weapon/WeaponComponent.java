@@ -22,6 +22,8 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
 
     public WeaponComponent(SoulboundComponent<?> component) {
         super(component);
+
+        this.statistics.statistics(StatisticType.criticalHitRate);
     }
 
     /**

@@ -56,6 +56,7 @@ import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
+import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
@@ -77,12 +78,13 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     protected final SkillStorage skills = new SkillStorage(this);
     protected ItemStack itemStack;
     protected boolean unlocked;
-    protected int boundSlot;
     protected int animationTime;
 
     public ItemComponent(SoulboundComponent<?> component) {
         this.component = component;
         this.player = component.player;
+
+        this.skills.add(Skills.enderPull);
     }
 
     /**
@@ -95,7 +97,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     /**
      @return the component attached to `entity` that matches `stack`.
      */
-    public static Optional<ItemComponent<?>> get(Entity entity, ItemStack stack) {
+    public static Optional<ItemComponent<?>> of(Entity entity, ItemStack stack) {
         return Components.soulbound(entity).filter(component -> component.accepts(stack)).flatMap(component -> component.items.values().stream().filter(item -> item.accepts(stack))).findAny();
     }
 
@@ -123,7 +125,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     public static Optional<ItemComponent<?>> fromMainHand(LivingEntity entity) {
-        return get(entity, entity.getMainHandStack());
+        return of(entity, entity.getMainHandStack());
     }
 
     /**
@@ -649,8 +651,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         }
 
         this.unlocked = false;
-        this.unbindSlot();
-
         this.synchronize();
     }
 
@@ -659,30 +659,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     public boolean canConsume(ItemStack stack) {
         return this.consumableItem() == stack.getItem();
-    }
-
-    public int boundSlot() {
-        return this.boundSlot;
-    }
-
-    public void bindSlot(int boundSlot) {
-        this.boundSlot = boundSlot;
-    }
-
-    public boolean hasBoundSlot() {
-        return this.boundSlot != -1;
-    }
-
-    public void unbindSlot() {
-        this.boundSlot = -1;
-    }
-
-    /**
-     @return the item stack in the bound slot.
-     @throws IndexOutOfBoundsException if no slot is bound.
-     */
-    public final ItemStack stackInBoundSlot() {
-        return this.player.getInventory().getStack(this.boundSlot);
     }
 
     /**
@@ -694,25 +670,17 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
     /**
      Scan the inventory and clean it up.
-     <br><br>
-     If this component's player is not in creative mode,
+     <br>
+     - If the player is not in creative mode,
      then remove their item stacks that do not correspond to this component or are not in the slot specified by `slot`.
-     <br><br>
-     If `slot` is -1, then set it to the bound slot if the item stack therein matches this component or the slot of the first item stack that matches this component.
-     <br><br>
-     If `slot` is still -1 and a matching item stack is encountered, then <br>
-     - if the bound slot does not match `slot`, then bind that slot; <br>
-     - if the item stack is not the current item stack, then replace it.
-     <br><br>
-     If a matching item stack is encountered and it does not equal {@link #itemStack}, then replace it by a copy thereof.
+     <br>
+     - If `slot` is -1, a matching item stack is encountered and the bound slot does not match `slot`, then bind that slot.
+     <br>
+     - If a matching item stack is encountered and it does not equal {@link #itemStack}, then replace it by a copy thereof.
 
      @param slot the slot from which to not remove
      */
     public void updateInventory(int slot) {
-        if (slot == -1 && this.hasBoundSlot() && this.accepts(this.stackInBoundSlot())) {
-            slot = this.boundSlot;
-        }
-
         var inventory = ItemUtil.inventory(this.player).toList().listIterator();
 
         while (inventory.hasNext()) {
@@ -723,8 +691,8 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
                     if (slot == -1) {
                         slot = inventory.previousIndex();
 
-                        if (this.hasBoundSlot()) {
-                            this.bindSlot(slot);
+                        if (this.component.hasBoundSlot()) {
+                            this.component.bindSlot(slot);
                         }
                     } else if (inventory.previousIndex() != slot) {
                         this.player.getInventory().removeOne(stack);
@@ -866,7 +834,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         tag.put("enchantments", this.enchantments.serialize());
         tag.put("skills", this.skills.serialize());
         tag.putBoolean("unlocked", this.unlocked);
-        tag.putInt("slot", this.boundSlot);
     }
 
     @Override
@@ -875,7 +842,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         this.enchantments.deserialize(tag.getCompound("enchantments"));
         this.skills.deserialize(tag.getCompound("skills"));
         this.unlocked = tag.getBoolean("unlocked");
-        this.bindSlot(tag.getInt("slot"));
 
         this.updateItemStack();
     }

@@ -2,12 +2,10 @@ package soulboundarmory.entity;
 
 import java.util.Optional;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -24,47 +22,46 @@ import soulboundarmory.util.Util;
 public class SoulboundDaggerEntity extends ExtendedProjectile {
     public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new, SpawnGroup.MISC)
-        .setDimensions(.5F, .5F)
+        .setDimensions(.3F, .5F)
         .build(Util.id("dagger").toString());
 
-    public ItemStack itemStack;
+    public static SoulboundDaggerEntity attacker;
 
-    protected boolean spawnClone;
-    protected boolean clone;
-    protected double attackDamageRatio;
+    public double damageRatio;
+
+    protected final boolean clone;
+    protected final boolean spawnClone;
     protected int ticksToSeek = -1;
     protected int ticksSeeking;
     protected int ticksInGround;
 
-    public SoulboundDaggerEntity(World world, LivingEntity shooter, ItemStack itemStack, boolean spawnClone, double speed, double maxSpeed) {
-        super(type, shooter, world);
+    public SoulboundDaggerEntity(PlayerEntity shooter, boolean clone, double speed, double damageRatio) {
+        super(type, shooter, shooter.world);
 
-        if (shooter instanceof PlayerEntity) {
-            this.pickupType = PickupPermission.ALLOWED;
-        }
-
-        this.itemStack = itemStack;
-        this.spawnClone = spawnClone;
-        this.attackDamageRatio = speed / maxSpeed;
+        this.clone = clone;
+        this.spawnClone = !clone && this.component().get().hasSkill(Skills.shadowClone);
+        this.damageRatio = damageRatio;
+        this.pickupType = PickupPermission.ALLOWED;
 
         this.setVelocity(shooter.getRotationVector().multiply(speed));
-        this.setDamage(this.component().get().attackDamage() * this.attackDamageRatio);
+        this.setDamage(this.component().get().attackDamage() * this.damageRatio);
     }
 
     private SoulboundDaggerEntity(SoulboundDaggerEntity original) {
-        this(original.world, (LivingEntity) original.getOwner(), original.itemStack, false, original.velocityD(), original.velocityD());
+        this((PlayerEntity) original.getOwner(), true, original.velocityD(), original.damageRatio);
 
-        this.clone = true;
         this.setPosition(original.getX(), original.getY(), original.getZ());
         this.setVelocity(original.getVelocity());
-        this.setRotation(original.getPitch(), original.getYaw());
+        this.setRotation(original.getYaw(), original.getPitch());
         this.prevPitch = original.prevPitch;
         this.prevYaw = original.prevYaw;
-        this.attackDamageRatio = original.attackDamageRatio;
     }
 
     private <T extends SoulboundDaggerEntity> SoulboundDaggerEntity(EntityType<T> type, World world) {
         super(type, world);
+
+        this.clone = false;
+        this.spawnClone = false;
     }
 
     public Optional<DaggerComponent> component() {
@@ -164,28 +161,15 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     }
 
     @Override
-    public void deserializeNBT(NbtCompound tag) {
-        super.deserializeNBT(tag);
-
-        this.itemStack = ItemStack.fromNbt(tag.getCompound("itemStack"));
-    }
-
-    @Override
-    public NbtCompound serializeNBT() {
-        var tag = super.serializeNBT();
-        tag.put("itemStack", this.itemStack.serializeNBT());
-
-        return tag;
-    }
-
-    @Override
     protected void onEntityHit(EntityHitResult target) {
         if (!this.seeking() && this.spawnClone) {
             this.world.spawnEntity(new SoulboundDaggerEntity(this));
         }
 
         if (this.getOwner() instanceof ServerPlayerEntity player && target.getEntity() != player) {
+            attacker = this;
             player.attack(target.getEntity());
+            attacker = null;
 
             if (!this.clone && !this.seeking()) {
                 this.setVelocity(this.getVelocity().multiply(-.2, 1, -.2));

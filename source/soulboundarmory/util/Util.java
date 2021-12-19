@@ -184,7 +184,9 @@ public class Util {
 
             try {
                 iterator.remove();
-            } catch (IndexOutOfBoundsException __)  {}
+            } catch (IndexOutOfBoundsException __)  {
+                LogManager.getLogger("soulbound-armory").error("Something is very fishy.");
+            }
         }
     }
 

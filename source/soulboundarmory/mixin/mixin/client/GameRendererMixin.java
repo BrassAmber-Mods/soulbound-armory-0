@@ -22,7 +22,7 @@ abstract class GameRendererMixin {
 
     @ModifyVariable(method = "updateTargetedEntity", at = @At(value = "STORE", ordinal = 3), ordinal = 1)
     private double reachThroughNonCollidableBlocks(double blockDistance, float tickDelta) {
-        return Widget.client.cameraEntity instanceof PlayerEntity player ? ItemComponent.get(player, player.getMainHandStack())
+        return Widget.client.cameraEntity instanceof PlayerEntity player ? ItemComponent.of(player, player.getMainHandStack())
             .filter(component -> component.hasSkill(Skills.precision))
             .map(component -> {
                 var start = player.getCameraPosVec(tickDelta);

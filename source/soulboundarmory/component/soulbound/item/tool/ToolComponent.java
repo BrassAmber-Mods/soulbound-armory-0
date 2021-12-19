@@ -32,7 +32,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     public ToolComponent(SoulboundComponent<?> component) {
         super(component);
 
-        this.skills.add(Skills.absorption, Skills.circumspection, Skills.enderPull);
+        this.skills.add(Skills.absorption, Skills.circumspection);
     }
 
     public Text materialName() {

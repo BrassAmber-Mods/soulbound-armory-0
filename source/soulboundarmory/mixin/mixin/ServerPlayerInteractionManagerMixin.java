@@ -19,7 +19,7 @@ abstract class ServerPlayerInteractionManagerMixin {
     @ModifyVariable(method = "tryBreakBlock", at = @At(value = "LOAD", ordinal = 11), ordinal = 0)
     private BlockPos dropExperienceAtMinerWithEnderPull(BlockPos position) {
         return Optional.ofNullable(this.player)
-            .flatMap(player -> ItemComponent.get(player, player.getMainHandStack()))
+            .flatMap(player -> ItemComponent.of(player, player.getMainHandStack()))
             .map(component -> component.hasSkill(Skills.enderPull) ? this.player.getBlockPos() : position)
             .orElse(position);
     }

@@ -42,7 +42,7 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void tooltip(ItemTooltipEvent event) {
-        ItemComponent.get(event.getPlayer(), event.getItemStack()).ifPresent(component -> {
+        ItemComponent.of(event.getPlayer(), event.getItemStack()).ifPresent(component -> {
             var tooltip = event.getToolTip();
             var startIndex = 1 + IntStream.range(0, tooltip.size())
                 .filter(index -> tooltip.get(index) instanceof TranslatableText translation && translation.getKey().equals("item.modifiers.mainhand"))

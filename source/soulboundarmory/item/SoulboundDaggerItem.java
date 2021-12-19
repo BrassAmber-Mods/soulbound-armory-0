@@ -22,8 +22,8 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
         super(1, -2, -1);
     }
 
-    private static float maxUsageRatio(float attackSpeed, int timeLeft) {
-        return Math.min(attackSpeed / 2 * (USE_TIME - timeLeft) / 20F, 1);
+    private static double damageRatio(double attackSpeed, int timeLeft) {
+        return Math.min(attackSpeed * (USE_TIME - timeLeft) / 40F, 1);
     }
 
     @Override
@@ -51,11 +51,10 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
         if (entity instanceof ServerPlayerEntity player) {
             var component = ItemComponentType.dagger.of(player);
-            var attackSpeed = (float) component.attributeTotal(StatisticType.attackSpeed);
-            var speed = maxUsageRatio(attackSpeed, timeLeft) * attackSpeed;
-            var maxSpeed = speed / attackSpeed;
+            var attackSpeed = component.attributeTotal(StatisticType.attackSpeed);
+            var damageRatio = damageRatio(attackSpeed, timeLeft);
 
-            world.spawnEntity(new SoulboundDaggerEntity(world, entity, itemStack, component.hasSkill(Skills.shadowClone), speed, maxSpeed));
+            world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed, damageRatio));
 
             if (!player.isCreative()) {
                 player.getInventory().removeOne(itemStack);

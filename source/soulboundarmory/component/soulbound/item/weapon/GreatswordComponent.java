@@ -30,14 +30,12 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
         this.statistics
             .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .statistics(StatisticType.efficiency)
+            .constant(6, StatisticType.reach)
             .min(0.8, StatisticType.attackSpeed)
-            .min(4, StatisticType.attackDamage)
-            .min(6, StatisticType.reach)
-            .max(1, StatisticType.criticalHitRate)
-            .max(4, StatisticType.attackSpeed);
+            .min(4, StatisticType.attackDamage);
 
         this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
-        this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.leaping, Skills.freezing);
+        this.skills.add(Skills.circumspection, Skills.precision, Skills.nourishment, Skills.leaping, Skills.freezing);
     }
 
     @Override

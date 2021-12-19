@@ -4,6 +4,7 @@ import cell.client.gui.screen.CellScreen;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -12,6 +13,7 @@ import net.minecraft.world.GameRules;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.config.Configuration;
@@ -32,10 +34,15 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
      */
     public int tab;
 
+    protected int boundSlot;
     protected ItemComponent<?> item;
 
     public SoulboundComponent(PlayerEntity player) {
         this.player = player;
+    }
+
+    public static Optional<? extends SoulboundComponent<?>> of(Entity entity, ItemStack stack) {
+        return Components.soulbound(entity).filter(component -> component.accepts(stack)).findAny();
     }
 
     /**
@@ -61,6 +68,30 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
         if (this.isClient()) {
             Packets.serverTab.send(new ExtendedPacketBuffer(this).writeByte(index));
         }
+    }
+
+    public int boundSlot() {
+        return this.boundSlot;
+    }
+
+    public void bindSlot(int boundSlot) {
+        this.boundSlot = boundSlot;
+    }
+
+    public boolean hasBoundSlot() {
+        return this.boundSlot != -1;
+    }
+
+    public void unbindSlot() {
+        this.boundSlot = -1;
+    }
+
+    /**
+     @return the item stack in the bound slot.
+     @throws IndexOutOfBoundsException if no slot is bound.
+     */
+    public final ItemStack stackInBoundSlot() {
+        return this.player.getInventory().getStack(this.boundSlot);
     }
 
     /**
@@ -155,7 +186,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
         }
 
         if (storage != null) {
-            this.item.updateInventory(-1);
+            this.item.updateInventory(this.hasBoundSlot() && this.accepts(this.stackInBoundSlot()) ? this.boundSlot : -1);
         }
 
         this.items.values().forEach(ItemComponent::tick);
@@ -205,6 +236,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
         }
 
         tag.putInt("tab", this.tab);
+        tag.putInt("slot", this.boundSlot);
     }
 
     @Override
@@ -220,5 +252,6 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
         }
 
         this.tab = tag.getInt("tab");
+        this.bindSlot(tag.getInt("slot"));
     }
 }

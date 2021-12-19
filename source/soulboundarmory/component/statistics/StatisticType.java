@@ -1,5 +1,6 @@
 package soulboundarmory.component.statistics;
 
+import java.util.function.Consumer;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.registry.RegistryEntry;
 import soulboundarmory.util.Util;
@@ -14,19 +15,33 @@ public class StatisticType extends RegistryEntry<StatisticType> {
     public static final StatisticType level = new StatisticType(Category.datum, "level");
     public static final StatisticType skillPoints = new StatisticType(Category.datum, "skill_points");
 
-    public static final StatisticType attackSpeed = new StatisticType(Category.attribute, "attack_speed");
+    public static final StatisticType attackSpeed = new StatisticType(Category.attribute, "attack_speed", statistic -> statistic.defaultMax(4));
     public static final StatisticType attackDamage = new StatisticType(Category.attribute, "attack_damage");
-    public static final StatisticType criticalHitRate = new StatisticType(Category.attribute, "critical_hit_rate");
+    public static final StatisticType criticalHitRate = new StatisticType(Category.attribute, "critical_hit_rate", statistic -> statistic.defaultMax(1));
     public static final StatisticType efficiency = new StatisticType(Category.attribute, "efficiency");
     public static final StatisticType reach = new StatisticType(Category.attribute, "reach");
     public static final StatisticType upgradeProgress = new StatisticType(Category.attribute, "upgrade_progress");
 
     public final Category category;
 
-    public StatisticType(Category category, String path) {
+    private final Consumer<Statistic> initialize;
+
+    public StatisticType(Category category, String path, Consumer<Statistic> initialize) {
         super(path);
 
         this.category = category;
+        this.initialize = initialize;
+    }
+
+    public StatisticType(Category category, String path) {
+        this(category, path, statistic -> {});
+    }
+
+    public final Statistic instantiate() {
+        var statistic = new Statistic(this);
+        this.initialize.accept(statistic);
+
+        return statistic;
     }
 
     @Override

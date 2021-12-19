@@ -17,7 +17,8 @@ public class SelectionTab extends SoulboundTab {
 
     @Override
     public void initialize() {
-        var selection = this.parent().component.items.values().stream().filter(storage -> storage.isUnlocked() || storage.canConsume(this.parent().stack)).toList();
+        var parent = this.parent();
+        var selection = parent.component.items.values().stream().filter(item -> item.isUnlocked() && parent.component.accepts(parent.stack) || item.canConsume(parent.stack)).toList();
 
         Util.enumerate(selection, (component, row) -> this.add(new ScalableWidget<>()
             .button()
@@ -27,8 +28,8 @@ public class SelectionTab extends SoulboundTab {
             .width(128)
             .height(20)
             .text(component.name())
-            .primaryAction(() -> component.select(this.parent().slot))
-            .active(!this.parent().displayTabs() || ItemUtil.inventory(player()).noneMatch(component::accepts))
+            .primaryAction(() -> component.select(parent.slot))
+            .active(!parent.displayTabs() || ItemUtil.inventory(player()).noneMatch(component::accepts))
         ));
     }
 }

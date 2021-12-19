@@ -22,13 +22,13 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
     protected ItemComponent<?> component;
 
     @Override
-    public int getHeight() {
-        return this.height() + (this.visible() ? this.offset() : 0);
+    public int getWidth(TextRenderer textRenderer) {
+        return this.visible() ? this.width() + 8 : 0;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
-        return this.width() + (this.visible() ? 8 : 0);
+    public int getHeight() {
+        return this.visible() ? this.height() + this.offset() : 0;
     }
 
     {
@@ -89,11 +89,12 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
         var level = this.component.level();
 
         if (level > 0) {
-            drawStrokedText(this.matrixes, String.valueOf(level), this.middleX() - width(String.valueOf(level)) / 2F, this.y() - 8, colors.argb(), colors.alpha << 24);
+            var text = String.valueOf(level);
+            drawStrokedText(this.matrixes, text, this.middleX() - width(text) / 2F, this.y() - 6, colors.argb(), colors.alpha << 24);
         }
     }
 
     private int offset() {
-        return this.component.level() > 0 ? fontHeight() : 0;
+        return this.component.level() > 0 ? fontHeight() - 2 : 0;
     }
 }

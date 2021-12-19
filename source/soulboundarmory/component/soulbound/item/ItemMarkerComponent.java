@@ -2,6 +2,7 @@ package soulboundarmory.component.soulbound.item;
 
 import cell.client.gui.CellElement;
 import cell.client.gui.widget.Widget;
+import java.util.Optional;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.item.ItemStack;
@@ -20,12 +21,12 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
         this.stack = stack;
 
         if (Util.isClient()) {
-            this.item = ItemComponent.get(CellElement.client.player, stack).orElse(null);
+            this.item = ItemComponent.of(CellElement.client.player, stack).orElse(null);
         }
     }
 
-    public ItemComponent<?> item() {
-        return this.item;
+    public Optional<ItemComponent<?>> item() {
+        return Optional.ofNullable(this.item);
     }
 
     public boolean animating() {
@@ -46,10 +47,10 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
 
     @Override
     public void serialize(NbtCompound tag) {
-        if (this.item != null) {
-            tag.putUuid("player", this.item.player.getUuid());
-            tag.putString("item", this.item.type().string());
-        }
+        this.item().ifPresent(item -> {
+            tag.putUuid("player", item.player.getUuid());
+            tag.putString("item", item.type().string());
+        });
     }
 
     @Override

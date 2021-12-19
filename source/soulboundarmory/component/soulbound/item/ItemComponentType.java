@@ -6,11 +6,14 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.tool.PickComponent;
+import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.component.soulbound.item.weapon.BigswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
+import soulboundarmory.component.soulbound.item.weapon.TridentComponent;
+import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.lib.component.EntityComponentKey;
 import soulboundarmory.registry.RegistryEntry;
@@ -21,12 +24,13 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
     @SuppressWarnings("rawtypes")
     public static final IForgeRegistry registry = Util.<ItemComponentType>newRegistry("storage");
 
-    public static final ItemComponentType<DaggerComponent> dagger = new ItemComponentType<>("dagger", Components.weapon);
-    public static final ItemComponentType<SwordComponent> sword = new ItemComponentType<>("sword", Components.weapon);
-    public static final ItemComponentType<GreatswordComponent> greatsword = new ItemComponentType<>("greatsword", Components.weapon);
-    public static final ItemComponentType<BigswordComponent> bigsword = new ItemComponentType<>("bigsword", Components.weapon);
-    public static final ItemComponentType<StaffComponent> staff = new ItemComponentType<>("staff", Components.weapon);
-    public static final ItemComponentType<PickComponent> pick = new ItemComponentType<>("pick", Components.tool);
+    public static final ItemComponentType<DaggerComponent> dagger = weapon("dagger");
+    public static final ItemComponentType<SwordComponent> sword = weapon("sword");
+    public static final ItemComponentType<GreatswordComponent> greatsword = weapon("greatsword");
+    public static final ItemComponentType<BigswordComponent> bigsword = weapon("bigsword");
+    public static final ItemComponentType<TridentComponent> trident = weapon("trident");
+    public static final ItemComponentType<StaffComponent> staff = weapon("staff");
+    public static final ItemComponentType<PickComponent> pick = tool("pick");
 
     public final EntityComponentKey<? extends SoulboundComponent<?>> parentKey;
 
@@ -34,6 +38,14 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
         super(path);
 
         this.parentKey = key;
+    }
+
+    public static <T extends WeaponComponent<T>> ItemComponentType<T> weapon(String path) {
+        return new ItemComponentType<>(path, Components.weapon);
+    }
+
+    public static <T extends ToolComponent<T>> ItemComponentType<T> tool(String path) {
+        return new ItemComponentType<>(path, Components.tool);
     }
 
     public static ItemComponentType<?> get(Identifier id) {
