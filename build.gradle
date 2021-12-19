@@ -1,3 +1,11 @@
+import net.auoeke.reflect.Accessor
+
+buildscript {
+    dependencies {
+        classpath("net.auoeke:reflect:latest.release")
+    }
+}
+
 plugins {
     id("maven-publish")
     id("dev.architectury.loom").version("latest.release")
@@ -32,14 +40,26 @@ loom {
     forge {
         mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")
     }
-}
 
-configurations {
-    library {
-        implementation.extendsFrom(it)
+    if (Boolean.getBoolean("idea.sync.active")) {
+        delete(".idea/runConfigurations")
 
-        afterEvaluate {
-            new File(loom.files.projectPersistentCache, "forge_minecraft_classpath.txt") << resolvedConfiguration.files.collect {'\n' + it}.join()
+        runs {
+            def project = project
+
+            all {run ->
+                Accessor.putReference(run, "envVariables", new HashMap() {
+                    Object put(Object key, Object value) {
+                        if (key == "MOD_CLASSES") {
+                            // Replace Gradle's output by IntelliJ IDEA's output.
+                            // Gradle's output interferes even if it is specified last.
+                            value = "main%%${file("out/production/${project.name}.${run.getSource(project).name}")}" as String
+                        }
+
+                        return super.put(key, value)
+                    }
+                })
+            }
         }
     }
 }
@@ -49,7 +69,7 @@ dependencies {
     mappings("net.fabricmc:yarn:$gameVersion+build.$yarn:v2")
     forge("net.minecraftforge:forge:$gameVersion-$forgeVersion")
 
-    library("net.auoeke:reflect:latest.integration")
+    forgeDependencies("net.auoeke:reflect:latest.integration")
 }
 
 tasks.withType(JavaCompile) {
