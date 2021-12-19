@@ -7,8 +7,9 @@ import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import soulboundarmory.util.Math2;
+import soulboundarmory.util.Sided;
 
-public abstract class ExtendedProjectile extends PersistentProjectileEntity {
+public abstract class ExtendedProjectile extends PersistentProjectileEntity implements Sided {
     protected ExtendedProjectile(EntityType<? extends PersistentProjectileEntity> type, double x, double y, double z, World world) {
         super(type, x, y, z, world);
     }

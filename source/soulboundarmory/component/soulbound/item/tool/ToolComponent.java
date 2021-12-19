@@ -69,7 +69,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
 
     @Override
     public void mined(BlockState state, BlockPos position) {
-        if (!this.isClient() && this.itemStack.isSuitableFor(state)) {
+        if (this.isServer() && this.itemStack.isSuitableFor(state)) {
             var delta = Math.max(1, state.calcBlockBreakingDelta(this.player, this.player.world, position));
             var xp = Math.round(state.getHardness(this.player.world, position)) + 4 * (1 - delta);
             this.add(StatisticType.experience, delta == 1 ? Math.min(10, xp) : xp);

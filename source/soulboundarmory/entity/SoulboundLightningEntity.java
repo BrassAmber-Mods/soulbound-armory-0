@@ -20,8 +20,9 @@ import net.minecraft.world.dimension.AreaHelper;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.mixin.access.LightningEntityAccess;
+import soulboundarmory.util.Sided;
 
-public class SoulboundLightningEntity extends LightningEntity implements LightningEntityAccess {
+public class SoulboundLightningEntity extends LightningEntity implements LightningEntityAccess, Sided {
     protected UUID caster;
 
     public SoulboundLightningEntity(World world, double x, double y, double z, UUID caster) {
@@ -40,7 +41,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
 
     @Override
     public void tick() {
-        if (!this.world.isClient) {
+        if (this.isServer()) {
             this.setFlag(6, this.isGlowing());
         }
 
@@ -64,7 +65,7 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
         }
 
         if (this.life() >= 0) {
-            if (this.world.isClient) {
+            if (this.isClient()) {
                 this.world.setLightningTicksLeft(2);
             } else {
                 var radius = 3D;
@@ -164,5 +165,10 @@ public class SoulboundLightningEntity extends LightningEntity implements Lightni
         super.deserializeNBT(tag);
 
         this.caster = tag.getUuid("casterUUID");
+    }
+
+    @Override
+    public boolean isClient() {
+        return this.world.isClient;
     }
 }

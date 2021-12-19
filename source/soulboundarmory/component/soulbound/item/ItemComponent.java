@@ -65,9 +65,10 @@ import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Math2;
+import soulboundarmory.util.Sided;
 import soulboundarmory.util.Util;
 
-public abstract class ItemComponent<T extends ItemComponent<T>> implements Serializable {
+public abstract class ItemComponent<T extends ItemComponent<T>> implements Serializable, Sided {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
 
     public final SoulboundComponent<?> component;
@@ -199,6 +200,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
     public void mined(BlockState state, BlockPos position) {}
 
+    @Override
     public final boolean isClient() {
         return this.player.world.isClient;
     }
