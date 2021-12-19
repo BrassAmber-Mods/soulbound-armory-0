@@ -152,12 +152,17 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     @Override
     public void onPlayerCollision(PlayerEntity player) {
-        if (!this.world.isClient && player == this.getOwner()) {
+        if (this.isServer() && player == this.getOwner()) {
             if (this.clone || this.age >= Math.max(1, 20 / this.component().get().attackSpeed()) && player.getInventory().insertStack(this.asItemStack())) {
                 player.sendPickup(this, 1);
                 this.discard();
             }
         }
+    }
+
+    @Override
+    public boolean isClient() {
+        return this.world.isClient;
     }
 
     @Override
@@ -196,13 +201,5 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     private boolean seeking() {
         return this.ticksSeeking > 0;
-    }
-
-    private boolean isClient() {
-        return this.world.isClient;
-    }
-
-    private boolean isServer() {
-        return !this.isClient();
     }
 }

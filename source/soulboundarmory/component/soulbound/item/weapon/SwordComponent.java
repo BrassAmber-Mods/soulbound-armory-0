@@ -87,7 +87,7 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
 
     @Override
     public void tick() {
-        if (!this.isClient()) {
+        if (this.isServer()) {
             if (this.lightningCooldown > 0) {
                 this.lightningCooldown--;
             }

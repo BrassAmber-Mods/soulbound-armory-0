@@ -55,7 +55,7 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
 
     @Override
     public void killed(LivingEntity entity) {
-        if (!this.isClient()) {
+        if (this.isServer()) {
             var damage = EntityUtil.attribute(entity, EntityAttributes.GENERIC_ATTACK_DAMAGE);
             var speed = EntityUtil.attribute(entity, EntityAttributes.GENERIC_ATTACK_SPEED);
             var configuration = Configuration.instance();

@@ -23,9 +23,10 @@ import soulboundarmory.lib.component.EntityComponentKey;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
+import soulboundarmory.util.Sided;
 import soulboundarmory.util.Util;
 
-public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implements EntityComponent<C> {
+public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implements EntityComponent<C>, Sided {
     public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> items = new Reference2ReferenceLinkedOpenHashMap<>();
     public final PlayerEntity player;
 
@@ -58,6 +59,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     /**
      @return what the name suggests.
      */
+    @Override
     public final boolean isClient() {
         return this.player.world.isClient;
     }
@@ -206,7 +208,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
      */
     @Override
     public void spawn() {
-        if (!this.isClient()) {
+        if (this.isServer()) {
             this.items.values().forEach(ItemComponent::updateItemStack);
             Packets.clientSync.send(this.player, new ExtendedPacketBuffer(this).writeNbt(this.serialize()));
         }
