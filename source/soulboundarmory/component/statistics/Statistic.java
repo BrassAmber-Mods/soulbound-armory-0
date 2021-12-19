@@ -13,9 +13,9 @@ public class Statistic extends Number implements Comparable<Number>, Serializabl
     protected double max = Double.MAX_VALUE;
     protected double defaultMax = this.max;
 
-    public Statistic(Category category, StatisticType statistic) {
+    public Statistic(StatisticType statistic) {
         this.type = statistic;
-        this.category = category;
+        this.category = statistic.category;
     }
 
     @Override

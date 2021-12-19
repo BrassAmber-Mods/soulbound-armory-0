@@ -26,7 +26,7 @@ public class SoulboundSword extends SoulboundMeleeWeapon {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         var stack = player.getStackInHand(hand);
-        var component = (SwordComponent) ItemComponent.get(player, stack).get();
+        var component = (SwordComponent) ItemComponent.of(player, stack).get();
 
         if (!world.isClient && component.hasSkill(Skills.summonLightning) && component.lightningCooldown() <= 0) {
             var pos = player.getPos();

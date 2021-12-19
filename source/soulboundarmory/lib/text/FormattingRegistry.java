@@ -2,67 +2,59 @@ package soulboundarmory.lib.text;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.auoeke.reflect.Pointer;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import soulboundarmory.lib.text.mixin.access.FormattingAccess;
-import soulboundarmory.lib.text.mixin.access.TextColorAccess;
-import soulboundarmory.util.Util;
 
 public class FormattingRegistry {
-    private static final Pointer pattern = new Pointer().staticField(Formatting.class, Util.mapField(126620));
     private static final Pointer values = new Pointer().staticField(Formatting.class, ExtendedFormatting.VALUES);
-    private static final Pointer colors = new Pointer().staticField(TextColor.class, Util.mapField(131255));
-
-    private static final Map<String, Formatting> nameMap = FormattingAccess.nameMap();
-    private static final Reference2ObjectOpenHashMap<Formatting, TextColor> colorMap = new Reference2ObjectOpenHashMap<>(TextColorAccess.formattingColors());
 
     public static ExtendedFormatting register(String name, char code, int colorIndex, @Nullable Integer color) {
-        return register(new ExtendedFormatting(name, code, colorIndex, color), code);
+        return register(new ExtendedFormatting(name, code, colorIndex, color));
     }
 
     public static ExtendedFormatting register(String name, char code, boolean modifier) {
-        return register(new ExtendedFormatting(name, code, modifier), code);
+        return register(new ExtendedFormatting(name, code, modifier));
     }
 
     public static ExtendedFormatting register(String name, char code, boolean modifier, int colorIndex, @Nullable Integer color) {
-        return register(new ExtendedFormatting(name, code, modifier, colorIndex, color), code);
+        return register(new ExtendedFormatting(name, code, modifier, colorIndex, color));
     }
 
-    private static ExtendedFormatting register(ExtendedFormatting formatting, char code) {
-        if (Character.toLowerCase(code) != code) {
-            throw new IllegalArgumentException(String.format("%s; uppercase codes are not allowed.", code));
+    private static ExtendedFormatting register(ExtendedFormatting formatting) {
+        if (Character.toLowerCase(formatting.code()) != formatting.code()) {
+            throw new IllegalArgumentException(String.format("%s; uppercase codes are not allowed.", formatting.code()));
         }
 
-        if (Formatting.byCode(code) != null) {
-            throw new IllegalArgumentException(String.format("a Formatting with the code %s already exists.", code));
+        if (Formatting.byCode(formatting.code()) != null) {
+            throw new IllegalArgumentException(String.format("a Formatting with the code %s already exists.", formatting.code()));
         }
 
-        if (Formatting.byName(formatting.cast().getName()) != null) {
-            throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", formatting.cast().getName()));
+        var cast = formatting.cast();
+
+        if (Formatting.byName(cast.getName()) != null) {
+            throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", cast.getName()));
         }
 
-        var oldValues = (Formatting[]) values.getT();
+        var oldValues = values.<Formatting[]>getT();
         var valueCount = oldValues.length;
         var newValues = Arrays.copyOf(oldValues, valueCount + 1);
-        newValues[valueCount] = formatting.cast();
+        newValues[valueCount] = cast;
         values.putReference(newValues);
 
-        nameMap.put(FormattingAccess.sanitize(formatting.cast().name()), formatting.cast());
+        Formatting.BY_NAME.put(Formatting.sanitize(cast.name()), cast);
+        Formatting.FORMATTING_CODE_PATTERN = Pattern.compile(Formatting.FORMATTING_CODE_PATTERN.toString().replace("]", formatting.code() + "]"));
 
-        pattern.putReference(Pattern.compile(pattern.getT().toString().replace("]", code + "]")));
-
-        if (formatting.cast().isColor()) {
-            colorMap.put(formatting.cast(), TextColorAccess.instantiate(formatting.cast().getColorValue(), formatting.cast().getName()));
+        if (cast.isColor()) {
+            TextColor.FORMATTING_TO_COLOR.put(cast, new TextColor(cast.getColorValue(), cast.getName()));
         }
 
         return formatting;
     }
 
     static {
-        colors.putReference(colorMap);
+        TextColor.FORMATTING_TO_COLOR = new Reference2ObjectOpenHashMap<>(TextColor.FORMATTING_TO_COLOR);
     }
 }

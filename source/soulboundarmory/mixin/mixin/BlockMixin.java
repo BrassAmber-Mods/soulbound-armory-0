@@ -30,7 +30,7 @@ abstract class BlockMixin {
     @Inject(method = "dropStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;"))
     private static void storeMinerForEnderPull(BlockState state, World world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack tool, CallbackInfo info) {
-        ItemComponent.get(entity, tool).ifPresent(component -> {
+        ItemComponent.of(entity, tool).ifPresent(component -> {
             if (component.hasSkill(Skills.enderPull)) {
                 miner = (PlayerEntity) entity;
             }

@@ -23,6 +23,7 @@ public class Translations {
     public static final Translation guiSword = gui("sword");
     public static final Translation guiGreatsword = gui("greatsword");
     public static final Translation guiBigsword = gui("bigsword");
+    public static final Translation guiTrident = gui("trident");
     public static final Translation guiStaff = gui("staff");
     public static final Translation guiPick = gui("pick");
     public static final Translation guiToolSelection = gui("selection");

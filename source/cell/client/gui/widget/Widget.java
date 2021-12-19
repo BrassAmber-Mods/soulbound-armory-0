@@ -124,7 +124,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<T> {
     }
 
     public T text(Text text) {
-        this.add(new TextWidget().text(text).position(Coordinate.Type.CENTER).width(textRenderer.getWidth(text)).height(fontHeight()).center());
+        this.add(new TextWidget().text(text).position(Coordinate.Type.CENTER).width(width(text)).height(fontHeight()).center());
 
         return (T) this;
     }

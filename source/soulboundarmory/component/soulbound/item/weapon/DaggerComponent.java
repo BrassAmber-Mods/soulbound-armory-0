@@ -20,12 +20,11 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
         this.statistics
             .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .statistics(StatisticType.efficiency)
-            .min(2, StatisticType.attackSpeed, StatisticType.attackDamage, StatisticType.reach)
-            .max(1, StatisticType.criticalHitRate)
-            .max(4, StatisticType.attackSpeed);
+            .constant(2, StatisticType.reach)
+            .min(2, StatisticType.attackSpeed, StatisticType.attackDamage);
 
         this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
-        this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.throwing, Skills.shadowClone, Skills.returning, Skills.sneakReturn);
+        this.skills.add(Skills.circumspection, Skills.precision, Skills.nourishment, Skills.throwing, Skills.shadowClone, Skills.returning, Skills.sneakReturn);
     }
 
     @Override

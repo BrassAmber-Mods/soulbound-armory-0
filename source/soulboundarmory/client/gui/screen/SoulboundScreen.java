@@ -62,7 +62,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         this.sliders.clear();
 
         this.stack = player().getInventory().getStack(this.slot);
-        this.item = ItemComponent.get(player(), this.stack).orElse(null);
+        this.item = ItemComponent.of(player(), this.stack).orElse(null);
 
         if (this.displayTabs()) {
             this.add(this.xpBar.item(this.item).x(this.width() / 2).y(this.height() - 27));
@@ -82,17 +82,16 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
 
             this.tabButtons.get(this.component.tab).active(false);
 
-            var unbind = this.item.boundSlot() == this.slot;
+            var unbind = this.component.boundSlot() == this.slot;
             var text = unbind ? Translations.guiButtonUnbind : Translations.guiButtonBind;
-            var buttonWidth = Math.max(this.button.width(), textRenderer.getWidth(text) + 8);
 
             this.add(new ScalableWidget<>().button()
-                .x(this.button.endX() - buttonWidth)
+                .x(this.button.x())
                 .y(this.height() - this.height() / 16 - 20)
-                .width(buttonWidth)
+                .width(Math.max(this.button.width(), textRenderer.getWidth(text) + 8))
                 .height(20)
                 .text(text)
-                .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.item).writeInt(unbind ? -1 : this.slot)))
+                .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.component).writeInt(unbind ? -1 : this.slot)))
             );
 
             this.tab(this.tab.index);

@@ -3,7 +3,6 @@ package soulboundarmory.lib.text;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
-import net.auoeke.reflect.Flags;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -116,6 +115,7 @@ public class Transformer implements IMixinConfigPlugin {
                 method.instructions.insertBefore(method.instructions.getFirst(), instructions);
             }
             case "soulboundarmory.lib.text.mixin.FormattingMixin" -> {
+/*
                 target.access &= ~Opcodes.ACC_FINAL;
 
                 target.fields.forEach(field -> {
@@ -125,6 +125,7 @@ public class Transformer implements IMixinConfigPlugin {
                 });
 
                 target.methods.stream().filter(method -> method.name.equals("<init>")).forEach(method -> method.access = method.access & ~Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC);
+*/
             }
             case "soulboundarmory.lib.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
                 target.superName = "net/minecraft/util/Formatting";
@@ -160,7 +161,7 @@ public class Transformer implements IMixinConfigPlugin {
                             method.access &= ~Opcodes.ACC_NATIVE;
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
-                            method.visitFieldInsn(Opcodes.GETFIELD, target.superName, "code", "C");
+                            method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, "getCode", "()C", false);
                             method.visitInsn(Opcodes.IRETURN);
                         }
                     }

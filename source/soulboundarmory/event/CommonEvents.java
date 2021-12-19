@@ -17,8 +17,10 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -34,6 +36,7 @@ import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.lib.component.EntityComponent;
 import soulboundarmory.lib.component.access.EntityAccess;
 import soulboundarmory.network.ExtendedPacketBuffer;
@@ -97,6 +100,16 @@ public final class CommonEvents {
                 event.setExpToDrop(0);
             }
         });
+    }
+
+    /**
+     Cancel critical hits for thrown daggers.
+     */
+    @SubscribeEvent
+    public static void criticalHit(CriticalHitEvent event) {
+        if (SoulboundDaggerEntity.attacker != null) {
+            event.setResult(Event.Result.DENY);
+        }
     }
 
     /**

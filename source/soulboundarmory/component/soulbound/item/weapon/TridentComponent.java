@@ -2,6 +2,7 @@ package soulboundarmory.component.soulbound.item.weapon;
 
 import java.util.stream.Stream;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
@@ -10,43 +11,43 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.registry.Skills;
 import soulboundarmory.registry.SoulboundItems;
 
-public class BigswordComponent extends WeaponComponent<BigswordComponent> {
-    public BigswordComponent(SoulboundComponent<?> component) {
+public class TridentComponent extends WeaponComponent<TridentComponent> {
+    public TridentComponent(SoulboundComponent<?> component) {
         super(component);
 
         this.statistics
             .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .statistics(StatisticType.efficiency)
-            .min(4, StatisticType.attackDamage)
-            .min(1, StatisticType.attackSpeed)
-            .min(3, StatisticType.reach);
+            .constant(3, StatisticType.reach)
+            .min(1.1, StatisticType.attackSpeed)
+            .min(5, StatisticType.attackDamage);
 
         this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
         this.skills.add(Skills.circumspection, Skills.precision, Skills.nourishment);
     }
 
     @Override
-    public ItemComponentType<BigswordComponent> type() {
-        return ItemComponentType.bigsword;
+    public ItemComponentType<TridentComponent> type() {
+        return ItemComponentType.trident;
     }
 
     @Override
     public Item item() {
-        return SoulboundItems.bigsword;
+        return SoulboundItems.trident;
+    }
+
+    @Override
+    public Item consumableItem() {
+        return Items.TRIDENT;
     }
 
     @Override
     public Text name() {
-        return Translations.guiBigsword;
+        return Translations.guiTrident;
     }
 
     @Override
     public double increase(StatisticType type) {
-        if (type == StatisticType.attackDamage) return 0.12;
-        if (type == StatisticType.attackSpeed) return 0.025;
-        if (type == StatisticType.criticalHitRate) return 0.008;
-        if (type == StatisticType.efficiency) return 0.03;
-
         return 0;
     }
 }

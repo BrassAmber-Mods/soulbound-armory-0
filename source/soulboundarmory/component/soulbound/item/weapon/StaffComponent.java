@@ -24,9 +24,7 @@ public class StaffComponent extends WeaponComponent<StaffComponent> {
             .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
             .constant(3, StatisticType.reach)
             .min(0.48, StatisticType.attackSpeed)
-            .min(8, StatisticType.attackDamage)
-            .max(1, StatisticType.criticalHitRate)
-            .max(4, StatisticType.attackSpeed);
+            .min(8, StatisticType.attackDamage);
 
         this.enchantments.initialize(enchantment -> {
             var name = enchantment.getTranslationKey().toLowerCase();

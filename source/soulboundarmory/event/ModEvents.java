@@ -58,14 +58,14 @@ public final class ModEvents {
                     Util.id("animating"),
                     (stack, world, holder, entityID) -> Components.marker.nullable(stack)
                         .filter(ItemMarkerComponent::animating)
-                        .or(() -> Components.entityData.nullable(holder).flatMap(data -> data.unlockedStack).filter(marker -> marker.animating() && marker.item.accepts(stack)))
+                        .or(() -> Components.entityData.nullable(holder).flatMap(data -> data.unlockedStack).filter(marker -> marker.animating() && marker.item != null && marker.item.accepts(stack)))
                         .isPresent() ? 1 : 0
                 );
 
                 ModelPredicateProviderRegistry.register(
                     item,
                     Util.id("level"),
-                    (stack, world, holder, entityID) -> Components.marker.nullable(stack).map(ItemMarkerComponent::item).map(ItemComponent::level).orElse(0)
+                    (stack, world, holder, entityID) -> Components.marker.nullable(stack).flatMap(ItemMarkerComponent::item).map(ItemComponent::level).orElse(0)
                 );
             }
         );
@@ -88,7 +88,7 @@ public final class ModEvents {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().registerAll(SoulboundItems.dagger, SoulboundItems.sword, SoulboundItems.greatsword, SoulboundItems.bigsword, SoulboundItems.staff, SoulboundItems.pick);
+        event.getRegistry().registerAll(SoulboundItems.dagger, SoulboundItems.sword, SoulboundItems.greatsword, SoulboundItems.bigsword, SoulboundItems.trident, SoulboundItems.staff, SoulboundItems.pick);
     }
 
     @SubscribeEvent

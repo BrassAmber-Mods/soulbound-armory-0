@@ -3,6 +3,7 @@ package soulboundarmory.component.statistics;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
@@ -53,6 +54,12 @@ public class Statistics extends Reference2ReferenceOpenHashMap<Category, Map<Sta
         return this;
     }
 
+    public Statistics statistic(StatisticType type, Consumer<Statistic> initialize) {
+        initialize.accept(this.obtain(type));
+
+        return this;
+    }
+
     public Statistics min(double min, StatisticType... types) {
         Stream.of(types).forEach(type -> this.obtain(type).min(min));
 
@@ -99,7 +106,7 @@ public class Statistics extends Reference2ReferenceOpenHashMap<Category, Map<Sta
     }
 
     private Statistic obtain(StatisticType type) {
-        return this.computeIfAbsent(type.category, category -> new Reference2ReferenceOpenHashMap<>()).computeIfAbsent(type, type1 -> new Statistic(type1.category, type1));
+        return this.computeIfAbsent(type.category, category -> new Reference2ReferenceOpenHashMap<>()).computeIfAbsent(type, StatisticType::instantiate);
     }
 
     private void deserialize(NbtCompound tag, Category category) {

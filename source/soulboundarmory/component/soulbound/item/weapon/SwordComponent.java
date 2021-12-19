@@ -31,13 +31,10 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
             .statistics(StatisticType.efficiency)
             .constant(3, StatisticType.reach)
             .min(1.6, StatisticType.attackSpeed)
-            .min(3, StatisticType.attackDamage)
-            .max(1, StatisticType.criticalHitRate)
-            .max(4, StatisticType.attackSpeed);
-
+            .min(3, StatisticType.attackDamage);
 
         this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
-        this.skills.add(Skills.circumspection, Skills.enderPull, Skills.precision, Skills.nourishment, Skills.summonLightning);
+        this.skills.add(Skills.circumspection, Skills.precision, Skills.nourishment, Skills.summonLightning);
     }
 
     @Override

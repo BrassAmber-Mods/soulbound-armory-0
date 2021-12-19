@@ -7,7 +7,7 @@ group = "net.auoeke"
 version = "3.0.0"
 
 def gameVersion = "1.18.1"
-def yarn = "3"
+def yarn = "6"
 def forgeVersion = "39.0.5"
 
 sourceCompatibility = 17

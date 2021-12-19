@@ -19,6 +19,7 @@ import soulboundarmory.item.SoulboundGreatsword;
 import soulboundarmory.item.SoulboundPickItem;
 import soulboundarmory.item.SoulboundStaffItem;
 import soulboundarmory.item.SoulboundSword;
+import soulboundarmory.item.SoulboundTridentItem;
 
 public class SoulboundItems {
     private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<Tag<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();
@@ -31,6 +32,7 @@ public class SoulboundItems {
     public static final SoulboundStaffItem staff = name(new SoulboundStaffItem(), "staff");
     public static final SoulboundPickItem pick = name(new SoulboundPickItem(), "pick");
     public static final SoulboundBigswordItem bigsword = name(new SoulboundBigswordItem(), "bigsword");
+    public static final SoulboundTridentItem trident = name(new SoulboundTridentItem(), "trident");
 
     public static ToolMaterial material(ToolMaterial previous) {
         return materials.computeIfAbsent(previous, previous1 -> new Reference2ReferenceOpenHashMap<>()).computeIfAbsent(previous.getTag(), tag -> {
