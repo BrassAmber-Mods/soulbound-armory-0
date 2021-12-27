@@ -1,21 +1,26 @@
 package cell.client.gui.widget;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.text.Text;
 import soulboundarmory.util.Math2;
+import soulboundarmory.function.ObjectSupplier;
 import soulboundarmory.util.Util;
 
 public class TextWidget extends Widget<TextWidget> {
-    public List<Text> text = new ObjectArrayList<>();
+    public List<Supplier<Text>> text = new ReferenceArrayList<>();
+    public IntSupplier color = () -> 0xFFFFFFFF;
     public boolean shadow;
-    public int color;
     public int stroke;
+    public boolean hasStroke;
 
     @Override
     public TextWidget text(Text text) {
-        this.text.add(text);
+        this.text.add(() -> text);
 
         return this;
     }
@@ -24,6 +29,53 @@ public class TextWidget extends Widget<TextWidget> {
         text.forEach(this::text);
 
         return this;
+    }
+
+    @Override
+    public TextWidget text(String text) {
+        return this.text(Text.of(text));
+    }
+
+    public TextWidget text(Supplier<Text> text) {
+        this.text.add(text);
+
+        return this;
+    }
+
+    public TextWidget text(ObjectSupplier text) {
+        this.text.add(() -> Text.of(String.valueOf(text.get())));
+
+        return this;
+    }
+
+    public TextWidget overwrite(Text text) {
+        this.text.clear();
+
+        return this.text(text);
+    }
+
+    public TextWidget overwrite(Iterable<Text> text) {
+        this.text.clear();
+
+        return this.text(text);
+    }
+
+    public TextWidget overwrite(String text) {
+        this.text.clear();
+
+        return this.text(text);
+    }
+
+    public TextWidget overwrite(Supplier<Text> text) {
+        this.text.clear();
+
+        return this.text(text);
+    }
+
+    public TextWidget overwrite(ObjectSupplier text) {
+        this.text.clear();
+
+        return this.text(text);
     }
 
     public TextWidget shadow(boolean shadow) {
@@ -36,14 +88,21 @@ public class TextWidget extends Widget<TextWidget> {
         return this.shadow(true);
     }
 
-    public TextWidget color(int color) {
+    public TextWidget color(IntSupplier color) {
         this.color = color;
+
+        return this;
+    }
+
+    public TextWidget color(int color) {
+        this.color = () -> color;
 
         return this;
     }
 
     public TextWidget stroke(int color) {
         this.stroke = color;
+        this.hasStroke = true;
 
         return this;
     }
@@ -52,22 +111,40 @@ public class TextWidget extends Widget<TextWidget> {
         return this.stroke(0xFF000000);
     }
 
+    public TextWidget stroke(boolean stroke) {
+        this.hasStroke = stroke;
+
+        return this;
+    }
+
+    public Stream<Text> text() {
+        return this.text.stream().map(Supplier::get);
+    }
+
     public int color() {
-        return this.adjustColor(this.color, 0xFFFFFFFF);
+        return this.adjustColor(this.color.getAsInt(), 0xFFFFFFFF);
     }
 
     public int strokeColor() {
-        return this.adjustColor(this.stroke, 0xFF000000);
+        return this.hasStroke ? this.adjustColor(this.stroke, 0xFF000000) : 0;
     }
 
     @Override
     public int width() {
-        return this.text.stream().map(textRenderer::getWidth).max(Comparator.naturalOrder()).orElse(0);
+        var width = this.text().map(textRenderer::getWidth).max(Comparator.naturalOrder()).orElse(0);
+
+        if (this.hasStroke) {
+            width += 2;
+        } else if (this.shadow) {
+            width++;
+        }
+
+        return width;
     }
 
     @Override
     public int height() {
-        return fontHeight() * this.text.size();
+        return fontHeight() * (int) this.text().count();
     }
 
     protected int adjustColor(int color, int fallback) {
@@ -79,7 +156,7 @@ public class TextWidget extends Widget<TextWidget> {
             color |= 0xFF000000;
         }
 
-        if (!this.active()) {
+        if (!this.isActive()) {
             color = color & 0xFFFFFF | Math2.alpha(color) * 160 / 255 << 24;
         }
 
@@ -88,10 +165,13 @@ public class TextWidget extends Widget<TextWidget> {
 
     @Override
     protected void render() {
-        Util.enumerate(this.text, (text, row) -> {
+        this.matrixes.push();
+        this.matrixes.translate(0, 0, this.z());
+
+        this.withZ(() -> Util.enumerate(this.text().toList(), (text, row) -> {
             var y = this.y() + fontHeight() * row;
 
-            if (this.stroke != 0) {
+            if (this.hasStroke) {
                 drawStrokedText(this.matrixes, text, this.x(), y, this.color(), this.strokeColor());
             }
 
@@ -100,6 +180,8 @@ public class TextWidget extends Widget<TextWidget> {
             } else {
                 textRenderer.draw(this.matrixes, text, this.x(), y, this.color());
             }
-        });
+        }));
+
+        this.matrixes.pop();
     }
 }

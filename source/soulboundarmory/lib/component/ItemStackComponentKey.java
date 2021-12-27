@@ -23,7 +23,7 @@ public final class ItemStackComponentKey<C extends ItemStackComponent<C>> extend
                 throw new IllegalArgumentException("component %s is already attached".formatted(this.key));
             }
 
-            ComponentRegistry.ticking.add(new WeakReference<>(component));
+            (Util.isClient() ? ComponentRegistry.tickingClient : ComponentRegistry.tickingServer).add(new WeakReference<>(component));
 
             return component;
         }

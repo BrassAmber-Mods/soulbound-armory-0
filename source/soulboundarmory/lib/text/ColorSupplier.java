@@ -11,7 +11,7 @@ public interface ColorSupplier extends ColorFunction {
     }
 
     /**
-     * @return the new color of the {@link Style}.
+     * @return the new color of the {@link Style}
      */
     int get();
 }

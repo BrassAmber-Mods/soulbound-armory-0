@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier;
 /**
  A textured widget that supports 9-slice scaling.
  */
-@SuppressWarnings({"UnusedReturnValue", "unused"})
+@SuppressWarnings("unused")
 public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     private static final Identifier widgetsID = new Identifier("textures/gui/advancements/widgets.png");
     private static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
@@ -282,7 +282,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         // this.renderAll();
         RenderSystem.disableBlend();
 
-        if (this.focused() && this.active()) {
+        if (this.focused() && this.isActive()) {
             this.drawBorder();
         }
     }
@@ -358,10 +358,8 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         drawHorizontalLine(this.matrixes, this.x(), endX, endY - 1, this.z(), -1);
     }
 
-    protected void detectBorder() {}
-
     protected void resetColor() {
-        if (this.active()) {
+        if (this.isActive()) {
             RenderSystem.setShaderColor(this.r, this.g, this.b, this.a);
         } else {
             var chroma = 160F / 255;

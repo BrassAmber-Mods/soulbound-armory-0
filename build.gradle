@@ -1,5 +1,3 @@
-import net.auoeke.reflect.Accessor
-
 buildscript {
     dependencies {
         classpath("net.auoeke:reflect:latest.release")
@@ -8,32 +6,27 @@ buildscript {
 
 plugins {
     id("maven-publish")
+    id("gronk").version("latest.release")
     id("dev.architectury.loom").version("latest.release")
 }
 
-group = "net.auoeke"
-version = "3.0.0"
+group("net.auoeke")
+version("3.0.0")
 
 def gameVersion = "1.18.1"
-def yarn = "6"
-def forgeVersion = "39.0.5"
+def yarn = "12"
+def forgeVersion = "39.0.8"
 
-sourceCompatibility = 17
-targetCompatibility = 17
+gronk {
+    javaVersion(17)
+}
 
 sourceSets {
-    main {
-        java.srcDirs = ["source"]
-
-        resources {
-            srcDirs = ["resources"]
-            include("assets/", "META-INF/", "pack.mcmeta", "*.json")
-        }
-    }
+    main.resources.include("assets/", "META-INF/", "pack.mcmeta", "*.json")
 }
 
 repositories {
-    maven {url = "https://maven.auoeke.net"}
+    maven("maven.auoeke.net")
 }
 
 loom {
@@ -42,13 +35,12 @@ loom {
     }
 
     if (Boolean.getBoolean("idea.sync.active")) {
-        delete(".idea/runConfigurations")
+        // `RunConfigSettings` has a property `project`—which is null—so store the actual project here.
+        def project = this.project
 
         runs {
-            def project = project
-
             all {run ->
-                Accessor.putReference(run, "envVariables", new HashMap() {
+                net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap() {
                     Object put(Object key, Object value) {
                         if (key == "MOD_CLASSES") {
                             // Replace Gradle's output by IntelliJ IDEA's output.
@@ -69,32 +61,22 @@ dependencies {
     mappings("net.fabricmc:yarn:$gameVersion+build.$yarn:v2")
     forge("net.minecraftforge:forge:$gameVersion-$forgeVersion")
 
-    forgeDependencies("net.auoeke:reflect:latest.integration")
+    forgeDependencies("net.auoeke:reflect")
 }
 
 tasks.withType(JavaCompile) {
     options.compilerArgs.add("-nowarn")
 }
 
-java {
-    withSourcesJar()
-}
-
 processResources {
-
+    filesMatching("META-INF/mods.toml") {
+        filter(line -> line.replace("0VERSION", version as String))
+    }
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
-
     repositories {
-        maven {
-            url = "https://maven.auoeke.net"
-
+        maven("maven.auoeke.net") {
             credentials {
                 username = System.properties["maven.username"]
                 password = System.properties["maven.password"]

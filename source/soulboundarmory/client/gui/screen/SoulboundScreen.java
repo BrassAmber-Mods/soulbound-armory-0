@@ -9,10 +9,10 @@ import java.util.List;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.client.keyboard.GUIKeyBinding;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.config.Configuration;
@@ -25,9 +25,12 @@ import soulboundarmory.network.Packets;
  */
 public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
-    protected static final Configuration.Client.Colors colors = configuration.colors;
+    protected static final Configuration.Client.Color color = configuration.color;
 
-    protected final ExperienceBar xpBar = new ExperienceBar().center()
+    public final ExperienceBar xpBar = this.add(new ExperienceBar())
+        .x(.5)
+        .y(1D, -27)
+        .center()
         .tooltip((bar, matrixes, x, y) -> {
             var xp = (int) this.item.experience();
             this.renderTooltip(x, y, this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp));
@@ -35,7 +38,8 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
             configuration.displayOptions ^= true;
             this.refresh();
         }).secondaryAction(() -> configuration.overlayExperienceBar ^= true)
-        .scrollAction(amount -> this.cycleStyle((int) amount));
+        .scrollAction(amount -> this.cycleStyle((int) amount))
+        .present(this::displayTabs);
 
     protected final List<Widget<?>> options = new ReferenceArrayList<>(5);
     protected final List<Widget<?>> sliders = new ReferenceArrayList<>(4);
@@ -58,14 +62,12 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     public void initialize() {
         this.tabButtons.clear();
         this.tabs.clear();
-        this.options.clear();
-        this.sliders.clear();
 
         this.stack = player().getInventory().getStack(this.slot);
         this.item = ItemComponent.of(player(), this.stack).orElse(null);
 
         if (this.displayTabs()) {
-            this.add(this.xpBar.item(this.item).x(this.width() / 2).y(this.height() - 27));
+            this.xpBar.item(this.item);
 
             var tabs = this.item.tabs();
             this.tab = tabs.get(this.component.tab);
@@ -80,21 +82,20 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 }
             }
 
-            this.tabButtons.get(this.component.tab).active(false);
-
             var unbind = this.component.boundSlot() == this.slot;
             var text = unbind ? Translations.guiButtonUnbind : Translations.guiButtonBind;
 
-            this.add(new ScalableWidget<>().button()
-                .x(this.button.x())
-                .y(this.height() - this.height() / 16 - 20)
-                .width(Math.max(this.button.width(), textRenderer.getWidth(text) + 8))
+            this.add(new ScalableWidget<>())
+                .button()
+                .x(this.button)
+                .y(15D / 16, -20)
+                .width(Math.max(this.button.width(), width(text) + 8))
                 .height(20)
                 .text(text)
-                .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.component).writeInt(unbind ? -1 : this.slot)))
-            );
+                .present(this::displayTabs)
+                .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.component).writeInt(unbind ? -1 : this.slot)));
 
-            this.tab(this.tab.index);
+            this.tab(this.tab);
 
             if (configuration.displayOptions) {
                 this.sliders.add(this.colorSlider(Translations.red, 0));
@@ -114,23 +115,9 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 this.add(this.options);
             }
         } else {
-            this.addTab(this.component.selectionTab());
-            this.tab(0);
-        }
-    }
-
-    @Override
-    public void render() {
-        renderBackground(this.matrixes);
-        super.render();
-
-        if (this.displayTabs()) {
-            var maxLevel = Configuration.instance().maxLevel;
-            var level = this.item.level();
-
-            if (maxLevel >= 0 && level > 0 && this.hoveringLevel()) {
-                this.renderTooltip(Translations.barLevel.format(level, maxLevel));
-            }
+            var tab = this.component.selectionTab();
+            this.addTab(tab);
+            this.tab(tab);
         }
     }
 
@@ -141,10 +128,10 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         }
 
         if (d != 0) {
-            var index = MathHelper.clamp((int) (this.tab.index - d), 0, this.tabs.size() - 1);
+            var tab = this.tabs.get(MathHelper.clamp((int) (this.tab.index - d), 0, this.tabs.size() - 1));
 
-            if (index != this.tab.index) {
-                this.tab(index);
+            if (tab != this.tab) {
+                this.tab(tab);
 
                 return true;
             }
@@ -155,7 +142,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
 
     @Override
     public boolean shouldClose(int keyCode, int scanCode, int modifiers) {
-        return super.shouldClose(keyCode, scanCode, modifiers) || modifiers == 0 && SoulboundArmoryClient.guiKeyBinding.matchesKey(keyCode, scanCode);
+        return super.shouldClose(keyCode, scanCode, modifiers) || modifiers == 0 && GUIKeyBinding.instance.matchesKey(keyCode, scanCode);
     }
 
     public boolean displayTabs() {
@@ -179,16 +166,18 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     }
 
     private int optionY(int row) {
-        return this.height() / 16 + Math.max(this.height() / 16 * row, 30 * row);
+        return this.height() / 16 + Math.max(this.height() / 16, 30) * row;
     }
 
     private <T extends ScalableWidget<T>> T optionButton(int row, Text text, Runnable primaryAction, Runnable secondaryAction) {
-        return new ScalableWidget<T>().button()
+        return new ScalableWidget<T>()
+            .button()
             .x(this.optionX())
             .y(this.optionY(row))
             .width(100)
             .height(20)
             .text(text)
+            .present(this::displayTabs)
             .primaryAction(primaryAction)
             .secondaryAction(secondaryAction);
     }
@@ -202,19 +191,22 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
             .min(0)
             .max(255)
             .discrete()
-            .value(colors.get(id))
+            .value(color.get(id))
             .text(text)
-            .onSlide(slider -> colors.set(id, (int) slider.value()));
+            .present(this::displayTabs)
+            .onSlide(slider -> color.set(id, (int) slider.value()));
     }
 
     private ScalableWidget<?> button(SoulboundTab tab) {
-        return new ScalableWidget<>().button()
-            .x(this.width() / 24)
-            .y(this.height() / 16 + tab.index * Math.max(this.height() / 16, 30))
+        return new ScalableWidget<>()
+            .button()
+            .x(1D / 24)
+            .y(this.optionY(tab.index))
             .width(Math.max(96, Math.round(this.width() / 7.5F)))
             .height(20)
             .text(tab.title)
-            .primaryAction(() -> this.tab(tab.index));
+            .primaryAction(() -> this.tab(tab))
+            .active(() -> tab != this.tab);
     }
 
     private void addTab(SoulboundTab tab) {
@@ -222,17 +214,14 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         tab.index = this.tabs.size() - 1;
     }
 
-    private void tab(int index) {
-        var tab = this.tabs.get(index);
-
+    private void tab(SoulboundTab tab) {
         if (this.displayTabs()) {
-            this.button.active(true);
-            tab.button = this.button = this.tabButtons.get(index).active(false);
+            tab.button = this.button = this.tabButtons.get(tab.index);
         }
 
         this.renew(this.tab, this.tab = tab);
         tab.preinitialize();
-        this.component.tab(index);
+        this.component.tab(tab.index);
     }
 
     private void cycleStyle(int change) {

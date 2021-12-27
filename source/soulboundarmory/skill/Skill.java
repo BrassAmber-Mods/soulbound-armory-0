@@ -1,12 +1,10 @@
 package soulboundarmory.skill;
 
-import cell.client.gui.screen.CellScreen;
 import cell.client.gui.widget.Widget;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -55,12 +53,12 @@ public abstract class Skill extends RegistryEntry<Skill> {
 
     /**
      @param level the next level; 1 is the level reached after unlocking; never <= 0.
-     @return the cost of unlocking or upgrading this skill; never < 0.
+     @return the cost of unlocking or upgrading this skill; never < 0
      */
     public abstract int cost(int level);
 
     /**
-     @return whether this skill has multiple levels.
+     @return whether this skill has multiple levels
      */
     public final boolean isTiered() {
         return this.maxLevel != 1;
@@ -77,7 +75,7 @@ public abstract class Skill extends RegistryEntry<Skill> {
     /**
      A skill's tier is the number of levels of dependencies that it has.
 
-     @return this skill's tier.
+     @return this skill's tier
      */
     public final int tier() {
         return this.tier;
@@ -94,9 +92,9 @@ public abstract class Skill extends RegistryEntry<Skill> {
     /**
      Render an icon of this skill.
      */
-    public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
+    public void render(Widget<?> tab, int level, int x, int y) {
         Widget.shaderTexture(this.texture);
-        DrawableHelper.drawTexture(matrixes, x, y, zOffset, 0, 0, 16, 16, 16, 16);
+        DrawableHelper.drawTexture(tab.matrixes, x, y, tab.z(), 0, 0, 16, 16, 16, 16);
     }
 
     /**

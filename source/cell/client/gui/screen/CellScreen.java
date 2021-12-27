@@ -10,9 +10,8 @@ public abstract class CellScreen<T extends CellScreen<T>> extends Widget<T> {
     public Text title = LiteralText.EMPTY;
     public ScreenDelegate screen;
 
-    @Override
-    public int z() {
-        return this.parent.map(parent -> parent.z() + 1000).orElse(super.z());
+    public CellScreen() {
+        this.z(100);
     }
 
     public T title(Text title) {
@@ -39,6 +38,11 @@ public abstract class CellScreen<T extends CellScreen<T>> extends Widget<T> {
 
     public void close() {
         client.setScreen(this.screen.parent);
+    }
+
+    @Override
+    protected void render() {
+        this.renderBackground(this.matrixes);
     }
 
     @Override

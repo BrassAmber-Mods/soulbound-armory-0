@@ -6,6 +6,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
 import soulboundarmory.SoulboundArmory;
+import soulboundarmory.util.Util;
 
 /**
  A key to a registered packet type; used for sending packets.
@@ -79,6 +80,12 @@ public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey
          */
         public void send(T message) {
             SoulboundArmory.channel.sendToServer(this.store(message));
+        }
+
+        public void sendIfClient(T message) {
+            if (Util.isClient()) {
+                this.send(message);
+            }
         }
     }
 }

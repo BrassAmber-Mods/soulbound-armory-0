@@ -15,7 +15,7 @@ public abstract class Record implements Serializable {
      Restore the component's state to the minimum extent necessary in order to revert to a target level.
 
      @param level the target level
-     @return whether the component has been fully restored to the required state.
+     @return whether the component has been fully restored to the required state
      */
     public abstract boolean revert(int level);
 

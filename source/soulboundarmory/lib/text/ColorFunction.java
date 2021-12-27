@@ -7,7 +7,7 @@ package soulboundarmory.lib.text;
 public interface ColorFunction {
     /**
      * @param previous the previous color of the {@link Style}.
-     * @return the new color of the {@link Style}.
+     * @return the new color of the {@link Style}
      */
     int apply(int previous);
 }

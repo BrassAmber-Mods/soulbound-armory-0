@@ -156,13 +156,13 @@ public final class Configuration {
 
         @Comment("the colors of this mod's XP bar")
         // @CollapsibleObject(startExpanded = true)
-        public Colors colors = new Colors();
+        public Color color = new Color();
 
         public void toggleOverlayExperienceBar() {
             this.overlayExperienceBar = !this.overlayExperienceBar;
         }
 
-        public static class Colors {
+        public static class Color {
             @Interval(max = 255)
             public int red = 160;
 

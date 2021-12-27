@@ -1,6 +1,5 @@
 package cell.client.gui.widget.slider;
 
-import cell.client.gui.widget.Coordinate;
 import cell.client.gui.widget.TextWidget;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import java.text.NumberFormat;
@@ -10,9 +9,8 @@ import net.minecraft.text.Text;
 public class SliderWidget extends ScalableWidget<SliderWidget> {
     protected static final NumberFormat floatFormat = NumberFormat.getNumberInstance();
 
-    public final Slider slider = this.add(new Slider().onSlide(slider -> this.updateMessage()));
-
-    public TextWidget text = this.add(new TextWidget().position(Coordinate.Type.CENTER).center());
+    public final Slider slider = this.add(new Slider().slide(slider -> this.updateMessage()));
+    public TextWidget text = this.add(new TextWidget().x(.5).y(.5).center());
     public Text label = LiteralText.EMPTY;
 
     public SliderWidget() {
@@ -58,7 +56,7 @@ public class SliderWidget extends ScalableWidget<SliderWidget> {
     }
 
     public SliderWidget onSlide(SlideCallback callback) {
-        this.slider.onSlide(callback);
+        this.slider.slide(callback);
 
         return this;
     }
@@ -68,8 +66,7 @@ public class SliderWidget extends ScalableWidget<SliderWidget> {
     }
 
     protected void updateMessage() {
-        this.text.text.clear();
         var formattedValue = this.slider.discrete || Math.abs(this.value()) >= 100 ? (long) this.value() : floatFormat.format(this.value());
-        this.text.text(this.label == LiteralText.EMPTY ? Text.of(String.valueOf(formattedValue)) : Text.of("%s: %s".formatted(this.label, formattedValue)));
+        this.text.overwrite(Text.of(this.label == LiteralText.EMPTY ? String.valueOf(formattedValue) : "%s: %s".formatted(this.label, formattedValue)));
     }
 }
