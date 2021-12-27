@@ -16,7 +16,7 @@ public class EnchantmentTab extends SoulboundTab {
 
     @Override
     public void initialize() {
-        var component = this.parent().item;
+        var component = this.container().item;
         var enchantments = component.enchantments;
         this.add(this.resetButton(Category.enchantment)).active(enchantments.values().stream().anyMatch(level -> level > 0));
 
@@ -28,9 +28,9 @@ public class EnchantmentTab extends SoulboundTab {
 
     @Override
     protected void render() {
-        this.displayPoints(this.parent().item.intValue(StatisticType.enchantmentPoints));
+        this.displayPoints(this.container().item.intValue(StatisticType.enchantmentPoints));
 
-        var enchantments = this.parent().item.enchantments;
+        var enchantments = this.container().item.enchantments;
         Util.enumerate(enchantments, (enchantment, level, row) -> textRenderer.drawWithShadow(
             this.matrixes,
             enchantment.getName(level),
@@ -41,7 +41,7 @@ public class EnchantmentTab extends SoulboundTab {
     }
 
     protected Runnable enchantAction(Enchantment enchantment) {
-        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent().item)
+        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.container().item)
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeBoolean(true)
             .writeBoolean(isShiftDown())
@@ -49,7 +49,7 @@ public class EnchantmentTab extends SoulboundTab {
     }
 
     protected Runnable disenchantAction(Enchantment enchantment) {
-        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.parent().item)
+        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.container().item)
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeBoolean(false)
             .writeBoolean(isShiftDown())

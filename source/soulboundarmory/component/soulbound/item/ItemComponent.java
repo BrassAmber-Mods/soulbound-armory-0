@@ -89,14 +89,14 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return all item components attached to `entity`.
+     @return all item components attached to `entity`
      */
     public static Stream<ItemComponent<?>> all(Entity entity) {
         return Components.soulbound(entity).flatMap(component -> component.items.values().stream());
     }
 
     /**
-     @return the component attached to `entity` that matches `stack`.
+     @return the component attached to `entity` that matches `stack`
      */
     public static Optional<ItemComponent<?>> of(Entity entity, ItemStack stack) {
         return Components.soulbound(entity).filter(component -> component.accepts(stack)).flatMap(component -> component.items.values().stream().filter(item -> item.accepts(stack))).findAny();
@@ -105,7 +105,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     /**
      Find the first component that matches an item held by an entity.
 
-     @return the component.
+     @return the component
      */
     public static Optional<ItemComponent<?>> fromHands(Entity entity) {
         if (entity == null) {
@@ -133,7 +133,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      Find the item component corresponding to the weapon that an attacker used.
 
      @param source the source of the damage that the attacker inflicted
-     @return an {@link Optional} containing the item component if it has been found.
+     @return an {@link Optional} containing the item component if it has been found
      */
     public static Optional<? extends ItemComponent<?>> fromAttacker(LivingEntity target, DamageSource source) {
         var entity = source.getSource();
@@ -155,44 +155,44 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the type of this item.
+     @return the type of this item
      */
     public abstract ItemComponentType<T> type();
 
     /**
-     @return the item that corresponds to this component.
+     @return the item that corresponds to this component
      */
     public abstract Item item();
 
     /**
-     @return the item that may be consumed in order to unlock this item.
+     @return the item that may be consumed in order to unlock this item
      */
     public abstract Item consumableItem();
 
     /**
-     @return the name of this item without a "soulbound" prefix.
+     @return the name of this item without a "soulbound" prefix
      */
     public abstract Text name();
 
     /**
-     @return the increase in `statistic` per point.
+     @return the increase in `statistic` per point
      @param type
      */
     public abstract double increase(StatisticType type);
 
     /**
      @param level a level
-     @return the XP required in order to reach level `level` from the previous level.
+     @return the XP required in order to reach level `level` from the previous level
      */
     public abstract int levelXP(int level);
 
     /**
-     @return a list of attributes to be displayed on the attribute tab for this item.
+     @return a list of attributes to be displayed on the attribute tab for this item
      */
     public abstract Map<Statistic, Text> screenAttributes();
 
     /**
-     @return the tooltip for stacks of this item.
+     @return the tooltip for stacks of this item
      */
     public abstract List<Text> tooltip();
 
@@ -245,8 +245,12 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         return this.animationTime;
     }
 
+    public int maxLevel() {
+        return Configuration.instance().maxLevel;
+    }
+
     /**
-     @return this item's current tool material.
+     @return this item's current tool material
      */
     public ToolMaterial material() {
         return SoulboundItems.material;
@@ -266,21 +270,21 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      Determine whether a given item stack matches this component.
 
      @param stack the item stack
-     @return whether `stack` matches this component.
+     @return whether `stack` matches this component
      */
     public boolean accepts(ItemStack stack) {
         return stack.getItem() == this.item();
     }
 
     /**
-     @return the tabs to display in the menu for this item.
+     @return the tabs to display in the menu for this item
      */
     public List<SoulboundTab> tabs() {
         return List.of(new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 
     /**
-     @return whether the user has permanently unlocked this item.
+     @return whether the user has permanently unlocked this item
      */
     public boolean isUnlocked() {
         return this.unlocked;
@@ -316,7 +320,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return this component's instance of a statistic type if it is present or null.
+     @return this component's instance of a statistic type if it is present or null
      */
     public Statistic statistic(StatisticType statistic) {
         return this.statistics.get(statistic);
@@ -326,7 +330,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      Calculate the total value of an attribute with all relevant enchantments applied.
 
      @param attribute the type of the attribute
-     @return the total value of the attribute.
+     @return the total value of the attribute
      */
     public double attributeTotal(StatisticType attribute) {
         var doubleValue = this.doubleValue(attribute);
@@ -346,8 +350,6 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             if (efficiency > 0) {
                 doubleValue++;
             }
-        } else if (attribute == StatisticType.reach) {
-            doubleValue += 3;
         }
 
         return doubleValue;
@@ -357,7 +359,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      Calculate the value of an attribute relative to its base value.
 
      @param attribute the type of the attribute
-     @return the relative value of the attribute.
+     @return the relative value of the attribute
      */
     public double attributeRelative(StatisticType attribute) {
         if (attribute == StatisticType.attackSpeed) return this.attackSpeed() - 4;
@@ -369,7 +371,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the integral value of a statistic if it is present or 0.
+     @return the integral value of a statistic if it is present or 0
      */
     public int intValue(StatisticType type) {
         var statistic = this.statistic(type);
@@ -377,7 +379,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the float value of a statistic if it is present or 0.
+     @return the float value of a statistic if it is present or 0
      */
     public float floatValue(StatisticType type) {
         var statistic = this.statistic(type);
@@ -385,7 +387,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the double value of a statistic if it is present or 0.
+     @return the double value of a statistic if it is present or 0
      */
     public double doubleValue(StatisticType type) {
         var statistic = this.statistic(type);
@@ -501,7 +503,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return whether this item can level up further, taking the configuration into account.
+     @return whether this item can level up further, taking the configuration into account
      */
     public boolean canLevelUp() {
         var configuration = Configuration.instance();
@@ -530,7 +532,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the XP required in order to reach the next level.
+     @return the XP required in order to reach the next level
      */
     public int nextLevelXP() {
         return this.levelXP(this.level());
@@ -572,7 +574,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the current level of `enchantment`.
+     @return the current level of `enchantment`
      */
     public int enchantment(Enchantment enchantment) {
         return this.enchantments.get(enchantment);
@@ -657,14 +659,14 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return whether the given item stack may be consumed in order to unlock this item.
+     @return whether the given item stack may be consumed in order to unlock this item
      */
     public boolean canConsume(ItemStack stack) {
         return this.consumableItem() == stack.getItem();
     }
 
     /**
-     @return whether an item stack in any of the player's hands matches this component.
+     @return whether an item stack in any of the player's hands matches this component
      */
     public boolean isItemEquipped() {
         return ItemUtil.handStacks(this.player).anyMatch(this::accepts);
@@ -726,7 +728,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return the attribute modifiers for new stacks of this item.
+     @return the attribute modifiers for new stacks of this item
      */
     public final Multimap<EntityAttribute, EntityAttributeModifier> attributeModifiers(EquipmentSlot slot) {
         var modifiers = LinkedHashMultimap.<EntityAttribute, EntityAttributeModifier>create();
@@ -746,7 +748,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return a copy of the current item stack.
+     @return a copy of the current item stack
      */
     public ItemStack stack() {
         return this.itemStack.copy();
@@ -767,7 +769,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return a new item stack with all statistics applied.
+     @return a new item stack with all statistics applied
      */
     protected ItemStack newItemStack() {
         this.itemStack = this.item().getDefaultStack();
@@ -798,7 +800,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      Format the value of a statistic of a given type.
 
      @param statistic the statistic type
-     @return the formatted value.
+     @return the formatted value
      */
     protected String format(StatisticType statistic) {
         if (statistic == StatisticType.upgradeProgress || statistic == StatisticType.criticalHitRate) {
@@ -817,14 +819,14 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     /**
-     @return an addition weapon attribute modifier with the given UUID and whose value is the relative value of the given statistic type.
+     @return an addition weapon attribute modifier with the given UUID and whose value is the relative value of the given statistic type
      */
     protected final EntityAttributeModifier weaponModifier(UUID attribute, StatisticType statistic) {
         return new EntityAttributeModifier(attribute, "Weapon modifier", this.attributeRelative(statistic), EntityAttributeModifier.Operation.ADDITION);
     }
 
     /**
-     @return an addition tool attribute modifier with the given UUID and whose value is the relative value of the given statistic type.
+     @return an addition tool attribute modifier with the given UUID and whose value is the relative value of the given statistic type
      */
     protected final EntityAttributeModifier toolModifier(UUID attribute, StatisticType statistic) {
         return new EntityAttributeModifier(attribute, "Tool modifier", this.attributeRelative(statistic), EntityAttributeModifier.Operation.ADDITION);

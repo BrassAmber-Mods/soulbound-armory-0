@@ -25,7 +25,9 @@
     },
     "client": [
         "client.GameRendererMixin",
+        "client.HeldItemRendererMixin",
         "client.InGameHudMixin",
+        "client.KeyboardMixin",
         "client.LivingEntityRendererMixin"
     ]
 }

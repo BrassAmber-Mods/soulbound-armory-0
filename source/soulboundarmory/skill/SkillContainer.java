@@ -1,6 +1,6 @@
 package soulboundarmory.skill;
 
-import cell.client.gui.screen.CellScreen;
+import cell.client.gui.widget.Widget;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,7 +78,6 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
     @Override
     public int compareTo(SkillContainer other) {
         var tierDifference = this.skill.tier() - other.skill.tier();
-
         return tierDifference == 0 ? this.level() - other.level() : tierDifference;
     }
 
@@ -90,8 +89,8 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
         return this.skill.tooltip();
     }
 
-    public void render(CellScreen screen, MatrixStack matrices, int x, int y, int zOffset) {
-        this.skill.render(screen, matrices, this.level, x, y, zOffset);
+    public void render(Widget<?> tab, MatrixStack matrices, int x, int y) {
+        this.skill.render(tab, this.level, x, y);
     }
 
     public void reset() {

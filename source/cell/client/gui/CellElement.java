@@ -2,7 +2,7 @@ package cell.client.gui;
 
 import cell.client.gui.screen.CellScreen;
 import cell.client.gui.screen.ScreenDelegate;
-import cell.client.gui.widget.Coordinate;
+import cell.client.gui.coordinate.Coordinate;
 import cell.client.gui.widget.Length;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Comparator;
@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
@@ -29,7 +30,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import soulboundarmory.function.BiFloatIntConsumer;
 
-public abstract class CellElement<T extends CellElement<T>> extends DrawableHelper implements DrawableElement, Cloneable {
+public abstract class CellElement<B extends CellElement<B, ?>, T extends CellElement<B, T>> extends DrawableHelper implements Node<B, T>, Cloneable {
     public Coordinate x = new Coordinate();
     public Coordinate y = new Coordinate();
 
@@ -46,6 +47,14 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
 
     public static int fontHeight() {
         return textRenderer.fontHeight;
+    }
+
+    public static int windowWidth() {
+        return window.getScaledWidth();
+    }
+
+    public static int windowHeight() {
+        return window.getScaledHeight();
     }
 
     public static float tickDelta() {
@@ -93,7 +102,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
     }
 
     /**
-     @return whether an area starting at (`startX`, `startY`) with dimensions (`width`, `height`) contains the point (`x`, `y`).
+     @return whether an area starting at (`startX`, `startY`) with dimensions (`width`, `height`) contains the point (`x`, `y`)
      */
     public static boolean contains(double x, double y, double startX, double startY, double width, double height) {
         return x >= startX && x <= startX + width && y >= startY && y <= startY + height;
@@ -257,7 +266,11 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         renderTooltip(matrixes, List.of(text), (int) x, (int) y);
     }
 
-    public static void renderBackground(Identifier identifier, int x, int y, int width, int height, int chroma, int alpha) {
+    public static void renderTooltipFromComponents(MatrixStack matrixes, List<? extends TooltipComponent> components, double x, double y) {
+        screen().renderTooltipFromComponents(matrixes, (List<TooltipComponent>) components, (int) x, (int) y);
+    }
+
+    public void renderBackground(Identifier identifier, int x, int y, int width, int height, int chroma, int alpha) {
         var tessellator = Tessellator.getInstance();
         var builder = tessellator.getBuffer();
         float f = 1 << 5;
@@ -269,23 +282,23 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
         builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
-        builder.vertex(x, endY, 0).color(chroma, chroma, chroma, 255).texture(0, endY / f + alpha).next();
-        builder.vertex(endX, endY, 0).color(chroma, chroma, chroma, 255).texture(endX / f, endY / f + alpha).next();
-        builder.vertex(endX, y, 0).color(chroma, chroma, chroma, 255).texture(endX / f, alpha).next();
-        builder.vertex(x, y, 0).color(chroma, chroma, chroma, 255).texture(0, alpha).next();
+        builder.vertex(x, endY, this.z() - 500).color(chroma, chroma, chroma, 255).texture(0, endY / f + alpha).next();
+        builder.vertex(endX, endY, this.z() - 500).color(chroma, chroma, chroma, 255).texture(endX / f, endY / f + alpha).next();
+        builder.vertex(endX, y, this.z() - 500).color(chroma, chroma, chroma, 255).texture(endX / f, alpha).next();
+        builder.vertex(x, y, this.z() - 500).color(chroma, chroma, chroma, 255).texture(0, alpha).next();
 
         tessellator.draw();
     }
 
-    public static void renderBackground(Identifier identifier, int x, int y, int width, int height, int chroma) {
-        renderBackground(identifier, x, y, width, height, chroma, 0);
+    public void renderBackground(Identifier identifier, int x, int y, int width, int height, int chroma) {
+        this.renderBackground(identifier, x, y, width, height, chroma, 0);
     }
 
-    public static void renderBackground(Identifier identifier, int x, int y, int width, int height) {
-        renderBackground(identifier, x, y, width, height, 64, 0);
+    public void renderBackground(Identifier identifier, int x, int y, int width, int height) {
+        this.renderBackground(identifier, x, y, width, height, 64, 0);
     }
 
-    public static void renderBackground(MatrixStack matrixes) {
+    public void renderBackground(MatrixStack matrixes) {
         screen().renderBackground(matrixes);
     }
 
@@ -293,8 +306,9 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         return lines.stream().map(line -> textHandler.wrapLines(line, width, Style.EMPTY)).flatMap(List::stream).toList();
     }
 
+    @Override
     public int x() {
-        return this.x.get(0, 0);
+        return this.x.resolve(0, 0, 0);
     }
 
     public T x(int x) {
@@ -303,8 +317,9 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         return (T) this;
     }
 
+    @Override
     public int y() {
-        return this.y.get(0, 0);
+        return this.y.resolve(0, 0, 0);
     }
 
     public T y(int y) {
@@ -329,16 +344,18 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
 
     public void withZ(int z, Runnable runnable) {
         this.addZ(z);
+        var previousZ = itemRenderer.zOffset;
         itemRenderer.zOffset = this.z();
         runnable.run();
         this.addZ(-z);
-        itemRenderer.zOffset = this.z();
+        itemRenderer.zOffset = previousZ;
     }
 
     public void renderGuiItem(ItemStack itemStack, int x, int y, int z) {
         this.withZ(z, () -> itemRenderer.renderGuiItemIcon(itemStack, x, y));
     }
 
+    @Override
     public int width() {
         return this.width.get();
     }
@@ -349,6 +366,7 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         return (T) this;
     }
 
+    @Override
     public int height() {
         return this.height.get();
     }
@@ -357,10 +375,6 @@ public abstract class CellElement<T extends CellElement<T>> extends DrawableHelp
         this.height.set(height);
 
         return (T) this;
-    }
-
-    public boolean contains(double x, double y) {
-        return contains(x, y, this.x(), this.y(), this.width(), this.height());
     }
 
     @Override

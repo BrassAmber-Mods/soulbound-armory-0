@@ -8,7 +8,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.sound.SoundEvent;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -18,7 +17,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.SoulboundArmoryClient;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.render.SoulboundDaggerEntityRenderer;
 import soulboundarmory.client.render.SoulboundFireballEntityRenderer;
@@ -49,7 +47,6 @@ public final class ModEvents {
 
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        ClientRegistry.registerKeyBinding(SoulboundArmoryClient.guiKeyBinding);
         MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar().item(component.item).width(144));
 
         ForgeRegistries.ITEMS.getValues().stream().filter(SoulboundItem.class::isInstance).forEach(item -> {

@@ -8,7 +8,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Hand;
 import net.minecraft.world.GameRules;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
@@ -47,17 +46,17 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     }
 
     /**
-     @return this component's {@linkplain ComponentRegistry#entity registered} {@linkplain EntityComponentKey key}.
+     @return this component's {@linkplain ComponentRegistry#entity registered} {@linkplain EntityComponentKey key}
      */
     public abstract EntityComponentKey<? extends SoulboundComponent<?>> key();
 
     /**
-     @return whether the given item stack matches any of this component's items.
+     @return whether the given item stack matches any of this component's items
      */
     public abstract boolean accepts(ItemStack stack);
 
     /**
-     @return what the name suggests.
+     @return what the name suggests
      */
     @Override
     public final boolean isClient() {
@@ -89,7 +88,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     }
 
     /**
-     @return the item stack in the bound slot.
+     @return the item stack in the bound slot
      @throws IndexOutOfBoundsException if no slot is bound.
      */
     public final ItemStack stackInBoundSlot() {
@@ -97,7 +96,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     }
 
     /**
-     @return the active soulbound item component.
+     @return the active soulbound item component
      */
     public ItemComponent<?> item() {
         return this.item;
@@ -108,7 +107,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
 
      @param type the item component type
      @param <S>  the class of the item component
-     @return the item component if it exists or null.
+     @return the item component if it exists or null
      */
     public <S extends ItemComponent<S>> S item(ItemComponentType<S> type) {
         return (S) this.items.get(type);
@@ -125,37 +124,35 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     }
 
     /**
-     @return the selection tab for this component.
+     @return the selection tab for this component
      */
     public SoulboundTab selectionTab() {
         return new SelectionTab();
     }
 
     /**
-     @return the item component that matches `stack`.
+     @return the item component that matches `stack`
      */
     public Optional<ItemComponent<?>> component(ItemStack stack) {
         return this.items.values().stream().filter(component -> component.accepts(stack)).findAny();
     }
 
     /**
-     @return the item component corresponding to the first held item stack that matches this component.
+     @return the item component corresponding to the first held item stack that matches this component
      */
     public Optional<ItemComponent<?>> heldItemComponent() {
         return ItemUtil.handStacks(this.player).flatMap(stack -> this.component(stack).stream()).findFirst();
     }
 
     /**
-     Open a GUI for this component if the player possesses a soulbound or {@linkplain ItemComponent#canConsume consumable} item.
+     Open a GUI for this component if {@code stack} is {@linkplain ItemComponent#canConsume consumable} or this component is {@linkplain #accepts applicable} to it.
 
-     @return whether a GUI was opened.
+     @param stack the item stack to test
+     @param slot the index of the inventory slot wherein the stack resides
+     @return whether a GUI was opened
      */
-    public boolean tryOpenGUI(Hand hand) {
-        var stack = this.player.getStackInHand(hand);
-        var match = this.items.values().stream().filter(storage -> storage.accepts(stack)).findAny();
-        var slot = hand == Hand.OFF_HAND ? 40 : this.player.getInventory().selectedSlot;
-
-        if (match.isPresent() || this.items.values().stream().anyMatch(storage -> storage.canConsume(stack))) {
+    public boolean tryOpenGUI(ItemStack stack, int slot) {
+        if (this.accepts(stack) || this.items.values().stream().anyMatch(item -> item.canConsume(stack))) {
             new SoulboundScreen(this, slot).open();
 
             return true;
@@ -179,15 +176,15 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
 
     @Override
     public void tickStart() {
-        var storage = this.heldItemComponent().orElse(null);
+        var component = this.heldItemComponent().orElse(null);
 
-        if (storage == null) {
-            storage = this.item;
+        if (component == null) {
+            component = this.item;
         } else {
-            this.select(storage);
+            this.select(component);
         }
 
-        if (storage != null) {
+        if (component != null) {
             this.item.updateInventory(this.hasBoundSlot() && this.accepts(this.stackInBoundSlot()) ? this.boundSlot : -1);
         }
 

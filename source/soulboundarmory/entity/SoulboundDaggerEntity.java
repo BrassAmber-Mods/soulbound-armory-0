@@ -2,16 +2,12 @@ package soulboundarmory.entity;
 
 import java.util.Optional;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MovementType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
@@ -31,6 +27,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     protected final boolean clone;
     protected final boolean spawnClone;
+    protected boolean hit;
     protected int ticksToSeek = -1;
     protected int ticksSeeking;
     protected int ticksInGround;
@@ -97,6 +94,10 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
                     || owner.distanceTo(this) >= 16 * (this.world.getServer().getPlayerManager().getViewDistance() - 1)
                     || this.getY() <= 0)
                 ) {
+                    // this.setRotation();
+                    this.setVelocity(this.getOwner().getEyePos().subtract(this.getPos()));
+
+/*
                     var box = owner.getBoundingBox();
                     var dx = (box.getMax(Direction.Axis.X) + box.getMin(Direction.Axis.X)) / 2 - this.getZ();
                     var dy = (box.getMax(Direction.Axis.Y) + box.getMin(Direction.Axis.Y)) / 2 - this.getY();
@@ -141,6 +142,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
                     }
 
                     this.move(MovementType.SELF, this.getVelocity());
+*/
                 }
 
                 // return;
@@ -153,7 +155,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     @Override
     public void onPlayerCollision(PlayerEntity player) {
         if (this.isServer() && player == this.getOwner()) {
-            if (this.clone || this.age >= Math.max(1, 20 / this.component().get().attackSpeed()) && player.getInventory().insertStack(this.asItemStack())) {
+            if (this.clone || (this.hit || this.age >= Math.max(1, 20 / this.component().get().attackSpeed())) && player.getInventory().insertStack(this.asItemStack())) {
                 player.sendPickup(this, 1);
                 this.discard();
             }
@@ -167,6 +169,8 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     @Override
     protected void onEntityHit(EntityHitResult target) {
+        this.hit = true;
+
         if (!this.seeking() && this.spawnClone) {
             this.world.spawnEntity(new SoulboundDaggerEntity(this));
         }

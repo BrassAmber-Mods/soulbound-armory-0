@@ -39,9 +39,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
 
-public class Util {
+public class Util extends net.minecraft.util.Util {
     public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
 
+    private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, IForgeRegistry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
@@ -78,7 +79,11 @@ public class Util {
     }
 
     public static boolean isClient() {
-        return isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread"));
+        return isClient.get();
+    }
+
+    public static boolean isServer() {
+        return !isClient();
     }
 
     public static MinecraftServer server() {

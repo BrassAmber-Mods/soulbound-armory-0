@@ -1,7 +1,6 @@
 package soulboundarmory.skill.tool.common;
 
-import cell.client.gui.screen.CellScreen;
-import net.minecraft.client.util.math.MatrixStack;
+import cell.client.gui.widget.Widget;
 import net.minecraft.item.Items;
 import soulboundarmory.skill.Skill;
 
@@ -16,7 +15,7 @@ public final class EnderPullSkill extends Skill {
     }
 
     @Override
-    public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
-        screen.renderGuiItem(Items.ENDER_PEARL.getDefaultStack(), x, y, zOffset);
+    public void render(Widget<?> tab, int level, int x, int y) {
+        tab.renderGuiItem(Items.ENDER_PEARL.getDefaultStack(), x, y, 0);
     }
 }

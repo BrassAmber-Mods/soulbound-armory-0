@@ -27,7 +27,7 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
     }
 
     /**
-     @return true if the hit is critical.
+     @return true if the hit is critical
      */
     public boolean hit() {
         this.criticalHitProgress += this.doubleValue(StatisticType.criticalHitRate);

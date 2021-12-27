@@ -1,7 +1,6 @@
 package soulboundarmory.skill.weapon.staff;
 
-import cell.client.gui.screen.CellScreen;
-import net.minecraft.client.util.math.MatrixStack;
+import cell.client.gui.widget.Widget;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
@@ -18,7 +17,7 @@ public class HealingSkill extends Skill {
     }
 
     @Override
-    public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
-        screen.renderGuiItem(PotionUtil.setPotion(Items.POTION.getDefaultStack(), Potions.HEALING), x, y, zOffset);
+    public void render(Widget<?> tab, int level, int x, int y) {
+        tab.renderGuiItem(PotionUtil.setPotion(Items.POTION.getDefaultStack(), Potions.HEALING), x, y, 0);
     }
 }

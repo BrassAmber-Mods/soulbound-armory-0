@@ -17,7 +17,7 @@ public class SelectionTab extends SoulboundTab {
 
     @Override
     public void initialize() {
-        var parent = this.parent();
+        var parent = this.container();
         var selection = parent.component.items.values().stream().filter(item -> item.isUnlocked() && parent.component.accepts(parent.stack) || item.canConsume(parent.stack)).toList();
 
         Util.enumerate(selection, (component, row) -> this.add(new ScalableWidget<>()

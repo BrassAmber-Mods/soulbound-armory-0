@@ -52,7 +52,7 @@ public final class ScreenDelegate extends Screen {
 
     @Override
     public Optional<Element> hoveredElement(double mouseX, double mouseY) {
-        return this.screen.hoveredChild().map(Util::cast);
+        return this.screen.hoveredDescendant().map(Util::cast);
     }
 
     @Override
@@ -116,7 +116,7 @@ public final class ScreenDelegate extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return this.screen.shouldPause();
     }
 

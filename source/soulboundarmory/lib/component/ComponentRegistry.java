@@ -27,7 +27,8 @@ public final class ComponentRegistry {
     public static final Map<Identifier, ItemStackComponentKey<?>> item = new Object2ReferenceOpenHashMap<>();
     private static final Map<Identifier, EntityComponentKey<?>> entity = new Object2ReferenceOpenHashMap<>();
 
-    static final List<WeakReference<ItemStackComponent<?>>> ticking = ReferenceLists.synchronize(new ReferenceArrayList<>());
+    static final List<WeakReference<ItemStackComponent<?>>> tickingServer = ReferenceLists.synchronize(new ReferenceArrayList<>());
+    static final List<WeakReference<ItemStackComponent<?>>> tickingClient = ReferenceLists.synchronize(new ReferenceArrayList<>());
 
     /**
      Register a component to attach to entities of a specified base type.
@@ -38,7 +39,7 @@ public final class ComponentRegistry {
      @param instantiate a function that instantiates the component for a given object
      @param <E>         the base type of the entities to which to attach the component
      @param <C>         the type of the component to register
-     @return a {@linkplain EntityComponentKey key} for the component.
+     @return a {@linkplain EntityComponentKey key} for the component
      */
     public static <E extends Entity, C extends EntityComponent<C>> EntityComponentKey<C> entity(Class<E> type, String path, Predicate<E> predicate, Function<E, C> instantiate) {
         var key = new EntityComponentKey<>(type, Util.id(path), predicate, instantiate);
@@ -58,7 +59,7 @@ public final class ComponentRegistry {
      @param type        a reference to `E`
      @param path        the path of the component under the registering mod's namespace
      @param instantiate a function that instantiates the component for a given object
-     @return a {@linkplain EntityComponentKey key} for the component.
+     @return a {@linkplain EntityComponentKey key} for the component
      */
     public static <E extends Entity, C extends EntityComponent<C>> EntityComponentKey<C> entity(Class<E> type, String path, Function<E, C> instantiate) {
         return entity(type, path, null, instantiate);
@@ -79,7 +80,7 @@ public final class ComponentRegistry {
      @param predicate   a predicate that will be invoked to determine whether the component should be attached to an item stack
      @param instantiate a function that instantiates a component for a given item stack
      @param <C>         the type of the component to register
-     @return a {@linkplain ItemStackComponentKey key} for the component.
+     @return a {@linkplain ItemStackComponentKey key} for the component
      */
     public static <C extends ItemStackComponent<C>> ItemStackComponentKey<C> item(String path, Predicate<ItemStack> predicate, Function<ItemStack, C> instantiate) {
         var key = new ItemStackComponentKey<>(Util.id(path), predicate, instantiate);
@@ -97,7 +98,7 @@ public final class ComponentRegistry {
      @param path        the path of the component under the registering mod's namespace
      @param instantiate a function that instantiates a component for a given item stack
      @param <C>         the type of the component to register
-     @return a {@linkplain ItemStackComponentKey key} for the component.
+     @return a {@linkplain ItemStackComponentKey key} for the component
      */
     public static <C extends ItemStackComponent<C>> ItemStackComponentKey<C> item(String path, Function<ItemStack, C> instantiate) {
         return item(path, null, instantiate);
@@ -115,7 +116,7 @@ public final class ComponentRegistry {
      Find the entity component key with a given identifier.
 
      @param id the component's identifier
-     @return the component key if it exists or null.
+     @return the component key if it exists or null
      */
     public static EntityComponentKey<?> findEntity(Identifier id) {
         return entity.get(id);
@@ -124,18 +125,18 @@ public final class ComponentRegistry {
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
-            Util.each(ticking, Component::tickStart);
+            Util.each(tickingClient, Component::tickStart);
         } else {
-            Util.each(ticking, Component::tickEnd);
+            Util.each(tickingClient, ItemStackComponent::tickEnd);
         }
     }
 
     @SubscribeEvent
     public static void serverTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
-            Util.each(ticking, Component::tickStart);
+            Util.each(tickingServer, Component::tickStart);
         } else {
-            Util.each(ticking, Component::tickEnd);
+            Util.each(tickingServer, ItemStackComponent::tickEnd);
         }
     }
 

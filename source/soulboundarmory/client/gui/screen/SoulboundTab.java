@@ -1,12 +1,12 @@
 package soulboundarmory.client.gui.screen;
 
+import cell.client.gui.coordinate.Coordinate;
 import cell.client.gui.widget.Widget;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.network.ExtendedPacketBuffer;
@@ -40,9 +40,10 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     }
 
     public Widget<?> squareButton(int x, int y, String text, Runnable action) {
-        return new ScalableWidget<>().button()
-            .x(x - 10)
-            .y(y - 10)
+        return new ScalableWidget<>()
+            .button()
+            .x(x).x(Coordinate.Position.CENTER)
+            .y(y).y(Coordinate.Position.CENTER)
             .width(20)
             .height(20)
             .text(Text.of(text))
@@ -50,9 +51,10 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     }
 
     public Widget<?> resetButton(Category category) {
-        return new ScalableWidget<>().button()
-            .x((int) MathHelper.lerp(23F / 24, 0, this.width()) - 112)
-            .y((int) MathHelper.lerp(15F / 16, 0, this.height()) - 20)
+        return new ScalableWidget<>()
+            .button()
+            .x(23D / 24).x(Coordinate.Position.END)
+            .y(15D / 16).y(Coordinate.Position.END)
             .width(112)
             .height(20)
             .text(Translations.guiButtonReset)
@@ -68,12 +70,12 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
         return super.parent(parent);
     }
 
-    protected SoulboundScreen parent() {
+    protected SoulboundScreen container() {
         return (SoulboundScreen) super.parent.get();
     }
 
     protected Runnable resetAction(Category category) {
-        return () -> Packets.serverReset.send(new ExtendedPacketBuffer(this.parent().item).writeIdentifier(category.id()));
+        return () -> Packets.serverReset.send(new ExtendedPacketBuffer(this.container().item).writeIdentifier(category.id()));
     }
 
     protected void displayPoints(int points) {

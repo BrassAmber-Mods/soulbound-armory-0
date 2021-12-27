@@ -48,6 +48,10 @@ public class TridentComponent extends WeaponComponent<TridentComponent> {
 
     @Override
     public double increase(StatisticType type) {
+        if (type == StatisticType.attackDamage) return 0.15;
+        if (type == StatisticType.attackSpeed) return 0.03;
+        if (type == StatisticType.criticalHitRate) return 0.005;
+
         return 0;
     }
 }

@@ -1,23 +1,33 @@
 package soulboundarmory.client.keyboard;
 
-import cell.client.gui.widget.Widget;
-import java.util.stream.Stream;
-import net.minecraft.util.Hand;
+import net.minecraft.client.option.KeyBinding;
 import org.lwjgl.glfw.GLFW;
+import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
-import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 
 /**
  Open {@linkplain SoulboundScreen the menu} if one of the held items is soulbound or {@linkplain ItemComponent#canConsume consumable}.
  */
-public class GUIKeyBinding extends KeyBindingBase {
-    public GUIKeyBinding() {
-        super("menu", GLFW.GLFW_KEY_R);
+public final class GUIKeyBinding extends KeyBinding {
+    public static final GUIKeyBinding instance = new GUIKeyBinding();
+
+    public boolean wasPressed;
+
+    private GUIKeyBinding() {
+        super("key.%s.%s".formatted(SoulboundArmory.ID, "menu"), GLFW.GLFW_KEY_R, "key.categories.%s".formatted(SoulboundArmory.ID));
     }
 
     @Override
-    protected void press() {
-        Stream.of(Hand.values()).anyMatch(hand -> Components.soulbound(Widget.client.player).anyMatch(component -> component.tryOpenGUI(hand)));
+    public void setPressed(boolean pressed) {
+        this.wasPressed = this.isPressed();
+
+        if (pressed && !this.wasPressed) {
+            this.press();
+        }
+
+        super.setPressed(pressed);
     }
+
+    private void press() {}
 }

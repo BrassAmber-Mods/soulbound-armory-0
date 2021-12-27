@@ -1,7 +1,6 @@
 package soulboundarmory.skill.weapon.staff;
 
-import cell.client.gui.screen.CellScreen;
-import net.minecraft.client.util.math.MatrixStack;
+import cell.client.gui.widget.Widget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import soulboundarmory.skill.Skill;
@@ -16,7 +15,7 @@ public class FireballSkill extends Skill {
     }
 
     @Override
-    public void render(CellScreen screen, MatrixStack matrixes, int level, int x, int y, int zOffset) {
-        screen.renderGuiItem(new ItemStack(Items.FIRE_CHARGE), x, y, zOffset);
+    public void render(Widget<?> tab, int level, int x, int y) {
+        tab.renderGuiItem(new ItemStack(Items.FIRE_CHARGE), x, y, 0);
     }
 }

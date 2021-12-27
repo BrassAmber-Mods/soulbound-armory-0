@@ -37,7 +37,7 @@ public abstract class ComponentKey<B, C extends Component<C>> {
      Extract the instance of this component from an object.
 
      @param object the object wherefrom to extract
-     @return null if `object` is null; otherwise the component instance attached to `object` or null.
+     @return null if `object` is null; otherwise the component instance attached to `object` or null
      */
     public abstract C of(B object);
 
@@ -45,7 +45,7 @@ public abstract class ComponentKey<B, C extends Component<C>> {
      Extract the instance of this component from an object and wrap it in an {@link Optional}.
 
      @param object the object wherefrom to extract
-     @return empty if `object` is null; otherwise an {@link Optional} of the component instance attached to `object` or empty.
+     @return empty if `object` is null; otherwise an {@link Optional} of the component instance attached to `object` or empty
      */
     public final Optional<C> nullable(B object) {
         return Optional.ofNullable(this.of(object));
@@ -55,7 +55,7 @@ public abstract class ComponentKey<B, C extends Component<C>> {
      Extract the instance of this component from an object if it is attached or attach a new component.
 
      @param object the object wherefrom to extract or whereto to attach
-     @return the component instance.
+     @return the component instance
      */
     public final C obtain(B object) {
         return this.nullable(object).orElseGet(() -> this.attach(object));

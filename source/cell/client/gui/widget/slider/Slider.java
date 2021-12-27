@@ -43,7 +43,7 @@ public class Slider extends ScalableWidget<Slider> {
         return this.discrete(true);
     }
 
-    public Slider onSlide(SlideCallback callback) {
+    public Slider slide(SlideCallback callback) {
         this.onSlide = this.onSlide == null ? callback : this.onSlide.then(callback);
 
         return this;
@@ -102,17 +102,17 @@ public class Slider extends ScalableWidget<Slider> {
 
     @Override
     public boolean focusable() {
-        return this.active();
+        return this.isActive();
     }
 
     @Override
     public boolean focused() {
-        return super.focused() || this.parent().hovered();
+        return super.focused() || this.owner().isHovered();
     }
 
     @Override
     public void drag() {
-        this.progress(MathHelper.clamp(mouseX() - this.parent().x(), 0D, this.maxX()) / this.maxX());
+        this.progress(MathHelper.clamp(mouseX() - this.owner().x(), 0D, this.maxX()) / this.maxX());
     }
 
     @Override
@@ -141,7 +141,7 @@ public class Slider extends ScalableWidget<Slider> {
             return true;
         }
 
-        if (this.selected()) {
+        if (this.isSelected()) {
             switch (keyCode) {
                 case GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_LEFT -> this.scroll(-1);
                 case GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_RIGHT -> this.scroll(1);
@@ -164,14 +164,14 @@ public class Slider extends ScalableWidget<Slider> {
 
     @Override
     protected boolean clicked() {
-        return this.parent().hovered() || this.hovered();
+        return this.owner().isHovered() || this.isHovered();
     }
 
-    protected Widget<?> parent() {
+    protected Widget<?> owner() {
         return this.parent.get();
     }
 
     protected int maxX() {
-        return this.parent().width() - this.width();
+        return this.owner().width() - this.width();
     }
 }

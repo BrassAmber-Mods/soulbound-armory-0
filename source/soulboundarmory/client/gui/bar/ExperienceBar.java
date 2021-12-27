@@ -1,34 +1,44 @@
 package soulboundarmory.client.gui.bar;
 
+import cell.client.gui.coordinate.Coordinate;
+import cell.client.gui.widget.TextWidget;
 import cell.client.gui.widget.scalable.ScalableWidget;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Matrix4f;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.config.Configuration;
 
 public class ExperienceBar extends ScalableWidget<ExperienceBar> implements TooltipComponent {
-    public static final ExperienceBar overlayBar = new ExperienceBar().center();
-
     protected static final Configuration.Client configuration = Configuration.instance().client;
-    protected static final Configuration.Client.Colors colors = configuration.colors;
+    protected static final Configuration.Client.Color color = configuration.color;
 
-    // protected final TextWidget level = new TextWidget().stroke();
+    public static final ExperienceBar overlayBar = new ExperienceBar().center().x(.5).y(1D, -27);
+
+    protected final TextWidget level = this.add(new TextWidget())
+        .x(.5)
+        .centerX()
+        .y(3)
+        .y(Coordinate.Position.END)
+        .color(color::argb)
+        .stroke()
+        .text(() -> this.component.level())
+        .visible(() -> this.component.level() > 0)
+        .tooltip(new TextWidget().y(-10).text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel())));
+
     protected ItemComponent<?> component;
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
-        return this.visible() ? this.width() + 8 : 0;
+        return this.isVisible() ? this.width() + 8 : 0;
     }
 
     @Override
     public int getHeight() {
-        return this.visible() ? this.height() + this.offset() : 0;
+        return this.isVisible() ? this.height() + this.offset() + 6 : 0;
     }
 
     {
@@ -43,22 +53,22 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
 
     public boolean renderOverlay(MatrixStack matrixes) {
         if (this.item(ItemComponent.fromHands(client.player).orElse(null)).component != null) {
-            this.x(window.getScaledWidth() / 2).y(window.getScaledHeight() - 27).render(matrixes);
+            this.render(matrixes);
 
-            return true;
+            return this.isVisible();
         }
 
         return false;
     }
 
     @Override
-    public boolean visible() {
-        return super.visible() && colors.alpha > 25;
+    public boolean isVisible() {
+        return color.alpha > 25 && super.isVisible();
     }
 
     @Override
     public void render() {
-        this.v(configuration.style.v).widthLimit(1F).color4f(colors.getf(0), colors.getf(1), colors.getf(2), colors.getf(3));
+        this.v(configuration.style.v).widthLimit(1F).color4f(color.getf(0), color.getf(1), color.getf(2), color.getf(3));
         super.render();
 
         if (this.component.canLevelUp()) {
@@ -67,31 +77,11 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
 
         this.v(configuration.style.v + 5);
         super.render();
-        this.drawLevel();
-    }
-
-    @Override
-    public void drawText(TextRenderer textRenderer, int x, int y, Matrix4f matrix, VertexConsumerProvider.Immediate vertexConsumers) {
-        var level = this.component.level();
-
-        if (level > 0 && this.visible()) {
-            var text = Text.of(String.valueOf(level)).asOrderedText();
-            textRenderer.drawWithOutline(text, this.x(x + 4).middleX() - width(text), y + 3 + this.offset() - fontHeight(), colors.argb(), 0xFF000000, matrix, vertexConsumers, 0xF000F0);
-        }
     }
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrixes, ItemRenderer itemRenderer, int z) {
-        this.z(z).x(x + 4).y(y + 3 + this.offset()).render(matrixes);
-    }
-
-    private void drawLevel() {
-        var level = this.component.level();
-
-        if (level > 0) {
-            var text = String.valueOf(level);
-            drawStrokedText(this.matrixes, text, this.middleX() - width(text) / 2F, this.y() - 6, colors.argb(), colors.alpha << 24);
-        }
+        this.x(x + 4).y(y + 2 + this.offset()).z(z).render(matrixes);
     }
 
     private int offset() {
