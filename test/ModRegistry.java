@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 import net.auoeke.reflect.Constructors;
@@ -111,6 +112,12 @@ public class ModRegistry<T extends IForgeRegistryEntry<T>> implements IForgeRegi
     @Override
     public Identifier getDefaultKey() {
         return null;
+    }
+
+    @Nullable
+    @Override
+    public Optional<RegistryKey<T>> getResourceKey(T entry) {
+        return Optional.empty();
     }
 
     @NotNull
