@@ -1,6 +1,5 @@
 package soulboundarmory.event;
 
-import java.lang.management.ManagementFactory;
 import net.auoeke.reflect.Accessor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
@@ -24,6 +23,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import soulboundarmory.SoulboundArmory;
@@ -266,8 +266,8 @@ public final class CommonEvents {
     public static void registerCommand(RegisterCommandsEvent event) {
         SoulboundArmoryCommand.register(event);
 
-        if (ManagementFactory.getRuntimeMXBean().getInputArguments().stream().anyMatch(argument -> argument.startsWith("-agentlib:jdwp"))) {
-            Accessor.<Logger>getReference(CommandManager.class, "LOGGER").setLevel(Level.DEBUG);
+        if (!FMLEnvironment.production) {
+            Accessor.<Logger>getReference(Accessor.<Object>getReference(CommandManager.class, "LOGGER"), "logger").setLevel(Level.DEBUG);
         }
     }
 }

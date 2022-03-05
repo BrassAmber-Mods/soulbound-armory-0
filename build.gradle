@@ -50,6 +50,7 @@ dependencies {
     forge("net.minecraftforge:forge:$gameVersion-$forgeVersion")
 
     lib("net.auoeke:reflect")
+    lib("net.gudenau.lib:unsafe")
 }
 
 tasks.withType(JavaCompile) {
