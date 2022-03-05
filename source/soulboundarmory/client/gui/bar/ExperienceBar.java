@@ -1,8 +1,8 @@
 package soulboundarmory.client.gui.bar;
 
-import cell.client.gui.coordinate.Coordinate;
-import cell.client.gui.widget.TextWidget;
-import cell.client.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.widget.TextWidget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.item.ItemRenderer;

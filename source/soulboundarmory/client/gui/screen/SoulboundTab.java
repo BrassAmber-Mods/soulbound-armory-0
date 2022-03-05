@@ -1,8 +1,8 @@
 package soulboundarmory.client.gui.screen;
 
-import cell.client.gui.coordinate.Coordinate;
-import cell.client.gui.widget.Widget;
-import cell.client.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import net.minecraft.text.LiteralText;

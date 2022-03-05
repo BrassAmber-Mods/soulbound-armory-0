@@ -1,6 +1,6 @@
 package soulboundarmory.mixin.mixin.client;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.RaycastContext;

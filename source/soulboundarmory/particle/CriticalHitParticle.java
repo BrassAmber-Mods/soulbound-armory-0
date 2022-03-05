@@ -16,9 +16,9 @@ public class CriticalHitParticle extends DamageParticle {
         this.setSprite(sprite);
 
         var color = 0x6B0303;
-        this.colorRed = Math2.redf(color);
-        this.colorGreen = Math2.greenf(color);
-        this.colorBlue = Math2.bluef(color);
+        this.red = Math2.redf(color);
+        this.green = Math2.greenf(color);
+        this.blue = Math2.bluef(color);
     }
 
     public static final class Factory implements ParticleFactory<DefaultParticleType> {
@@ -29,8 +29,7 @@ public class CriticalHitParticle extends DamageParticle {
         }
 
         @Nullable
-        @Override
-        public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+        @Override public Particle createParticle(DefaultParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
             return new CriticalHitParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.sprite);
         }
     }

@@ -35,7 +35,7 @@ abstract class LivingEntityMixin {
             if (leapForce > 0) {
                 if (greatsword.hasSkill(Skills.freezing)) {
                     for (var nearbyEntity : entities) {
-                        greatsword.freeze(nearbyEntity, (int) (20 * leapForce), (float) EntityUtil.speed(player) * (float) leapForce);
+                        greatsword.freeze(nearbyEntity, (int) (20 * leapForce), (float) EntityUtil.speed(player) * leapForce);
                     }
                 }
 

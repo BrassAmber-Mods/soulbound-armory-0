@@ -1,6 +1,6 @@
 package soulboundarmory.event;
 
-import cell.client.gui.CellElement;
+import soulboundarmory.lib.gui.CellElement;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.enchantment.Enchantment;

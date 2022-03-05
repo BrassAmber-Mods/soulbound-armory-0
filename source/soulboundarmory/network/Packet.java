@@ -1,6 +1,6 @@
 package soulboundarmory.network;
 
-import cell.client.gui.CellElement;
+import soulboundarmory.lib.gui.CellElement;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.network.NetworkEvent;

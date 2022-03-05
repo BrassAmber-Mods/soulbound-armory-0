@@ -1,6 +1,6 @@
 package soulboundarmory.component.soulbound.player;
 
-import cell.client.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.screen.CellScreen;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import java.util.Map;
 import java.util.Optional;

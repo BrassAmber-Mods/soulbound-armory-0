@@ -1,6 +1,6 @@
 package soulboundarmory.client.gui.screen;
 
-import cell.client.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;

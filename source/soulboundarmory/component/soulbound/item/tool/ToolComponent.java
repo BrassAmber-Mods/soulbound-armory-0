@@ -10,7 +10,7 @@ import net.minecraft.item.ToolItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -156,7 +156,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
         this.nextMaterial = TierSortingRegistry.byName(new Identifier(tag.getString("nextMaterial")));
     }
 
-    protected abstract Tag<Block> tag();
+    protected abstract TagKey<Block> tag();
 
     protected abstract boolean canAbsorb(ItemStack stack);
 }

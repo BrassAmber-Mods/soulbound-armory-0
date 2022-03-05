@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
-import cell.client.gui.CellElement;
+import soulboundarmory.lib.gui.CellElement;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.resource.Resource;

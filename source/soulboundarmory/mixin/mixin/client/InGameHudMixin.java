@@ -1,6 +1,6 @@
 package soulboundarmory.mixin.mixin.client;
 
-import cell.client.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.screen.CellScreen;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;

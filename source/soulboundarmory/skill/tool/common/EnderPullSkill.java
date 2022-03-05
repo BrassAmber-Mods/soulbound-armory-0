@@ -1,6 +1,6 @@
 package soulboundarmory.skill.tool.common;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import net.minecraft.item.Items;
 import soulboundarmory.skill.Skill;
 

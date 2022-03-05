@@ -1,7 +1,7 @@
 package soulboundarmory.component.soulbound.item;
 
-import cell.client.gui.CellElement;
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.lib.gui.widget.Widget;
 import java.util.Optional;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.texture.Sprite;

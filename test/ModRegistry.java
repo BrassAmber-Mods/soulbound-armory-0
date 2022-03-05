@@ -1,13 +1,13 @@
 package soulboundarmory.registry;
 
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.auoeke.reflect.Constructors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -15,8 +15,6 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import soulboundarmory.util.Util;
 
 public class ModRegistry<T extends IForgeRegistryEntry<T>> implements IForgeRegistry<T> {
@@ -96,43 +94,36 @@ public class ModRegistry<T extends IForgeRegistryEntry<T>> implements IForgeRegi
         return this.entries.isEmpty();
     }
 
-    @Nullable
     @Override
     public T getValue(Identifier id) {
         return this.entries.get(id);
     }
 
-    @Nullable
     @Override
     public Identifier getKey(T entry) {
         return entry == null ? this.getDefaultKey() : entry.getRegistryName();
     }
 
-    @Nullable
     @Override
     public Identifier getDefaultKey() {
         return null;
     }
 
-    @Nullable
     @Override
     public Optional<RegistryKey<T>> getResourceKey(T entry) {
         return Optional.empty();
     }
 
-    @NotNull
     @Override
     public Set<Identifier> getKeys() {
         return this.entries.keySet();
     }
 
-    @NotNull
     @Override
     public Collection<T> getValues() {
         return this.entries.values();
     }
 
-    @NotNull
     @Override
     public Set<Map.Entry<RegistryKey<T>, T>> getEntries() {
         return this.keyEntries.entrySet();
@@ -143,7 +134,6 @@ public class ModRegistry<T extends IForgeRegistryEntry<T>> implements IForgeRegi
         return null;
     }
 
-    @NotNull
     @Override
     public Iterator<T> iterator() {
         return this.getValues().iterator();

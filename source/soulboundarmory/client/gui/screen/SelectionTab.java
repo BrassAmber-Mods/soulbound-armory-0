@@ -1,6 +1,6 @@
 package soulboundarmory.client.gui.screen;
 
-import cell.client.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.util.ItemUtil;
