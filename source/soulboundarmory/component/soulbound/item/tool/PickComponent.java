@@ -6,7 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ToolActions;
 import soulboundarmory.client.i18n.Translations;
@@ -60,7 +60,7 @@ public class PickComponent extends ToolComponent<PickComponent> {
     }
 
     @Override
-    protected Tag<Block> tag() {
+    protected TagKey<Block> tag() {
         return BlockTags.PICKAXE_MINEABLE;
     }
 

@@ -1,16 +1,7 @@
 package soulboundarmory.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.INameMappingService;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +12,13 @@ import java.util.function.ObjIntConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import net.auoeke.reflect.Classes;
+import com.mojang.blaze3d.systems.RenderSystem;
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.INameMappingService;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
@@ -180,7 +177,7 @@ public class Util extends net.minecraft.util.Util {
             var reference = iterator.next();
 
             if (reference == null) {
-                LogManager.getLogger("soulbound-armory").error("\uD83E\uDD28 Something's fishy.");
+                LogManager.getLogger("soulbound-armory").error("🤨 Something's fishy.");
             } else if (!reference.refersTo(null)) {
                 action.accept(reference.get());
 
@@ -195,33 +192,27 @@ public class Util extends net.minecraft.util.Util {
         }
     }
 
-    public static List<Type> arguments(Class<?> subtype, Class<?> supertype) {
-        for (var type : Classes.supertypes(subtype)) {
-            if (type == supertype) {
-                for (var genericType : Classes.genericSupertypes(subtype)) {
-                    if (genericType.equals(supertype)) {
-                        return Arrays.asList(((ParameterizedType) genericType).getActualTypeArguments());
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
     public static String mapClass(String name) {
-        return mapper().apply(INameMappingService.Domain.CLASS, name);
+        return map(INameMappingService.Domain.CLASS, name);
     }
 
     public static String mapMethod(int number) {
-        return mapper().apply(INameMappingService.Domain.METHOD, "m_%d_".formatted(number));
+        return map(INameMappingService.Domain.METHOD, "m_%d_".formatted(number));
     }
 
     public static String mapField(int number) {
-        return mapper().apply(INameMappingService.Domain.FIELD, "f_%d_".formatted(number));
+        return map(INameMappingService.Domain.FIELD, "f_%d_".formatted(number));
     }
 
-    private static BiFunction<INameMappingService.Domain, String, String> mapper() {
-        return mapper == null ? mapper = Launcher.INSTANCE.environment().findNameMapping("srg").get() : mapper;
+    private static String map(INameMappingService.Domain domain, String name) {
+        if (FMLEnvironment.production) {
+            return name;
+        }
+
+        if (mapper == null) {
+            mapper = Launcher.INSTANCE.environment().findNameMapping("srg").get();
+        }
+
+        return mapper.apply(domain, name);
     }
 }

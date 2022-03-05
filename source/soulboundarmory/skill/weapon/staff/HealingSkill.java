@@ -1,6 +1,6 @@
 package soulboundarmory.skill.weapon.staff;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;

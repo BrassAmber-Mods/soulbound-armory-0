@@ -1,6 +1,6 @@
 package soulboundarmory.network.client;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.BufferPacket;
 

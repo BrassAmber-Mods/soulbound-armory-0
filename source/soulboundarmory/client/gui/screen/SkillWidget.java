@@ -1,6 +1,6 @@
 package soulboundarmory.client.gui.screen;
 
-import cell.client.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 
 public class SkillWidget extends ScalableWidget<SkillWidget> {
     @Override

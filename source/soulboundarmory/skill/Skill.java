@@ -1,6 +1,6 @@
 package soulboundarmory.skill;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
 import java.util.Set;

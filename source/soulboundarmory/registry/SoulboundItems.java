@@ -1,14 +1,14 @@
 package soulboundarmory.registry;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.util.List;
 import java.util.Map;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.auoeke.reflect.Invoker;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.ToolMaterials;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.common.ForgeTier;
 import net.minecraftforge.common.TierSortingRegistry;
@@ -22,7 +22,7 @@ import soulboundarmory.item.SoulboundSword;
 import soulboundarmory.item.SoulboundTridentItem;
 
 public class SoulboundItems {
-    private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<Tag<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();
+    private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<TagKey<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();
 
     public static final ToolMaterial material = material(ToolMaterials.WOOD);
 

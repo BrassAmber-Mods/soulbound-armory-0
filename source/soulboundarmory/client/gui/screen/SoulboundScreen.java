@@ -1,9 +1,9 @@
 package soulboundarmory.client.gui.screen;
 
-import cell.client.gui.screen.CellScreen;
-import cell.client.gui.widget.Widget;
-import cell.client.gui.widget.scalable.ScalableWidget;
-import cell.client.gui.widget.slider.SliderWidget;
+import soulboundarmory.lib.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.widget.slider.SliderWidget;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
 import net.minecraft.item.ItemStack;

@@ -1,6 +1,6 @@
 package soulboundarmory.mixin.mixin.client;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import java.util.stream.IntStream;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;

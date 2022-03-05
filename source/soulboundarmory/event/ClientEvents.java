@@ -1,6 +1,6 @@
 package soulboundarmory.event;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.stream.IntStream;
 import net.minecraft.client.gui.screen.Screen;

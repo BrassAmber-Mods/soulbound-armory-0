@@ -1,6 +1,6 @@
 package soulboundarmory.skill.weapon.dagger;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import net.minecraft.item.Items;
 import soulboundarmory.skill.Skill;
 public class ThrowingSkill extends Skill {

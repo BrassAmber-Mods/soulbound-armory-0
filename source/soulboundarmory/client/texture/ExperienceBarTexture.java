@@ -1,6 +1,6 @@
 package soulboundarmory.client.texture;
 
-import cell.client.gui.CellElement;
+import soulboundarmory.lib.gui.CellElement;
 import java.util.Arrays;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.texture.NativeImage;

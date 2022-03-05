@@ -1,6 +1,6 @@
 package soulboundarmory.component.soulbound.item;
 
-import cell.client.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.Widget;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import java.math.BigDecimal;
