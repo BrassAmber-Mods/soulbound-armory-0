@@ -117,7 +117,7 @@ public class Transformer implements IMixinConfigPlugin {
                 method.instructions.insertBefore(method.instructions.getFirst(), instructions);
             }
             case "soulboundarmory.lib.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
-                target.superName = Util.mapClass(4856);
+                target.superName = Util.mapClass("net/minecraft/ChatFormatting");
 
                 target.methods.forEach(method -> {
                     switch (method.name) {

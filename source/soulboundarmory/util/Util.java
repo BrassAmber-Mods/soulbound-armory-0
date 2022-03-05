@@ -192,8 +192,8 @@ public class Util extends net.minecraft.util.Util {
         }
     }
 
-    public static String mapClass(int production) {
-        return map(INameMappingService.Domain.CLASS, "net/minecraft/src/C_%d_".formatted(production));
+    public static String mapClass(String production) {
+        return map(INameMappingService.Domain.CLASS, production);
     }
 
     public static String mapMethod(int production) {

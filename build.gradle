@@ -51,6 +51,7 @@ dependencies {
 
     lib("net.auoeke:reflect")
 	lib("net.auoeke:romeral")
+    lib("net.gudenau.lib:unsafe")
 }
 
 tasks.withType(JavaCompile) {
