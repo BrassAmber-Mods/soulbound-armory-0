@@ -75,6 +75,7 @@ public class Transformer implements IMixinConfigPlugin {
                     return this.phormat_previousColor = this.phormat_colorFunction.apply(this.phormat_previousColor);
                 }*/
 
+/*
                 var endIf = new LabelNode();
                 insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this
                 insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
@@ -91,6 +92,7 @@ public class Transformer implements IMixinConfigPlugin {
                 insertion.add(endIf);
 
                 method.instructions.insertBefore(method.instructions.getFirst(), insertion);
+*/
             }
             case "soulboundarmory.lib.text.mixin.dummy.LanguageDummyMixin" -> {
                 var get = Util.mapMethod(6834);
@@ -114,21 +116,8 @@ public class Transformer implements IMixinConfigPlugin {
 
                 method.instructions.insertBefore(method.instructions.getFirst(), instructions);
             }
-            case "soulboundarmory.lib.text.mixin.FormattingMixin" -> {
-/*
-                target.access &= ~Opcodes.ACC_FINAL;
-
-                target.fields.forEach(field -> {
-                    switch (field.name) {
-                        case ExtendedFormatting.VALUES, "code" -> field.access = Flags.visibility(field.access, Opcodes.ACC_PUBLIC);
-                    }
-                });
-
-                target.methods.stream().filter(method -> method.name.equals("<init>")).forEach(method -> method.access = method.access & ~Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC);
-*/
-            }
             case "soulboundarmory.lib.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
-                target.superName = "net/minecraft/util/Formatting";
+                target.superName = Util.mapClass(4856);
 
                 target.methods.forEach(method -> {
                     switch (method.name) {
@@ -144,7 +133,7 @@ public class Transformer implements IMixinConfigPlugin {
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
                             method.visitVarInsn(Opcodes.ALOAD, 1);
-                            method.visitFieldInsn(Opcodes.GETSTATIC, target.superName, ExtendedFormatting.VALUES, "[Lnet/minecraft/util/Formatting;");
+                            method.visitFieldInsn(Opcodes.GETSTATIC, target.superName, ExtendedFormatting.VALUES, "[L%s;".formatted(target.superName));
                             method.visitInsn(Opcodes.ARRAYLENGTH);
                             IntStream.range(1, parameterTypes.length + 1).forEach(index -> method.visitVarInsn(parameterTypes[index - 1].getOpcode(Opcodes.ILOAD), index));
                             method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, method.name, Type.getMethodDescriptor(Type.VOID_TYPE, actualTypes), false);
@@ -154,14 +143,14 @@ public class Transformer implements IMixinConfigPlugin {
                             method.access &= ~Opcodes.ACC_NATIVE;
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
-                            method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, "getColor", "()Ljava/lang/Integer;", false);
+                            method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, Util.mapMethod(126665), "()Ljava/lang/Integer;", false);
                             method.visitInsn(Opcodes.ARETURN);
                         }
                         case "code" -> {
                             method.access &= ~Opcodes.ACC_NATIVE;
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
-                            method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, "getCode", "()C", false);
+                            method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, Util.mapMethod(178510), "()C", false);
                             method.visitInsn(Opcodes.IRETURN);
                         }
                     }
@@ -172,5 +161,4 @@ public class Transformer implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
-
 }

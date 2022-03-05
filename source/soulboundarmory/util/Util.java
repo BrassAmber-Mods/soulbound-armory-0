@@ -192,27 +192,27 @@ public class Util extends net.minecraft.util.Util {
         }
     }
 
-    public static String mapClass(String name) {
-        return map(INameMappingService.Domain.CLASS, name);
+    public static String mapClass(int production) {
+        return map(INameMappingService.Domain.CLASS, "net/minecraft/src/C_%d_".formatted(production));
     }
 
-    public static String mapMethod(int number) {
-        return map(INameMappingService.Domain.METHOD, "m_%d_".formatted(number));
+    public static String mapMethod(int production) {
+        return map(INameMappingService.Domain.METHOD, "m_%d_".formatted(production));
     }
 
-    public static String mapField(int number) {
-        return map(INameMappingService.Domain.FIELD, "f_%d_".formatted(number));
+    public static String mapField(int production) {
+        return map(INameMappingService.Domain.FIELD, "f_%d_".formatted(production));
     }
 
-    private static String map(INameMappingService.Domain domain, String name) {
+    private static String map(INameMappingService.Domain domain, String production) {
         if (FMLEnvironment.production) {
-            return name;
+            return production;
         }
 
         if (mapper == null) {
             mapper = Launcher.INSTANCE.environment().findNameMapping("srg").get();
         }
 
-        return mapper.apply(domain, name);
+        return mapper.apply(domain, production);
     }
 }
