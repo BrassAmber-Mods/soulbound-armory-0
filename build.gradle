@@ -16,14 +16,26 @@ version("3.0.0")
 
 def gameVersion = "1.18.2"
 def yarn = "1"
-def forgeVersion = "40.0.3"
+def forgeVersion = "40.0.4"
 
 gronk {
     javaVersion(17)
 }
 
 sourceSets {
-    main.resources.include("assets/", "META-INF/", "pack.mcmeta", "*.json")
+    main {
+        resources {
+            include("assets/", "META-INF/", "pack.mcmeta", "*.json")
+        }
+    }
+
+    dev {
+        java {
+            srcDirs = ["dev"]
+        }
+
+        compileClasspath += main.compileClasspath
+    }
 }
 
 configurations {
@@ -89,7 +101,7 @@ loom {
                         if (key == "MOD_CLASSES") {
                             // Replace Gradle's output by IntelliJ IDEA's output.
                             // Gradle's output interferes even if it is specified last.
-                            value = "main%%${file("out/production/${project.name}.${run.getSource(project).name}")}" as String
+                            value = ["main", "dev"]*.with {"main%%" + file("out/production/$project.name.$it")}.join(File.pathSeparator)
                         }
 
                         return super.put(key, value)

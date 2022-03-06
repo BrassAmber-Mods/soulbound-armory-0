@@ -8,7 +8,8 @@ import net.gudenau.lib.unsafe.Unsafe;
 /**
  A reimplementation of {@code UnsafeHacks}.
  <p>
- Somewhy the original {@code UnsafeHacks} cannot be found. Perhaps because another dependency with artifact ID "unsafe" is present and overrides {@code net.minecraftforge:unsafe}?
+ Somewhy the original {@code UnsafeHacks} cannot be found.
+ Perhaps because another dependency with artifact ID "unsafe" is present and overrides {@code net.minecraftforge:unsafe}?
  */
 public class UnsafeHacks {
     public static Object newInstance(Class<?> type) {
