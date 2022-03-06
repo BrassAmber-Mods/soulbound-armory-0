@@ -17,7 +17,6 @@ abstract class TextColorMixin {
     @Final
     private int rgb;
 
-    @SuppressWarnings("FieldMayBeFinal") // mutated via handwritten bytecode
     private int phormat_previousColor = this.rgb;
 
     private boolean phormat_hasColorFunction;
