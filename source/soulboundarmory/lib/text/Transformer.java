@@ -63,37 +63,6 @@ public class Transformer implements IMixinConfigPlugin {
                     }
                 });
             }
-            case "soulboundarmory.lib.text.mixin.TextColorMixin" -> {
-                var value = Util.mapField(131257);
-                var getRgb = Util.mapMethod(131265);
-
-                var method = target.methods.stream().filter(m -> m.name.equals(getRgb)).findAny().get();
-                var internalName = targetClassName.replace('.', '/');
-                var insertion = new InsnList();
-
-                /*if (this.phormat_hasColorFunction) {
-                    return this.phormat_previousColor = this.phormat_colorFunction.apply(this.phormat_previousColor);
-                }*/
-
-/*
-                var endIf = new LabelNode();
-                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this
-                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
-                insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_hasColorFunction", "Z")); // this boolean
-                insertion.add(new JumpInsnNode(Opcodes.IFEQ, endIf)); // this
-                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this this
-                insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_colorFunction", "Lsoulboundarmory/lib/text/ColorFunction;")); // this ColorFunction
-                insertion.add(new VarInsnNode(Opcodes.ALOAD, 0)); // this ColorFunction this
-                insertion.add(new FieldInsnNode(Opcodes.GETFIELD, internalName, "phormat_previousColor", "I")); // this ColorFunction int
-                insertion.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "soulboundarmory/lib/text/ColorFunction", "apply", "(I)I", true)); // this int
-                insertion.add(new InsnNode(Opcodes.DUP_X1)); // int this int
-                insertion.add(new FieldInsnNode(Opcodes.PUTFIELD, internalName, "phormat_previousColor", "I")); // int
-                insertion.add(new InsnNode(Opcodes.IRETURN));
-                insertion.add(endIf);
-
-                method.instructions.insertBefore(method.instructions.getFirst(), insertion);
-*/
-            }
             case "soulboundarmory.lib.text.mixin.dummy.LanguageDummyMixin" -> {
                 var get = Util.mapMethod(6834);
                 var method = target.methods.stream().filter(m -> m.name.equals(get)).findAny().get();
