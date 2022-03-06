@@ -6,7 +6,6 @@ import java.util.stream.IntStream;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -102,7 +101,7 @@ public class Transformer implements IMixinConfigPlugin {
 
                             method.visitVarInsn(Opcodes.ALOAD, 0);
                             method.visitVarInsn(Opcodes.ALOAD, 1);
-                            method.visitFieldInsn(Opcodes.GETSTATIC, target.superName, ExtendedFormatting.VALUES, "[L%s;".formatted(target.superName));
+                            method.visitFieldInsn(Opcodes.GETSTATIC, target.superName, Util.formattingValueField, "[L%s;".formatted(target.superName));
                             method.visitInsn(Opcodes.ARRAYLENGTH);
                             IntStream.range(1, parameterTypes.length + 1).forEach(index -> method.visitVarInsn(parameterTypes[index - 1].getOpcode(Opcodes.ILOAD), index));
                             method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, method.name, Type.getMethodDescriptor(Type.VOID_TYPE, actualTypes), false);

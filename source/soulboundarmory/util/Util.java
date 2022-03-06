@@ -38,6 +38,7 @@ import soulboundarmory.SoulboundArmory;
 
 public class Util extends net.minecraft.util.Util {
     public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
+    public static final String formattingValueField = map("field_1072", "$VALUES");
 
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, IForgeRegistry<?>> registries = new Reference2ReferenceOpenHashMap<>();
@@ -190,6 +191,10 @@ public class Util extends net.minecraft.util.Util {
                 LogManager.getLogger("soulbound-armory").error("Something is very fishy.");
             }
         }
+    }
+
+    public static String map(String development, String production) {
+        return FMLEnvironment.production ? production : development;
     }
 
     public static String mapClass(String production) {

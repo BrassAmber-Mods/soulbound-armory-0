@@ -4,8 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.util.Formatting;
 
 public class ExtendedFormatting /*extends Formatting*/ {
-    public static final String VALUES = "field_1072";
-
     public ColorFunction colorFunction;
     public TextFormatter formatter;
 
