@@ -7,5 +7,4 @@ license = "GNU LGPL v3.0"
 modId = "soulboundarmory"
 version = "0VERSION" # FML wants a leading digit here.
 displayName = "soulbound armory"
-authors = "auoeke"
 description = "old Better Dungeons' soul weapons with additions"
