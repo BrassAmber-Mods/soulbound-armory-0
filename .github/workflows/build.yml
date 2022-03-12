@@ -17,12 +17,12 @@ jobs:
         with:
           java-version: 17
       - name: make Gradle wrapper executable
-        if: ${{runner.os != 'Windows'}}
+        if: runner.os != 'Windows'
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
       - name: capture build artifacts
-        if: ${{runner.os == 'Linux'}}
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v2
         with:
           name: soulbound armory
