@@ -440,7 +440,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
 
     public void preinitialize() {
         this.select(null);
-        // this.children.clear();
+        this.children.clear();
         keyboard.setRepeatEvents(true);
         this.initialize();
     }
