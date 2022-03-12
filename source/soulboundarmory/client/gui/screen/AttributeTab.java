@@ -17,10 +17,9 @@ public class AttributeTab extends SoulboundTab {
         super(Translations.guiButtonAttributes);
     }
 
-    @Override
-    public void initialize() {
+    @Override public void initialize() {
         this.attributes = this.container().item.screenAttributes();
-        this.length = Math.max(this.container().width(), width(this.attributes.values().stream()) + 40);
+        this.length = Math.max(this.container().xpBar.width(), width(this.attributes.values().stream()) + 40);
         this.add(this.resetButton(Category.attribute)).active(this.container().item.statistics.get(Category.attribute).values().stream().anyMatch(Statistic::aboveMin));
 
         Util.enumerate(this.attributes, (statistic, text, row) -> {
@@ -45,8 +44,7 @@ public class AttributeTab extends SoulboundTab {
         );
     }
 
-    @Override
-    protected void render() {
+    @Override protected void render() {
         this.displayPoints(this.container().item.attributePoints());
         Util.enumerate(this.attributes, (entry, text, row) -> textRenderer.drawWithShadow(this.matrixes, text, this.middleX() - this.length / 2F, this.height(this.attributes.size(), row), 0xFFFFFF));
     }
