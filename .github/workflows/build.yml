@@ -1,0 +1,29 @@
+name: build
+on: [pull_request, push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2022]
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+      - name: validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: setup JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - name: make Gradle wrapper executable
+        if: ${{runner.os != 'Windows'}}
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build
+      - name: capture build artifacts
+        if: ${{runner.os == 'Linux'}}
+        uses: actions/upload-artifact@v2
+        with:
+          name: soulbound armory
+          path: build/libs/*[0-9].jar
