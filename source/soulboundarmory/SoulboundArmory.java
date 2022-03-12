@@ -1,6 +1,5 @@
 package soulboundarmory;
 
-import net.auoeke.reflect.Reflect;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.sound.SoundEvent;
@@ -26,9 +25,5 @@ public final class SoulboundArmory {
     public SoulboundArmory() {
         // ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, );
         // ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, (minecaft, parent) -> );
-    }
-
-    static {
-        Reflect.defaultClassLoader = SoulboundArmory.class.getClassLoader();
     }
 }
