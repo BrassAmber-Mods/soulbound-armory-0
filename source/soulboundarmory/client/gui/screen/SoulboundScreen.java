@@ -151,7 +151,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     }
 
     public void refresh() {
-        this.initialize();
+        this.preinitialize();
         this.tab.preinitialize();
     }
 
