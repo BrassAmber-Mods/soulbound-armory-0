@@ -1,7 +1,5 @@
 .*
-
 !.gitignore
-
 build
 out
 run
