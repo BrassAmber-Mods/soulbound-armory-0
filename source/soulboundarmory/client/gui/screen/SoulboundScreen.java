@@ -27,7 +27,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Color color = configuration.color;
 
-    public final ExperienceBar xpBar = this.add(new ExperienceBar())
+    public final ExperienceBar xpBar = new ExperienceBar()
         .x(.5)
         .y(1D, -27)
         .center()
@@ -62,6 +62,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     public void initialize() {
         this.tabButtons.clear();
         this.tabs.clear();
+        this.add(this.xpBar);
 
         this.stack = player().getInventory().getStack(this.slot);
         this.item = ItemComponent.of(player(), this.stack).orElse(null);
@@ -150,7 +151,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     }
 
     public void refresh() {
-        this.preinitialize();
+        this.initialize();
         this.tab.preinitialize();
     }
 
