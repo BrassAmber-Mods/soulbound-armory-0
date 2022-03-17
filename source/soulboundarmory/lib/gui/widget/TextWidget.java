@@ -1,14 +1,14 @@
 package soulboundarmory.lib.gui.widget;
 
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.text.Text;
-import soulboundarmory.util.Math2;
 import soulboundarmory.function.ObjectSupplier;
+import soulboundarmory.util.Math2;
 import soulboundarmory.util.Util;
 
 public class TextWidget extends Widget<TextWidget> {

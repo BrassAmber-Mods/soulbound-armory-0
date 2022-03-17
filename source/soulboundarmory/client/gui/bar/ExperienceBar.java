@@ -1,8 +1,5 @@
 package soulboundarmory.client.gui.bar;
 
-import soulboundarmory.lib.gui.coordinate.Coordinate;
-import soulboundarmory.lib.gui.widget.TextWidget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -11,6 +8,10 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.widget.TextWidget;
+import soulboundarmory.lib.gui.widget.TooltipWidget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 
 public class ExperienceBar extends ScalableWidget<ExperienceBar> implements TooltipComponent {
     protected static final Configuration.Client configuration = Configuration.instance().client;
@@ -27,9 +28,13 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
         .stroke()
         .text(() -> this.component.level())
         .visible(() -> this.component.level() > 0)
-        .tooltip(new TextWidget().y(-10).text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel())));
+        .tooltip(new TooltipWidget().y(-10).with(new TextWidget().text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel()))));
 
     protected ItemComponent<?> component;
+
+    public ExperienceBar() {
+        this.experienceBar().texture(ExperienceBarTexture.instance).width(182).height(5);
+    }
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
@@ -39,10 +44,6 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
     @Override
     public int getHeight() {
         return this.isVisible() ? this.height() + this.offset() + 6 : 0;
-    }
-
-    {
-        this.experienceBar().texture(ExperienceBarTexture.instance).width(182).height(5);
     }
 
     public ExperienceBar item(ItemComponent<?> component) {

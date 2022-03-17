@@ -338,6 +338,12 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
         return this.add(this.degree(), children);
     }
 
+    public T with(Widget<?> child) {
+        this.add(child);
+
+        return (T) this;
+    }
+
     public <C extends Widget> C remove(C child) {
         this.children.remove(child);
         child.parent(null);
@@ -766,7 +772,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrixes, ItemRenderer itemRenderer, int z) {
-        this.x(x).y(y).render(matrixes);
+        this.x(x).y(y).z(z).render(matrixes);
     }
 
     @Override
