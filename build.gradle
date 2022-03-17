@@ -16,7 +16,7 @@ version("3.0.0")
 
 def gameVersion = "1.18.2"
 def yarn = "1"
-def forgeVersion = "40.0.4"
+def forgeVersion = "40.0.18"
 
 gronk {
     javaVersion(17)
@@ -96,8 +96,8 @@ loom {
 
         runs {
             all {run ->
-                net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap() {
-                    Object put(Object key, Object value) {
+                net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
+                    String put(String key, String value) {
                         if (key == "MOD_CLASSES") {
                             // Replace Gradle's output by IntelliJ IDEA's output.
                             // Gradle's output interferes even if it is specified last.
