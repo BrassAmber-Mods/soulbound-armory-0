@@ -1,4 +1,4 @@
-The update for Minecraft 1.18.1 is in progress.
+The update for Minecraft 1.18.2 is in progress.
 
 ### testing
 1. Clone this repository. If you don't know how to do that, then click the green button labeled "Code" and in the popup "Download ZIP".
