@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.entity.SoulboundLightningEntity;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 
 public class SoulboundSword extends SoulboundMeleeWeapon {
     public SoulboundSword() {

@@ -15,6 +15,6 @@ import soulboundarmory.network.ItemComponentPacket;
 public final class C2SAttribute extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> component) {
-        component.addAttribute(StatisticType.registry.getValue(this.message.readIdentifier()), this.message.readInt());
+        component.addAttribute(this.message.readRegistryEntry(StatisticType.registry), this.message.readInt());
     }
 }

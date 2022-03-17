@@ -8,8 +8,8 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.registry.Skills;
-import soulboundarmory.registry.SoulboundItems;
+import soulboundarmory.skill.Skills;
+import soulboundarmory.item.SoulboundItems;
 
 public class TridentComponent extends WeaponComponent<TridentComponent> {
     public TridentComponent(SoulboundComponent<?> component) {

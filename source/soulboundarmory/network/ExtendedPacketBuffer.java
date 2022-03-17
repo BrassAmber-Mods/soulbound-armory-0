@@ -1,5 +1,6 @@
 package soulboundarmory.network;
 
+import net.minecraft.util.registry.Registry;
 import soulboundarmory.lib.gui.widget.Widget;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -18,6 +19,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
@@ -47,8 +49,8 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         return this;
     }
 
-    public <T extends IForgeRegistryEntry<T>> T readRegistryEntry(IForgeRegistry<T> registry) {
-        return registry.getValue(this.readIdentifier());
+    public <T> T readRegistryEntry(Registry<T> registry) {
+        return registry.get(this.readIdentifier());
     }
 
     @Override

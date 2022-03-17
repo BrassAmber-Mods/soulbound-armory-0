@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.util.EntityUtil;
 
 @Mixin(LivingEntity.class)

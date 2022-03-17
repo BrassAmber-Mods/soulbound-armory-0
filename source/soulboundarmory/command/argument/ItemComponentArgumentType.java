@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.RegistryManager;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
@@ -45,17 +46,17 @@ public class ItemComponentArgumentType extends RegistryArgumentType<ItemComponen
     public static class Serializer implements ArgumentSerializer<RegistryArgumentType<?>> {
         @Override
         public void toPacket(RegistryArgumentType<?> type, PacketByteBuf buf) {
-            buf.writeIdentifier(type.registry.getRegistryName());
+            buf.writeVarInt(Registry.REGISTRIES.getRawId(Util.cast(type.registry)));
         }
 
         @Override
         public RegistryArgumentType<?> fromPacket(PacketByteBuf buf) {
-            return new RegistryArgumentType<>(RegistryManager.ACTIVE.getRegistry(buf.readIdentifier()));
+            return new RegistryArgumentType<>(Registry.REGISTRIES.get(buf.readVarInt()));
         }
 
         @Override
         public void toJson(RegistryArgumentType<?> type, JsonObject json) {
-            json.addProperty("registry", type.registry.getRegistryName().toString());
+            json.addProperty("registry", type.registry.getKey().getRegistryName().toString());
         }
     }
 }

@@ -14,6 +14,6 @@ import soulboundarmory.skill.Skill;
 public final class C2SSkill extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> component) {
-        component.upgrade(component.skill(Skill.registry.getValue(this.message.readIdentifier())));
+        component.upgrade(component.skill(Skill.registry.get(this.message.readIdentifier())));
     }
 }

@@ -13,7 +13,7 @@ import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 
 public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
     private static final int USE_TIME = 1200;

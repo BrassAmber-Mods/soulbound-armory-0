@@ -1,35 +1,34 @@
 package soulboundarmory.skill;
 
+import net.minecraft.util.registry.Registry;
+import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.lib.gui.widget.Widget;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.registry.RegistryEntry;
+import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
 
 /**
  An active or passive ability; locked by default and possibly having multiple levels and dependencies.
  */
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
-public abstract class Skill extends RegistryEntry<Skill> {
-    public static final IForgeRegistry<Skill> registry = Util.newRegistry("skill");
+public abstract class Skill extends RegistryElement<Skill> {
+    public static final Registry<Skill> registry = Util.newRegistry("skill");
 
     public final int maxLevel;
 
-    protected final Set<Skill> dependencies = new ReferenceOpenHashSet<>();
     protected final Identifier texture;
 
+    private Set<Skill> dependencies;
     private int tier = -1;
 
     public Skill(Identifier identifier, Identifier texture, int maxLevel) {
@@ -65,11 +64,11 @@ public abstract class Skill extends RegistryEntry<Skill> {
     }
 
     public Set<Skill> dependencies() {
-        return this.dependencies;
+        return Objects.requireNonNullElse(this.dependencies, Collections.emptySet());
     }
 
     public boolean hasDependencies() {
-        return !this.dependencies.isEmpty();
+        return !this.dependencies().isEmpty();
     }
 
     /**
@@ -92,35 +91,24 @@ public abstract class Skill extends RegistryEntry<Skill> {
     /**
      Render an icon of this skill.
      */
-    public void render(Widget<?> tab, int level, int x, int y) {
+    public void render(SoulboundTab tab, int level, int x, int y) {
         Widget.shaderTexture(this.texture);
         DrawableHelper.drawTexture(tab.matrixes, x, y, tab.z(), 0, 0, 16, 16, 16, 16);
     }
 
     /**
      Register dependencies for this skill.
-     Must be invoked <b>after</b> all skills are initialized and <b>after</b> adding dependencies in any overriding methods.
+     Must be invoked <b>after</b> all skills are initialized.
      */
-    protected void initDependencies() {
+     void initDependencies() {
         if (this.tier == -1) {
+            this.dependencies = this.dependencies();
             this.tier = this.hasDependencies() ? 1 : 0;
 
-            for (var dependency : this.dependencies()) {
+            for (var dependency : this.dependencies) {
                 dependency.initDependencies();
-                var previous = dependency.tier() + 1;
-
-                if (previous > this.tier) {
-                    this.tier = previous;
-                }
+                this.tier = Math.max(this.tier, dependency.tier() + 1);
             }
         }
-    }
-
-    /**
-     Initialize skills' dependencies.
-     */
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void registerSkills(RegistryEvent.Register<Skill> event) {
-        event.getRegistry().forEach(Skill::initDependencies);
     }
 }

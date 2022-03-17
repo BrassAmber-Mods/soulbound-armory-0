@@ -1,6 +1,6 @@
 package soulboundarmory.skill.tool.common;
 
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.client.gui.screen.SoulboundTab;
 import net.minecraft.item.Items;
 import soulboundarmory.skill.Skill;
 
@@ -15,7 +15,7 @@ public final class EnderPullSkill extends Skill {
     }
 
     @Override
-    public void render(Widget<?> tab, int level, int x, int y) {
+    public void render(SoulboundTab tab, int level, int x, int y) {
         tab.renderGuiItem(Items.ENDER_PEARL.getDefaultStack(), x, y, 0);
     }
 }

@@ -1,8 +1,5 @@
 package soulboundarmory.component.soulbound.item;
 
-import soulboundarmory.lib.gui.widget.Widget;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -13,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -52,15 +51,15 @@ import soulboundarmory.component.statistics.Statistics;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.entity.Attributes;
 import soulboundarmory.entity.SoulboundDaggerEntity;
-import soulboundarmory.entity.SoulboundFireballEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
+import soulboundarmory.item.SoulboundItems;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-import soulboundarmory.registry.Skills;
-import soulboundarmory.registry.SoulboundItems;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.ItemUtil;
@@ -150,8 +149,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
         return entity instanceof SoulboundDaggerEntity ? ItemComponentType.dagger.nullable(attacker)
             : entity instanceof SoulboundLightningEntity ? ItemComponentType.sword.nullable(attacker)
-                : entity instanceof SoulboundFireballEntity ? ItemComponentType.staff.nullable(attacker)
-                    : Optional.empty();
+                : Optional.empty();
     }
 
     /**
@@ -547,7 +545,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     public SkillContainer skill(Identifier identifier) {
-        return this.skill(Skill.registry.getValue(identifier));
+        return this.skill(Skill.registry.get(identifier));
     }
 
     public boolean hasSkill(Skill skill) {
@@ -565,7 +563,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     public void upgrade(SkillContainer skill) {
         if (this.isClient()) {
-            Packets.serverSkill.send(new ExtendedPacketBuffer(this).writeIdentifier(skill.skill.getRegistryName()));
+            Packets.serverSkill.send(new ExtendedPacketBuffer(this).writeIdentifier(skill.skill.id()));
         } else if (skill.canUpgrade(this.skillPoints())) {
             this.add(StatisticType.skillPoints, -skill.cost());
             skill.upgrade();

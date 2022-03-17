@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.tool.ToolComponent;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
 @Mixin(ItemStack.class)

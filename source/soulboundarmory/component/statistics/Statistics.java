@@ -96,7 +96,7 @@ public class Statistics extends Reference2ReferenceOpenHashMap<Category, Map<Sta
     @Override
     public void deserialize(NbtCompound tag) {
         for (var key : tag.getKeys()) {
-            this.deserialize(tag.getCompound(key), Category.registry.getValue(new Identifier(key)));
+            this.deserialize(tag.getCompound(key), Category.registry.get(new Identifier(key)));
         }
     }
 
@@ -112,7 +112,7 @@ public class Statistics extends Reference2ReferenceOpenHashMap<Category, Map<Sta
     private void deserialize(NbtCompound tag, Category category) {
         if (category != null) {
             for (var identifier : tag.getKeys()) {
-                var statistic = this.get(StatisticType.registry.getValue(new Identifier(identifier)));
+                var statistic = this.get(StatisticType.registry.get(new Identifier(identifier)));
 
                 if (statistic != null) {
                     statistic.deserialize(tag.getCompound(identifier));

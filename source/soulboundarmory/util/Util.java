@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -13,38 +14,48 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.Lifecycle;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import net.auoeke.reflect.Accessor;
+import net.auoeke.reflect.Fields;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
+import soulboundarmory.registry.RegistryElement;
+import soulboundarmory.registry.SimplerRegistry;
 
 public class Util extends net.minecraft.util.Util {
     public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
     public static final String formattingValueField = map("field_1072", "$VALUES");
 
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
-    private static final Map<Class<?>, IForgeRegistry<?>> registries = new Reference2ReferenceOpenHashMap<>();
+    private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
-    public static <A, B> B nul(A... a) {
+    public static <B> B nul(Object... vacuum) {
         return null;
     }
 
@@ -89,7 +100,7 @@ public class Util extends net.minecraft.util.Util {
     }
 
     public static boolean containsIgnoreCase(String string, String substring) {
-        return Pattern.compile(Pattern.quote(substring), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(string).find();
+        return Pattern.compile(substring, Pattern.CASE_INSENSITIVE | Pattern.LITERAL | Pattern.UNICODE_CASE).matcher(string).find();
     }
 
     public static boolean contains(Object target, Object... items) {
@@ -140,19 +151,16 @@ public class Util extends net.minecraft.util.Util {
         }
     }
 
-    public static <T extends IForgeRegistryEntry<T>> IForgeRegistry<T> newRegistry(String path, T... dummy) {
-        return new RegistryBuilder<T>().setName(id(path)).setType(componentType(dummy)).create();
+    public static <T extends RegistryElement<T>> SimplerRegistry<T> newRegistry(String path, T... dummy) {
+        var key = RegistryKey.<T>ofRegistry(id(path));
+        var registry = Registry.register(cast(Registry.REGISTRIES), key, new SimplerRegistry<T>(key, Lifecycle.experimental(), null));
+        registries.put(componentType(dummy), registry);
+
+        return registry;
     }
 
-    public static <T extends IForgeRegistryEntry<T>> IForgeRegistry<T> registry(Class<T> type) {
-        if (type == null) {
-            return null;
-        }
-
-        return (IForgeRegistry<T>) registries.computeIfAbsent(type, __ -> {
-            var registry = RegistryManager.ACTIVE.getRegistry(type);
-            return registry == null ? registry(cast(type.getSuperclass())) : registry;
-        });
+    public static <T> Registry<? super T> registry(Class<T> type) {
+        return type == null ? null : (Registry<? super T>) registries.computeIfAbsent(type, __ -> registry(type.getSuperclass()));
     }
 
     public static <K, V> void enumerate(Map<K, V> map, TriConsumer<K, V, Integer> action) {

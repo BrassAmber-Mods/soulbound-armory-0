@@ -1,11 +1,11 @@
 package soulboundarmory.component.statistics;
 
-import net.minecraftforge.registries.IForgeRegistry;
-import soulboundarmory.registry.RegistryEntry;
+import net.minecraft.util.registry.Registry;
+import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
 
-public class Category extends RegistryEntry<Category> {
-    public static final IForgeRegistry<Category> registry = Util.newRegistry("category");
+public class Category extends RegistryElement<Category> {
+    public static final Registry<Category> registry = Util.newRegistry("category");
 
     public static final Category datum = new Category("datum");
     public static final Category attribute = new Category("attribute");
@@ -18,6 +18,6 @@ public class Category extends RegistryEntry<Category> {
 
     @Override
     public String toString() {
-        return "category " + this.getRegistryName();
+        return "category " + this.id();
     }
 }

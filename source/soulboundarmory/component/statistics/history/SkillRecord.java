@@ -48,7 +48,7 @@ public final class SkillRecord extends Record {
 
     @Override
     public void deserialize(NbtCompound tag) {
-        this.skill = Skill.registry.getValue(new Identifier(tag.getString("skill")));
+        this.skill = Skill.registry.get(new Identifier(tag.getString("skill")));
         this.points = tag.getInt("points");
     }
 

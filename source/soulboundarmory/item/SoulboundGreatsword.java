@@ -10,7 +10,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 
 public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     public SoulboundGreatsword() {

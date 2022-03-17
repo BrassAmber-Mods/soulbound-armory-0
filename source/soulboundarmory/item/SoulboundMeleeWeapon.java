@@ -8,7 +8,6 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.SwordItem;
-import soulboundarmory.registry.SoulboundItems;
 
 public abstract class SoulboundMeleeWeapon extends SwordItem implements SoulboundWeaponItem {
     protected final float reach;

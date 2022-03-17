@@ -1,5 +1,6 @@
 package soulboundarmory.skill;
 
+import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.lib.gui.widget.Widget;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
@@ -22,7 +23,7 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
     }
 
     public void initializeDependencies(SkillStorage storage) {
-        this.dependencies.addAll(this.skill.dependencies.stream().map(storage::get).toList());
+        this.dependencies.addAll(this.skill.dependencies().stream().map(storage::get).toList());
     }
 
     public boolean hasDependencies() {
@@ -89,7 +90,7 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
         return this.skill.tooltip();
     }
 
-    public void render(Widget<?> tab, MatrixStack matrices, int x, int y) {
+    public void render(SoulboundTab tab, MatrixStack matrices, int x, int y) {
         this.skill.render(tab, this.level, x, y);
     }
 

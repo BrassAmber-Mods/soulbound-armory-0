@@ -24,7 +24,6 @@ public class Translations {
     public static final Translation guiGreatsword = gui("greatsword");
     public static final Translation guiBigsword = gui("bigsword");
     public static final Translation guiTrident = gui("trident");
-    public static final Translation guiStaff = gui("staff");
     public static final Translation guiPick = gui("pick");
     public static final Translation guiToolSelection = gui("selection");
     public static final Translation guiButtonAttributes = gui("attributes");
@@ -65,8 +64,6 @@ public class Translations {
     public static final Translation cannotAbsorbDamaged = message("cannot_absorb_damaged");
     public static final Translation cannotAbsorbWeaker = message("cannot_absorb_weaker");
 
-    public static final Translation hudSpell = of("hud", "spell");
-
     public static final Translation guiKey = of("key", "gui");
 
     public static final Translation tier = of("tier");
@@ -74,7 +71,7 @@ public class Translations {
     public static final Translation commandNoItem = of("command", "no_item");
 
     public static Text skillName(Skill skill) {
-        return Text.of(Util.capitalize(I18n.translate("skill.%s.%s.name".formatted(skill.getRegistryName().getNamespace(), skill.getRegistryName().getPath()))));
+        return Text.of(Util.capitalize(I18n.translate("skill.%s.%s.name".formatted(skill.id().getNamespace(), skill.id().getPath()))));
     }
 
     public static Translation toolMaterial(ToolMaterial material) {
@@ -82,7 +79,7 @@ public class Translations {
     }
 
     public static List<Text> skillDescription(Skill skill) {
-        return Stream.of(Util.capitalize(I18n.translate("skill.%s.%s.desc".formatted(skill.getRegistryName().getNamespace(), skill.getRegistryName().getPath()))).split("\n")).map(Text::of).toList();
+        return Stream.of(Util.capitalize(I18n.translate("skill.%s.%s.desc".formatted(skill.id().getNamespace(), skill.id().getPath()))).split("\n")).map(Text::of).toList();
     }
 
     private static Translation of(String path) {

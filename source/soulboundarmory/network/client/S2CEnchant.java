@@ -1,5 +1,6 @@
 package soulboundarmory.network.client;
 
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.StatisticType;
@@ -19,7 +20,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public final class S2CEnchant extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> component) {
-        component.enchantments.put(this.message.readRegistryEntry(ForgeRegistries.ENCHANTMENTS), this.message.readInt());
+        component.enchantments.put(this.message.readRegistryEntry(Registry.ENCHANTMENT), this.message.readInt());
         component.set(StatisticType.enchantmentPoints, this.message.readInt());
         component.component.refresh();
     }

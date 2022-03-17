@@ -41,7 +41,7 @@ import soulboundarmory.lib.component.EntityComponent;
 import soulboundarmory.lib.component.access.EntityAccess;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public final class CommonEvents {

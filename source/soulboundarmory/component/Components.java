@@ -17,7 +17,7 @@ import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.lib.component.ComponentRegistry;
 import soulboundarmory.lib.component.EntityComponentKey;
 import soulboundarmory.lib.component.ItemStackComponentKey;
-import soulboundarmory.registry.SoulboundItems;
+import soulboundarmory.item.SoulboundItems;
 
 public final class Components {
     public static final EntityComponentKey<ConfigComponent> config = ComponentRegistry.entity(PlayerEntity.class, "config", ConfigComponent::new);

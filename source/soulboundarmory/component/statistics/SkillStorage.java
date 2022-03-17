@@ -36,7 +36,7 @@ public class SkillStorage extends Reference2ObjectLinkedOpenHashMap<Skill, Skill
     @Override
     public void deserialize(NbtCompound tag) {
         for (var identifier : tag.getKeys()) {
-            var skill = this.get(Skill.registry.getValue(new Identifier(identifier)));
+            var skill = this.get(Skill.registry.get(new Identifier(identifier)));
 
             if (skill != null) {
                 skill.deserialize(tag.getCompound(identifier));

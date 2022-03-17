@@ -21,8 +21,8 @@ import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.registry.Skills;
-import soulboundarmory.registry.SoulboundItems;
+import soulboundarmory.skill.Skills;
+import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.util.Util;
 
 public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {

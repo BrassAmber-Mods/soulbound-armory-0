@@ -1,6 +1,8 @@
 package soulboundarmory.skill.weapon.dagger;
 
-import soulboundarmory.registry.Skills;
+import java.util.Collections;
+import java.util.Set;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.skill.Skill;
 
 public class ReturnSkill extends Skill {
@@ -8,11 +10,8 @@ public class ReturnSkill extends Skill {
         super("return", 1);
     }
 
-    @Override
-    public void initDependencies() {
-        this.dependencies.add(Skills.throwing);
-
-        super.initDependencies();
+    @Override public Set<Skill> dependencies() {
+        return Collections.singleton(Skills.throwing);
     }
 
     @Override

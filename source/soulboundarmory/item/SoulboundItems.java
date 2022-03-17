@@ -1,4 +1,4 @@
-package soulboundarmory.registry;
+package soulboundarmory.item;
 
 import java.util.List;
 import java.util.Map;
@@ -13,13 +13,6 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.common.ForgeTier;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.item.SoulboundBigswordItem;
-import soulboundarmory.item.SoulboundDaggerItem;
-import soulboundarmory.item.SoulboundGreatsword;
-import soulboundarmory.item.SoulboundPickItem;
-import soulboundarmory.item.SoulboundStaffItem;
-import soulboundarmory.item.SoulboundSword;
-import soulboundarmory.item.SoulboundTridentItem;
 
 public class SoulboundItems {
     private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<TagKey<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();
@@ -29,7 +22,6 @@ public class SoulboundItems {
     public static final SoulboundDaggerItem dagger = name(new SoulboundDaggerItem(), "dagger");
     public static final SoulboundSword sword = name(new SoulboundSword(), "sword");
     public static final SoulboundGreatsword greatsword = name(new SoulboundGreatsword(), "greatsword");
-    public static final SoulboundStaffItem staff = name(new SoulboundStaffItem(), "staff");
     public static final SoulboundPickItem pick = name(new SoulboundPickItem(), "pick");
     public static final SoulboundBigswordItem bigsword = name(new SoulboundBigswordItem(), "bigsword");
     public static final SoulboundTridentItem trident = name(new SoulboundTridentItem(), "trident");

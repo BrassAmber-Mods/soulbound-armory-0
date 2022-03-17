@@ -18,7 +18,6 @@ import soulboundarmory.network.server.C2SEnchant;
 import soulboundarmory.network.server.C2SReset;
 import soulboundarmory.network.server.C2SSelectItem;
 import soulboundarmory.network.server.C2SSkill;
-import soulboundarmory.network.server.C2SSpell;
 import soulboundarmory.network.server.C2STab;
 
 public final class Packets {
@@ -29,7 +28,6 @@ public final class Packets {
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SSelectItem> serverSelectItem = server(C2SSelectItem.class);
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SReset> serverReset = server(C2SReset.class);
     public static final PacketKey.Server<ExtendedPacketBuffer, C2SSkill> serverSkill = server(C2SSkill.class);
-    public static final PacketKey.Server<ExtendedPacketBuffer, C2SSpell> serverSpell = server(C2SSpell.class);
     public static final PacketKey.Server<ExtendedPacketBuffer, C2STab> serverTab = server(C2STab.class);
 
     public static final PacketKey.Client<ExtendedPacketBuffer, S2CBindSlot> clientBindSlot = client(S2CBindSlot.class);

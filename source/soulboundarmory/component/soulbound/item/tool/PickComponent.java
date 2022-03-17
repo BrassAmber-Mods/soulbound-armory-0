@@ -13,7 +13,7 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.registry.SoulboundItems;
+import soulboundarmory.item.SoulboundItems;
 
 public class PickComponent extends ToolComponent<PickComponent> {
     public PickComponent(SoulboundComponent<?> component) {

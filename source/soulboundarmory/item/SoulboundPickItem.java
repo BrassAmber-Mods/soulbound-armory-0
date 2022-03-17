@@ -2,7 +2,6 @@ package soulboundarmory.item;
 
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.PickaxeItem;
-import soulboundarmory.registry.SoulboundItems;
 
 public class SoulboundPickItem extends PickaxeItem implements SoulboundToolItem {
     public SoulboundPickItem() {

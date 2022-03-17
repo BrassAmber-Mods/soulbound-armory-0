@@ -1,13 +1,13 @@
 package soulboundarmory.component.statistics;
 
 import java.util.function.Consumer;
-import net.minecraftforge.registries.IForgeRegistry;
-import soulboundarmory.registry.RegistryEntry;
+import net.minecraft.util.registry.Registry;
+import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
 
-public class StatisticType extends RegistryEntry<StatisticType> {
+public class StatisticType extends RegistryElement<StatisticType> {
     @SuppressWarnings("unused")
-    public static final IForgeRegistry<StatisticType> registry = Util.newRegistry("statistic");
+    public static final Registry<StatisticType> registry = Util.newRegistry("statistic");
 
     public static final StatisticType attributePoints = new StatisticType(Category.datum, "attribute_points");
     public static final StatisticType enchantmentPoints = new StatisticType(Category.datum, "enchantment_points");
@@ -46,6 +46,6 @@ public class StatisticType extends RegistryEntry<StatisticType> {
 
     @Override
     public String toString() {
-        return "statistic type " + this.getRegistryName();
+        return "statistic type " + this.id();
     }
 }

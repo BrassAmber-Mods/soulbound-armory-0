@@ -6,7 +6,6 @@ import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.weapon.BigswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
-import soulboundarmory.component.soulbound.item.weapon.StaffComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.soulbound.item.weapon.TridentComponent;
 import soulboundarmory.item.SoulboundWeaponItem;
@@ -21,7 +20,6 @@ public class SoulboundWeaponComponent extends SoulboundComponent<SoulboundWeapon
         this.store(new GreatswordComponent(this));
         this.store(new BigswordComponent(this));
         this.store(new TridentComponent(this));
-        this.store(new StaffComponent(this));
     }
 
     @Override

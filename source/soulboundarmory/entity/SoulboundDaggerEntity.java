@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
-import soulboundarmory.registry.Skills;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntity extends ExtendedProjectile {
