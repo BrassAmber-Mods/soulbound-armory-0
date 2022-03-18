@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[40.0.18,)"
+loaderVersion = "[40,)"
 issueTrackerURL = "https://github.com/auoeke/soulbound-armory"
 license = "GNU LGPL v3.0"
 
