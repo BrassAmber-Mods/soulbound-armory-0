@@ -16,7 +16,7 @@ version("3.0.0")
 
 def gameVersion = "1.18.2"
 def yarn = "1"
-def forgeVersion = "40.0.18"
+def forgeVersion = "40."
 
 gronk {
     javaVersion(17)
@@ -59,7 +59,7 @@ repositories {
 dependencies {
     minecraft("com.mojang:minecraft:$gameVersion")
     mappings("net.fabricmc:yarn:$gameVersion+build.$yarn:v2")
-    forge("net.minecraftforge:forge:$gameVersion-$forgeVersion")
+    forge("net.minecraftforge:forge:$gameVersion-$forgeVersion+")
 
     lib("net.auoeke:reflect")
 	lib("net.auoeke:romeral")
