@@ -69,11 +69,11 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
 
     @Override
     public void render() {
-        this.v(configuration.style.v).widthLimit(1F).color4f(color.getf(0), color.getf(1), color.getf(2), color.getf(3));
+        this.v(configuration.style.v).viewWidth(1F).color4f(color.getf(0), color.getf(1), color.getf(2), color.getf(3));
         super.render();
 
         if (this.component.canLevelUp()) {
-            this.widthLimit(Math.min(1, this.component.experience() / this.component.nextLevelXP()));
+            this.viewWidth(Math.min(1, this.component.experience() / this.component.nextLevelXP()));
         }
 
         this.v(configuration.style.v + 5);

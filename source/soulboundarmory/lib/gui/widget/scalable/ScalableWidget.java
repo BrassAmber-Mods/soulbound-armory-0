@@ -4,6 +4,7 @@ import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.widget.Length;
 import soulboundarmory.lib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -37,8 +38,10 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     protected int textureWidth = 256;
     protected int textureHeight = 256;
 
-    protected Length widthLimit = new Length();
-    protected Length heightLimit = new Length();
+    protected Coordinate viewX = new Coordinate();
+    protected Coordinate viewY = new Coordinate();
+    protected Length viewWidth = new Length();
+    protected Length viewHeight = new Length();
 
     public T texture(AbstractTexture texture) {
         this.texture = texture;
@@ -160,48 +163,48 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return (T) this;
     }
 
-    public T maxSize() {
+    public T fullView() {
         return this.width(1F).height(1F);
     }
 
-    public int widthLimit() {
-        return this.widthLimit.get(this.width());
+    public int viewWidth() {
+        return this.viewWidth.get(this.width());
     }
 
-    public int heightLimit() {
-        return this.heightLimit.get(this.height());
+    public int viewHeight() {
+        return this.viewHeight.get(this.height());
     }
 
-    public T widthLimit(int width) {
-        this.widthLimit.set(width);
+    public T viewWidth(int width) {
+        this.viewWidth.set(width);
 
         return (T) this;
     }
 
-    public T widthLimit(double width) {
-        this.widthLimit.set(width);
+    public T viewWidth(double width) {
+        this.viewWidth.set(width);
 
         return (T) this;
     }
 
-    public T heightLimit(int height) {
-        this.heightLimit.set(height);
+    public T viewHeight(int height) {
+        this.viewHeight.set(height);
 
         return (T) this;
     }
 
-    public T heightLimit(double height) {
-        this.heightLimit.set(height);
+    public T viewHeight(double height) {
+        this.viewHeight.set(height);
 
         return (T) this;
     }
 
-    public T limit(int width, int height) {
-        return this.widthLimit(width).heightLimit(height);
+    public T view(int width, int height) {
+        return this.viewWidth(width).viewHeight(height);
     }
 
-    public T limit(double width, double height) {
-        return this.widthLimit(width).heightLimit(height);
+    public T view(double width, double height) {
+        return this.viewWidth(width).viewHeight(height);
     }
 
     public T color4f(float r, float g, float b, float a) {
@@ -301,15 +304,15 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     protected void renderCorners() {
-        for (var i = 0; i < this.corners.length; ++i) {
-            var corner = this.corners[i];
-            var width = corner.width();
-            var height = corner.height();
+        for (var index = 0; index < this.corners.length; ++index) {
+            var corner = this.corners[index];
+            var width = Math.max(0, this.viewWidth() + corner.width() - this.width());
+            var height = Math.max(0, this.viewHeight() + corner.height() - this.height());
 
-            drawTexture(
+            if (width + height > 0) drawTexture(
                 this.matrixes,
-                this.x() + i % 2 * (this.width() - width),
-                this.y() + i / 2 * (this.height() - height),
+                this.x() + index % 2 * (this.width() - corner.width()),
+                this.y() + index / 2 * (this.height() - corner.height()),
                 this.z(),
                 this.u + corner.start.x,
                 this.v + corner.start.y,
@@ -328,12 +331,12 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
         for (var index = 0; index < this.middles.length; ++index) {
             var middle = this.middles[index];
-            var startX = switch (index) {
+            var x = switch (index) {
                 case 1 -> this.x();
                 case 3 -> this.endX() - middle.width();
                 default -> this.x() + this.middles[1].width();
             };
-            var startY = switch (index) {
+            var y = switch (index) {
                 case 0 -> this.y();
                 case 4 -> this.endY() - middle.height();
                 default -> this.y() + this.middles[0].height();
@@ -349,15 +352,27 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
                 default -> this.endY() - this.middles[4].height();
             };
 
-            var textureWidth = (float) this.textureWidth();
-            var textureHeight = (float) this.textureHeight();
-            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-            buffer.vertex(matrix, startX, endY, this.z()).texture((this.u + middle.start.x) / textureWidth, (this.v + middle.end.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
-            buffer.vertex(matrix, endX, endY, this.z()).texture((this.u + middle.end.x) / textureWidth, (this.v + middle.end.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
-            buffer.vertex(matrix, endX, startY, this.z()).texture((this.u + middle.end.x) / textureWidth, (this.v + middle.start.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
-            buffer.vertex(matrix, startX, startY, this.z()).texture((this.u + middle.start.x) / textureWidth, (this.v + middle.start.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
-            buffer.end();
-            BufferRenderer.draw(buffer);
+            var viewEndX = this.x() + this.viewWidth();
+            var viewEndY = this.y() + this.viewHeight();
+
+            if (viewEndX > x && viewEndY > y) {
+                var textureWidth = (float) this.textureWidth();
+                var textureHeight = (float) this.textureHeight();
+                var u = (this.u + middle.start.x) / textureWidth;
+                var v = (this.v + middle.start.y) / textureHeight;
+                var endU = u + middle.width() / textureWidth * (float) (Math.min(endX, viewEndX) - x) / (endX - x);
+                var endV = v + middle.height() / textureHeight * (float) (Math.min(endY, viewEndY) - y) / (endY - y);
+                endX = Math.min(endX, viewEndX);
+                endY = Math.min(endY, viewEndY);
+
+                buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+                buffer.vertex(matrix, x, endY, this.z()).texture(u, endV).next();
+                buffer.vertex(matrix, endX, endY, this.z()).texture(endU, endV).next();
+                buffer.vertex(matrix, endX, y, this.z()).texture(endU, v).next();
+                buffer.vertex(matrix, x, y, this.z()).texture(u, v).next();
+                buffer.end();
+                BufferRenderer.draw(buffer);
+            }
         }
     }
 
