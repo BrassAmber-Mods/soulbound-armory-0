@@ -311,7 +311,6 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         RenderSystem.enableBlend();
         this.renderCorners();
         this.renderMiddles();
-        RenderSystem.disableBlend();
 
         if (this.isFocused() && this.isActive()) {
             this.drawBorder();
@@ -376,8 +375,8 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
                 var textureHeight = (float) this.textureHeight();
                 var u = (this.u + middle.start.x) / textureWidth;
                 var v = (this.v + middle.start.y) / textureHeight;
-                var endU = u + Math.min(viewEndX - x, middle.width() * (float) (viewEndX - x) / (endX - x)) / textureWidth;
-                var endV = v + Math.min(viewEndY - y, middle.height() * (float) (viewEndY - y) / (endY - y)) / textureHeight;
+                var endU = u + Math.min(viewEndX - x, middle.width()) / textureWidth;
+                var endV = v + Math.min(viewEndY - y, middle.height()) / textureHeight;
 
                 buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
                 buffer.vertex(matrix, x, viewEndY, this.z()).texture(u, endV).next();
