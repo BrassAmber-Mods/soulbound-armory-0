@@ -8,6 +8,7 @@ public class TooltipWidget extends Widget<TooltipWidget> {
     }
 
     @Override protected void render() {
-        this.withZ(() -> renderTooltipFromComponents(this.matrixes, this.listChildren(), this.x(), this.y()));
+        var mouseFocused = this.parent.filter(parent -> parent.mouseFocused).isPresent();
+        this.withZ(() -> renderTooltipFromComponents(this.matrixes, this.listChildren(), mouseFocused ? mouseX() : this.x() - 8, mouseFocused ? mouseY() : this.y()));
     }
 }

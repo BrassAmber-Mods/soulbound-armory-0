@@ -23,8 +23,6 @@ import soulboundarmory.lib.gui.Node;
 import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.coordinate.Offset;
 import soulboundarmory.lib.gui.widget.callback.PressCallback;
-import soulboundarmory.lib.gui.widget.callback.TextProvider;
-import soulboundarmory.lib.gui.widget.callback.TooltipProvider;
 import soulboundarmory.lib.gui.widget.callback.TooltipRenderer;
 import soulboundarmory.lib.gui.widget.scroll.ContextScrollAction;
 import soulboundarmory.lib.gui.widget.scroll.ScrollAction;
@@ -124,13 +122,13 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
     }
 
     /**
-     Position this widget vertically at a point—expressed as a fraction of its height the parent element offset from its origin.
+     Position this widget vertically offset from the origin of the parent element at a point expressed as a fraction of the parent element's height.
 
-     @param value the fraction of the parent's height
+     @param y y position along the parent element as a fraction of its height
      @return this
      */
-    public T y(double value) {
-        super.y.offset.value = value;
+    public T y(double y) {
+        super.y.offset.value = y;
 
         return this.y(Offset.Type.RELATIVE);
     }
@@ -255,34 +253,14 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
         return this.scrollAction((ContextScrollAction<T>) action);
     }
 
-    public T tooltip(Text... tooltip) {
-        return this.tooltip(Arrays.asList(tooltip));
-    }
-
-    public T tooltip(String tooltip) {
-        return this.tooltip(new TranslatableText(tooltip));
-    }
-
-    public T tooltip(List<Text> tooltip) {
-        return this.tooltip(() -> tooltip);
-    }
-
     public T tooltip(TooltipRenderer<T> renderer) {
         this.tooltip = renderer;
 
         return (T) this;
     }
 
-    public T tooltip(TextProvider<T> textProvider) {
-        return this.tooltip((TooltipRenderer<T>) textProvider);
-    }
-
-    public T tooltip(TooltipProvider<T> tooltipProvider) {
-        return this.tooltip((TooltipRenderer<T>) tooltipProvider);
-    }
-
     public T tooltip(Widget<?> tooltip) {
-        this.tooltipWidget = Optional.of(this.add(tooltip.present(tooltip.present.and(() -> this.isHovered() || tooltip.isHovered()))));
+        this.tooltipWidget = Optional.of(this.add(tooltip.present(tooltip.present.and(() -> this.mouseFocused || tooltip.mouseFocused || this.focused() && isShiftDown()))));
 
         return (T) this;
     }
@@ -419,7 +397,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
     }
 
     public boolean isSelected() {
-        return this.selected.isPresent() && this.selected.get() == this;
+        return this.selected.filter(this::equals).isPresent();
     }
 
     public boolean focused() {
@@ -483,7 +461,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
                 }
             } else if (this.selected.isPresent()) {
                 start = this.selected.get().index();
-            } else if (this.focusable()) {
+            } else if (forward && this.focusable()) {
                 this.select(this);
 
                 return true;
@@ -497,6 +475,12 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
 
                     return true;
                 }
+            }
+
+            if (!forward && this.focusable()) {
+                this.select(this);
+
+                return true;
             }
 
             if (this.isRoot()) {
@@ -523,8 +507,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
 
     public void select() {}
 
-    @Override
-    public void render(MatrixStack matrixes, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrixes) {
         if (this.isPresent()) {
             this.matrixes = matrixes;
             this.mouseFocused = false;
@@ -544,19 +527,20 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
 
             if (this.isVisible()) {
                 this.render();
-                super.render(matrixes, mouseX, mouseY, delta);
+                super.render(matrixes, -1, -1, -1);
             }
         }
     }
 
-    public void render(MatrixStack matrixes) {
-        this.render(matrixes, -1, -1, 0);
+    @Override
+    public void render(MatrixStack matrixes, int mouseX, int mouseY, float delta) {
+        this.render(matrixes);
     }
 
     protected void render() {}
 
     protected void renderTooltip() {
-        if (this.mouseFocused || Screen.hasShiftDown()) {
+        if (this.mouseFocused || isShiftDown()) {
             var x = this.mouseFocused ? (int) mouseX() : this.x();
             var y = this.mouseFocused ? (int) mouseY() : this.y();
 

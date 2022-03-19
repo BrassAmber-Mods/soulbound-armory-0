@@ -1,6 +1,8 @@
 package soulboundarmory.client.gui.screen;
 
 import soulboundarmory.lib.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.widget.TextWidget;
+import soulboundarmory.lib.gui.widget.TooltipWidget;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.lib.gui.widget.slider.SliderWidget;
@@ -31,10 +33,10 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         .x(.5)
         .y(1D, -27)
         .center()
-        .tooltip((bar, matrixes, x, y) -> {
+        .tooltip(new TooltipWidget().with(new TextWidget().text(() -> {
             var xp = (int) this.item.experience();
-            this.renderTooltip(x, y, this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp));
-        }).primaryAction(() -> {
+            return this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp);
+        }))).primaryAction(() -> {
             configuration.displayOptions ^= true;
             this.refresh();
         }).secondaryAction(() -> configuration.overlayExperienceBar ^= true)
@@ -153,13 +155,6 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     public void refresh() {
         this.preinitialize();
         this.tab.preinitialize();
-    }
-
-    private boolean hoveringLevel() {
-        var levelString = String.valueOf(this.item.level());
-        var levelLeftX = (this.width() - width(levelString)) / 2;
-
-        return contains(mouseX(), mouseY(), levelLeftX - 1, this.y() - 1, width(levelString) + 2, fontHeight() + 2);
     }
 
     private int optionX() {
