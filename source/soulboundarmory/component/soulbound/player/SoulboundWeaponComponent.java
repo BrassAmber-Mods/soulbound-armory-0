@@ -17,8 +17,8 @@ public class SoulboundWeaponComponent extends SoulboundComponent<SoulboundWeapon
 
         this.store(new DaggerComponent(this));
         this.store(new SwordComponent(this));
-        this.store(new GreatswordComponent(this));
         this.store(new BigswordComponent(this));
+        this.store(new GreatswordComponent(this));
         this.store(new TridentComponent(this));
     }
 

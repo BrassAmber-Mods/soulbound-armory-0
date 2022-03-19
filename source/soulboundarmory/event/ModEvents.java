@@ -27,7 +27,7 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.item.SoulboundItems;
-import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.lib.gui.Node;
 import soulboundarmory.particle.CriticalHitParticle;
 import soulboundarmory.particle.UnlockParticle;
 import soulboundarmory.skill.Skills;
@@ -38,8 +38,8 @@ public final class ModEvents {
     @SubscribeEvent
     public static void setup(FMLCommonSetupEvent event) {
         if (Util.isPhysicalClient) {
-            CellElement.client.particleManager.registerFactory(SoulboundArmory.criticalHitParticleType, CriticalHitParticle.Factory::new);
-            CellElement.client.particleManager.registerFactory(SoulboundArmory.unlockParticle, UnlockParticle.Factory::new);
+            Node.client.particleManager.registerFactory(SoulboundArmory.criticalHitParticleType, CriticalHitParticle.Factory::new);
+            Node.client.particleManager.registerFactory(SoulboundArmory.unlockParticle, UnlockParticle.Factory::new);
         }
     }
 

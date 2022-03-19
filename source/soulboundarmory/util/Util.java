@@ -10,6 +10,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -55,6 +56,22 @@ public class Util extends net.minecraft.util.Util {
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
+    public static <T> T[] fill(T[] array, Supplier<T> element) {
+        for (var index = 0; index < array.length; ++index) {
+            array[index] = element.get();
+        }
+
+        return array;
+    }
+
+    public static <T> T[][] fill2(T[][] array, Supplier<T> element) {
+        for (var subarray : array) {
+            fill(subarray, element);
+        }
+        
+        return array;
+    }
+    
     public static <B> B nul(Object... vacuum) {
         return null;
     }

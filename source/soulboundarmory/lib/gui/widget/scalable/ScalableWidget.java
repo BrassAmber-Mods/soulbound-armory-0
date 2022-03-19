@@ -1,14 +1,17 @@
 package soulboundarmory.lib.gui.widget.scalable;
 
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import soulboundarmory.lib.gui.widget.Length;
 import soulboundarmory.lib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.util.Identifier;
-import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.util.Util;
 
 /**
  A textured widget that supports 9-slice scaling.
@@ -18,9 +21,9 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     private static final Identifier widgetsID = new Identifier("textures/gui/advancements/widgets.png");
     private static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
 
-    public final int[][][] middles = new int[5][4][2];
-    public final int[][][] corners = new int[4][4][2];
-    public final int[][] border = new int[4][2];
+    public final Rectangle[] middles = Util.fill(new Rectangle[5], Rectangle::new);
+    public final Rectangle[] corners = Util.fill(new Rectangle[4], Rectangle::new);
+    public final Rectangle border = new Rectangle();
 
     public AbstractTexture texture;
 
@@ -75,19 +78,28 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T slice(int u0, int u1, int u2, int v0, int v1, int v2) {
-        this.corners[2][3][0] = this.corners[2][1][0] = this.corners[0][3][0] = this.corners[0][1][0] = u0;
-        this.corners[3][2][0] = this.corners[3][0][0] = this.corners[1][2][0] = this.corners[1][0][0] = u1;
-        this.corners[3][3][0] = this.corners[3][1][0] = this.corners[1][3][0] = this.corners[1][1][0] = u2;
-        this.corners[1][3][1] = this.corners[1][2][1] = this.corners[0][3][1] = this.corners[0][2][1] = v0;
-        this.corners[3][1][1] = this.corners[3][0][1] = this.corners[2][1][1] = this.corners[2][0][1] = v1;
-        this.corners[3][3][1] = this.corners[3][2][1] = this.corners[2][3][1] = this.corners[2][2][1] = v2;
+        var topLeft = this.corners[0];
+        var topRight = this.corners[1];
+        var bottomLeft = this.corners[2];
+        var bottomRight = this.corners[3];
+        bottomLeft.end.x = topLeft.end.x = u0;
+        bottomRight.start.x = topRight.start.x = u1;
+        bottomRight.end.x = topRight.end.x = u2;
+        topRight.end.y = topLeft.end.y = v0;
+        bottomRight.start.y = bottomLeft.start.y = v1;
+        bottomRight.end.y = bottomLeft.end.y = v2;
 
-        this.middles[4][2][0] = this.middles[4][0][0] = this.middles[2][2][0] = this.middles[2][0][0] = this.middles[1][3][0] = this.middles[1][1][0] = this.middles[0][2][0] = this.middles[0][0][0] = u0;
-        this.middles[4][3][0] = this.middles[4][1][0] = this.middles[3][2][0] = this.middles[3][0][0] = this.middles[2][3][0] = this.middles[2][1][0] = this.middles[0][3][0] = this.middles[0][1][0] = u1;
-        this.middles[3][3][0] = this.middles[3][1][0] = u2;
-        this.middles[3][1][1] = this.middles[3][0][1] = this.middles[2][1][1] = this.middles[2][0][1] = this.middles[1][1][1] = this.middles[1][0][1] = this.middles[0][3][1] = this.middles[0][2][1] = v0;
-        this.middles[4][1][1] = this.middles[4][0][1] = this.middles[3][3][1] = this.middles[3][2][1] = this.middles[2][3][1] = this.middles[2][2][1] = this.middles[1][3][1] = this.middles[1][2][1] = v1;
-        this.middles[4][3][1] = this.middles[4][2][1] = v2;
+        var top = this.middles[0];
+        var left = this.middles[1];
+        var center = this.middles[2];
+        var right = this.middles[3];
+        var bottom = this.middles[4];
+        bottom.start.x = center.start.x = left.end.x = top.start.x = u0;
+        bottom.end.x = right.start.x = center.end.x = top.end.x = u1;
+        right.end.x = u2;
+        right.start.y = center.start.y = left.start.y = top.end.y = v0;
+        bottom.start.y = right.end.y = center.end.y = left.end.y = v1;
+        bottom.end.y = v2;
 
         return (T) this;
     }
@@ -266,22 +278,21 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T button(int index) {
-        return this.texture(ClickableWidget.WIDGETS_TEXTURE).v(46 + index * 20).slice(2, 198, 200, 2, 17, 20);
+        return this.texture(ClickableWidget.WIDGETS_TEXTURE).v(46 + index * 20).slice(5, 195, 200, 5, 15, 20);
     }
 
     public T experienceBar() {
-        return this.texture(DrawableHelper.GUI_ICONS_TEXTURE).v(64).slice(1, 172, 182, 1, 4, 5);
+        return this.texture(GUI_ICONS_TEXTURE).v(64).slice(1, 172, 182, 1, 4, 5);
     }
 
     @Override
     public void render() {
-        CellElement.shaderTexture(this.texture);
+        shaderTexture(this.texture);
         this.resetColor();
 
         RenderSystem.enableBlend();
         this.renderCorners();
         this.renderMiddles();
-        // this.renderAll();
         RenderSystem.disableBlend();
 
         if (this.focused() && this.isActive()) {
@@ -290,63 +301,63 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     protected void renderCorners() {
-        var corners = this.corners;
+        for (var i = 0; i < this.corners.length; ++i) {
+            var corner = this.corners[i];
+            var width = corner.width();
+            var height = corner.height();
 
-        for (int i = 0, length = corners.length; i < length; ++i) {
-            var corner = corners[i];
-            var topLeft = corner[0];
-            var u = topLeft[0];
-            var v = topLeft[1];
-            var width = corner[1][0] - u;
-            var height = corner[2][1] - v;
-
-            DrawableHelper.drawTexture(this.matrixes, this.x() + i % 2 * (this.width() - width), this.y() + i / 2 * (this.height() - height), this.z(), this.u + u, this.v + v, width, height, this.textureHeight(), this.textureWidth());
+            drawTexture(
+                this.matrixes,
+                this.x() + i % 2 * (this.width() - width),
+                this.y() + i / 2 * (this.height() - height),
+                this.z(),
+                this.u + corner.start.x,
+                this.v + corner.start.y,
+                width,
+                height,
+                this.textureHeight(),
+                this.textureWidth()
+            );
         }
     }
 
     protected void renderMiddles() {
-        var middles = this.middles;
-        var corners = this.corners;
-        var middleWidth = this.widthLimit() - corners[0][1][0] + corners[1][0][0] - corners[1][1][0];
-        var middleHeight = this.heightLimit() - corners[0][2][1] + corners[2][0][1] - corners[2][2][1];
+        shaderTexture(this.texture);
+        var buffer = Tessellator.getInstance().getBuffer();
+        var matrix = this.matrixes.peek().getPositionMatrix();
 
-        if (middleWidth > 0) for (int i = 0, length = middles.length; i < length; ++i) {
-            var middle = middles[i];
-            var u = middle[0][0];
-            var v = middle[0][1];
-            var endU = middle[1][0];
-            var endV = middle[2][1];
-            var maxWidth = endU - u;
-            var maxHeight = endV - v;
-            var absoluteU = this.u + u;
-            var absoluteV = this.v + v;
-            var remainingHeight = (i & 3) == 0 ? maxHeight : middleHeight;
-            var endX = (i & 1) == 0
-                ? this.x() + middle[0][0] + middleWidth
-                : (i == 1 ? this.x() + middle[1][0] : this.x() + middles[1][1][0] + middleWidth + middle[1][0] - middle[0][0]);
-            var endY = (i & 3) == 0
-                ? (i == 0 ? this.y() + middle[2][1] : this.y() + middles[0][2][1] + middleHeight + middle[2][1] - middle[0][1])
-                : this.y() + middle[0][1] + middleHeight;
+        for (var index = 0; index < this.middles.length; ++index) {
+            var middle = this.middles[index];
+            var startX = switch (index) {
+                case 1 -> this.x();
+                case 3 -> this.endX() - middle.width();
+                default -> this.x() + this.middles[1].width();
+            };
+            var startY = switch (index) {
+                case 0 -> this.y();
+                case 4 -> this.endY() - middle.height();
+                default -> this.y() + this.middles[0].height();
+            };
+            var endX = switch (index) {
+                case 1 -> this.x() + middle.width();
+                case 3 -> this.endX();
+                default -> this.endX() - this.middles[3].width();
+            };
+            var endY = switch (index) {
+                case 0 -> this.y() + middle.height();
+                case 4 -> this.endY();
+                default -> this.endY() - this.middles[4].height();
+            };
 
-            for (int drawnHeight; remainingHeight > 0; remainingHeight -= drawnHeight) {
-                var remainingWidth = (i & 1) == 0 ? middleWidth : maxWidth;
-                var y = endY - remainingHeight;
-                drawnHeight = Math.min(remainingHeight, maxHeight);
-
-                for (int drawnWidth; remainingWidth > 0; remainingWidth -= drawnWidth) {
-                    drawnWidth = Math.min(remainingWidth, maxWidth);
-
-                    DrawableHelper.drawTexture(this.matrixes, endX - remainingWidth, y, this.z(), absoluteU, absoluteV, drawnWidth, drawnHeight, this.textureHeight(), this.textureWidth());
-                }
-            }
-        }
-    }
-
-    protected void renderAll() {
-        int[][][] sections = {};
-
-        for (var index = 0; index < sections.length; index++) {
-            var section = sections[index];
+            var textureWidth = (float) this.textureWidth();
+            var textureHeight = (float) this.textureHeight();
+            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+            buffer.vertex(matrix, startX, endY, this.z()).texture((this.u + middle.start.x) / textureWidth, (this.v + middle.end.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
+            buffer.vertex(matrix, endX, endY, this.z()).texture((this.u + middle.end.x) / textureWidth, (this.v + middle.end.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
+            buffer.vertex(matrix, endX, startY, this.z()).texture((this.u + middle.end.x) / textureWidth, (this.v + middle.start.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
+            buffer.vertex(matrix, startX, startY, this.z()).texture((this.u + middle.start.x) / textureWidth, (this.v + middle.start.y) / textureHeight).color(this.r, this.g, this.b, this.a).next();
+            buffer.end();
+            BufferRenderer.draw(buffer);
         }
     }
 
@@ -354,10 +365,10 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         var endX = this.x() + this.width() - 1;
         var endY = this.y() + this.height();
 
-        CellElement.drawHorizontalLine(this.matrixes, this.x(), endX, this.y(), this.z(), -1);
-        CellElement.drawVerticalLine(this.matrixes, this.x(), this.y(), endY, this.z(), -1);
-        CellElement.drawVerticalLine(this.matrixes, endX, this.y(), endY, this.z(), -1);
-        CellElement.drawHorizontalLine(this.matrixes, this.x(), endX, endY - 1, this.z(), -1);
+        drawHorizontalLine(this.matrixes, this.x(), endX, this.y(), this.z(), -1);
+        drawVerticalLine(this.matrixes, this.x(), this.y(), endY, this.z(), -1);
+        drawVerticalLine(this.matrixes, endX, this.y(), endY, this.z(), -1);
+        drawHorizontalLine(this.matrixes, this.x(), endX, endY - 1, this.z(), -1);
     }
 
     protected void resetColor() {
