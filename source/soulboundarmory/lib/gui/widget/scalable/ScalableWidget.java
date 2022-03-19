@@ -38,8 +38,6 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     protected int textureWidth = 256;
     protected int textureHeight = 256;
 
-    protected Coordinate viewX = new Coordinate();
-    protected Coordinate viewY = new Coordinate();
     protected Length viewWidth = new Length();
     protected Length viewHeight = new Length();
 
