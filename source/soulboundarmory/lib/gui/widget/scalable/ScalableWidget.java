@@ -1,10 +1,9 @@
 package soulboundarmory.lib.gui.widget.scalable;
 
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.util.Rectangle;
 import soulboundarmory.lib.gui.widget.Length;
 import soulboundarmory.lib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -78,6 +77,24 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return this.u(u).v(v);
     }
 
+    /**
+     Slice the texture into 9 parts: 4 non-scalable corners and 5 other resizable parts.
+     <pre>
+     - | + | -
+     + | + | +
+     - | + | -
+     </pre>
+     -: non-repeatable corner<br>
+     +: repeatable non-corner
+
+     @param u0 u coordinate just after a left corner
+     @param u1 u coordinate just before a right corner
+     @param u2 u coordinate just after a right corner
+     @param v0 v coordinate just after a top corner
+     @param v1 v coordinate just before a bottom corner
+     @param v2 v coordinate just after a bottom corner
+     @return {@code this}
+     */
     public T slice(int u0, int u1, int u2, int v0, int v1, int v2) {
         var topLeft = this.corners[0];
         var topRight = this.corners[1];
@@ -263,11 +280,11 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T longRectangle(int index) {
-        return this.texture(widgetsID).v(3 + index * 26).slice(2, 198, 200, 2, 18, 20);
+        return this.texture(widgetsID).v(3 + index * 26).slice(5, 195, 200, 5, 15, 20);
     }
 
     public T rectangle(int index) {
-        return this.texture(widgetsID).uv(1, 129 + index * 26).slice(2, 22, 24, 2, 22, 24);
+        return this.texture(widgetsID).uv(1, 129 + index * 26).slice(6, 18, 24, 6, 18, 24);
     }
 
     public T spikedRectangle(int index) {
@@ -275,7 +292,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T roundedRectangle(int index) {
-        return this.texture(widgetsID).uv(54, 129 + index * 26).slice(7, 15, 22, 4, 21, 26);
+        return this.texture(widgetsID).uv(54, 129 + index * 26).slice(7, 15, 22, 6, 21, 26);
     }
 
     public T button(int index) {
@@ -283,11 +300,11 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public T experienceBar() {
-        return this.texture(GUI_ICONS_TEXTURE).v(64).slice(1, 172, 182, 1, 4, 5);
+        return this.texture(GUI_ICONS_TEXTURE).v(64).slice(1, 138, 182, 1, 4, 5);
     }
 
     @Override
-    public void render() {
+    protected void render() {
         shaderTexture(this.texture);
         this.resetColor();
 
@@ -296,7 +313,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         this.renderMiddles();
         RenderSystem.disableBlend();
 
-        if (this.focused() && this.isActive()) {
+        if (this.isFocused() && this.isActive()) {
             this.drawBorder();
         }
     }
@@ -324,7 +341,8 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     protected void renderMiddles() {
         shaderTexture(this.texture);
-        var buffer = Tessellator.getInstance().getBuffer();
+        var tessellator = Tessellator.getInstance();
+        var buffer = tessellator.getBuffer();
         var matrix = this.matrixes.peek().getPositionMatrix();
 
         for (var index = 0; index < this.middles.length; ++index) {
@@ -350,34 +368,30 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
                 default -> this.endY() - this.middles[4].height();
             };
 
-            var viewEndX = this.x() + this.viewWidth();
-            var viewEndY = this.y() + this.viewHeight();
+            var viewEndX = Math.min(endX, this.x() + this.viewWidth());
+            var viewEndY = Math.min(endY, this.y() + this.viewHeight());
 
             if (viewEndX > x && viewEndY > y) {
                 var textureWidth = (float) this.textureWidth();
                 var textureHeight = (float) this.textureHeight();
                 var u = (this.u + middle.start.x) / textureWidth;
                 var v = (this.v + middle.start.y) / textureHeight;
-                var endU = u + middle.width() / textureWidth * (float) (Math.min(endX, viewEndX) - x) / (endX - x);
-                var endV = v + middle.height() / textureHeight * (float) (Math.min(endY, viewEndY) - y) / (endY - y);
-                endX = Math.min(endX, viewEndX);
-                endY = Math.min(endY, viewEndY);
+                var endU = u + Math.min(viewEndX - x, middle.width() * (float) (viewEndX - x) / (endX - x)) / textureWidth;
+                var endV = v + Math.min(viewEndY - y, middle.height() * (float) (viewEndY - y) / (endY - y)) / textureHeight;
 
                 buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-                buffer.vertex(matrix, x, endY, this.z()).texture(u, endV).next();
-                buffer.vertex(matrix, endX, endY, this.z()).texture(endU, endV).next();
-                buffer.vertex(matrix, endX, y, this.z()).texture(endU, v).next();
+                buffer.vertex(matrix, x, viewEndY, this.z()).texture(u, endV).next();
+                buffer.vertex(matrix, viewEndX, viewEndY, this.z()).texture(endU, endV).next();
+                buffer.vertex(matrix, viewEndX, y, this.z()).texture(endU, v).next();
                 buffer.vertex(matrix, x, y, this.z()).texture(u, v).next();
-                buffer.end();
-                BufferRenderer.draw(buffer);
+                tessellator.draw();
             }
         }
     }
 
     protected void drawBorder() {
-        var endX = this.x() + this.width() - 1;
-        var endY = this.y() + this.height();
-
+        var endX = this.endX() - 1;
+        var endY = this.endY();
         drawHorizontalLine(this.matrixes, this.x(), endX, this.y(), this.z(), -1);
         drawVerticalLine(this.matrixes, this.x(), this.y(), endY, this.z(), -1);
         drawVerticalLine(this.matrixes, endX, this.y(), endY, this.z(), -1);

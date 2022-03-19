@@ -1,4 +1,4 @@
-package soulboundarmory.lib.gui.widget.scalable;
+package soulboundarmory.lib.gui.util;
 
 public class Rectangle {
     public final Point start = new Point();

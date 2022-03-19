@@ -56,6 +56,10 @@ public class Util extends net.minecraft.util.Util {
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
+    public static <T> Iterable<T> iterate(Stream<T> stream) {
+        return stream::iterator;
+    }
+
     public static <T> T[] fill(T[] array, Supplier<T> element) {
         for (var index = 0; index < array.length; ++index) {
             array[index] = element.get();

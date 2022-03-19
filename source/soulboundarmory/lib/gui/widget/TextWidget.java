@@ -6,7 +6,9 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import soulboundarmory.function.ObjectSupplier;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Util;
@@ -25,15 +27,19 @@ public class TextWidget extends Widget<TextWidget> {
         return this;
     }
 
+    @Override
+    public TextWidget text(String text) {
+        return this.text(Text.of(text));
+    }
+
     public TextWidget text(Iterable<Text> text) {
         text.forEach(this::text);
 
         return this;
     }
 
-    @Override
-    public TextWidget text(String text) {
-        return this.text(Text.of(text));
+    public TextWidget text(StringVisitable text) {
+        return this.text(text::getString);
     }
 
     public TextWidget text(Supplier<Text> text) {
@@ -98,6 +104,10 @@ public class TextWidget extends Widget<TextWidget> {
         this.color = () -> color;
 
         return this;
+    }
+
+    public TextWidget color(Formatting formatting) {
+        return this.color(formatting.getColorValue());
     }
 
     public TextWidget stroke(int color) {
@@ -165,9 +175,6 @@ public class TextWidget extends Widget<TextWidget> {
 
     @Override
     protected void render() {
-        this.matrixes.push();
-        this.matrixes.translate(0, 0, this.z());
-
         this.withZ(() -> Util.enumerate(this.text().toList(), (text, row) -> {
             var y = this.y() + fontHeight() * row;
 
@@ -181,7 +188,5 @@ public class TextWidget extends Widget<TextWidget> {
                 textRenderer.draw(this.matrixes, text, this.x(), y, this.color());
             }
         }));
-
-        this.matrixes.pop();
     }
 }

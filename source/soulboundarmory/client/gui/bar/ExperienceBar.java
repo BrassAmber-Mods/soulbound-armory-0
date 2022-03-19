@@ -82,7 +82,7 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrixes, ItemRenderer itemRenderer, int z) {
-        this.x(x + 4).y(y + 2 + this.offset()).z(z).render(matrixes);
+        this.x(x).y(y + this.offset()).z(z).render(matrixes);
     }
 
     private int offset() {

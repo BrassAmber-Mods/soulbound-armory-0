@@ -7,6 +7,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.resource.ResourceManager;
 import soulboundarmory.client.gui.bar.BarStyle;
+import soulboundarmory.lib.gui.Node;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Resources;
 import soulboundarmory.util.Util;
@@ -17,7 +18,7 @@ public class ExperienceBarTexture extends ResourceTexture {
     private ExperienceBarTexture() {
         super(Util.id("gui/experience_bar"));
 
-        CellElement.textureManager.registerTexture(this.location, this);
+        Node.textureManager.registerTexture(this.location, this);
     }
 
     @Override

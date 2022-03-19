@@ -1,13 +1,11 @@
 package soulboundarmory.lib.gui.widget;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.IntSupplier;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -26,13 +24,14 @@ import soulboundarmory.lib.gui.widget.callback.PressCallback;
 import soulboundarmory.lib.gui.widget.callback.TooltipRenderer;
 import soulboundarmory.lib.gui.widget.scroll.ContextScrollAction;
 import soulboundarmory.lib.gui.widget.scroll.ScrollAction;
+import soulboundarmory.util.Util;
 
 /**
  A flexible and fluent element that supports nesting.
 
  @param <T> the type of the widget
  */
-public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> implements TooltipComponent {
+public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> implements TooltipComponent {
     public Optional<Widget<?>> parent = Optional.empty();
     public ReferenceArrayList<Widget<?>> children = new ReferenceArrayList<>();
 
@@ -260,7 +259,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
     }
 
     public T tooltip(Widget<?> tooltip) {
-        this.tooltipWidget = Optional.of(this.add(tooltip.present(tooltip.present.and(() -> this.mouseFocused || tooltip.mouseFocused || this.focused() && isShiftDown()))));
+        this.tooltipWidget = Optional.of(this.add(tooltip.present(tooltip.present.and(() -> this.mouseFocused || tooltip.mouseFocused || this.isFocused() && isShiftDown()))));
 
         return (T) this;
     }
@@ -279,8 +278,8 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
     }
 
     public <C extends Widget> C add(int index, C child) {
-        this.children.add(index, child);
         child.parent(this);
+        this.children.add(index, child);
 
         return child;
     }
@@ -400,7 +399,7 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
         return this.selected.filter(this::equals).isPresent();
     }
 
-    public boolean focused() {
+    public boolean isFocused() {
         return this.mouseFocused || this.isSelected();
     }
 
@@ -513,15 +512,22 @@ public abstract class Widget<T extends Widget<T>> extends CellElement<Widget<?>,
             this.mouseFocused = false;
 
             if (this.isHovered()) {
-                if (this.focusable()) {
+                mouseFocused: if (this.focusable()) {
+                    for (var ancestor : Util.iterate(this.ancestors())) {
+                        if (ancestor.z() > this.z() && ancestor.mouseFocused) {
+                            break mouseFocused;
+                        }
+
+                        ancestor.mouseFocused = false;
+                    }
+
                     this.mouseFocused = true;
-                    this.ancestors().forEach(parent -> parent.mouseFocused = false);
                 }
 
                 this.whileHovered();
             }
 
-            if (this.focused()) {
+            if (this.isFocused()) {
                 this.whileFocused();
             }
 

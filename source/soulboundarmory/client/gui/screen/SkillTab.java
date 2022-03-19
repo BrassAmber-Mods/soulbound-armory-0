@@ -1,5 +1,10 @@
 package soulboundarmory.client.gui.screen;
 
+import net.minecraft.util.Formatting;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.coordinate.Offset;
+import soulboundarmory.lib.gui.util.Point;
+import soulboundarmory.lib.gui.widget.TextWidget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
@@ -21,18 +26,13 @@ import soulboundarmory.skill.SkillContainer;
 public class SkillTab extends SoulboundTab {
     protected static final Identifier background = new Identifier("textures/block/andesite.png");
 
-    protected static final ScalableWidget<?> grayRectangle = new ScalableWidget<>().grayRectangle().z(500);
-    protected static final ScalableWidget<?> blueRectangle = new ScalableWidget<>().blueRectangle().z(500);
-    protected static final ScalableWidget<?> whiteFrame = new ScalableWidget<>().whiteRectangle().width(24).height(24);
-    protected static final ScalableWidget<?> yellowFrame = new ScalableWidget<>().yellowRectangle().width(24).height(24);
+    protected final Map<SkillContainer, Point> skills = new Reference2ReferenceLinkedOpenHashMap<>();
+    protected ScalableWidget<?> window = new ScalableWidget<>().window().width(512).height(288).z(-1000)
+        .with(new TextWidget().stroke().text(this.title).x(8).y(6).color(0xEEEEEE))
+        .with(new TextWidget().stroke().text(() -> this.pointText(this.container().item.skillPoints())).x(Coordinate.Position.END).x(1, -15).y(25).color(0xEEEEEE));
 
-    protected final Map<SkillContainer, int[]> skills = new Reference2ReferenceLinkedOpenHashMap<>();
-
-    protected ScalableWidget<?> window = new ScalableWidget<>().window().width(512).height(288).z(-1000);
     protected SkillContainer selectedSkill;
-
     protected float chroma;
-
     protected int insideWidth;
     protected int insideHeight;
     protected int centerX;
@@ -46,10 +46,6 @@ public class SkillTab extends SoulboundTab {
 
     public SkillTab() {
         super(Translations.guiSkills);
-    }
-
-    protected static void chroma(float chroma) {
-        RenderSystem.setShaderColor(chroma, chroma, chroma, -1);
     }
 
     @Override
@@ -108,10 +104,6 @@ public class SkillTab extends SoulboundTab {
 
         this.renderBackground(background, this.insideX, this.insideY, this.insideWidth, this.insideHeight, (int) (128 * this.chroma));
 
-        drawStrokedText(this.matrixes, Translations.guiSkills, this.insideX + 8, this.window.y() + 6, 0xEEEEEE);
-        var text = this.pointText(this.container().item.skillPoints());
-        drawStrokedText(this.matrixes, text, this.insideEndX - 8 - textRenderer.getWidth(text), this.insideY + 6, 0xEEEEEE);
-
         var delta = 20F * tickDelta() / 255F;
         this.chroma = this.selectedSkill() == null ? Math.min(this.chroma + delta, 1F) : Math.max(this.chroma - delta, 175F / 255F);
     }
@@ -125,92 +117,15 @@ public class SkillTab extends SoulboundTab {
             }
         }
 
-        this.renderSkill(this.selectedSkill);
+        if (this.selectedSkill != null) {
+            this.renderSkill(this.selectedSkill);
+        }
     }
 
     protected void renderSkill(SkillContainer skill) {
-        var positions = this.skills.get(skill);
-
-        if (positions != null) {
-            var width = 16;
-            var height = 16;
-            var x = positions[0] - width / 2;
-            var y = positions[1] - height / 2;
-            float chroma;
-
-            if (skill == this.selectedSkill) {
-                chroma(1);
-
-                if (this.isHovered(skill)) {
-                    this.renderTooltip(this.matrixes, skill, x, y);
-                }
-
-                chroma = 1;
-            } else {
-                chroma(this.chroma);
-                this.addZ(-300);
-
-                chroma = this.chroma;
-            }
-
-            (skill.learned() ? yellowFrame : whiteFrame).x(x - 4).y(y - 4).z(200).render(this.matrixes);
-
-            chroma(chroma);
-            skill.render(this, this.matrixes, x, y);
-            this.z(0);
-        }
-    }
-
-    protected void renderTooltip(MatrixStack stack, SkillContainer skill, int centerX, int centerY) {
-        var name = skill.name();
-        var tooltip = skill.tooltip();
-        var barWidth = 36 + Math.max(108, textRenderer.getWidth(name));
-
-        var belowCenter = centerY > this.insideCenterY;
-        var y = centerY + (belowCenter ? -56 : 14);
-        var textY = y + 7;
-        var cost = skill.cost();
-
-        var sections = new ReferenceArrayList<List<? extends StringVisitable>>();
-        var genericSections = new ReferenceArrayList<Text>();
-
-        if (skill.learned()) {
-            if (skill.skill.isTiered()) {
-                genericSections.add(Translations.guiLevel.format(skill.level()));
-
-                if (skill.canUpgrade()) {
-                    genericSections.add((cost == 1 ? Translations.guiSkillUpgradeCostSingular : Translations.guiSkillUpgradeCostPlural).format(cost));
-                }
-            }
-        } else if (skill.dependenciesFulfilled()) {
-            genericSections.add((cost == 1 ? Translations.guiSkillLearnCostSingular : Translations.guiSkillLearnCostPlural).format(cost));
-        }
-
-        barWidth = Math.max(barWidth, 12 + genericSections.stream().peek(section -> sections.add(List.of(section))).map(textRenderer::getWidth).max(Comparator.naturalOrder()).orElse(0));
-
-        if (tooltip.size() > 0) {
-            sections.add(0, tooltip = wrap(tooltip, barWidth - 8));
-        }
-
-        var height = 1 + (1 + tooltip.size()) * fontHeight();
-
-        for (var section : sections) {
-            grayRectangle.x(centerX - 8).y(y).width(barWidth).height(height).render(stack);
-
-            for (var line : section) {
-                var why = textY;
-                this.withZ(() -> textRenderer.draw(stack, line.getString(), centerX - 3, why, 0x999999));
-                textY += fontHeight();
-            }
-
-            y += height;
-            textY = y + 6;
-            height = 20;
-        }
-
-        chroma(1);
-        blueRectangle.x(centerX - 8).y(centerY - 2).width(barWidth).height(20).render(stack);
-        this.withZ(() -> textRenderer.drawWithShadow(stack, name, centerX + 24, centerY + 4, 0xFFFFFF));
+        var point = this.skills.get(skill);
+        var widget = new SkillWidget(skill).x(point.x).y(point.y).center().parent(this);
+        widget.render(this.matrixes);
     }
 
     protected SkillContainer selectedSkill() {
@@ -224,8 +139,8 @@ public class SkillTab extends SoulboundTab {
     }
 
     protected boolean isHovered(SkillContainer skill) {
-        var positions = this.skills.get(skill);
-        return Math.abs(positions[0] - mouseX()) <= 12 && Math.abs(positions[1] - mouseY()) <= 12;
+        var point = this.skills.get(skill);
+        return Math.abs(point.x - mouseX()) <= 12 && Math.abs(point.y - mouseY()) <= 12;
     }
 
     protected void updateIcons() {
@@ -273,7 +188,7 @@ public class SkillTab extends SoulboundTab {
                 var total = 0;
 
                 for (var other : dependencies) {
-                    total += this.skills.get(other)[0];
+                    total += this.skills.get(other).x;
                 }
 
                 x += total / dependencies.size();
@@ -281,7 +196,7 @@ public class SkillTab extends SoulboundTab {
                 x += this.centerX;
             }
 
-            this.skills.put(skill, new int[]{x, this.insideY + 24 + 32 * tier});
+            this.skills.put(skill, new Point(x, this.insideY + 24 + 32 * tier));
         }
     }
 }

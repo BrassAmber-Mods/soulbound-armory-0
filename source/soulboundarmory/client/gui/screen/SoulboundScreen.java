@@ -92,7 +92,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 .button()
                 .x(this.button)
                 .y(15D / 16, -20)
-                .width(Math.max(this.button.width(), width(text) + 8))
+                .width(Math.max(this.button.width(), width(text) + 12))
                 .height(20)
                 .text(text)
                 .present(this::displayTabs)

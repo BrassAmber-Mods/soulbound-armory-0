@@ -132,6 +132,10 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
     }
 
+    public static void chroma(float chroma) {
+        RenderSystem.setShaderColor(chroma, chroma, chroma, -1);
+    }
+
     public static void fill(MatrixStack matrices, int x1, int y1, int x2, int y2, float z, int color) {
         fill(matrices.peek().getPositionMatrix(), x1, y1, x2, y2, z, color);
     }
@@ -270,10 +274,14 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
         screen().renderTooltipFromComponents(matrixes, (List<TooltipComponent>) components, (int) x, (int) y);
     }
 
+    public static List<StringVisitable> wrap(List<? extends StringVisitable> lines, int width) {
+        return lines.stream().map(line -> textHandler.wrapLines(line, width, Style.EMPTY)).flatMap(List::stream).toList();
+    }
+
     public void renderBackground(Identifier identifier, int x, int y, int width, int height, int chroma, int alpha) {
         var tessellator = Tessellator.getInstance();
-        var builder = tessellator.getBuffer();
-        float f = 1 << 5;
+        var buffer = tessellator.getBuffer();
+        float f = 32;
         float endX = x + width;
         float endY = y + height;
 
@@ -281,12 +289,11 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
         setPositionColorTextureShader();
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
-        builder.vertex(x, endY, this.z() - 500).color(chroma, chroma, chroma, 255).texture(0, endY / f + alpha).next();
-        builder.vertex(endX, endY, this.z() - 500).color(chroma, chroma, chroma, 255).texture(endX / f, endY / f + alpha).next();
-        builder.vertex(endX, y, this.z() - 500).color(chroma, chroma, chroma, 255).texture(endX / f, alpha).next();
-        builder.vertex(x, y, this.z() - 500).color(chroma, chroma, chroma, 255).texture(0, alpha).next();
-
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
+        buffer.vertex(x, endY, this.z() - 1000).color(chroma, chroma, chroma, 255).texture(0, endY / f + alpha).next();
+        buffer.vertex(endX, endY, this.z() - 1000).color(chroma, chroma, chroma, 255).texture(endX / f, endY / f + alpha).next();
+        buffer.vertex(endX, y, this.z() - 1000).color(chroma, chroma, chroma, 255).texture(endX / f, alpha).next();
+        buffer.vertex(x, y, this.z() - 1000).color(chroma, chroma, chroma, 255).texture(0, alpha).next();
         tessellator.draw();
     }
 
@@ -300,10 +307,6 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
 
     public void renderBackground(MatrixStack matrixes) {
         screen().renderBackground(matrixes);
-    }
-
-    public static List<StringVisitable> wrap(List<? extends StringVisitable> lines, int width) {
-        return lines.stream().map(line -> textHandler.wrapLines(line, width, Style.EMPTY)).flatMap(List::stream).toList();
     }
 
     @Override
@@ -378,7 +381,7 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
     }
 
     @Override
-    protected T clone() {
+    public T clone() {
         try {
             return (T) super.clone();
         } catch (CloneNotSupportedException exception) {

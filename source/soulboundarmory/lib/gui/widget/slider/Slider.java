@@ -106,8 +106,8 @@ public class Slider extends ScalableWidget<Slider> {
     }
 
     @Override
-    public boolean focused() {
-        return super.focused() || this.owner().isHovered();
+    public boolean isFocused() {
+        return super.isFocused() || this.owner().isHovered();
     }
 
     @Override

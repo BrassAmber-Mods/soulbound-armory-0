@@ -99,14 +99,14 @@ public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawab
      @return the total width of this node and all of its descendants
      */
     default int totalWidth() {
-        return this.descendants().map(B::x).max(Comparator.naturalOrder()).orElse(this.endX()) - this.descendants().map(B::x).min(Comparator.naturalOrder()).orElse(this.x());
+        return this.descendants().mapToInt(B::x).max().orElseGet(this::endX) - this.descendants().mapToInt(B::x).min().orElseGet(this::x);
     }
 
     /**
      @return the total height of this node and all of its descendants
      */
     default int totalHeight() {
-        return this.descendants().map(B::y).max(Comparator.naturalOrder()).orElse(this.endY()) - this.descendants().map(B::y).min(Comparator.naturalOrder()).orElse(this.y());
+        return this.descendants().mapToInt(B::y).max().orElseGet(this::endY) - this.descendants().mapToInt(B::y).min().orElseGet(this::y);
     }
 
     /**
