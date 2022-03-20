@@ -8,11 +8,11 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.sound.SoundEvent;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.NewRegistryEvent;
 import soulboundarmory.SoulboundArmory;
@@ -36,14 +36,6 @@ import soulboundarmory.util.Util;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public final class ModEvents {
-    @SubscribeEvent
-    public static void setup(FMLCommonSetupEvent event) {
-        if (Util.isPhysicalClient) {
-            Node.client.particleManager.registerFactory(SoulboundArmory.criticalHitParticleType, CriticalHitParticle.Factory::new);
-            Node.client.particleManager.registerFactory(SoulboundArmory.unlockParticle, UnlockParticle.Factory::new);
-        }
-    }
-
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar().item(component.item).width(CellElement.width(component.stack.getName())));
@@ -92,9 +84,15 @@ public final class ModEvents {
     }
 
     @SubscribeEvent
-    public static void registerParticle(RegistryEvent.Register<ParticleType<?>> event) {
+    public static void registerParticles(RegistryEvent.Register<ParticleType<?>> event) {
         event.getRegistry().register(SoulboundArmory.criticalHitParticleType.setRegistryName("critical_hit"));
         event.getRegistry().register(SoulboundArmory.unlockParticle.setRegistryName("unlock"));
+    }
+
+    @SubscribeEvent
+    public static void registerParticleFactories(ParticleFactoryRegisterEvent event) {
+        Node.client.particleManager.registerFactory(SoulboundArmory.criticalHitParticleType, CriticalHitParticle.Factory::new);
+        Node.client.particleManager.registerFactory(SoulboundArmory.unlockParticle, UnlockParticle.Factory::new);
     }
 
     @SubscribeEvent
