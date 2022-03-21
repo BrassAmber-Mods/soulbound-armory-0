@@ -7,7 +7,7 @@ import soulboundarmory.skill.Skill;
 
 public final class NourishmentSkill extends Skill {
     public NourishmentSkill() {
-        super("nourishment");
+        super("nourishment", 3);
     }
 
     @Override
