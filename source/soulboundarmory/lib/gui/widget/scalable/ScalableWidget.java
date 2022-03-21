@@ -225,6 +225,10 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return this.color4f(r, g, b, 1);
     }
 
+    public T color3f(float chroma) {
+        return this.color3f(chroma, chroma, chroma);
+    }
+
     public T yellowRectangle() {
         return this.longRectangle(0);
     }

@@ -3,9 +3,11 @@ package soulboundarmory.lib.gui.widget;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntSupplier;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -23,7 +25,6 @@ import soulboundarmory.lib.gui.Node;
 import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.coordinate.Offset;
 import soulboundarmory.lib.gui.widget.callback.PressCallback;
-import soulboundarmory.lib.gui.widget.callback.TooltipRenderer;
 import soulboundarmory.lib.gui.widget.scroll.ContextScrollAction;
 import soulboundarmory.lib.gui.widget.scroll.ScrollAction;
 import soulboundarmory.util.Util;
@@ -35,20 +36,19 @@ import soulboundarmory.util.Util;
  */
 public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> implements TooltipComponent {
     public Optional<Widget<?>> parent = Optional.empty();
-    public ReferenceArrayList<Widget<?>> children = new ReferenceArrayList<>();
+    public ReferenceArrayList<Widget<?>> children = ReferenceArrayList.of();
+    public ReferenceArrayList<Widget<?>> tooltips = ReferenceArrayList.of();
 
     /**
      The element selected by the keyboard; may be `null`, `this` or a child.
      */
     public Optional<Widget<?>> selected = Optional.empty();
-    public Widget<?> tooltipWidget;
-    public TooltipRenderer<T> tooltip;
     public PressCallback<T> primaryAction;
     public PressCallback<T> secondaryAction;
     public PressCallback<T> tertiaryAction;
     public ContextScrollAction<T> scrollAction;
 
-    public NulliPredicate present = NulliPredicate.ofTrue();
+    public NulliPredicate present = () -> !this.isTooltip() || this.isPresentTooltip();
     public NulliPredicate visible = NulliPredicate.ofTrue();
     public NulliPredicate active = NulliPredicate.ofTrue();
 
@@ -62,9 +62,11 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     public boolean dragging;
 
     /**
-     Stored in {@link #render(MatrixStack)} in order to avoid passing it around everywhere.
+     Stored by {@link #render(MatrixStack)} in order to avoid passing it around everywhere.
      */
     public MatrixStack matrixes;
+
+    private final Set<Widget<?>> renderDeferred = ReferenceLinkedOpenHashSet.of();
 
     public void initialize() {}
 
@@ -254,14 +256,8 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return this.scrollAction((ContextScrollAction<T>) action);
     }
 
-    public T tooltip(TooltipRenderer<T> renderer) {
-        this.tooltip = renderer;
-
-        return (T) this;
-    }
-
     public T tooltip(Widget<?> tooltip) {
-        this.tooltipWidget = this.add(tooltip.present(tooltip.present.and(() -> this.mouseFocused || tooltip.isFocused() || this.isFocused() && isControlDown())));
+        this.tooltips.add(this.add(tooltip));
 
         return (T) this;
     }
@@ -325,6 +321,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     public <C extends Widget> C remove(C child) {
         this.children.remove(child);
+        this.tooltips.remove(child);
         child.parent(null);
 
         return child;
@@ -343,6 +340,11 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     public boolean remove(Widget<?>... children) {
         return this.remove(List.of(children));
+    }
+
+    public void clear() {
+        this.children.clear();
+        this.tooltips.clear();
     }
 
     public int replace(Widget<?> original, Widget<?> replacement) {
@@ -406,11 +408,19 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public boolean focusable() {
-        return this.isActive() && (this.primaryAction != null || this.secondaryAction != null || this.tertiaryAction != null || this.tooltip != null || this.tooltipWidget != null);
+        return this.isActive() && (this.primaryAction != null || this.secondaryAction != null || this.tertiaryAction != null || !this.tooltips.isEmpty());
     }
 
     public boolean scrollable() {
         return this.scrollAction != null;
+    }
+
+    public boolean isTooltip() {
+        return this.parent.filter(parent -> parent.tooltips.contains(this)).isPresent();
+    }
+
+    public boolean isPresentTooltip() {
+        return this.isTooltip() && this.parent.get().mouseFocused || this.parent.get().isSelected() && isControlDown() || this.isFocused();
     }
 
     @Override
@@ -425,7 +435,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     public void preinitialize() {
         this.select(null);
-        this.children.clear();
+        this.clear();
         keyboard.setRepeatEvents(true);
         this.initialize();
     }
@@ -510,6 +520,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     public void render(MatrixStack matrixes) {
         if (this.isPresent()) {
+            this.renderDeferred.clear();
             this.matrixes = matrixes;
             this.mouseFocused = false;
 
@@ -537,15 +548,13 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
                 this.render();
 
                 for (var child : this.children) {
-                    if (child != this.tooltipWidget) {
-                        child.render(matrixes);
-                    }
+                    child.render(matrixes);
                 }
 
                 if (this.isRoot()) {
-                    this.descendants().filter(descendant -> descendant.parent().filter(parent -> descendant == parent.tooltipWidget).isPresent()).forEach(tooltip -> {
+                    this.renderDeferred.forEach(widget -> {
                         RenderSystem.clear(GL46C.GL_DEPTH_BUFFER_BIT, false);
-                        tooltip.render(matrixes);
+                        widget.render(matrixes);
                     });
                 }
             }
@@ -559,22 +568,13 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     protected void render() {}
 
-    protected void renderTooltip() {
-        if (this.mouseFocused || isControlDown()) {
-            var x = this.mouseFocused ? (int) mouseX() : this.x();
-            var y = this.mouseFocused ? (int) mouseY() : this.y();
-
-            if (this.tooltip != null) {
-                this.tooltip.render((T) this, this.matrixes, x, y);
-            }
-        }
+    protected void deferRender() {
+        this.root().renderDeferred.add(this);
     }
 
     protected void whileHovered() {}
 
-    protected void whileFocused() {
-        this.renderTooltip();
-    }
+    protected void whileFocused() {}
 
     /**
      Determine whether the click should trigger the primary action.
