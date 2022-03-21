@@ -23,6 +23,50 @@ public class SkillWidget extends Widget<SkillWidget> {
         this.primaryAction(() -> tab.container().item().upgrade(skill));
     }
 
+    @Override public void tick() {
+        if (this.isFocused()) {
+            var cost = this.skill.cost();
+            var genericSections = new ReferenceArrayList<Text>();
+
+            if (this.skill.learned()) {
+                if (this.skill.skill.isTiered()) {
+                    genericSections.add(this.skill.skill.maxLevel < 0 ? Translations.guiLevel.format(this.skill.level()) : Translations.guiLevelFinite.format(this.skill.level(), this.skill.skill.maxLevel));
+
+                    if (this.skill.canUpgrade()) {
+                        genericSections.add(Translations.guiSkillUpgradeCost.format(cost));
+                    }
+                }
+            } else if (this.skill.dependenciesFulfilled()) {
+                genericSections.add(Translations.guiSkillLearnCost.format(cost));
+            }
+
+            var sections = ReferenceArrayList.<List<? extends StringVisitable>>of();
+            var tooltipWidth = Math.max(36 + Math.max(108, textRenderer.getWidth(this.skill.name())), 12 + genericSections.stream().peek(section -> sections.add(List.of(section))).mapToInt(textRenderer::getWidth).max().orElse(0));
+            var tooltip = wrap(this.skill.tooltip(), tooltipWidth - 8);
+            sections.add(0, tooltip);
+
+            var height = 1 + (1 + tooltip.size()) * fontHeight();
+            var y = this.y() - 4 > this.tab.insideCenterY ? -56 : -7;
+            var textY = 7;
+            this.clear();
+
+            for (var section : sections) {
+                var text = new TextWidget().x(5).y(textY).color(0x999999);
+                section.forEach(text::text);
+                this.tooltip(new ScalableWidget<>().grayRectangle().x(-4).y(1, y).width(tooltipWidth).height(height).present(this::isFocused).with(text));
+
+                y += height;
+                textY = 6;
+                height = 20;
+            }
+
+            this.tooltip(new ScalableWidget<>().blueRectangle().x(-4).y(0.5).centerY().width(tooltipWidth).height(20).present(this::isFocused).with(new TextWidget().x(32).y(6).shadow().text(this.skill.name())));
+            this.add(this.frame);
+        }
+
+        super.tick();
+    }
+
     @Override protected void render() {
         if (this.skill.learned()) {
             this.frame.yellowRectangle();
@@ -30,58 +74,11 @@ public class SkillWidget extends Widget<SkillWidget> {
             this.frame.whiteRectangle();
         }
 
-        if (this.tab.focusedSkill == this) {
-            if (!this.isFocused()) {
-                this.tab.focusedSkill = null;
-            }
+        if (this.isFocused()) {
+            this.frame.color3f(1);
+            this.deferRender();
         } else {
-            chroma(this.tab.chroma);
+            this.frame.color3f(this.tab.chroma);
         }
-    }
-
-    @Override protected void renderTooltip() {
-        this.tab.focusedSkill = this;
-        chroma(1);
-
-        var cost = this.skill.cost();
-        var genericSections = new ReferenceArrayList<Text>();
-
-        if (this.skill.learned()) {
-            if (this.skill.skill.isTiered()) {
-                genericSections.add(Translations.guiLevel.format(this.skill.level()));
-
-                if (this.skill.canUpgrade()) {
-                    genericSections.add(Translations.guiSkillUpgradeCost.format(cost));
-                }
-            }
-        } else if (this.skill.dependenciesFulfilled()) {
-            genericSections.add(Translations.guiSkillLearnCost.format(cost));
-        }
-
-        var sections = new ReferenceArrayList<List<? extends StringVisitable>>();
-        var name = this.skill.name();
-        var barWidth = Math.max(36 + Math.max(108, textRenderer.getWidth(name)), 12 + genericSections.stream().peek(section -> sections.add(List.of(section))).mapToInt(textRenderer::getWidth).max().orElse(0));
-        var tooltip = this.skill.tooltip();
-
-        if (tooltip.size() > 0) {
-            sections.add(0, tooltip = wrap(tooltip, barWidth - 8));
-        }
-
-        var height = 1 + (1 + tooltip.size()) * fontHeight();
-        var y = this.y() - 4 > this.tab.insideCenterY ? -56 : -7;
-        var textY = 7;
-
-        for (var section : sections) {
-            var text = new TextWidget().x(5).y(textY).color(0x999999);
-            section.forEach(text::text);
-            new ScalableWidget<>().grayRectangle().parent(this).x(-4).y(1, y).width(barWidth).height(height).with(text).render(this.matrixes);
-
-            y += height;
-            textY = 6;
-            height = 20;
-        }
-
-        chroma(1);
-        new ScalableWidget<>().blueRectangle().parent(this).x(-4).y(0.5).centerY().width(barWidth).height(20).with(new TextWidget().x(32).y(6).shadow().text(name)).render(this.matrixes);
     }
 }

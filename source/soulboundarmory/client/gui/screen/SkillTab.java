@@ -9,6 +9,7 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.coordinate.Offset;
 import soulboundarmory.lib.gui.widget.TextWidget;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.skill.SkillInstance;
 
@@ -23,13 +24,9 @@ public class SkillTab extends SoulboundTab {
         .with(new TextWidget().stroke().text(this.title).x(8).y(6).color(0xEEEEEE))
         .with(new TextWidget().stroke().text(() -> this.pointText(this.container().item().skillPoints())).x(Coordinate.Position.END).x(1, -15).y(25).color(0xEEEEEE));
 
-    protected SkillWidget focusedSkill;
-    protected float chroma;
+    protected float chroma = 1;
     protected int insideWidth;
     protected int insideHeight;
-    protected int centerX;
-    protected int centerY;
-    protected int insideCenterX;
     protected int insideCenterY;
     protected int insideX;
     protected int insideY;
@@ -42,29 +39,26 @@ public class SkillTab extends SoulboundTab {
 
     @Override
     public void initialize() {
-        if (this.focusedSkill == null) {
+        if (!this.dim()) {
             this.chroma = 1;
         }
 
-        this.centerX = Math.max(this.button.endX() + this.window.width() / 2 + 4, this.middleX());
-        this.centerY = Math.min(this.container().xpBar.y() - 16 - this.window.height() / 2, this.middleY());
-        this.window.x(this.centerX).y(this.centerY).center();
+        this.window.x(Math.max(this.button.endX() + this.window.width() / 2 + 4, this.middleX())).y(Math.min(this.container().xpBar.y() - 16 - this.window.height() / 2, this.middleY())).center();
         this.insideWidth = this.window.width() - 18;
         this.insideHeight = this.window.height() - 27;
-        this.insideCenterX = this.centerX;
-        this.insideCenterY = this.centerY + 4;
-        this.insideX = this.insideCenterX - this.insideWidth / 2;
+        this.insideCenterY = this.window.middleY() + 4;
+        this.insideX = this.window.middleX() - this.insideWidth / 2;
         this.insideY = this.insideCenterY - this.insideHeight / 2;
-        this.insideEndX = this.centerX + this.insideWidth / 2;
-        this.insideEndY = this.centerY + this.insideHeight / 2;
+        this.insideEndX = this.window.middleX() + this.insideWidth / 2;
+        this.insideEndY = this.window.middleY() + this.insideHeight / 2;
 
         this.add(this.window);
         this.updateWidgets();
 
         if (!this.container().options.isEmpty()) {
-            var slider = this.container().sliders.get(0);
+            var option = this.container().options.get(0);
 
-            if (slider != null && slider.x() < this.window.endX()) {
+            if (option.x() < this.window.endX()) {
                 this.remove(this.container().options);
             }
         }
@@ -72,12 +66,15 @@ public class SkillTab extends SoulboundTab {
 
     @Override
     protected void render() {
+        var delta = 20 * tickDelta() / 255F;
+        this.chroma = this.dim() ? Math.max(this.chroma - delta, 175 / 255F) : Math.min(this.chroma + delta, 1);
         chroma(this.chroma);
         RenderSystem.enableBlend();
         this.renderBackground(background, this.insideX, this.insideY, this.insideWidth, this.insideHeight, (int) (128 * this.chroma));
+    }
 
-        var delta = 20 * tickDelta() / 255F;
-        this.chroma = this.focusedSkill == null ? Math.min(this.chroma + delta, 1) : Math.max(this.chroma - delta, 175 / 255F);
+    private boolean dim() {
+        return this.window.children().anyMatch(child -> child.tooltips.stream().anyMatch(Widget::isPresent));
     }
 
     private void updateWidgets() {
@@ -128,7 +125,7 @@ public class SkillTab extends SoulboundTab {
 
                 x += total / dependencies.size();
             } else {
-                x += this.centerX;
+                x += this.window.middleX();
             }
 
             this.skills.computeIfAbsent(skill, skil -> this.window.add(new SkillWidget(this, skil).size(24).center().offset(Offset.Type.ABSOLUTE))).x(x).y(this.insideY + 24 + 32 * tier);

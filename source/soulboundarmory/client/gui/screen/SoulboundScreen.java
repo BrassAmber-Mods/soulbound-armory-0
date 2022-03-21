@@ -1,6 +1,8 @@
 package soulboundarmory.client.gui.screen;
 
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -36,15 +38,23 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         .tooltip(new TooltipWidget().with(new TextWidget().text(() -> {
             var xp = (int) this.item.experience();
             return this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp);
-        }))).primaryAction(() -> {
-            configuration.displayOptions ^= true;
-            this.refresh();
-        }).secondaryAction(() -> configuration.overlayExperienceBar ^= true)
+        }))).primaryAction(() -> configuration.displayOptions ^= true)
+        .secondaryAction(() -> configuration.overlayExperienceBar ^= true)
         .scrollAction(amount -> this.cycleStyle((int) amount))
         .present(this::displayTabs);
 
-    protected final List<Widget<?>> options = new ReferenceArrayList<>(5);
-    protected final List<Widget<?>> sliders = new ReferenceArrayList<>(4);
+    protected final List<Widget<?>> options = Stream.<Widget<?>>of(
+        this.colorSlider(Translations.red, 0),
+        this.colorSlider(Translations.green, 1),
+        this.colorSlider(Translations.blue, 2),
+        this.colorSlider(Translations.alpha, 3),
+        this.optionButton(
+            4,
+            () -> Translations.style.format(configuration.style.text),
+            () -> this.cycleStyle(1),
+            () -> this.cycleStyle(-1)
+        )
+    ).peek(option -> option.present(() -> configuration.displayOptions && this.displayTabs())).toList();
     protected final SoulboundComponent<?> component;
     protected final int slot;
     protected ItemStack stack;
@@ -99,24 +109,7 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
                 .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.component).writeInt(unbind ? -1 : this.slot)));
 
             this.tab(this.tab);
-
-            if (configuration.displayOptions) {
-                this.sliders.add(this.colorSlider(Translations.red, 0));
-                this.sliders.add(this.colorSlider(Translations.green, 1));
-                this.sliders.add(this.colorSlider(Translations.blue, 2));
-                this.sliders.add(this.colorSlider(Translations.alpha, 3));
-
-                this.options.addAll(this.sliders);
-
-                this.options.add(this.optionButton(
-                    4,
-                    Translations.style.format(configuration.style.text),
-                    () -> this.cycleStyle(1),
-                    () -> this.cycleStyle(-1)
-                ));
-
-                this.add(this.options);
-            }
+            this.add(this.options);
         } else {
             var tab = this.component.selectionTab();
             this.addTab(tab);
@@ -169,23 +162,22 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         return this.height() / 16 + Math.max(this.height() / 16, 30) * row;
     }
 
-    private <T extends ScalableWidget<T>> T optionButton(int row, Text text, Runnable primaryAction, Runnable secondaryAction) {
+    private <T extends ScalableWidget<T>> T optionButton(int row, Supplier<? extends Text> text, Runnable primaryAction, Runnable secondaryAction) {
         return new ScalableWidget<T>()
             .button()
-            .x(this.optionX())
-            .y(this.optionY(row))
+            .x(this::optionX)
+            .y(() -> this.optionY(row))
             .width(100)
             .height(20)
-            .text(text)
-            .present(this::displayTabs)
+            .text(widget -> widget.text(text))
             .primaryAction(primaryAction)
             .secondaryAction(secondaryAction);
     }
 
     private SliderWidget colorSlider(Text text, int id) {
         return new SliderWidget()
-            .x(this.optionX())
-            .y(this.optionY(id))
+            .x(this::optionX)
+            .y(() -> this.optionY(id))
             .width(100)
             .height(20)
             .min(0)
@@ -193,7 +185,6 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
             .discrete()
             .value(color.get(id))
             .text(text)
-            .present(this::displayTabs)
             .onSlide(slider -> color.set(id, (int) slider.value()));
     }
 
@@ -226,12 +217,6 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
 
     private void cycleStyle(int change) {
         var index = (Configuration.instance().client.style.ordinal() + change) % BarStyle.count;
-
-        if (index < 0) {
-            this.cycleStyle(BarStyle.count + index);
-        } else {
-            Configuration.instance().client.style = BarStyle.styles.get(index);
-            this.refresh();
-        }
+        Configuration.instance().client.style = BarStyle.styles.get(index >= 0 ? index : index + BarStyle.count);
     }
 }
