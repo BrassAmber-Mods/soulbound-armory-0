@@ -51,16 +51,31 @@ public class SkillWidget extends Widget<SkillWidget> {
             this.clear();
 
             for (var section : sections) {
-                var text = new TextWidget().x(5).y(textY).color(0x999999);
-                section.forEach(text::text);
-                this.tooltip(new ScalableWidget<>().grayRectangle().x(-4).y(1, y).width(tooltipWidth).height(height).present(this::isFocused).with(text));
+                this.tooltip(new ScalableWidget<>()
+                    .grayRectangle()
+                    .x(-4)
+                    .y(1, y)
+                    .width(tooltipWidth)
+                    .height(height)
+                    .present(this::isFocused).with(new TextWidget().alignStart().x(5).y(textY).color(0x999999).with(t -> section.forEach(t::text)))
+                );
 
                 y += height;
                 textY = 6;
                 height = 20;
             }
 
-            this.tooltip(new ScalableWidget<>().blueRectangle().x(-4).y(0.5).centerY().width(tooltipWidth).height(20).present(this::isFocused).with(new TextWidget().x(32).y(6).shadow().text(this.skill.name())));
+            this.tooltip(new ScalableWidget<>()
+                .blueRectangle()
+                .x(-4)
+                .y(0.5)
+                .centerY()
+                .width(tooltipWidth)
+                .height(20)
+                .present(this::isFocused)
+                .with(new TextWidget().x(32).y(6).shadow().text(this.skill.name()))
+            );
+
             this.add(this.frame);
         }
 

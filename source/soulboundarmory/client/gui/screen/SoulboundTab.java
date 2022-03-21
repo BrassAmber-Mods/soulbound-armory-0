@@ -2,16 +2,19 @@ package soulboundarmory.client.gui.screen;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.function.IntSupplier;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class SoulboundTab extends Widget<SoulboundTab> {
     protected static final NumberFormat format = DecimalFormat.getInstance();
 
@@ -33,7 +36,7 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     }
 
     public int top(int rows) {
-        return this.top(this.height() / 16, rows);
+        return this.top(24, rows);
     }
 
     public int top(int separation, int rows) {
@@ -41,7 +44,7 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     }
 
     public int height(int rows, int row) {
-        return this.top(rows) + row * this.height() / 16;
+        return this.height(24, rows, row);
     }
 
     public int height(int separation, int rows, int row) {
@@ -51,10 +54,10 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     public Widget<?> squareButton(int x, int y, String text, Runnable action) {
         return new ScalableWidget<>()
             .button()
-            .x(x).x(Coordinate.Position.CENTER)
-            .y(y).y(Coordinate.Position.CENTER)
-            .width(20)
-            .height(20)
+            .center()
+            .x(.5, x)
+            .y(y)
+            .size(20)
             .text(Text.of(text))
             .primaryAction(action);
     }
@@ -62,24 +65,25 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     public Widget<?> resetButton(Category category) {
         return new ScalableWidget<>()
             .button()
-            .x(23D / 24).x(Coordinate.Position.END)
-            .y(15D / 16).y(Coordinate.Position.END)
+            .alignEnd()
+            .x(23D / 24)
+            .y(15D / 16)
             .width(112)
             .height(20)
             .text(Translations.guiButtonReset)
-            .primaryAction(this.resetAction(category));
+            .primaryAction(() -> this.reset(category));
     }
 
     public SoulboundScreen container() {
         return (SoulboundScreen) super.parent.get();
     }
 
-    protected Runnable resetAction(Category category) {
-        return () -> Packets.serverReset.send(new ExtendedPacketBuffer(this.container().item()).writeIdentifier(category.id()));
+    protected void reset(Category category) {
+        Packets.serverReset.send(new ExtendedPacketBuffer(this.container().item()).writeIdentifier(category.id()));
     }
 
-    protected void displayPoints(int points) {
-        drawCenteredText(this.matrixes, textRenderer, this.pointText(points), Math.round(this.width() / 2F), 4, 0xFFFFFF);
+    protected void displayPoints(IntSupplier points) {
+        this.centeredText(widget -> widget.text(() -> this.pointText(points.getAsInt())).y(0, 4).alignUp());
     }
 
     protected Text pointText(int points) {

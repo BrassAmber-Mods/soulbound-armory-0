@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import it.unimi.dsi.fastutil.objects.ReferenceList;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -31,6 +32,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
 import soulboundarmory.client.gui.screen.AttributeTab;
 import soulboundarmory.client.gui.screen.EnchantmentTab;
@@ -185,9 +188,9 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public abstract int levelXP(int level);
 
     /**
-     @return a list of attributes to be displayed on the attribute tab for this item
+     @return a list of attributes for display on the attribute tab for this item
      */
-    public abstract Map<Statistic, Text> screenAttributes();
+    public abstract List<StatisticType> screenAttributes();
 
     /**
      @return the tooltip for stacks of this item
@@ -277,8 +280,9 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     /**
      @return the tabs to display in the menu for this item
      */
+    @OnlyIn(Dist.CLIENT)
     public List<SoulboundTab> tabs() {
-        return List.of(new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab());
+        return ReferenceList.of(new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab());
     }
 
     /**
@@ -648,8 +652,14 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      {@linkplain #reset(Category) Reset} all statistic categories and lock this item.
      */
     public void reset() {
+        var level = this.level();
+
         for (var category : Category.registry) {
             this.reset(category);
+        }
+
+        if (Configuration.instance().freeRestoration) {
+            this.set(StatisticType.attributePoints, level);
         }
 
         this.unlocked = false;
@@ -735,6 +745,20 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         return modifiers;
     }
 
+    public Text format(StatisticType attribute) {
+        if (attribute == StatisticType.attackDamage) return Translations.guiAttackDamage.format(this.formatValue(attribute));
+        if (attribute == StatisticType.attackSpeed) return Translations.guiAttackSpeed.format(this.formatValue(attribute));
+        if (attribute == StatisticType.criticalHitRate) return Translations.guiCriticalHitRate.format(this.formatValue(attribute));
+        if (attribute == StatisticType.efficiency) return Translations.guiEfficiency.format(this.formatValue(attribute));
+        if (attribute == StatisticType.reach) return Translations.guiReach.format(this.formatValue(attribute));
+
+        return null;
+    }
+
+    protected Map.Entry<Statistic, Text> statisticEntry(StatisticType type, Translation translation, Object... arguments) {
+        return Map.entry(this.statistic(type), translation.format(Util.add(this.formatValue(type), arguments)));
+    }
+
     /**
      Ensure that the client's component is up to date with the server.
 
@@ -798,7 +822,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @param statistic the statistic type
      @return the formatted value
      */
-    protected String format(StatisticType statistic) {
+    protected String formatValue(StatisticType statistic) {
         if (statistic == StatisticType.upgradeProgress || statistic == StatisticType.criticalHitRate) {
             return this.formatPercentage(statistic);
         }
@@ -807,11 +831,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     protected String formatPercentage(StatisticType statistic) {
-        return (int) (this.floatValue(statistic) * 100) + "%";
-    }
-
-    protected Map.Entry<Statistic, Text> statisticEntry(StatisticType type, Translation translation, Object... arguments) {
-        return Map.entry(this.statistic(type), translation.format(Util.add(this.format(type), arguments)));
+        return Integer.toString((int) (this.floatValue(statistic) * 100));
     }
 
     /**

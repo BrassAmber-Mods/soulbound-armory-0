@@ -12,9 +12,9 @@ import soulboundarmory.util.Util;
 
 public final class ScreenDelegate extends Screen {
     public final Screen parent = Widget.screen();
-    public final CellScreen<?> screen;
+    public final ScreenWidget<?> screen;
 
-    public ScreenDelegate(Text title, CellScreen<?> screen) {
+    public ScreenDelegate(Text title, ScreenWidget<?> screen) {
         super(title);
 
         this.screen = screen;

@@ -9,6 +9,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.skill.Skills;
 
@@ -56,6 +58,7 @@ public class SoulboundGreatsword extends SoulboundMeleeWeapon {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int itemSlot, boolean isSelected) {
         if (entity instanceof ClientPlayerEntity user && isSelected && user.getActiveItem().getItem() == this) {
             user.input.movementForward *= 4.5;

@@ -64,12 +64,12 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
     public static class Serializer implements ArgumentSerializer<RegistryArgumentType<?>> {
         @Override
         public void toPacket(RegistryArgumentType<?> type, PacketByteBuf buf) {
-            buf.writeVarInt(Registry.REGISTRIES.getRawId(Util.cast(type.registry)));
+            buf.writeIdentifier(Registry.REGISTRIES.getId(Util.cast(type.registry)));
         }
 
         @Override
         public RegistryArgumentType<?> fromPacket(PacketByteBuf buf) {
-            return new RegistryArgumentType<>(Registry.REGISTRIES.get(buf.readVarInt()));
+            return new RegistryArgumentType<>(Registry.REGISTRIES.get(buf.readIdentifier()));
         }
 
         @Override

@@ -22,6 +22,8 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.ResourceManager;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.util.Util;
 
 /**
@@ -30,6 +32,7 @@ import soulboundarmory.util.Util;
  @param <B> the base type wherewith this node can interact (have as parents or children)
  @param <T> the type of the node
  */
+@OnlyIn(Dist.CLIENT)
 public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawable, Element {
     MinecraftClient client = MinecraftClient.getInstance();
     Window window = client.getWindow();
@@ -95,17 +98,25 @@ public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawab
     }
 
     /**
-     @return the total width of this node and all of its descendants
+     @return the total width of the smallest area that contains this node's descendants
      */
-    default int totalWidth() {
-        return this.descendants().mapToInt(B::x).max().orElseGet(this::endX) - this.descendants().mapToInt(B::x).min().orElseGet(this::x);
+    default int descendantWidth() {
+        return switch (this.degree()) {
+            case 0 -> 0;
+            case 1 -> this.child(0).width();
+            default -> this.descendants().mapToInt(B::endX).max().orElse(0) - this.descendants().mapToInt(B::x).min().orElse(0);
+        };
     }
 
     /**
-     @return the total height of this node and all of its descendants
+     @return the total height of the smallest area that contains this node's descendants
      */
-    default int totalHeight() {
-        return this.descendants().mapToInt(B::y).max().orElseGet(this::endY) - this.descendants().mapToInt(B::y).min().orElseGet(this::y);
+    default int descendantHeight() {
+        return switch (this.degree()) {
+            case 0 -> 0;
+            case 1 -> this.child(0).height();
+            default -> this.descendants().mapToInt(B::endY).max().orElseGet(this::endY) - this.descendants().mapToInt(B::y).min().orElseGet(this::y);
+        };
     }
 
     /**

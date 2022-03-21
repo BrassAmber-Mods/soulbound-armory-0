@@ -9,8 +9,8 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import soulboundarmory.SoulboundArmory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.registry.RegistryElement;
@@ -19,7 +19,6 @@ import soulboundarmory.util.Util;
 /**
  An active or passive ability; locked by default and possibly having multiple levels and dependencies.
  */
-@EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public abstract class Skill extends RegistryElement<Skill> {
     public static final Registry<Skill> registry = Util.newRegistry("skill");
 
@@ -62,14 +61,6 @@ public abstract class Skill extends RegistryElement<Skill> {
         return this.maxLevel != 1;
     }
 
-    public Set<Skill> dependencies() {
-        return Objects.requireNonNullElse(this.dependencies, Collections.emptySet());
-    }
-
-    public boolean hasDependencies() {
-        return !this.dependencies().isEmpty();
-    }
-
     /**
      A skill's tier is the number of levels of dependencies that it has.
 
@@ -77,6 +68,14 @@ public abstract class Skill extends RegistryElement<Skill> {
      */
     public final int tier() {
         return this.tier;
+    }
+
+    public Set<Skill> dependencies() {
+        return Objects.requireNonNullElse(this.dependencies, Collections.emptySet());
+    }
+
+    public boolean hasDependencies() {
+        return !this.dependencies().isEmpty();
     }
 
     public Text name() {
@@ -90,6 +89,7 @@ public abstract class Skill extends RegistryElement<Skill> {
     /**
      Render an icon of this skill.
      */
+    @OnlyIn(Dist.CLIENT)
     public void render(Widget<?> tab, int level) {
         Widget.shaderTexture(this.texture);
         DrawableHelper.drawTexture(tab.matrixes, tab.x(), tab.y(), tab.z(), 0, 0, 16, 16, 16, 16);

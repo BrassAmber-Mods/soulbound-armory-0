@@ -12,13 +12,13 @@ import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.component.Components;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.lib.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.screen.ScreenWidget;
 
 @Mixin(InGameHud.class)
 abstract class InGameHudMixin {
     @Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
     private void renderSoulboundItemExperienceBar(MatrixStack matrixes, int x, CallbackInfo info) {
-        if (CellScreen.cellScreen() instanceof SoulboundScreen screen && screen.xpBar.isVisible() || Configuration.instance().client.overlayExperienceBar && ExperienceBar.overlayBar.renderOverlay(matrixes)) {
+        if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen && screen.xpBar.isVisible() || Configuration.instance().client.overlayExperienceBar && ExperienceBar.overlayBar.renderOverlay(matrixes)) {
             info.cancel();
         }
     }

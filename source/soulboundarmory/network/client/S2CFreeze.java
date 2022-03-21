@@ -1,5 +1,7 @@
 package soulboundarmory.network.client;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.component.Components;
 import soulboundarmory.network.BufferPacket;
@@ -13,6 +15,7 @@ import soulboundarmory.network.BufferPacket;
  */
 public class S2CFreeze extends BufferPacket {
     @Override
+    @OnlyIn(Dist.CLIENT)
     protected void execute() {
         this.message.readEntity().map(Components.entityData::of).ifPresent(component -> {
             var frozen = this.message.readBoolean();

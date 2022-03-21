@@ -1,5 +1,7 @@
 package soulboundarmory.network.client;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.network.ComponentPacket;
 
@@ -12,6 +14,7 @@ import soulboundarmory.network.ComponentPacket;
  */
 public final class S2CRefresh extends ComponentPacket {
     @Override
+    @OnlyIn(Dist.CLIENT)
     protected void execute(SoulboundComponent<?> component) {
         component.refresh();
     }

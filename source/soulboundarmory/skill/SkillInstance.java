@@ -89,7 +89,7 @@ public final class SkillInstance implements Comparable<SkillInstance>, Serializa
         return this.skill.tooltip();
     }
 
-    public void render(Widget<?> tab, MatrixStack matrices) {
+    public void render(Widget<?> tab, MatrixStack matrixes) {
         this.skill.render(tab, this.level);
     }
 

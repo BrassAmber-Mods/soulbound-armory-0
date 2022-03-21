@@ -1,7 +1,7 @@
 package soulboundarmory.lib.gui.widget;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -20,32 +20,18 @@ public class TextWidget extends Widget<TextWidget> {
     public int stroke;
     public boolean hasStroke;
 
-    @Override
-    public TextWidget text(Text text) {
-        this.text.add(() -> text);
+    @Override public TextWidget text(Supplier<? extends Text> text) {
+        this.text.add(text);
 
         return this;
     }
 
-    @Override
-    public TextWidget text(String text) {
-        return this.text(Text.of(text));
-    }
-
-    public TextWidget text(Iterable<? extends Text> text) {
-        text.forEach(this::text);
-
-        return this;
+    @Override public TextWidget text(Consumer<? super TextWidget> configure) {
+        return this.with(configure);
     }
 
     public TextWidget text(StringVisitable text) {
         return this.text(text::getString);
-    }
-
-    public TextWidget text(Supplier<? extends Text> text) {
-        this.text.add(text);
-
-        return this;
     }
 
     public TextWidget text(ObjectSupplier text) {
@@ -141,36 +127,12 @@ public class TextWidget extends Widget<TextWidget> {
 
     @Override
     public int width() {
-        var width = this.text().map(textRenderer::getWidth).max(Comparator.naturalOrder()).orElse(0);
-
-        if (this.hasStroke) {
-            width += 2;
-        } else if (this.shadow) {
-            width++;
-        }
-
-        return width;
+        return this.adjustSize(this.text().mapToInt(textRenderer::getWidth).max().orElse(0));
     }
 
     @Override
     public int height() {
-        return fontHeight() * (int) this.text().count();
-    }
-
-    protected int adjustColor(int color, int fallback) {
-        if (color == 0) {
-            color = fallback;
-        }
-
-        if ((color & 0xFF000000) == 0) {
-            color |= 0xFF000000;
-        }
-
-        if (!this.isActive()) {
-            color = color & 0xFFFFFF | Math2.alpha(color) * 160 / 255 << 24;
-        }
-
-        return color;
+        return this.adjustSize(fontHeight() * (int) this.text().count());
     }
 
     @Override
@@ -187,6 +149,28 @@ public class TextWidget extends Widget<TextWidget> {
             } else {
                 textRenderer.draw(this.matrixes, text, this.x(), y, this.color());
             }
+
+            if (this.isFocused() && this.isActive()) {
+                drawStrokedText(this.matrixes, text, this.x(), y, this.strokeColor(), this.color());
+            }
         }));
+    }
+
+    protected int adjustColor(int color, int fallback) {
+        if (color == 0) color = fallback;
+        if ((color & 0xFF000000) == 0) color |= 0xFF000000;
+        if (!this.isActive()) color = color & 0xFFFFFF | Math2.alpha(color) * 160 / 255 << 24;
+
+        return color;
+    }
+
+    protected int adjustSize(int baseSize) {
+        if (this.hasStroke) {
+            baseSize += 2;
+        } else if (this.shadow) {
+            baseSize++;
+        }
+
+        return baseSize;
     }
 }

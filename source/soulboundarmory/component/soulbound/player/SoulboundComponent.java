@@ -1,14 +1,15 @@
 package soulboundarmory.component.soulbound.player;
 
-import soulboundarmory.lib.gui.screen.CellScreen;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.GameRules;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.client.gui.screen.SoulboundTab;
@@ -19,6 +20,7 @@ import soulboundarmory.config.Configuration;
 import soulboundarmory.lib.component.ComponentRegistry;
 import soulboundarmory.lib.component.EntityComponent;
 import soulboundarmory.lib.component.EntityComponentKey;
+import soulboundarmory.lib.gui.screen.ScreenWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
@@ -32,8 +34,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     /**
      The index of the last open tab in the menu for that it may be restored when the menu is next opened.
      */
-    public int tab;
-
+    protected int tab;
     protected int boundSlot;
     protected ItemComponent<?> item;
 
@@ -61,6 +62,10 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     @Override
     public final boolean isClient() {
         return this.player.world.isClient;
+    }
+
+    public int tab() {
+        return this.tab;
     }
 
     public void tab(int index) {
@@ -126,6 +131,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     /**
      @return the selection tab for this component
      */
+    @OnlyIn(Dist.CLIENT)
     public SoulboundTab selectionTab() {
         return new SelectionTab();
     }
@@ -166,7 +172,7 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
      */
     public void refresh() {
         if (this.isClient()) {
-            if (CellScreen.cellScreen() instanceof SoulboundScreen screen) {
+            if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen) {
                 screen.refresh();
             }
         } else {

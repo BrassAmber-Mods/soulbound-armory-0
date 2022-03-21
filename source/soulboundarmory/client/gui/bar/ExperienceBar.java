@@ -1,19 +1,16 @@
 package soulboundarmory.client.gui.bar;
 
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.widget.TextWidget;
-import soulboundarmory.lib.gui.widget.TooltipWidget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 
-public class ExperienceBar extends ScalableWidget<ExperienceBar> implements TooltipComponent {
+public class ExperienceBar extends ScalableWidget<ExperienceBar> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Color color = configuration.color;
 
@@ -21,14 +18,14 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
 
     protected final TextWidget level = this.add(new TextWidget())
         .x(.5)
+        .y(5)
         .centerX()
-        .y(3)
-        .y(Coordinate.Position.END)
+        .alignDown()
         .color(color::argb)
         .stroke()
         .text(() -> this.component.level())
         .visible(() -> this.component.level() > 0)
-        .tooltip(new TooltipWidget().y(Coordinate.Position.END).with(new TextWidget().text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel()))));
+        .tooltip(tooltip -> tooltip.alignDown().text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel())));
 
     protected ItemComponent<?> component;
 

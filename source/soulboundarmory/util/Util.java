@@ -3,6 +3,8 @@ package soulboundarmory.util;
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +50,11 @@ public class Util extends net.minecraft.util.Util {
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
+
+    public static <T, C extends Collection<? super T>> C add(C collection, T... things) {
+        Collections.addAll(collection, things);
+        return collection;
+    }
 
     public static void rotate(MatrixStack matrixes, Vec3f axis, float degrees) {
         matrixes.multiply(axis.getDegreesQuaternion(degrees));

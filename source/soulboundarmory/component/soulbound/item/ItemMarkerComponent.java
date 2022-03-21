@@ -6,6 +6,9 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.lib.component.ItemStackComponent;
 import soulboundarmory.lib.gui.AbstractNode;
 import soulboundarmory.lib.gui.Node;
@@ -30,7 +33,11 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
     }
 
     public ItemComponent<?> item() {
-        return Util.or(this.item, this::initializeItem);
+        if (this.item == null && Util.isClient()) {
+            return this.initializeItem();
+        }
+
+        return this.item;
     }
 
     public void item(ItemComponent<?> item) {
@@ -44,6 +51,11 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
     public void unlock() {
         this.animationTick = 0;
         this.upload();
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public ExperienceBar tooltip() {
+        return new ExperienceBar().item(this.item()).width(AbstractNode.width(this.stack.getName()));
     }
 
     @Override
@@ -68,10 +80,12 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     private ItemComponent<?> initializeItem() {
-        return this.item = ItemComponent.of(Node.client.player, this.stack).orElse(null);
+        return this.item = ItemComponent.of(AbstractNode.player(), this.stack).orElse(null);
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void upload() {
         var player = this.item.player;
         var animation = (Sprite.Animation) Node.itemRenderer.getModel(this.stack, player.world, player, player.getId()).getParticleSprite().getAnimation();

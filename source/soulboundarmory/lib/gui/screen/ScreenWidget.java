@@ -6,11 +6,11 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-public abstract class CellScreen<T extends CellScreen<T>> extends Widget<T> {
+public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> {
     public Text title = LiteralText.EMPTY;
     public ScreenDelegate screen;
 
-    public CellScreen() {
+    public ScreenWidget() {
         this.z(100);
     }
 

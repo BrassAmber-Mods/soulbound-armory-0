@@ -1,8 +1,8 @@
 package soulboundarmory.component.soulbound.item.tool;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
@@ -18,12 +18,10 @@ import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.skill.Skills;
 import soulboundarmory.item.SoulboundItems;
-import soulboundarmory.util.Util;
+import soulboundarmory.skill.Skills;
 
 public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
     protected ToolMaterial material = ToolMaterials.WOOD;
@@ -85,53 +83,52 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     public void addAttribute(StatisticType type, int points) {
         super.addAttribute(type, points);
 
-        var progress = this.statistic(StatisticType.upgradeProgress);
+        var upgrade = this.statistic(StatisticType.upgradeProgress);
 
-        if (this.nextMaterial != null && progress.intValue() == 1) {
-            progress.setToMin();
-            progress.max();
+        if (this.nextMaterial != null && upgrade.intValue() == 1) {
+            upgrade.setToMin();
+            upgrade.max();
             this.material = this.nextMaterial;
             this.nextMaterial = null;
             this.synchronize();
+        }
+
+        if (type == upgrade.type) {
+            this.component.refresh();
         }
     }
 
     @Override
     public void reset() {
-        var level = this.level();
-
         super.reset();
 
         this.nextMaterial = null;
         this.material = ToolMaterials.WOOD;
 
-        if (Configuration.instance().freeRestoration) {
-            this.set(StatisticType.attributePoints, level);
-        }
-
         this.synchronize();
     }
 
+    @Override public Text format(StatisticType attribute) {
+        return attribute == StatisticType.upgradeProgress ? Translations.guiUpgradeProgress.format(this.formatValue(attribute), Translations.toolMaterial(this.nextMaterial)) : super.format(attribute);
+    }
+
     @Override
-    public Map<Statistic, Text> screenAttributes() {
-        var attributes = Util.map(
-            this.statisticEntry(StatisticType.efficiency, Translations.guiEfficiency),
-            this.statisticEntry(StatisticType.reach, Translations.guiReach)
-        );
+    public List<StatisticType> screenAttributes() {
+        var types = ReferenceArrayList.of(StatisticType.efficiency, StatisticType.reach);
 
         if (this.nextMaterial != null) {
-            Util.add(attributes, this.statisticEntry(StatisticType.upgradeProgress, Translations.guiUpgradeProgress, Translations.toolMaterial(this.nextMaterial)));
+            types.add(StatisticType.upgradeProgress);
         }
 
-        return attributes;
+        return types;
     }
 
     @Override
     public List<Text> tooltip() {
         return List.of(
-            Translations.tooltipReach.translate(this.format(StatisticType.reach)),
-            Translations.tooltipEfficiency.translate(this.format(StatisticType.efficiency)),
-            this.nextMaterial == null ? Translations.tier.translate(this.materialName()) : Translations.tooltipUpgradeProgress.translate(this.format(StatisticType.upgradeProgress), this.materialName())
+            Translations.tooltipReach.translate(this.formatValue(StatisticType.reach)),
+            Translations.tooltipEfficiency.translate(this.formatValue(StatisticType.efficiency)),
+            this.nextMaterial == null ? Translations.tier.translate(this.materialName()) : Translations.tooltipUpgradeProgress.translate(this.formatValue(StatisticType.upgradeProgress), this.materialName())
         );
     }
 

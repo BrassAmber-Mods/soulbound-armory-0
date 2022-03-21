@@ -1,16 +1,15 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.skill.Skills;
 import soulboundarmory.item.SoulboundItems;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
 public class DaggerComponent extends WeaponComponent<DaggerComponent> {
@@ -43,8 +42,8 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
     }
 
     @Override
-    public Map<Statistic, Text> screenAttributes() {
-        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiEfficiency));
+    public List<StatisticType> screenAttributes() {
+        return Util.add(super.screenAttributes(), StatisticType.efficiency);
     }
 
     @Override

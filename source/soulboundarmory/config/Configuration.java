@@ -14,6 +14,7 @@ import soulboundarmory.lib.config.Category;
 import soulboundarmory.lib.config.Comment;
 import soulboundarmory.lib.config.Interval;
 import soulboundarmory.util.Math2;
+import soulboundarmory.util.Util;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
@@ -83,7 +84,13 @@ public final class Configuration {
     // @TransitiveObject
     @Category(CLIENT)
     @OnlyIn(Dist.CLIENT)
-    public Client client = new Client();
+    public Client client;
+
+    public Configuration() {
+        if (Util.isClient()) {
+            this.client = new Client();
+        }
+    }
 
     public static Configuration instance() {
         return instance;

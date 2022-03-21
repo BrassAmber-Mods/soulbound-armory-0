@@ -14,20 +14,19 @@ import soulboundarmory.client.keyboard.GUIKeyBinding;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.lib.gui.screen.CellScreen;
-import soulboundarmory.lib.gui.widget.TextWidget;
-import soulboundarmory.lib.gui.widget.TooltipWidget;
+import soulboundarmory.lib.gui.screen.ScreenWidget;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.lib.gui.widget.slider.SliderWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
+import soulboundarmory.util.Util;
 
 /**
  The main menu of this mod.
  It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
  */
-public class SoulboundScreen extends CellScreen<SoulboundScreen> {
+public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Color color = configuration.color;
 
@@ -35,10 +34,10 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         .x(.5)
         .y(1D, -27)
         .center()
-        .tooltip(new TooltipWidget().with(new TextWidget().text(() -> {
+        .tooltip(tooltip -> tooltip.text(() -> {
             var xp = (int) this.item.experience();
             return this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp);
-        }))).primaryAction(() -> configuration.displayOptions ^= true)
+        })).primaryAction(() -> configuration.displayOptions ^= true)
         .secondaryAction(() -> configuration.overlayExperienceBar ^= true)
         .scrollAction(amount -> this.cycleStyle((int) amount))
         .present(this::displayTabs);
@@ -48,73 +47,66 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         this.colorSlider(Translations.green, 1),
         this.colorSlider(Translations.blue, 2),
         this.colorSlider(Translations.alpha, 3),
-        this.optionButton(
-            4,
-            () -> Translations.style.format(configuration.style.text),
-            () -> this.cycleStyle(1),
-            () -> this.cycleStyle(-1)
-        )
+        this.optionButton(4, () -> Translations.style.format(configuration.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1))
     ).peek(option -> option.present(() -> configuration.displayOptions && this.displayTabs())).toList();
     protected final SoulboundComponent<?> component;
     protected final int slot;
     protected ItemStack stack;
 
-    private final List<Widget<?>> tabButtons = new ReferenceArrayList<>();
-    private final List<SoulboundTab> tabs = new ReferenceArrayList<>();
+    private final List<SoulboundTab> tabs = ReferenceArrayList.of();
     private ItemComponent<?> item;
     private SoulboundTab tab;
-    private Widget<?> button;
 
     public SoulboundScreen(SoulboundComponent<?> component, int slot) {
         this.component = component;
         this.slot = slot;
     }
 
-    @Override
-    public void initialize() {
-        this.tabButtons.clear();
-        this.tabs.clear();
-        this.add(this.xpBar);
-
+    @Override public void tick() {
         this.stack = player().getInventory().getStack(this.slot);
+        var previousItem = this.item;
         this.item = ItemComponent.of(player(), this.stack).orElse(null);
 
-        if (this.displayTabs()) {
-            this.xpBar.item(this.item);
-
-            var tabs = this.item.tabs();
-            this.tab = tabs.get(this.component.tab);
-
-            for (var tab : tabs) {
-                this.addTab(tab);
-                var button = this.add(this.button(tab));
-                this.tabButtons.add(button);
-
-                if (tab == this.tab) {
-                    this.button = button;
-                }
-            }
-
-            var unbind = this.component.boundSlot() == this.slot;
-            var text = unbind ? Translations.guiButtonUnbind : Translations.guiButtonBind;
-
-            this.add(new ScalableWidget<>())
-                .button()
-                .x(this.button)
-                .y(15D / 16, -20)
-                .width(Math.max(this.button.width(), width(text) + 12))
-                .height(20)
-                .text(text)
-                .present(this::displayTabs)
-                .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.component).writeInt(unbind ? -1 : this.slot)));
-
-            this.tab(this.tab);
-            this.add(this.options);
+        if (previousItem != null && this.item != previousItem) {
+            this.close();
         } else {
-            var tab = this.component.selectionTab();
-            this.addTab(tab);
-            this.tab(tab);
+            this.xpBar.item(this.item);
+            super.tick();
         }
+    }
+
+    @Override
+    public void initialize() {
+        this.tabs.clear();
+        this.tick();
+        this.add(this.xpBar);
+
+        if (this.displayTabs()) {
+            this.tabs.addAll(this.item.tabs());
+            this.tab = this.tabs.get(MathHelper.clamp(this.component.tab(), 0, this.tabs.size() - 1));
+        } else {
+            this.tabs.add(this.tab = this.component.selectionTab());
+        }
+
+        Util.enumerate(this.tabs, (tab, index) -> {
+            tab.index = index;
+            tab.button = this.add(this.button(tab));
+        });
+
+        this.tab(this.tab);
+
+        this.add(new ScalableWidget<>())
+            .button()
+            .x(this.tab.button)
+            .y(15D / 16)
+            .centerY()
+            .width(button -> Math.max(this.tab.button.width(), button.descendantWidth() + 12))
+            .height(20)
+            .text(() -> this.bound() ? Translations.guiButtonUnbind : Translations.guiButtonBind)
+            .present(this::displayTabs)
+            .primaryAction(() -> Packets.serverBindSlot.send(new ExtendedPacketBuffer(this.component).writeInt(this.bound() ? -1 : this.slot)));
+
+        this.add(this.options);
     }
 
     @Override
@@ -154,6 +146,10 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
         this.tab.preinitialize();
     }
 
+    private boolean bound() {
+        return this.component.boundSlot() == this.slot;
+    }
+
     private int optionX() {
         return Math.round(this.width() * 23 / 24F) - 100;
     }
@@ -165,19 +161,19 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     private <T extends ScalableWidget<T>> T optionButton(int row, Supplier<? extends Text> text, Runnable primaryAction, Runnable secondaryAction) {
         return new ScalableWidget<T>()
             .button()
-            .x(this::optionX)
-            .y(() -> this.optionY(row))
+            .x(__ -> this.optionX())
+            .y(__ -> this.optionY(row))
             .width(100)
             .height(20)
-            .text(widget -> widget.text(text))
+            .centeredText(widget -> widget.text(text))
             .primaryAction(primaryAction)
             .secondaryAction(secondaryAction);
     }
 
     private SliderWidget colorSlider(Text text, int id) {
         return new SliderWidget()
-            .x(this::optionX)
-            .y(() -> this.optionY(id))
+            .x(__ -> this.optionX())
+            .y(__ -> this.optionY(id))
             .width(100)
             .height(20)
             .min(0)
@@ -197,19 +193,11 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
             .height(20)
             .text(tab.title)
             .primaryAction(() -> this.tab(tab))
+            .present(this::displayTabs)
             .active(() -> tab != this.tab);
     }
 
-    private void addTab(SoulboundTab tab) {
-        this.tabs.add(tab);
-        tab.index = this.tabs.size() - 1;
-    }
-
     private void tab(SoulboundTab tab) {
-        if (this.displayTabs()) {
-            tab.button = this.button = this.tabButtons.get(tab.index);
-        }
-
         this.renew(this.tab, this.tab = tab);
         tab.preinitialize();
         this.component.tab(tab.index);

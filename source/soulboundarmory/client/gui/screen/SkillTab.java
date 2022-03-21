@@ -6,9 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import net.minecraft.util.Identifier;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.coordinate.Offset;
-import soulboundarmory.lib.gui.widget.TextWidget;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.skill.SkillInstance;
@@ -21,8 +19,8 @@ public class SkillTab extends SoulboundTab {
 
     protected final Map<SkillInstance, SkillWidget> skills = new Reference2ReferenceLinkedOpenHashMap<>();
     protected final ScalableWidget<?> window = new ScalableWidget<>().window().width(512).height(288)
-        .with(new TextWidget().stroke().text(this.title).x(8).y(6).color(0xEEEEEE))
-        .with(new TextWidget().stroke().text(() -> this.pointText(this.container().item().skillPoints())).x(Coordinate.Position.END).x(1, -15).y(25).color(0xEEEEEE));
+        .text(text -> text.stroke().text(this.title).x(0, 8).y(6).color(0xEEEEEE))
+        .text(text -> text.stroke().text(() -> this.pointText(this.container().item().skillPoints())).alignRight().alignUp().x(1, -15).y(25).color(0xEEEEEE));
 
     protected float chroma = 1;
     protected int insideWidth;

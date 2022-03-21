@@ -1,9 +1,11 @@
 package soulboundarmory.network;
 
-import soulboundarmory.lib.gui.AbstractNode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent;
+import soulboundarmory.lib.gui.AbstractNode;
 
 /**
  The base packet type.
@@ -40,6 +42,11 @@ public abstract class Packet<T> {
      If this method is in a server context, then return the sender of this packet; otherwise, return the player.
      */
     protected final PlayerEntity player() {
-        return this.context.getDirection().getReceptionSide().isClient() ? AbstractNode.client.player : this.context.getSender();
+        return this.context.getDirection().getReceptionSide().isClient() ? player0() : this.context.getSender();
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private static PlayerEntity player0() {
+        return AbstractNode.player();
     }
 }

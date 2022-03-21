@@ -18,40 +18,20 @@ public class EnchantmentTab extends SoulboundTab {
     public void initialize() {
         var component = this.container().item();
         var enchantments = component.enchantments;
-        this.add(this.resetButton(Category.enchantment)).active(enchantments.values().intStream().anyMatch(level -> level > 0));
+        this.add(this.resetButton(Category.enchantment)).active(() -> enchantments.values().intStream().anyMatch(level -> level > 0));
+        this.displayPoints(() -> this.container().item().intValue(StatisticType.enchantmentPoints));
 
         Util.enumerate(enchantments, (enchantment, level, row) -> {
-            this.add(this.squareButton(this.width() + 122 >> 1, this.height(enchantments.size(), row), "-", this.disenchantAction(enchantment))).active(level > 0);
-            this.add(this.squareButton(this.width() + 162 >> 1, this.height(enchantments.size(), row), "+", this.enchantAction(enchantment))).active(component.intValue(StatisticType.enchantmentPoints) > 0);
+            this.add(this.squareButton(122 / 2, this.height(enchantments.size(), row), "-", () -> this.enchant(enchantment, false))).active(() -> component.enchantment(enchantment) > 0);
+            this.add(this.squareButton(162 / 2, this.height(enchantments.size(), row), "+", () -> this.enchant(enchantment, true))).active(() -> component.intValue(StatisticType.enchantmentPoints) > 0);
+            this.text(text -> text.shadow().centerY().x(.5, -91).y(this.height(enchantments.size(), row)).text(() -> enchantment.getName(component.enchantment(enchantment))));
         });
     }
 
-    @Override
-    protected void render() {
-        this.displayPoints(this.container().item().intValue(StatisticType.enchantmentPoints));
-
-        var enchantments = this.container().item().enchantments;
-        Util.enumerate(enchantments, (enchantment, level, row) -> textRenderer.drawWithShadow(
-            this.matrixes,
-            enchantment.getName(level),
-            this.width() - 182 >> 1,
-            this.height(enchantments.size(), row) - fontHeight() / 2F,
-            0xFFFFFF
-        ));
-    }
-
-    protected Runnable enchantAction(Enchantment enchantment) {
-        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.container().item())
+    private void enchant(Enchantment enchantment, boolean enchant) {
+        Packets.serverEnchant.send(new ExtendedPacketBuffer(this.container().item())
             .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
-            .writeBoolean(true)
-            .writeBoolean(isShiftDown())
-        );
-    }
-
-    protected Runnable disenchantAction(Enchantment enchantment) {
-        return () -> Packets.serverEnchant.send(new ExtendedPacketBuffer(this.container().item())
-            .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
-            .writeBoolean(false)
+            .writeBoolean(enchant)
             .writeBoolean(isShiftDown())
         );
     }

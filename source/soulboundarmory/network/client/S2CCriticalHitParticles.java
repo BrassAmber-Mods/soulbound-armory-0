@@ -1,5 +1,7 @@
 package soulboundarmory.network.client;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.BufferPacket;
@@ -12,6 +14,7 @@ import soulboundarmory.network.BufferPacket;
  */
 public final class S2CCriticalHitParticles extends BufferPacket {
     @Override
+    @OnlyIn(Dist.CLIENT)
     protected void execute() {
         this.message.readEntity().ifPresent(value -> Widget.client.particleManager.addEmitter(value, SoulboundArmory.criticalHitParticleType));
     }

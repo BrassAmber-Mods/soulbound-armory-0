@@ -2,6 +2,8 @@ package soulboundarmory.lib.gui;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.gudenau.lib.unsafe.Unsafe;
@@ -18,18 +20,21 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.function.BiFloatIntConsumer;
 import soulboundarmory.lib.gui.coordinate.Coordinate;
-import soulboundarmory.lib.gui.screen.CellScreen;
 import soulboundarmory.lib.gui.screen.ScreenDelegate;
+import soulboundarmory.lib.gui.screen.ScreenWidget;
 import soulboundarmory.lib.gui.widget.Length;
+import soulboundarmory.util.Util;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends AbstractNode<B, T>> extends DrawableHelper implements Node<B, T>, Cloneable {
     public Coordinate x = new Coordinate();
     public Coordinate y = new Coordinate();
@@ -41,7 +46,7 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
         return client.currentScreen;
     }
 
-    public static CellScreen<?> cellScreen() {
+    public static ScreenWidget<?> cellScreen() {
         return client.currentScreen instanceof ScreenDelegate screen ? screen.screen : null;
     }
 
@@ -97,12 +102,12 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
         return textRenderer.getWidth(text);
     }
 
-    public static int width(OrderedText text) {
-        return textRenderer.getWidth(text);
+    public static int width(Stream<? extends StringVisitable> text) {
+        return text.mapToInt(AbstractNode::width).max().orElse(0);
     }
 
-    public static int width(Stream<? extends StringVisitable> text) {
-        return text.map(AbstractNode::width).max(Comparator.naturalOrder()).orElse(0);
+    public static int width(Iterable<? extends StringVisitable> text) {
+        return width(Util.stream(text));
     }
 
     /**
@@ -324,6 +329,12 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
         return (T) this;
     }
 
+    public T x(ToIntFunction<T> x) {
+        this.x.set(() -> x.applyAsInt((T) this));
+
+        return (T) this;
+    }
+
     @Override
     public int y() {
         return this.y.resolve(0, 0, 0);
@@ -331,6 +342,12 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
 
     public T y(int y) {
         this.y.set(y);
+
+        return (T) this;
+    }
+
+    public T y(ToIntFunction<T> y) {
+        this.y.set(() -> y.applyAsInt((T) this));
 
         return (T) this;
     }
@@ -356,10 +373,6 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
         itemRenderer.zOffset = previousZ;
     }
 
-    public void renderGuiItem(ItemStack itemStack, int x, int y) {
-        this.withZ(() -> itemRenderer.renderGuiItemIcon(itemStack, x, y));
-    }
-
     @Override
     public int width() {
         return this.width.get();
@@ -367,6 +380,24 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
 
     public T width(int width) {
         this.width.set(width);
+
+        return (T) this;
+    }
+
+    public T width(double width) {
+        this.width.set(width);
+
+        return (T) this;
+    }
+
+    public T width(ToIntFunction<T> width) {
+        this.width.set(() -> width.applyAsInt((T) this));
+
+        return (T) this;
+    }
+
+    public T relativeWidth(ToDoubleFunction<T> width) {
+        this.width.set(() -> width.applyAsDouble((T) this));
 
         return (T) this;
     }
@@ -382,8 +413,34 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
         return (T) this;
     }
 
+    public T height(double height) {
+        this.height.set(height);
+
+        return (T) this;
+    }
+
+    public T height(ToIntFunction<T> height) {
+        this.height.set(() -> height.applyAsInt((T) this));
+
+        return (T) this;
+    }
+
+    public T relativeHeight(ToDoubleFunction<T> height) {
+        this.height.set(() -> height.applyAsDouble((T) this));
+
+        return (T) this;
+    }
+
+    public T size(int width, int height) {
+        return this.width(width).height(height);
+    }
+
     public T size(int size) {
-        return this.width(size).height(size);
+        return this.size(size, size);
+    }
+
+    public void renderGuiItem(ItemStack itemStack, int x, int y) {
+        this.withZ(() -> itemRenderer.renderGuiItemIcon(itemStack, x, y));
     }
 
     @Override

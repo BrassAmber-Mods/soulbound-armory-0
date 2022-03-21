@@ -1,7 +1,5 @@
 package soulboundarmory.network;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.client.S2CBindSlot;
 import soulboundarmory.network.client.S2CCriticalHitParticles;
@@ -63,7 +61,6 @@ public final class Packets {
     }
 
     private static <T, P extends Packet<T>> PacketKey.Client<T, P> client(Class<P> type) {
-        var key = new PacketKey.Client<>(type);
-        return FMLEnvironment.dist == Dist.CLIENT ? register(key) : key;
+        return register(new PacketKey.Client<>(type));
     }
 }

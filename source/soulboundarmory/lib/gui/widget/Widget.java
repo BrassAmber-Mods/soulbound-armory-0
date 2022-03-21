@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
@@ -17,7 +17,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46C;
 import soulboundarmory.function.NulliPredicate;
@@ -35,6 +36,7 @@ import soulboundarmory.util.Util;
 
  @param <T> the type of the widget
  */
+@OnlyIn(Dist.CLIENT)
 public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> implements TooltipComponent {
     public Optional<Widget<?>> parent = Optional.empty();
     public ReferenceArrayList<Widget<?>> children = ReferenceArrayList.of();
@@ -52,9 +54,6 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     public NulliPredicate present = () -> !this.isTooltip() || this.isPresentTooltip();
     public NulliPredicate visible = NulliPredicate.ofTrue();
     public NulliPredicate active = NulliPredicate.ofTrue();
-
-    public IntSupplier x = () -> super.x.resolve(this.width(), this.parent.map(Widget::x).orElse(0), this.parent.map(Widget::width).orElse(windowWidth()));
-    public IntSupplier y = () -> super.y.resolve(this.height(), this.parent.map(Widget::y).orElse(0), this.parent.map(Widget::height).orElse(windowHeight()));
 
     /**
      Is the deepest element that is hovered by the mouse.
@@ -103,14 +102,8 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return this.x(offset).x(x).x(Offset.Type.RELATIVE);
     }
 
-    public T x(IntSupplier x) {
-        this.x = x;
-
-        return (T) this;
-    }
-
     public T x(Node<?, ?> node) {
-        return this.x(node::x);
+        return this.x(__ -> node.x());
     }
 
     public T y(Offset.Type offset) {
@@ -141,14 +134,8 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return this.y(offset).y(y).y(Offset.Type.RELATIVE);
     }
 
-    public T y(IntSupplier y) {
-        this.y = y;
-
-        return (T) this;
-    }
-
     public T y(Node<?, ?> node) {
-        return this.y(node::y);
+        return this.y(__ -> node.y());
     }
 
     public T offset(Offset.Type offset) {
@@ -169,6 +156,30 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     public T center() {
         return this.position(Coordinate.Position.CENTER);
+    }
+
+    public T alignLeft() {
+        return this.x(Coordinate.Position.START);
+    }
+
+    public T alignRight() {
+        return this.x(Coordinate.Position.END);
+    }
+
+    public T alignUp() {
+        return this.y(Coordinate.Position.START);
+    }
+
+    public T alignDown() {
+        return this.y(Coordinate.Position.END);
+    }
+
+    public T alignEnd() {
+        return this.alignRight().alignDown();
+    }
+
+    public T alignStart() {
+        return this.alignLeft().alignUp();
     }
 
     public T present(NulliPredicate predicate) {
@@ -198,21 +209,27 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public T text(String text) {
-        return this.text(new TranslatableText(text));
+        return this.text(Text.of(text));
     }
 
     public T text(Text text) {
-        this.text(widget -> widget.text(text));
-
-        return (T) this;
+        return this.text(() -> text);
     }
 
-    public T text(Consumer<TextWidget> configure) {
-        return this.with(self -> {
-            var text = new TextWidget().center().x(.5).y(.5);
-            configure.accept(text);
-            self.add(text);
-        });
+    public T text(Supplier<? extends Text> text) {
+        return this.centeredText(widget -> widget.text(text));
+    }
+
+    public T text(Iterable<? extends Text> text) {
+        return this.with(self -> text.forEach(self::text));
+    }
+
+    public T text(Consumer<? super TextWidget> configure) {
+        return this.with(self -> self.add(new TextWidget().with(configure)));
+    }
+
+    public T centeredText(Consumer<? super TextWidget> configure) {
+        return this.text(text -> text.center().x(.5).y(.5).with(configure));
     }
 
     public T parent(Widget<?> parent) {
@@ -269,6 +286,10 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         this.tooltips.add(this.add(tooltip));
 
         return (T) this;
+    }
+
+    public T tooltip(Consumer<TooltipWidget> configure) {
+        return this.with(self -> self.tooltip(new TooltipWidget().with(configure)));
     }
 
     public T select(Widget<?> widget) {
@@ -380,12 +401,12 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
     @Override
     public int x() {
-        return this.x.getAsInt();
+        return this.x.resolve(this.width(), this.parent.map(Widget::x).orElse(0), this.parent.map(Widget::width).orElse(windowWidth()));
     }
 
     @Override
     public int y() {
-        return this.y.getAsInt();
+        return this.y.resolve(this.height(), this.parent.map(Widget::y).orElse(0), this.parent.map(Widget::height).orElse(windowHeight()));
     }
 
     @Override

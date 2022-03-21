@@ -1,16 +1,13 @@
 package soulboundarmory;
 
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.sound.SoundEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import soulboundarmory.util.Util;
 
 @Mod(SoulboundArmory.ID)
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public final class SoulboundArmory {
     public static final String ID = "soulboundarmory";
 

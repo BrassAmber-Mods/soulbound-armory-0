@@ -1,6 +1,6 @@
 package soulboundarmory.component.soulbound.item.weapon;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -10,7 +10,6 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.item.SoulboundItems;
@@ -86,8 +85,8 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     }
 
     @Override
-    public Map<Statistic, Text> screenAttributes() {
-        return Util.add(super.screenAttributes(), this.statisticEntry(StatisticType.efficiency, Translations.guiEfficiency));
+    public List<StatisticType> screenAttributes() {
+        return Util.add(super.screenAttributes(), StatisticType.efficiency);
     }
 
     @Override

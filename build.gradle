@@ -91,6 +91,8 @@ loom {
     }
 
     if (Boolean.getBoolean("idea.sync.active")) {
+        delete(".idea/runConfigurations")
+
         // `RunConfigSettings` has a property `project`—which is null—so store the actual project here.
         def project = this.project
 

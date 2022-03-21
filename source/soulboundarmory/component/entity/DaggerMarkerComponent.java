@@ -6,4 +6,4 @@ import soulboundarmory.lib.component.ItemStackComponent;
 /**
  Used as a marker in {@link SoulboundDaggerItem#canPerformAction}.
  */
-public class DaggerItemComponent implements ItemStackComponent<DaggerItemComponent> {}
+public class DaggerMarkerComponent implements ItemStackComponent<DaggerMarkerComponent> {}

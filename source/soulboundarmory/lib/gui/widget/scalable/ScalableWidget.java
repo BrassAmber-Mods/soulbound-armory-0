@@ -156,18 +156,6 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return this.height.get(this.textureHeight);
     }
 
-    public T width(double width) {
-        this.width.set(width);
-
-        return (T) this;
-    }
-
-    public T height(double height) {
-        this.height.set(height);
-
-        return (T) this;
-    }
-
     public T fullView() {
         return this.viewWidth(1D).viewHeight(1D);
     }

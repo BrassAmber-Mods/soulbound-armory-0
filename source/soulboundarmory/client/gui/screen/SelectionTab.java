@@ -22,14 +22,13 @@ public class SelectionTab extends SoulboundTab {
 
         Util.enumerate(selection, (component, row) -> this.add(new ScalableWidget<>()
             .button()
-            .x(this.middleX())
-            .y(this.height(32, selection.size(), row))
+            .x(.5)
+            .y(this.height(24, selection.size(), row))
             .center()
-            .width(128)
-            .height(20)
+            .size(128, 20)
             .text(component.name())
             .primaryAction(() -> component.select(parent.slot))
-            .active(!parent.displayTabs() || ItemUtil.inventory(player()).noneMatch(component::accepts))
+            .active(() -> !parent.displayTabs() || ItemUtil.inventory(player()).noneMatch(component::accepts))
         ));
     }
 }
