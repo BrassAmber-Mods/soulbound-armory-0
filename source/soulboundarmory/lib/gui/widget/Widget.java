@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -201,9 +202,17 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public T text(Text text) {
-        this.add(new TextWidget().text(text).x(0.5).y(0.5).width(width(text)).height(fontHeight()).center());
+        this.text(widget -> widget.text(text));
 
         return (T) this;
+    }
+
+    public T text(Consumer<TextWidget> configure) {
+        return this.with(self -> {
+            var text = new TextWidget().center().x(.5).y(.5);
+            configure.accept(text);
+            self.add(text);
+        });
     }
 
     public T parent(Widget<?> parent) {
@@ -286,7 +295,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return this.add(this.degree(), child);
     }
 
-    public T add(int index, Iterable<Widget<?>> children) {
+    public T add(int index, Iterable<? extends Widget<?>> children) {
         for (var child : children) {
             this.add(index++, child);
         }
@@ -294,7 +303,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return (T) this;
     }
 
-    public T add(Iterable<Widget<?>> children) {
+    public T add(Iterable<? extends Widget<?>> children) {
         return this.add(this.degree(), children);
     }
 
@@ -327,7 +336,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return child;
     }
 
-    public boolean remove(Iterable<Widget<?>> children) {
+    public boolean remove(Iterable<? extends Widget<?>> children) {
         var removed = false;
 
         for (var child : children) {
@@ -536,12 +545,6 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
 
                     this.mouseFocused = true;
                 }
-
-                this.whileHovered();
-            }
-
-            if (this.isFocused()) {
-                this.whileFocused();
             }
 
             if (this.isVisible()) {
@@ -571,10 +574,6 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     protected void deferRender() {
         this.root().renderDeferred.add(this);
     }
-
-    protected void whileHovered() {}
-
-    protected void whileFocused() {}
 
     /**
      Determine whether the click should trigger the primary action.

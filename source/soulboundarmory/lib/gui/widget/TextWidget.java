@@ -14,7 +14,7 @@ import soulboundarmory.util.Math2;
 import soulboundarmory.util.Util;
 
 public class TextWidget extends Widget<TextWidget> {
-    public List<Supplier<Text>> text = new ReferenceArrayList<>();
+    public List<Supplier<? extends Text>> text = new ReferenceArrayList<>();
     public IntSupplier color = () -> 0xFFFFFFFF;
     public boolean shadow;
     public int stroke;
@@ -32,7 +32,7 @@ public class TextWidget extends Widget<TextWidget> {
         return this.text(Text.of(text));
     }
 
-    public TextWidget text(Iterable<Text> text) {
+    public TextWidget text(Iterable<? extends Text> text) {
         text.forEach(this::text);
 
         return this;
@@ -42,7 +42,7 @@ public class TextWidget extends Widget<TextWidget> {
         return this.text(text::getString);
     }
 
-    public TextWidget text(Supplier<Text> text) {
+    public TextWidget text(Supplier<? extends Text> text) {
         this.text.add(text);
 
         return this;
@@ -60,7 +60,7 @@ public class TextWidget extends Widget<TextWidget> {
         return this.text(text);
     }
 
-    public TextWidget overwrite(Iterable<Text> text) {
+    public TextWidget overwrite(Iterable<? extends Text> text) {
         this.text.clear();
 
         return this.text(text);
@@ -72,7 +72,7 @@ public class TextWidget extends Widget<TextWidget> {
         return this.text(text);
     }
 
-    public TextWidget overwrite(Supplier<Text> text) {
+    public TextWidget overwrite(Supplier<? extends Text> text) {
         this.text.clear();
 
         return this.text(text);
