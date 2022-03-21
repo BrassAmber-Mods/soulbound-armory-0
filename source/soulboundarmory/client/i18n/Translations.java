@@ -40,6 +40,7 @@ public class Translations {
     public static final PluralizableTranslation guiSkillUpgradeCost = new PluralizableTranslation(gui("upgrade_cost_singular"), gui("upgrade_cost_plural"));
     public static final PluralizableTranslation guiSkillLearnCost = new PluralizableTranslation(gui("learn_cost_singular"), gui("learn_cost_plural"));
     public static final Translation guiLevel = gui("level");
+    public static final Translation guiLevelFinite = gui("level_finite");
     public static final Translation red = gui("red");
     public static final Translation green = gui("green");
     public static final Translation blue = gui("blue");
