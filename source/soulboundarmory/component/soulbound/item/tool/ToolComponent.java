@@ -108,8 +108,12 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
         this.synchronize();
     }
 
-    @Override public Text format(StatisticType attribute) {
-        return attribute == StatisticType.upgradeProgress ? Translations.guiUpgradeProgress.format(this.formatValue(attribute), Translations.toolMaterial(this.nextMaterial)) : super.format(attribute);
+    @Override public Text format(StatisticType statistic) {
+        if (statistic == StatisticType.upgradeProgress) {
+            return this.nextMaterial == null ? Translations.tier.format(this.materialName()) : Translations.guiUpgradeProgress.format(this.formatValue(statistic), Translations.toolMaterial(this.nextMaterial));
+        }
+
+        return super.format(statistic);
     }
 
     @Override

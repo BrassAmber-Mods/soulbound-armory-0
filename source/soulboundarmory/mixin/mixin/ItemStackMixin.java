@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemMarkerComponent;
 import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.skill.Skills;
@@ -32,14 +33,14 @@ abstract class ItemStackMixin {
 
     @Inject(method = "postMine", at = @At("RETURN"))
     private void addXPByEnderPull(World world, BlockState state, BlockPos pos, PlayerEntity miner, CallbackInfo info) {
-        Components.marker.nullable(Util.cast(this)).ifPresent(marker -> marker.item().mined(state, pos));
+        ItemComponent.of(miner, Util.cast(this)).ifPresent(component -> component.mined(state, pos));
     }
 
     @Inject(method = "use", at = @At("RETURN"))
     private void absorbTool(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> info) {
         if (hand == Hand.MAIN_HAND && info.getReturnValue().getResult() == ActionResult.PASS) {
-            Components.marker.nullable(Util.cast(this)).ifPresent(marker -> {
-                if (marker.item() instanceof ToolComponent tool && tool.hasSkill(Skills.absorption)) {
+            ItemComponent.of(user, Util.cast(this)).ifPresent(component -> {
+                if (component instanceof ToolComponent tool && tool.hasSkill(Skills.absorption)) {
                     tool.absorb();
                 }
             });

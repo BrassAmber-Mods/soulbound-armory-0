@@ -745,18 +745,14 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         return modifiers;
     }
 
-    public Text format(StatisticType attribute) {
-        if (attribute == StatisticType.attackDamage) return Translations.guiAttackDamage.format(this.formatValue(attribute));
-        if (attribute == StatisticType.attackSpeed) return Translations.guiAttackSpeed.format(this.formatValue(attribute));
-        if (attribute == StatisticType.criticalHitRate) return Translations.guiCriticalHitRate.format(this.formatValue(attribute));
-        if (attribute == StatisticType.efficiency) return Translations.guiEfficiency.format(this.formatValue(attribute));
-        if (attribute == StatisticType.reach) return Translations.guiReach.format(this.formatValue(attribute));
+    public Text format(StatisticType statistic) {
+        if (statistic == StatisticType.attackDamage) return Translations.guiAttackDamage.format(this.formatValue(statistic));
+        if (statistic == StatisticType.attackSpeed) return Translations.guiAttackSpeed.format(this.formatValue(statistic));
+        if (statistic == StatisticType.criticalHitRate) return Translations.guiCriticalHitRate.format(this.formatValue(statistic));
+        if (statistic == StatisticType.efficiency) return Translations.guiEfficiency.format(this.formatValue(statistic));
+        if (statistic == StatisticType.reach) return Translations.guiReach.format(this.formatValue(statistic));
 
-        return null;
-    }
-
-    protected Map.Entry<Statistic, Text> statisticEntry(StatisticType type, Translation translation, Object... arguments) {
-        return Map.entry(this.statistic(type), translation.format(Util.add(this.formatValue(type), arguments)));
+        return Text.of("%s: %s".formatted(statistic.id().getPath(), this.formatValue(statistic)));
     }
 
     /**

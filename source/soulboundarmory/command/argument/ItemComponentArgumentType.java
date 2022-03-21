@@ -25,7 +25,7 @@ public class ItemComponentArgumentType extends RegistryArgumentType<ItemComponen
         var cursor = reader.getCursor();
 
         if (Util.containsIgnoreCase(reader.readString(), "current")) {
-            return new ReferenceOpenHashSet<>();
+            return ReferenceOpenHashSet.of();
         }
 
         reader.setCursor(cursor);

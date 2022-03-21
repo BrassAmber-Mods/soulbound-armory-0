@@ -6,7 +6,6 @@ import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
 
 public class StatisticType extends RegistryElement<StatisticType> {
-    @SuppressWarnings("unused")
     public static final Registry<StatisticType> registry = Util.newRegistry("statistic");
 
     public static final StatisticType attributePoints = new StatisticType(Category.datum, "attribute_points");
