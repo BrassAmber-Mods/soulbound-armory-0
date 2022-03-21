@@ -337,7 +337,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             for (var entry : this.enchantments.reference2IntEntrySet()) {
                 var enchantment = entry.getKey();
 
-                if (entry.getValue() > 0) {
+                if (entry.getIntValue() > 0) {
                     doubleValue += enchantment.getAttackDamage(this.enchantment(enchantment), EntityGroup.DEFAULT);
                 }
             }
@@ -771,7 +771,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      */
     protected ItemStack newItemStack() {
         this.itemStack = this.item().getDefaultStack();
-        Components.marker.of(this.itemStack).item = this;
+        Components.marker.of(this.itemStack).item(this);
 
         for (var slot : EquipmentSlot.values()) {
             var attributeModifiers = this.attributeModifiers(slot);
@@ -783,13 +783,11 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             }
         }
 
-        for (var entry : this.enchantments.entrySet()) {
-            int level = entry.getValue();
-
+        this.enchantments.forEach((enchantment, level) -> {
             if (level > 0) {
-                this.itemStack.addEnchantment(entry.getKey(), level);
+                this.itemStack.addEnchantment(enchantment, level);
             }
-        }
+        });
 
         return this.itemStack;
     }

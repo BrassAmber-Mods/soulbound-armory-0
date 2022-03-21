@@ -47,6 +47,14 @@ public class Util extends net.minecraft.util.Util {
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
+    public static <T> Optional<T> or(Optional<T> optional, Supplier<? extends T> alternative) {
+        return optional.or(() -> Optional.ofNullable(alternative.get()));
+    }
+
+    public static <T> T or(T t, Supplier<? extends T> alternative) {
+        return t == null ? alternative.get() : t;
+    }
+
     public static <T> boolean ifPresent(Optional<T> optional, Consumer<? super T> action) {
         if (optional.isPresent()) {
             action.accept(optional.get());

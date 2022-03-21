@@ -1,7 +1,5 @@
 package soulboundarmory.component.soulbound.item;
 
-import soulboundarmory.lib.gui.AbstractNode;
-import soulboundarmory.lib.gui.widget.Widget;
 import java.util.Optional;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.texture.Sprite;
@@ -9,24 +7,34 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PlayerScreenHandler;
 import soulboundarmory.lib.component.ItemStackComponent;
+import soulboundarmory.lib.gui.AbstractNode;
+import soulboundarmory.lib.gui.Node;
 import soulboundarmory.util.Util;
 
 public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerComponent>, TooltipData {
     public final ItemStack stack;
-    public ItemComponent<?> item;
 
+    private ItemComponent<?> item;
     private int animationTick = 40;
 
     public ItemMarkerComponent(ItemStack stack) {
         this.stack = stack;
 
         if (Util.isClient()) {
-            this.item = ItemComponent.of(AbstractNode.client.player, stack).orElse(null);
+            this.initializeItem();
         }
     }
 
-    public Optional<ItemComponent<?>> item() {
-        return Optional.ofNullable(this.item);
+    public Optional<ItemComponent<?>> optionalItem() {
+        return Optional.ofNullable(this.item());
+    }
+
+    public ItemComponent<?> item() {
+        return Util.or(this.item, this::initializeItem);
+    }
+
+    public void item(ItemComponent<?> item) {
+        this.item = item;
     }
 
     public boolean animating() {
@@ -47,7 +55,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
 
     @Override
     public void serialize(NbtCompound tag) {
-        this.item().ifPresent(item -> {
+        this.optionalItem().ifPresent(item -> {
             tag.putUuid("player", item.player.getUuid());
             tag.putString("item", item.type().string());
         });
@@ -60,11 +68,15 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
         }
     }
 
+    private ItemComponent<?> initializeItem() {
+        return this.item = ItemComponent.of(Node.client.player, this.stack).orElse(null);
+    }
+
     private void upload() {
         var player = this.item.player;
-        var animation = (Sprite.Animation) Widget.itemRenderer.getModel(this.stack, player.world, player, player.getId()).getParticleSprite().getAnimation();
+        var animation = (Sprite.Animation) Node.itemRenderer.getModel(this.stack, player.world, player, player.getId()).getParticleSprite().getAnimation();
         animation.frameTicks = Integer.MIN_VALUE;
-        Widget.bind(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
+        AbstractNode.bind(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
         animation.upload(Math.max(0, this.animationTick - 5) / 2);
     }
 }

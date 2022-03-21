@@ -38,7 +38,7 @@ import soulboundarmory.util.Util;
 public final class ModEvents {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar().item(component.item).width(AbstractNode.width(component.stack.getName())));
+        MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar().item(component.item()).width(AbstractNode.width(component.stack.getName())));
 
         ForgeRegistries.ITEMS.getValues().stream().filter(SoulboundItem.class::isInstance).forEach(item -> {
                 ModelPredicateProviderRegistry.register(
@@ -46,14 +46,14 @@ public final class ModEvents {
                     Util.id("animating"),
                     (stack, world, holder, entityID) -> Components.marker.nullable(stack)
                         .filter(ItemMarkerComponent::animating)
-                        .or(() -> Components.entityData.nullable(holder).flatMap(data -> data.unlockedStack).filter(marker -> marker.animating() && marker.item != null && marker.item.accepts(stack)))
+                        .or(() -> Components.entityData.nullable(holder).flatMap(data -> data.unlockedStack).filter(marker -> marker.animating() && marker.item() != null && marker.item().accepts(stack)))
                         .isPresent() ? 1 : 0
                 );
 
                 ModelPredicateProviderRegistry.register(
                     item,
                     Util.id("level"),
-                    (stack, world, holder, entityID) -> Components.marker.nullable(stack).flatMap(ItemMarkerComponent::item).map(ItemComponent::level).orElse(0)
+                    (stack, world, holder, entityID) -> Components.marker.nullable(stack).flatMap(ItemMarkerComponent::optionalItem).map(ItemComponent::level).orElse(0)
                 );
             }
         );
