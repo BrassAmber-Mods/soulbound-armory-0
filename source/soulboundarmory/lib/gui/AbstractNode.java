@@ -1,6 +1,5 @@
 package soulboundarmory.lib.gui;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
@@ -19,6 +18,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
@@ -439,8 +439,8 @@ public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends Abstr
         return this.size(size, size);
     }
 
-    public void renderGuiItem(ItemStack itemStack, int x, int y) {
-        this.withZ(() -> itemRenderer.renderGuiItemIcon(itemStack, x, y));
+    public void renderGuiItem(Item item, int x, int y) {
+        this.withZ(() -> itemRenderer.renderGuiItemIcon(item.getDefaultStack(), x, y));
     }
 
     @Override

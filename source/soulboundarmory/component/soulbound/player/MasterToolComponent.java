@@ -7,15 +7,15 @@ import soulboundarmory.component.soulbound.item.tool.PickComponent;
 import soulboundarmory.item.SoulboundToolItem;
 import soulboundarmory.lib.component.EntityComponentKey;
 
-public class SoulboundToolComponent extends SoulboundComponent<SoulboundToolComponent> {
-    public SoulboundToolComponent(PlayerEntity player) {
+public class MasterToolComponent extends MasterComponent<MasterToolComponent> {
+    public MasterToolComponent(PlayerEntity player) {
         super(player);
 
         this.store(new PickComponent(this));
     }
 
     @Override
-    public EntityComponentKey<SoulboundToolComponent> key() {
+    public EntityComponentKey<MasterToolComponent> key() {
         return Components.tool;
     }
 

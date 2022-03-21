@@ -16,6 +16,6 @@ public class LeapingSkill extends Skill {
 
     @Override
     public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.RABBIT_FOOT.getDefaultStack(), tab.x(), tab.y());
+        tab.renderGuiItem(Items.RABBIT_FOOT, tab.x(), tab.y());
     }
 }

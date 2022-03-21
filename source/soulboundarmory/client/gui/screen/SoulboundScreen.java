@@ -12,7 +12,7 @@ import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.client.keyboard.GUIKeyBinding;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.lib.gui.screen.ScreenWidget;
 import soulboundarmory.lib.gui.widget.Widget;
@@ -49,7 +49,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
         this.colorSlider(Translations.alpha, 3),
         this.optionButton(4, () -> Translations.style.format(configuration.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1))
     ).peek(option -> option.present(() -> configuration.displayOptions && this.displayTabs())).toList();
-    protected final SoulboundComponent<?> component;
+    protected final MasterComponent<?> component;
     protected final int slot;
     protected ItemStack stack;
 
@@ -57,28 +57,39 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
     private ItemComponent<?> item;
     private SoulboundTab tab;
 
-    public SoulboundScreen(SoulboundComponent<?> component, int slot) {
+    public SoulboundScreen(MasterComponent<?> component, int slot) {
         this.component = component;
         this.slot = slot;
     }
 
     @Override public void tick() {
-        this.stack = player().getInventory().getStack(this.slot);
         var previousItem = this.item;
-        this.item = ItemComponent.of(player(), this.stack).orElse(null);
+        this.baseTick();
 
         if (previousItem != null && this.item != previousItem) {
-            this.close();
-        } else {
-            this.xpBar.item(this.item);
-            super.tick();
+            if (this.item == null) {
+                this.close();
+
+                return;
+            }
+
+            if (this.item.component != this.component) {
+                this.close();
+                this.item.component.tryOpenGUI(this.stack, this.slot);
+
+                return;
+            }
+
+            this.refresh();
         }
+
+        super.tick();
     }
 
     @Override
     public void initialize() {
         this.tabs.clear();
-        this.tick();
+        this.baseTick();
         this.add(this.xpBar);
 
         if (this.displayTabs()) {
@@ -144,6 +155,11 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
     public void refresh() {
         this.preinitialize();
         this.tab.preinitialize();
+    }
+
+    private void baseTick() {
+        this.stack = player().getInventory().getStack(this.slot);
+        this.xpBar.item(this.item = ItemComponent.of(player(), this.stack).orElse(null));
     }
 
     private boolean bound() {

@@ -10,7 +10,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.util.EntityUtil;
@@ -19,7 +19,7 @@ import soulboundarmory.util.Util;
 public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
     protected double criticalHitProgress;
 
-    public WeaponComponent(SoulboundComponent<?> component) {
+    public WeaponComponent(MasterComponent<?> component) {
         super(component);
 
         this.statistics.statistics(StatisticType.criticalHitRate);

@@ -33,7 +33,7 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.entity.SoulboundDaggerEntity;
@@ -54,7 +54,7 @@ public final class CommonEvents {
         if (event.getEntity() instanceof PlayerEntity player) {
             if (!player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
                 Components.soulbound(player)
-                    .map(SoulboundComponent::item)
+                    .map(MasterComponent::item)
                     .filter(component -> component != null && component.level() >= Configuration.instance().preservationLevel)
                     .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.getInventory().insertStack(drop.getStack())));
             }

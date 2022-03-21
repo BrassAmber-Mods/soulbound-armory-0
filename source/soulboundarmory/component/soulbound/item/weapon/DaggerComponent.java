@@ -6,14 +6,14 @@ import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
 public class DaggerComponent extends WeaponComponent<DaggerComponent> {
-    public DaggerComponent(SoulboundComponent<?> component) {
+    public DaggerComponent(MasterComponent<?> component) {
         super(component);
 
         this.statistics

@@ -5,13 +5,13 @@ import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.item.SoulboundItems;
 
 public class BigswordComponent extends WeaponComponent<BigswordComponent> {
-    public BigswordComponent(SoulboundComponent<?> component) {
+    public BigswordComponent(MasterComponent<?> component) {
         super(component);
 
         this.statistics

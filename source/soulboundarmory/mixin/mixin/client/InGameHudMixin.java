@@ -18,7 +18,7 @@ import soulboundarmory.lib.gui.screen.ScreenWidget;
 abstract class InGameHudMixin {
     @Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
     private void renderSoulboundItemExperienceBar(MatrixStack matrixes, int x, CallbackInfo info) {
-        if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen && screen.xpBar.isVisible() || Configuration.instance().client.overlayExperienceBar && ExperienceBar.overlayBar.renderOverlay(matrixes)) {
+        if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen && screen.xpBar.isVisible() || Configuration.instance().client.overlayExperienceBar && ExperienceBar.renderOverlay(matrixes)) {
             info.cancel();
         }
     }

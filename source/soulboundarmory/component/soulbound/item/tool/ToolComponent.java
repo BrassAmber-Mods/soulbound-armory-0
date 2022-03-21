@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
@@ -27,7 +27,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     protected ToolMaterial material = ToolMaterials.WOOD;
     protected ToolMaterial nextMaterial;
 
-    public ToolComponent(SoulboundComponent<?> component) {
+    public ToolComponent(MasterComponent<?> component) {
         super(component);
 
         this.skills.add(Skills.absorption, Skills.circumspection);

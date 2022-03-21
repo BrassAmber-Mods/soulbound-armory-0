@@ -24,6 +24,6 @@ public class FreezingSkill extends Skill {
 
     @Override
     public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.SNOWBALL.getDefaultStack(), tab.x(), tab.y());
+        tab.renderGuiItem(Items.SNOWBALL, tab.x(), tab.y());
     }
 }

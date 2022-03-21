@@ -1,6 +1,5 @@
 package soulboundarmory.skill.weapon.common;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.skill.Skill;
@@ -17,6 +16,6 @@ public final class NourishmentSkill extends Skill {
 
     @Override
     public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(new ItemStack(Items.COOKED_BEEF), tab.x(), tab.y());
+        tab.renderGuiItem(Items.COOKED_BEEF, tab.x(), tab.y());
     }
 }

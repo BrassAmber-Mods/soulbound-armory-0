@@ -27,7 +27,7 @@ import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Sided;
 import soulboundarmory.util.Util;
 
-public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implements EntityComponent<C>, Sided {
+public abstract class MasterComponent<C extends MasterComponent<C>> implements EntityComponent<C>, Sided {
     public final Map<ItemComponentType<? extends ItemComponent<?>>, ItemComponent<?>> items = new Reference2ReferenceLinkedOpenHashMap<>();
     public final PlayerEntity player;
 
@@ -38,18 +38,18 @@ public abstract class SoulboundComponent<C extends SoulboundComponent<C>> implem
     protected int boundSlot;
     protected ItemComponent<?> item;
 
-    public SoulboundComponent(PlayerEntity player) {
+    public MasterComponent(PlayerEntity player) {
         this.player = player;
     }
 
-    public static Optional<? extends SoulboundComponent<?>> of(Entity entity, ItemStack stack) {
+    public static Optional<? extends MasterComponent<?>> of(Entity entity, ItemStack stack) {
         return Components.soulbound(entity).filter(component -> component.accepts(stack)).findAny();
     }
 
     /**
      @return this component's {@linkplain ComponentRegistry#entity registered} {@linkplain EntityComponentKey key}
      */
-    public abstract EntityComponentKey<? extends SoulboundComponent<?>> key();
+    public abstract EntityComponentKey<? extends MasterComponent<?>> key();
 
     /**
      @return whether the given item stack matches any of this component's items

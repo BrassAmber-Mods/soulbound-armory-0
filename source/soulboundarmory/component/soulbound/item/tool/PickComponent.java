@@ -11,12 +11,12 @@ import net.minecraft.text.Text;
 import net.minecraftforge.common.ToolActions;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.item.SoulboundItems;
 
 public class PickComponent extends ToolComponent<PickComponent> {
-    public PickComponent(SoulboundComponent<?> component) {
+    public PickComponent(MasterComponent<?> component) {
         super(component);
 
         this.statistics

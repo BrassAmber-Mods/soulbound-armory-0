@@ -6,7 +6,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -44,7 +43,7 @@ import soulboundarmory.client.gui.screen.SoulboundTab;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.EnchantmentStorage;
 import soulboundarmory.component.statistics.SkillMap;
@@ -63,17 +62,15 @@ import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillInstance;
 import soulboundarmory.skill.Skills;
-import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.ItemUtil;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Sided;
-import soulboundarmory.util.Util;
 
 public abstract class ItemComponent<T extends ItemComponent<T>> implements Serializable, Sided {
     protected static final NumberFormat statisticFormat = DecimalFormat.getInstance();
 
-    public final SoulboundComponent<?> component;
+    public final MasterComponent<?> component;
     public final PlayerEntity player;
     public final EnchantmentStorage enchantments = new EnchantmentStorage(this);
     public final Statistics statistics = new Statistics(this);
@@ -83,7 +80,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     protected boolean unlocked;
     protected int animationTime;
 
-    public ItemComponent(SoulboundComponent<?> component) {
+    public ItemComponent(MasterComponent<?> component) {
         this.component = component;
         this.player = component.player;
 

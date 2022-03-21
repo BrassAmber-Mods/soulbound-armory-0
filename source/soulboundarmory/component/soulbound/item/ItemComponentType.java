@@ -13,7 +13,7 @@ import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.soulbound.item.weapon.TridentComponent;
 import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.lib.component.EntityComponentKey;
 import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
@@ -28,9 +28,9 @@ public final class ItemComponentType<T extends ItemComponent<T>> extends Registr
     public static final ItemComponentType<TridentComponent> trident = weapon("trident");
     public static final ItemComponentType<PickComponent> pick = tool("pick");
 
-    public final EntityComponentKey<? extends SoulboundComponent<?>> parentKey;
+    public final EntityComponentKey<? extends MasterComponent<?>> parentKey;
 
-    public ItemComponentType(String path, EntityComponentKey<? extends SoulboundComponent<?>> key) {
+    public ItemComponentType(String path, EntityComponentKey<? extends MasterComponent<?>> key) {
         super(path);
 
         this.parentKey = key;

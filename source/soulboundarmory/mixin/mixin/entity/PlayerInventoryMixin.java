@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 
 @Mixin(PlayerInventory.class)
 abstract class PlayerInventoryMixin {
@@ -26,7 +26,7 @@ abstract class PlayerInventoryMixin {
      */
     @Inject(method = "insertStack(Lnet/minecraft/item/ItemStack;)Z", at = @At("HEAD"), cancellable = true)
     public void insertIntoBoundSlot(ItemStack stack, CallbackInfoReturnable<Boolean> info) {
-        SoulboundComponent.of(this.player, stack).ifPresent(component -> {
+        MasterComponent.of(this.player, stack).ifPresent(component -> {
             if (component.hasBoundSlot() && component.stackInBoundSlot().isEmpty()) {
                 info.setReturnValue(this.insertStack(component.boundSlot(), stack));
             }

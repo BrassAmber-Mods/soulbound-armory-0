@@ -14,7 +14,7 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
     protected static final Configuration.Client configuration = Configuration.instance().client;
     protected static final Configuration.Client.Color color = configuration.color;
 
-    public static final ExperienceBar overlayBar = new ExperienceBar().center().x(.5).y(1D, -27);
+    private static final ExperienceBar overlayBar = new ExperienceBar().center().x(.5).y(1D, -27);
 
     protected final TextWidget level = this.add(new TextWidget())
         .x(.5)
@@ -33,35 +33,29 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
         this.experienceBar().texture(ExperienceBarTexture.instance).width(182).height(5);
     }
 
-    @Override
-    public int getWidth(TextRenderer textRenderer) {
-        return this.isVisible() ? this.width() + 8 : 0;
-    }
-
-    @Override
-    public int getHeight() {
-        return this.isVisible() ? this.height() + this.offset() + 6 : 0;
+    public static boolean renderOverlay(MatrixStack matrixes) {
+        overlayBar.item(ItemComponent.fromHands(client.player).orElse(null)).render(matrixes);
+        return overlayBar.isPresent();
     }
 
     public ExperienceBar item(ItemComponent<?> component) {
         this.component = component;
-
         return this;
     }
 
-    public boolean renderOverlay(MatrixStack matrixes) {
-        if (this.item(ItemComponent.fromHands(client.player).orElse(null)).component != null) {
-            this.render(matrixes);
-
-            return this.isVisible();
-        }
-
-        return false;
+    @Override
+    public int getWidth(TextRenderer textRenderer) {
+        return this.isPresent() ? this.width() + 8 : 0;
     }
 
     @Override
-    public boolean isVisible() {
-        return color.alpha > 25 && super.isVisible();
+    public int getHeight() {
+        return this.isPresent() ? this.height() + this.offset() + 6 : 0;
+    }
+
+    @Override
+    public boolean isPresent() {
+        return this.component != null && color.alpha > 25 && super.isPresent();
     }
 
     @Override

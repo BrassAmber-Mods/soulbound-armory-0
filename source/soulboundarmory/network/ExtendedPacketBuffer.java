@@ -14,12 +14,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
-import soulboundarmory.registry.RegistryElement;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.util.Util;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
@@ -31,7 +29,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         super(buffer);
     }
 
-    public ExtendedPacketBuffer(SoulboundComponent<?> component) {
+    public ExtendedPacketBuffer(MasterComponent<?> component) {
         this();
 
         this.writeIdentifier(component.key().id);

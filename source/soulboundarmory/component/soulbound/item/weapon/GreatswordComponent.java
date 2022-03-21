@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.component.soulbound.player.SoulboundComponent;
+import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.item.SoulboundItems;
@@ -23,7 +23,7 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
     protected float zenith;
     protected float leapForce;
 
-    public GreatswordComponent(SoulboundComponent<?> component) {
+    public GreatswordComponent(MasterComponent<?> component) {
         super(component);
 
         this.statistics
