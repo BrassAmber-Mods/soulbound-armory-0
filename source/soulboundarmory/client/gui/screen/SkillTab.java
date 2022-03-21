@@ -1,24 +1,16 @@
 package soulboundarmory.client.gui.screen;
 
-import net.minecraft.util.Formatting;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
-import soulboundarmory.lib.gui.coordinate.Offset;
-import soulboundarmory.lib.gui.util.Point;
-import soulboundarmory.lib.gui.widget.TextWidget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import java.util.Map;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.coordinate.Offset;
+import soulboundarmory.lib.gui.widget.TextWidget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.skill.SkillInstance;
 
 /**
  The skill tab; design (not code of course) blatantly copied from the advancement screen.
@@ -26,12 +18,12 @@ import soulboundarmory.skill.SkillContainer;
 public class SkillTab extends SoulboundTab {
     protected static final Identifier background = new Identifier("textures/block/andesite.png");
 
-    protected final Map<SkillContainer, Point> skills = new Reference2ReferenceLinkedOpenHashMap<>();
-    protected ScalableWidget<?> window = new ScalableWidget<>().window().width(512).height(288).z(-1000)
+    protected final Map<SkillInstance, SkillWidget> skills = new Reference2ReferenceLinkedOpenHashMap<>();
+    protected final ScalableWidget<?> window = new ScalableWidget<>().window().width(512).height(288)
         .with(new TextWidget().stroke().text(this.title).x(8).y(6).color(0xEEEEEE))
-        .with(new TextWidget().stroke().text(() -> this.pointText(this.container().item.skillPoints())).x(Coordinate.Position.END).x(1, -15).y(25).color(0xEEEEEE));
+        .with(new TextWidget().stroke().text(() -> this.pointText(this.container().item().skillPoints())).x(Coordinate.Position.END).x(1, -15).y(25).color(0xEEEEEE));
 
-    protected SkillContainer selectedSkill;
+    protected SkillWidget focusedSkill;
     protected float chroma;
     protected int insideWidth;
     protected int insideHeight;
@@ -50,12 +42,15 @@ public class SkillTab extends SoulboundTab {
 
     @Override
     public void initialize() {
-        this.chroma = 1;
+        if (this.focusedSkill == null) {
+            this.chroma = 1;
+        }
+
         this.centerX = Math.max(this.button.endX() + this.window.width() / 2 + 4, this.middleX());
         this.centerY = Math.min(this.container().xpBar.y() - 16 - this.window.height() / 2, this.middleY());
         this.window.x(this.centerX).y(this.centerY).center();
         this.insideWidth = this.window.width() - 18;
-        this.insideHeight = this.window.height() - 29;
+        this.insideHeight = this.window.height() - 27;
         this.insideCenterX = this.centerX;
         this.insideCenterY = this.centerY + 4;
         this.insideX = this.insideCenterX - this.insideWidth / 2;
@@ -64,7 +59,7 @@ public class SkillTab extends SoulboundTab {
         this.insideEndY = this.centerY + this.insideHeight / 2;
 
         this.add(this.window);
-        this.updateIcons();
+        this.updateWidgets();
 
         if (!this.container().options.isEmpty()) {
             var slider = this.container().sliders.get(0);
@@ -77,77 +72,17 @@ public class SkillTab extends SoulboundTab {
 
     @Override
     protected void render() {
-        this.renderWindow();
-        this.renderSkills();
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return true;
-        }
-
-        var skill = this.selectedSkill();
-
-        if (skill != null) {
-            this.container().item.upgrade(skill);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public void renderWindow() {
         chroma(this.chroma);
         RenderSystem.enableBlend();
-
         this.renderBackground(background, this.insideX, this.insideY, this.insideWidth, this.insideHeight, (int) (128 * this.chroma));
 
-        var delta = 20F * tickDelta() / 255F;
-        this.chroma = this.selectedSkill() == null ? Math.min(this.chroma + delta, 1F) : Math.max(this.chroma - delta, 175F / 255F);
+        var delta = 20 * tickDelta() / 255F;
+        this.chroma = this.focusedSkill == null ? Math.min(this.chroma + delta, 1) : Math.max(this.chroma - delta, 175 / 255F);
     }
 
-    protected void renderSkills() {
-        for (var skill : this.skills.keySet()) {
-            if (this.isHovered(skill)) {
-                this.selectedSkill = skill;
-            } else {
-                this.renderSkill(skill);
-            }
-        }
-
-        if (this.selectedSkill != null) {
-            this.renderSkill(this.selectedSkill);
-        }
-    }
-
-    protected void renderSkill(SkillContainer skill) {
-        var point = this.skills.get(skill);
-        var widget = new SkillWidget(skill).x(point.x).y(point.y).center().parent(this);
-        widget.render(this.matrixes);
-    }
-
-    protected SkillContainer selectedSkill() {
-        for (var skill : this.skills.keySet()) {
-            if (this.isHovered(skill)) {
-                return skill;
-            }
-        }
-
-        return null;
-    }
-
-    protected boolean isHovered(SkillContainer skill) {
-        var point = this.skills.get(skill);
-        return Math.abs(point.x - mouseX()) <= 12 && Math.abs(point.y - mouseY()) <= 12;
-    }
-
-    protected void updateIcons() {
-        this.skills.clear();
-
+    private void updateWidgets() {
         var tierOrders = new Int2ReferenceLinkedOpenHashMap<int[]>();
-        var skills = this.container().item.skills();
+        var skills = this.container().item().skills();
 
         for (var skill : skills) {
             var tier = skill.tier();
@@ -179,7 +114,7 @@ public class SkillTab extends SoulboundTab {
                 tierOrders.put(tier, data);
             }
 
-            var spacing = !skill.hasDependencies() ? width * 24 : 48;
+            var spacing = skill.hasDependencies() ? 48 : width * 24;
             var offset = (1 - data[1]) * spacing / 2;
             var x = offset + (data[0] - 1) * spacing;
 
@@ -188,7 +123,7 @@ public class SkillTab extends SoulboundTab {
                 var total = 0;
 
                 for (var other : dependencies) {
-                    total += this.skills.get(other).x;
+                    total += this.skills.get(other).x();
                 }
 
                 x += total / dependencies.size();
@@ -196,7 +131,7 @@ public class SkillTab extends SoulboundTab {
                 x += this.centerX;
             }
 
-            this.skills.put(skill, new Point(x, this.insideY + 24 + 32 * tier));
+            this.skills.computeIfAbsent(skill, skil -> this.window.add(new SkillWidget(this, skil).size(24).center().offset(Offset.Type.ABSOLUTE))).x(x).y(this.insideY + 24 + 32 * tier);
         }
     }
 }

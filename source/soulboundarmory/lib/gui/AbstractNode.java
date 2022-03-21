@@ -1,13 +1,9 @@
 package soulboundarmory.lib.gui;
 
-import soulboundarmory.lib.gui.screen.CellScreen;
-import soulboundarmory.lib.gui.screen.ScreenDelegate;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
-import soulboundarmory.lib.gui.widget.Length;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -29,8 +25,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import soulboundarmory.function.BiFloatIntConsumer;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.screen.ScreenDelegate;
+import soulboundarmory.lib.gui.widget.Length;
 
-public abstract class CellElement<B extends CellElement<B, ?>, T extends CellElement<B, T>> extends DrawableHelper implements Node<B, T>, Cloneable {
+public abstract class AbstractNode<B extends AbstractNode<B, ?>, T extends AbstractNode<B, T>> extends DrawableHelper implements Node<B, T>, Cloneable {
     public Coordinate x = new Coordinate();
     public Coordinate y = new Coordinate();
 
@@ -55,6 +55,10 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
 
     public static int windowHeight() {
         return window.getScaledHeight();
+    }
+
+    public static int unscale(int scaledX) {
+        return (int) (scaledX * window.getScaleFactor());
     }
 
     public static float tickDelta() {
@@ -98,7 +102,7 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
     }
 
     public static int width(Stream<? extends StringVisitable> text) {
-        return text.map(CellElement::width).max(Comparator.naturalOrder()).orElse(0);
+        return text.map(AbstractNode::width).max(Comparator.naturalOrder()).orElse(0);
     }
 
     /**
@@ -345,17 +349,15 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
         return this.z(this.z() + z);
     }
 
-    public void withZ(int z, Runnable runnable) {
-        this.addZ(z);
+    public void withZ(Runnable runnable) {
         var previousZ = itemRenderer.zOffset;
         itemRenderer.zOffset = this.z();
         runnable.run();
-        this.addZ(-z);
         itemRenderer.zOffset = previousZ;
     }
 
-    public void renderGuiItem(ItemStack itemStack, int x, int y, int z) {
-        this.withZ(z, () -> itemRenderer.renderGuiItemIcon(itemStack, x, y));
+    public void renderGuiItem(ItemStack itemStack, int x, int y) {
+        this.withZ(() -> itemRenderer.renderGuiItemIcon(itemStack, x, y));
     }
 
     @Override
@@ -378,6 +380,10 @@ public abstract class CellElement<B extends CellElement<B, ?>, T extends CellEle
         this.height.set(height);
 
         return (T) this;
+    }
+
+    public T size(int size) {
+        return this.width(size).height(size);
     }
 
     @Override

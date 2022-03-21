@@ -6,7 +6,7 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.skill.Skill;
-import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.skill.SkillInstance;
 
 public final class SkillRecord extends Record {
     private Skill skill;
@@ -58,7 +58,7 @@ public final class SkillRecord extends Record {
         tag.putInt("points", this.points);
     }
 
-    private SkillContainer skill() {
+    private SkillInstance skill() {
         return this.component.skill(this.skill);
     }
 }

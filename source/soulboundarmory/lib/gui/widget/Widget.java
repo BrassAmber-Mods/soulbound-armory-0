@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.IntSupplier;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -15,8 +16,9 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL46C;
 import soulboundarmory.function.NulliPredicate;
-import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.lib.gui.AbstractNode;
 import soulboundarmory.lib.gui.Node;
 import soulboundarmory.lib.gui.coordinate.Coordinate;
 import soulboundarmory.lib.gui.coordinate.Offset;
@@ -31,7 +33,7 @@ import soulboundarmory.util.Util;
 
  @param <T> the type of the widget
  */
-public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> implements TooltipComponent {
+public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> implements TooltipComponent {
     public Optional<Widget<?>> parent = Optional.empty();
     public ReferenceArrayList<Widget<?>> children = new ReferenceArrayList<>();
 
@@ -39,7 +41,7 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
      The element selected by the keyboard; may be `null`, `this` or a child.
      */
     public Optional<Widget<?>> selected = Optional.empty();
-    public Optional<Widget<?>> tooltipWidget = Optional.empty();
+    public Widget<?> tooltipWidget;
     public TooltipRenderer<T> tooltip;
     public PressCallback<T> primaryAction;
     public PressCallback<T> secondaryAction;
@@ -60,7 +62,7 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
     public boolean dragging;
 
     /**
-     Stored in {@link #render(MatrixStack, int, int, float)} in order to avoid passing it around everywhere.
+     Stored in {@link #render(MatrixStack)} in order to avoid passing it around everywhere.
      */
     public MatrixStack matrixes;
 
@@ -259,7 +261,7 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
     }
 
     public T tooltip(Widget<?> tooltip) {
-        this.tooltipWidget = Optional.of(this.add(tooltip.present(tooltip.present.and(() -> this.mouseFocused || tooltip.mouseFocused || this.isFocused() && isShiftDown()))));
+        this.tooltipWidget = this.add(tooltip.present(tooltip.present.and(() -> this.mouseFocused || tooltip.isFocused() || this.isFocused() && isControlDown())));
 
         return (T) this;
     }
@@ -399,12 +401,12 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
         return this.selected.filter(this::equals).isPresent();
     }
 
-    public boolean isFocused() {
+    @Override public boolean isFocused() {
         return this.mouseFocused || this.isSelected();
     }
 
     public boolean focusable() {
-        return this.isActive() && (this.primaryAction != null || this.secondaryAction != null || this.tertiaryAction != null || this.tooltip != null || this.tooltipWidget.isPresent());
+        return this.isActive() && (this.primaryAction != null || this.secondaryAction != null || this.tertiaryAction != null || this.tooltip != null || this.tooltipWidget != null);
     }
 
     public boolean scrollable() {
@@ -533,7 +535,19 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
 
             if (this.isVisible()) {
                 this.render();
-                super.render(matrixes, -1, -1, -1);
+
+                for (var child : this.children) {
+                    if (child != this.tooltipWidget) {
+                        child.render(matrixes);
+                    }
+                }
+
+                if (this.isRoot()) {
+                    this.descendants().filter(descendant -> descendant.parent().filter(parent -> descendant == parent.tooltipWidget).isPresent()).forEach(tooltip -> {
+                        RenderSystem.clear(GL46C.GL_DEPTH_BUFFER_BIT, false);
+                        tooltip.render(matrixes);
+                    });
+                }
             }
         }
     }
@@ -546,7 +560,7 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
     protected void render() {}
 
     protected void renderTooltip() {
-        if (this.mouseFocused || isShiftDown()) {
+        if (this.mouseFocused || isControlDown()) {
             var x = this.mouseFocused ? (int) mouseX() : this.x();
             var y = this.mouseFocused ? (int) mouseY() : this.y();
 
@@ -628,10 +642,10 @@ public class Widget<T extends Widget<T>> extends CellElement<Widget<?>, T> imple
     /**
      Push a matrix, translate by {@link #z()}, run {@code render} and pop.
      */
-    public void withZ(Runnable render) {
+    @Override public void withZ(Runnable render) {
         this.matrixes.push();
         this.matrixes.translate(0, 0, this.z());
-        render.run();
+        super.withZ(render);
         this.matrixes.pop();
     }
 

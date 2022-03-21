@@ -1,13 +1,7 @@
 package soulboundarmory.client.gui.screen;
 
-import soulboundarmory.lib.gui.screen.CellScreen;
-import soulboundarmory.lib.gui.widget.TextWidget;
-import soulboundarmory.lib.gui.widget.TooltipWidget;
-import soulboundarmory.lib.gui.widget.Widget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
-import soulboundarmory.lib.gui.widget.slider.SliderWidget;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -18,6 +12,12 @@ import soulboundarmory.client.keyboard.GUIKeyBinding;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.lib.gui.screen.CellScreen;
+import soulboundarmory.lib.gui.widget.TextWidget;
+import soulboundarmory.lib.gui.widget.TooltipWidget;
+import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.lib.gui.widget.slider.SliderWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
@@ -47,11 +47,11 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     protected final List<Widget<?>> sliders = new ReferenceArrayList<>(4);
     protected final SoulboundComponent<?> component;
     protected final int slot;
-    protected ItemComponent<?> item;
     protected ItemStack stack;
 
     private final List<Widget<?>> tabButtons = new ReferenceArrayList<>();
     private final List<SoulboundTab> tabs = new ReferenceArrayList<>();
+    private ItemComponent<?> item;
     private SoulboundTab tab;
     private Widget<?> button;
 
@@ -146,6 +146,10 @@ public class SoulboundScreen extends CellScreen<SoulboundScreen> {
     @Override
     public boolean shouldClose(int keyCode, int scanCode, int modifiers) {
         return super.shouldClose(keyCode, scanCode, modifiers) || modifiers == 0 && GUIKeyBinding.instance.matchesKey(keyCode, scanCode);
+    }
+
+    public ItemComponent<?> item() {
+        return this.item;
     }
 
     public boolean displayTabs() {

@@ -27,7 +27,7 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.item.SoulboundItem;
 import soulboundarmory.item.SoulboundItems;
-import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.lib.gui.AbstractNode;
 import soulboundarmory.lib.gui.Node;
 import soulboundarmory.particle.CriticalHitParticle;
 import soulboundarmory.particle.UnlockParticle;
@@ -38,7 +38,7 @@ import soulboundarmory.util.Util;
 public final class ModEvents {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar().item(component.item).width(CellElement.width(component.stack.getName())));
+        MinecraftForgeClient.registerTooltipComponentFactory(ItemMarkerComponent.class, component -> new ExperienceBar().item(component.item).width(AbstractNode.width(component.stack.getName())));
 
         ForgeRegistries.ITEMS.getValues().stream().filter(SoulboundItem.class::isInstance).forEach(item -> {
                 ModelPredicateProviderRegistry.register(

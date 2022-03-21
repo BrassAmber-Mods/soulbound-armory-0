@@ -1,6 +1,6 @@
 package soulboundarmory.network;
 
-import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.lib.gui.AbstractNode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -40,6 +40,6 @@ public abstract class Packet<T> {
      If this method is in a server context, then return the sender of this packet; otherwise, return the player.
      */
     protected final PlayerEntity player() {
-        return this.context.getDirection().getReceptionSide().isClient() ? CellElement.client.player : this.context.getSender();
+        return this.context.getDirection().getReceptionSide().isClient() ? AbstractNode.client.player : this.context.getSender();
     }
 }

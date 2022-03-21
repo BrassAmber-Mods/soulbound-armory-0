@@ -18,10 +18,10 @@ import soulboundarmory.util.Math2;
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
 public final class Configuration {
-    private static transient final String MULTIPLIERS = "multipliers";
-    private static transient final String CLIENT = "client";
+    private static final String MULTIPLIERS = "multipliers";
+    private static final String CLIENT = "client";
 
-    public static transient final Configuration instance = new Configuration();
+    public static final Configuration instance = new Configuration();
 
     @Comment("the amount of experience points required to reach the first level for tools")
     public int initialToolXP = 16;

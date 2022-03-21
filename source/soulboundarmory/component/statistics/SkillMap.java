@@ -7,18 +7,18 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.history.SkillHistory;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
-import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.skill.SkillInstance;
 
-public class SkillStorage extends Reference2ObjectLinkedOpenHashMap<Skill, SkillContainer> implements Serializable {
+public class SkillMap extends Reference2ObjectLinkedOpenHashMap<Skill, SkillInstance> implements Serializable {
     public SkillHistory history;
 
-    public SkillStorage(ItemComponent<?> component) {
+    public SkillMap(ItemComponent<?> component) {
         this.history = new SkillHistory(component);
     }
 
     public void add(Skill... skills) {
         for (var skill : skills) {
-            this.put(skill, new SkillContainer(skill));
+            this.put(skill, new SkillInstance(skill));
         }
 
         this.values().forEach(container -> container.initializeDependencies(this));

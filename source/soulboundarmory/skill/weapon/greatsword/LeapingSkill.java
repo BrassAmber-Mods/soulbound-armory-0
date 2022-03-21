@@ -1,7 +1,7 @@
 package soulboundarmory.skill.weapon.greatsword;
 
-import soulboundarmory.client.gui.screen.SoulboundTab;
 import net.minecraft.item.Items;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.skill.Skill;
 
 public class LeapingSkill extends Skill {
@@ -15,7 +15,7 @@ public class LeapingSkill extends Skill {
     }
 
     @Override
-    public void render(SoulboundTab tab, int level, int x, int y) {
-        tab.renderGuiItem(Items.RABBIT_FOOT.getDefaultStack(), x, y, 0);
+    public void render(Widget<?> tab, int level) {
+        tab.renderGuiItem(Items.RABBIT_FOOT.getDefaultStack(), tab.x(), tab.y());
     }
 }

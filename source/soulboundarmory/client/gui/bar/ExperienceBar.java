@@ -28,7 +28,7 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> implements Tool
         .stroke()
         .text(() -> this.component.level())
         .visible(() -> this.component.level() > 0)
-        .tooltip(new TooltipWidget().y(-10).with(new TextWidget().text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel()))));
+        .tooltip(new TooltipWidget().y(Coordinate.Position.END).with(new TextWidget().text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel()))));
 
     protected ItemComponent<?> component;
 

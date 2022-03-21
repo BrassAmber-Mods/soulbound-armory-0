@@ -1,6 +1,6 @@
 package soulboundarmory.component.soulbound.item;
 
-import soulboundarmory.lib.gui.CellElement;
+import soulboundarmory.lib.gui.AbstractNode;
 import soulboundarmory.lib.gui.widget.Widget;
 import java.util.Optional;
 import net.minecraft.client.item.TooltipData;
@@ -21,7 +21,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
         this.stack = stack;
 
         if (Util.isClient()) {
-            this.item = ItemComponent.of(CellElement.client.player, stack).orElse(null);
+            this.item = ItemComponent.of(AbstractNode.client.player, stack).orElse(null);
         }
     }
 

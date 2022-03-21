@@ -1,7 +1,7 @@
 package soulboundarmory.skill.weapon.dagger;
 
-import soulboundarmory.client.gui.screen.SoulboundTab;
 import net.minecraft.item.Items;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.skill.Skill;
 public class ThrowingSkill extends Skill {
     public ThrowingSkill() {
@@ -14,7 +14,7 @@ public class ThrowingSkill extends Skill {
     }
 
     @Override
-    public void render(SoulboundTab tab, int level, int x, int y) {
-        tab.renderGuiItem(Items.TRIDENT.getDefaultStack(), x, y, 0);
+    public void render(Widget<?> tab, int level) {
+        tab.renderGuiItem(Items.TRIDENT.getDefaultStack(), tab.x(), tab.y());
     }
 }

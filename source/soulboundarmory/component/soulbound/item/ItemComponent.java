@@ -44,7 +44,7 @@ import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.SoulboundComponent;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.EnchantmentStorage;
-import soulboundarmory.component.statistics.SkillStorage;
+import soulboundarmory.component.statistics.SkillMap;
 import soulboundarmory.component.statistics.Statistic;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.component.statistics.Statistics;
@@ -58,7 +58,7 @@ import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
-import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.skill.SkillInstance;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.text.Translation;
 import soulboundarmory.util.AttributeModifierIdentifiers;
@@ -75,7 +75,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public final EnchantmentStorage enchantments = new EnchantmentStorage(this);
     public final Statistics statistics = new Statistics(this);
 
-    protected final SkillStorage skills = new SkillStorage(this);
+    protected final SkillMap skills = new SkillMap(this);
     protected ItemStack itemStack;
     protected boolean unlocked;
     protected int animationTime;
@@ -536,15 +536,15 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         return this.levelXP(this.level());
     }
 
-    public Collection<SkillContainer> skills() {
+    public Collection<SkillInstance> skills() {
         return this.skills.values();
     }
 
-    public SkillContainer skill(Skill skill) {
+    public SkillInstance skill(Skill skill) {
         return this.skills.get(skill);
     }
 
-    public SkillContainer skill(Identifier identifier) {
+    public SkillInstance skill(Identifier identifier) {
         return this.skill(Skill.registry.get(identifier));
     }
 
@@ -561,7 +561,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     /**
      Learn or upgrade a skill.
      */
-    public void upgrade(SkillContainer skill) {
+    public void upgrade(SkillInstance skill) {
         if (this.isClient()) {
             Packets.serverSkill.send(new ExtendedPacketBuffer(this).writeIdentifier(skill.skill.id()));
         } else if (skill.canUpgrade(this.skillPoints())) {

@@ -1,6 +1,5 @@
 package soulboundarmory.lib.gui;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -199,7 +198,7 @@ public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawab
      @return a stream of this node's posterity
      */
     default Stream<? extends B> descendants() {
-        return this.children().flatMap(B::descendants);
+        return Stream.concat(this.children(), this.children().flatMap(B::descendants));
     }
 
     /**
@@ -225,6 +224,30 @@ public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawab
      */
     default Optional<? extends B> hovered() {
         return this.hoveredDescendant().or(() -> Optional.ofNullable(this.isHovered() ? Util.cast(this) : null));
+    }
+
+    /**
+     @return a stream of this node's {@linkplain #isFocused focused} children
+     */
+    default Stream<? extends B> focusedChildren() {
+        return this.childrenReverse().filter(B::isFocused);
+    }
+
+    /**
+     @return the currently focused descendant rooted at this node
+     */
+    default Optional<? extends B> focusedDescendant() {
+        return this.childrenReverse()
+            .map(B::focused)
+            .flatMap(Optional::stream)
+            .findFirst();
+    }
+
+    /**
+     @return the currently focused node starting at this node as the root
+     */
+    default Optional<? extends B> focused() {
+        return this.focusedDescendant().or(() -> Optional.ofNullable(this.isFocused() ? Util.cast(this) : null));
     }
 
     /**
@@ -275,11 +298,15 @@ public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawab
         return this.parent().isEmpty() || this.parent().get().isActive();
     }
 
+    default boolean isFocused() {
+        return false;
+    }
+
     /**
      @return whether this node is hovered my the cursor
      */
     default boolean isHovered() {
-        return this.contains(CellElement.mouseX(), CellElement.mouseY());
+        return this.contains(AbstractNode.mouseX(), AbstractNode.mouseY());
     }
 
     /**
@@ -293,7 +320,7 @@ public interface Node<B extends Node<B, ?>, T extends Node<B, T>> extends Drawab
      @return whether this node's area contains the given point
      */
     default boolean contains(double x, double y) {
-        return CellElement.contains(x, y, this.x(), this.y(), this.width(), this.height());
+        return AbstractNode.contains(x, y, this.x(), this.y(), this.width(), this.height());
     }
 
     /**

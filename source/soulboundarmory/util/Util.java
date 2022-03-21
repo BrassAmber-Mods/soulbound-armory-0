@@ -5,8 +5,8 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
@@ -22,26 +22,17 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import net.auoeke.reflect.Accessor;
-import net.auoeke.reflect.Fields;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.ObjectHolder;
-import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
@@ -55,6 +46,16 @@ public class Util extends net.minecraft.util.Util {
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
+
+    public static <T> boolean ifPresent(Optional<T> optional, Consumer<? super T> action) {
+        if (optional.isPresent()) {
+            action.accept(optional.get());
+
+            return true;
+        }
+
+        return false;
+    }
 
     public static <T> Iterable<T> iterate(Stream<T> stream) {
         return stream::iterator;

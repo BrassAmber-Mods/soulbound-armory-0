@@ -2,10 +2,10 @@ package soulboundarmory.skill.weapon.dagger;
 
 import java.util.Collections;
 import java.util.Set;
-import soulboundarmory.client.gui.screen.SoulboundTab;
 import net.minecraft.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.skill.Skill;
 
@@ -25,7 +25,7 @@ public class SneakReturnSkill extends Skill {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(SoulboundTab tab, int level, int x, int y) {
-        tab.renderGuiItem(Items.LEAD.getDefaultStack(), x, y, 0);
+    public void render(Widget<?> tab, int level) {
+        tab.renderGuiItem(Items.LEAD.getDefaultStack(), tab.x(), tab.y());
     }
 }

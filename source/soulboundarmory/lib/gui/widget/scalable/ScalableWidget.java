@@ -1,16 +1,16 @@
 package soulboundarmory.lib.gui.widget.scalable;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
-import soulboundarmory.lib.gui.util.Rectangle;
-import soulboundarmory.lib.gui.widget.Length;
-import soulboundarmory.lib.gui.widget.Widget;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.util.Identifier;
+import soulboundarmory.lib.gui.util.Rectangle;
+import soulboundarmory.lib.gui.widget.Length;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.util.Util;
 
 /**
@@ -24,11 +24,8 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     public final Rectangle[] middles = Util.fill(new Rectangle[5], Rectangle::new);
     public final Rectangle[] corners = Util.fill(new Rectangle[4], Rectangle::new);
     public final Rectangle border = new Rectangle();
-
     public AbstractTexture texture;
-
     public int u, v;
-
     public float r = 1;
     public float g = 1;
     public float b = 1;
@@ -36,7 +33,6 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     protected int textureWidth = 256;
     protected int textureHeight = 256;
-
     protected Length viewWidth = new Length();
     protected Length viewHeight = new Length();
 
@@ -78,14 +74,18 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     /**
-     Slice the texture into 9 parts: 4 non-scalable corners and 5 other resizable parts.
+     Slice the texture into 9 parts: 4 non-scalable corners and 5 resizable other parts.
      <pre>
-     - | + | -
-     + | + | +
-     - | + | -
-     </pre>
-     -: non-repeatable corner<br>
+     - │ + │ -
+     ──┼───┼──
+     + │ + │ +
+     ──┼───┼──
+     - │ + │ -
+
+     -: non-repeatable corner
      +: repeatable non-corner
+     ┼: slice marker
+     </pre>
 
      @param u0 u coordinate just after a left corner
      @param u1 u coordinate just before a right corner
@@ -156,30 +156,20 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         return this.height.get(this.textureHeight);
     }
 
-    @Override
-    public T width(int width) {
-        return super.width(width);
-    }
-
-    @Override
-    public T height(int height) {
-        return super.height(height);
-    }
-
-    public T width(float width) {
+    public T width(double width) {
         this.width.set(width);
 
         return (T) this;
     }
 
-    public T height(float height) {
+    public T height(double height) {
         this.height.set(height);
 
         return (T) this;
     }
 
     public T fullView() {
-        return this.width(1F).height(1F);
+        return this.viewWidth(1D).viewHeight(1D);
     }
 
     public int viewWidth() {
@@ -305,25 +295,28 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     @Override
     protected void render() {
+        var viewHeight = unscale(this.viewHeight());
+        RenderSystem.enableScissor(unscale(this.x()), window.getFramebufferHeight() - unscale(this.y()) - viewHeight, unscale(this.viewWidth()), viewHeight);
+        RenderSystem.enableBlend();
         shaderTexture(this.texture);
         this.resetColor();
-
-        RenderSystem.enableBlend();
         this.renderCorners();
         this.renderMiddles();
 
         if (this.isFocused() && this.isActive()) {
             this.drawBorder();
         }
+
+        RenderSystem.disableScissor();
     }
 
     protected void renderCorners() {
         for (var index = 0; index < this.corners.length; ++index) {
             var corner = this.corners[index];
-            var width = Math.max(0, this.viewWidth() + corner.width() - this.width());
-            var height = Math.max(0, this.viewHeight() + corner.height() - this.height());
+            var width = corner.width();
+            var height = corner.height();
 
-            if (width + height > 0) drawTexture(
+            drawTexture(
                 this.matrixes,
                 this.x() + index % 2 * (this.width() - corner.width()),
                 this.y() + index / 2 * (this.height() - corner.height()),
@@ -332,14 +325,13 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
                 this.v + corner.start.y,
                 width,
                 height,
-                this.textureHeight(),
-                this.textureWidth()
+                this.textureWidth(),
+                this.textureHeight()
             );
         }
     }
 
     protected void renderMiddles() {
-        shaderTexture(this.texture);
         var tessellator = Tessellator.getInstance();
         var buffer = tessellator.getBuffer();
         var matrix = this.matrixes.peek().getPositionMatrix();
@@ -367,24 +359,18 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
                 default -> this.endY() - this.middles[4].height();
             };
 
-            var viewEndX = Math.min(endX, this.x() + this.viewWidth());
-            var viewEndY = Math.min(endY, this.y() + this.viewHeight());
-
-            if (viewEndX > x && viewEndY > y) {
-                var textureWidth = (float) this.textureWidth();
-                var textureHeight = (float) this.textureHeight();
-                var u = (this.u + middle.start.x) / textureWidth;
-                var v = (this.v + middle.start.y) / textureHeight;
-                var endU = u + Math.min(viewEndX - x, middle.width()) / textureWidth;
-                var endV = v + Math.min(viewEndY - y, middle.height()) / textureHeight;
-
-                buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-                buffer.vertex(matrix, x, viewEndY, this.z()).texture(u, endV).next();
-                buffer.vertex(matrix, viewEndX, viewEndY, this.z()).texture(endU, endV).next();
-                buffer.vertex(matrix, viewEndX, y, this.z()).texture(endU, v).next();
-                buffer.vertex(matrix, x, y, this.z()).texture(u, v).next();
-                tessellator.draw();
-            }
+            var textureWidth = (float) this.textureWidth();
+            var textureHeight = (float) this.textureHeight();
+            var u = (this.u + middle.start.x) / textureWidth;
+            var v = (this.v + middle.start.y) / textureHeight;
+            var endU = u + Math.min(endX - x, middle.width()) / textureWidth;
+            var endV = v + Math.min(endY - y, middle.height()) / textureHeight;
+            buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+            buffer.vertex(matrix, x, endY, this.z()).texture(u, endV).next();
+            buffer.vertex(matrix, endX, endY, this.z()).texture(endU, endV).next();
+            buffer.vertex(matrix, endX, y, this.z()).texture(endU, v).next();
+            buffer.vertex(matrix, x, y, this.z()).texture(u, v).next();
+            tessellator.draw();
         }
     }
 

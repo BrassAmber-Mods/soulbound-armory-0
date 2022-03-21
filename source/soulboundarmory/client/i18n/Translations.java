@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.skill.Skill;
+import soulboundarmory.text.PluralizableTranslation;
 import soulboundarmory.text.Translation;
 import soulboundarmory.util.Util;
 
@@ -36,10 +37,8 @@ public class Translations {
     public static final Translation guiUnspentPoint = gui("unspent_point");
     public static final Translation guiPoints = gui("points");
     public static final Translation guiPoint = gui("point");
-    public static final Translation guiSkillLearnCostSingular = gui("learn_cost_singular");
-    public static final Translation guiSkillLearnCostPlural = gui("learn_cost_plural");
-    public static final Translation guiSkillUpgradeCostSingular = gui("upgrade_cost_singular");
-    public static final Translation guiSkillUpgradeCostPlural = gui("upgrade_cost_plural");
+    public static final PluralizableTranslation guiSkillUpgradeCost = new PluralizableTranslation(gui("upgrade_cost_singular"), gui("upgrade_cost_plural"));
+    public static final PluralizableTranslation guiSkillLearnCost = new PluralizableTranslation(gui("learn_cost_singular"), gui("learn_cost_plural"));
     public static final Translation guiLevel = gui("level");
     public static final Translation red = gui("red");
     public static final Translation green = gui("green");
@@ -79,7 +78,7 @@ public class Translations {
     }
 
     public static List<Text> skillDescription(Skill skill) {
-        return Stream.of(Util.capitalize(I18n.translate("skill.%s.%s.desc".formatted(skill.id().getNamespace(), skill.id().getPath()))).split("\n")).map(Text::of).toList();
+        return Stream.of(I18n.translate("skill.%s.%s.desc".formatted(skill.id().getNamespace(), skill.id().getPath())).split("\n")).map(Text::of).toList();
     }
 
     private static Translation of(String path) {

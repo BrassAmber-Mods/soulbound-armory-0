@@ -2,8 +2,8 @@ package soulboundarmory.skill.weapon.greatsword;
 
 import java.util.Collections;
 import java.util.Set;
-import soulboundarmory.client.gui.screen.SoulboundTab;
 import net.minecraft.item.Items;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.skill.Skill;
 
@@ -23,7 +23,7 @@ public class FreezingSkill extends Skill {
     }
 
     @Override
-    public void render(SoulboundTab tab, int level, int x, int y) {
-        tab.renderGuiItem(Items.SNOWBALL.getDefaultStack(), x, y, 0);
+    public void render(Widget<?> tab, int level) {
+        tab.renderGuiItem(Items.SNOWBALL.getDefaultStack(), tab.x(), tab.y());
     }
 }

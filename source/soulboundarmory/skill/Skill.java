@@ -1,8 +1,5 @@
 package soulboundarmory.skill;
 
-import net.minecraft.util.registry.Registry;
-import soulboundarmory.client.gui.screen.SoulboundTab;
-import soulboundarmory.lib.gui.widget.Widget;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -11,9 +8,11 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
 
@@ -91,9 +90,9 @@ public abstract class Skill extends RegistryElement<Skill> {
     /**
      Render an icon of this skill.
      */
-    public void render(SoulboundTab tab, int level, int x, int y) {
+    public void render(Widget<?> tab, int level) {
         Widget.shaderTexture(this.texture);
-        DrawableHelper.drawTexture(tab.matrixes, x, y, tab.z(), 0, 0, 16, 16, 16, 16);
+        DrawableHelper.drawTexture(tab.matrixes, tab.x(), tab.y(), tab.z(), 0, 0, 16, 16, 16, 16);
     }
 
     /**

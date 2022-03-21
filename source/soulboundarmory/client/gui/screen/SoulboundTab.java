@@ -1,14 +1,14 @@
 package soulboundarmory.client.gui.screen;
 
-import soulboundarmory.lib.gui.coordinate.Coordinate;
-import soulboundarmory.lib.gui.widget.Widget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
+import soulboundarmory.lib.gui.coordinate.Coordinate;
+import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
@@ -21,6 +21,15 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
 
     public SoulboundTab(Text title) {
         this.title = title;
+    }
+
+    @Override
+    public SoulboundTab parent(Widget<?> parent) {
+        if (parent != null) {
+            this.width(parent.width()).height(parent.height());
+        }
+
+        return super.parent(parent);
     }
 
     public int top(int rows) {
@@ -61,21 +70,12 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
             .primaryAction(this.resetAction(category));
     }
 
-    @Override
-    public SoulboundTab parent(Widget<?> parent) {
-        if (parent != null) {
-            this.width(parent.width()).height(parent.height());
-        }
-
-        return super.parent(parent);
-    }
-
-    protected SoulboundScreen container() {
+    public SoulboundScreen container() {
         return (SoulboundScreen) super.parent.get();
     }
 
     protected Runnable resetAction(Category category) {
-        return () -> Packets.serverReset.send(new ExtendedPacketBuffer(this.container().item).writeIdentifier(category.id()));
+        return () -> Packets.serverReset.send(new ExtendedPacketBuffer(this.container().item()).writeIdentifier(category.id()));
     }
 
     protected void displayPoints(int points) {

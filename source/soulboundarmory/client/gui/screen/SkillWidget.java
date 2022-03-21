@@ -2,56 +2,47 @@ package soulboundarmory.client.gui.screen;
 
 import java.util.List;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.lib.gui.coordinate.Coordinate;
-import soulboundarmory.lib.gui.util.Point;
+import soulboundarmory.lib.gui.widget.GraphicWidget;
 import soulboundarmory.lib.gui.widget.TextWidget;
 import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
-import soulboundarmory.skill.SkillContainer;
+import soulboundarmory.skill.SkillInstance;
 
 public class SkillWidget extends Widget<SkillWidget> {
-    protected static final ScalableWidget<?> grayRectangle = new ScalableWidget<>().grayRectangle().z(500);
-    protected static final ScalableWidget<?> blueRectangle = new ScalableWidget<>().blueRectangle().z(500);
-    protected final ScalableWidget<?> whiteFrame = new ScalableWidget<>().whiteRectangle().width(24).height(24);
-    protected final ScalableWidget<?> yellowFrame = new ScalableWidget<>().yellowRectangle().width(24).height(24);
+    private final ScalableWidget<?> frame = this.add(new ScalableWidget<>().width(24).height(24));
+    private final SkillTab tab;
+    private final SkillInstance skill;
 
-    public ScalableWidget<?> frame;
-    public SkillContainer skill;
-    public Widget<?> tooltip;
-
-    public SkillWidget(SkillContainer skill) {
+    public SkillWidget(SkillTab tab, SkillInstance skill) {
+        this.tab = tab;
         this.skill = skill;
-        this.frame = this.add(skill.learned() ? this.yellowFrame : this.whiteFrame).z(100);
-        this.tooltip = this.add(new Widget<>());
-        this.width(24).height(24);
+        this.frame.add(new GraphicWidget(widget -> skill.render(widget, this.matrixes)).center().x(0.5).y(0.5).size(16));
+        this.primaryAction(() -> tab.container().item().upgrade(skill));
     }
 
     @Override protected void render() {
-        var x = this.middleX() - 8;
-        var y = this.middleY() - 8;
-        var chroma = 1F;
-
-        if (this.skill == this.tab().selectedSkill) {
-            chroma(1);
-
-            if (this.tab().isHovered(this.skill)) {
-                this.renderTooltip();
-            }
+        if (this.skill.learned()) {
+            this.frame.yellowRectangle();
         } else {
-            chroma(chroma = this.tab().chroma);
-            this.tab().addZ(-300);
+            this.frame.whiteRectangle();
         }
 
-        chroma(chroma);
-        this.skill.render(this.tab(), this.matrixes, x, y);
-        this.tab().z(0);
+        if (this.tab.focusedSkill == this) {
+            if (!this.isFocused()) {
+                this.tab.focusedSkill = null;
+            }
+        } else {
+            chroma(this.tab.chroma);
+        }
     }
 
     @Override protected void renderTooltip() {
+        this.tab.focusedSkill = this;
+        chroma(1);
+
         var cost = this.skill.cost();
         var genericSections = new ReferenceArrayList<Text>();
 
@@ -60,11 +51,11 @@ public class SkillWidget extends Widget<SkillWidget> {
                 genericSections.add(Translations.guiLevel.format(this.skill.level()));
 
                 if (this.skill.canUpgrade()) {
-                    genericSections.add((cost == 1 ? Translations.guiSkillUpgradeCostSingular : Translations.guiSkillUpgradeCostPlural).format(cost));
+                    genericSections.add(Translations.guiSkillUpgradeCost.format(cost));
                 }
             }
         } else if (this.skill.dependenciesFulfilled()) {
-            genericSections.add((cost == 1 ? Translations.guiSkillLearnCostSingular : Translations.guiSkillLearnCostPlural).format(cost));
+            genericSections.add(Translations.guiSkillLearnCost.format(cost));
         }
 
         var sections = new ReferenceArrayList<List<? extends StringVisitable>>();
@@ -77,7 +68,7 @@ public class SkillWidget extends Widget<SkillWidget> {
         }
 
         var height = 1 + (1 + tooltip.size()) * fontHeight();
-        var y = this.y() - 4 > this.tab().insideCenterY ? -56 : -7;
+        var y = this.y() - 4 > this.tab.insideCenterY ? -56 : -7;
         var textY = 7;
 
         for (var section : sections) {
@@ -92,9 +83,5 @@ public class SkillWidget extends Widget<SkillWidget> {
 
         chroma(1);
         new ScalableWidget<>().blueRectangle().parent(this).x(-4).y(0.5).centerY().width(barWidth).height(20).with(new TextWidget().x(32).y(6).shadow().text(name)).render(this.matrixes);
-    }
-
-    private SkillTab tab() {
-        return (SkillTab) this.parent.get();
     }
 }

@@ -1,28 +1,27 @@
 package soulboundarmory.skill;
 
-import soulboundarmory.client.gui.screen.SoulboundTab;
-import soulboundarmory.lib.gui.widget.Widget;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.util.List;
 import java.util.Set;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
-import soulboundarmory.component.statistics.SkillStorage;
+import soulboundarmory.component.statistics.SkillMap;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.serial.Serializable;
 
-public final class SkillContainer implements Comparable<SkillContainer>, Serializable {
-    public final Set<SkillContainer> dependencies = new ReferenceOpenHashSet<>();
+public final class SkillInstance implements Comparable<SkillInstance>, Serializable {
+    public final Set<SkillInstance> dependencies = new ReferenceOpenHashSet<>();
     public final Skill skill;
 
     private int level;
 
-    public SkillContainer(Skill skill) {
+    public SkillInstance(Skill skill) {
         this.skill = skill;
     }
 
-    public void initializeDependencies(SkillStorage storage) {
+    public void initializeDependencies(SkillMap storage) {
         this.dependencies.addAll(this.skill.dependencies().stream().map(storage::get).toList());
     }
 
@@ -39,7 +38,7 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
     }
 
     public boolean dependenciesFulfilled() {
-        return this.dependencies.stream().allMatch(SkillContainer::learned);
+        return this.dependencies.stream().allMatch(SkillInstance::learned);
     }
 
     public boolean canUpgrade() {
@@ -77,7 +76,7 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
     }
 
     @Override
-    public int compareTo(SkillContainer other) {
+    public int compareTo(SkillInstance other) {
         var tierDifference = this.skill.tier() - other.skill.tier();
         return tierDifference == 0 ? this.level() - other.level() : tierDifference;
     }
@@ -90,8 +89,8 @@ public final class SkillContainer implements Comparable<SkillContainer>, Seriali
         return this.skill.tooltip();
     }
 
-    public void render(SoulboundTab tab, MatrixStack matrices, int x, int y) {
-        this.skill.render(tab, this.level, x, y);
+    public void render(Widget<?> tab, MatrixStack matrices) {
+        this.skill.render(tab, this.level);
     }
 
     public void reset() {
