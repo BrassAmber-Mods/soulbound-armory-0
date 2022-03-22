@@ -20,8 +20,8 @@ public class SoulboundItems {
     public static final ToolMaterial material = material(ToolMaterials.WOOD);
 
     @Register("dagger") public static final SoulboundDaggerItem dagger = new SoulboundDaggerItem();
-    @Register("sword") public static final SoulboundSword sword = new SoulboundSword();
-    @Register("greatsword") public static final SoulboundGreatsword greatsword = new SoulboundGreatsword();
+    @Register("sword") public static final SoulboundSwordItem sword = new SoulboundSwordItem();
+    @Register("greatsword") public static final SoulboundGreatswordItem greatsword = new SoulboundGreatswordItem();
     @Register("pick") public static final SoulboundPickItem pick = new SoulboundPickItem();
     @Register("bigsword") public static final SoulboundBigswordItem bigsword = new SoulboundBigswordItem();
     @Register("trident") public static final SoulboundTridentItem trident = new SoulboundTridentItem();

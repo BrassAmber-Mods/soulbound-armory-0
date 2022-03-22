@@ -14,8 +14,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.skill.Skills;
 
-public class SoulboundGreatsword extends SoulboundMeleeWeapon {
-    public SoulboundGreatsword() {
+public class SoulboundGreatswordItem extends SoulboundMeleeWeapon {
+    public SoulboundGreatswordItem() {
         super(5, -3.2F, 3);
     }
 

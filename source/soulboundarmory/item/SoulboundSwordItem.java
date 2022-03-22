@@ -13,8 +13,8 @@ import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.skill.Skills;
 
-public class SoulboundSword extends SoulboundMeleeWeapon {
-    public SoulboundSword() {
+public class SoulboundSwordItem extends SoulboundMeleeWeapon {
+    public SoulboundSwordItem() {
         super(3, -2.4F, 0);
     }
 
