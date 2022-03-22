@@ -16,6 +16,7 @@
         "entity.LivingEntityMixin",
         "entity.EntityAttributeModifierMixin",
         "entity.OperationMixin",
+        "entity.PersistentProjectileEntityMixin",
         "entity.PlayerEntityMixin",
         "entity.PlayerInventoryMixin"
     ],

@@ -5,17 +5,22 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.minecraftforge.network.NetworkHooks;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
-public class SoulboundDaggerEntity extends ExtendedProjectile {
+public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntityAdditionalSpawnData {
     public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new, SpawnGroup.MISC)
         .setDimensions(.3F, .5F)
@@ -28,9 +33,9 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     protected final boolean clone;
     protected final boolean spawnClone;
     protected boolean hit;
-    protected int ticksToSeek = -1;
     protected int ticksSeeking;
     protected int ticksInGround;
+    protected ItemStack stack = ItemStack.EMPTY;
 
     public SoulboundDaggerEntity(PlayerEntity shooter, boolean clone, double speed, double damageRatio) {
         super(type, shooter, shooter.world);
@@ -67,7 +72,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     @Override
     public ItemStack asItemStack() {
-        return this.component().map(ItemComponent::stack).orElse(ItemStack.EMPTY);
+        return this.component().map(ItemComponent::stack).orElse(this.stack);
     }
 
     @Override
@@ -77,79 +82,37 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
 
     @Override
     public void tick() {
-        if (this.isServer()) {
-            top:
-            if (this.component().isPresent()) {
-                var component = this.component().get();
-                var owner = component.player;
-                var attackSpeed = component.attackSpeed();
+        super.tick();
 
-                if (this.seeking()
-                    || component.hasSkill(Skills.sneakReturn)
-                    && owner.isSneaking()
-                    && this.age >= 60 / attackSpeed
-                    || component.hasSkill(Skills.returning)
-                    && (this.age >= 300
-                    || this.ticksInGround > 20 / attackSpeed
-                    || owner.distanceTo(this) >= 16 * (this.world.getServer().getPlayerManager().getViewDistance() - 1)
-                    || this.getY() <= 0)
-                ) {
-                    // this.setRotation();
-                    this.setVelocity(this.getOwner().getEyePos().subtract(this.getPos()));
-
-/*
-                    var box = owner.getBoundingBox();
-                    var dx = (box.getMax(Direction.Axis.X) + box.getMin(Direction.Axis.X)) / 2 - this.getZ();
-                    var dy = (box.getMax(Direction.Axis.Y) + box.getMin(Direction.Axis.Y)) / 2 - this.getY();
-                    var dz = (box.getMax(Direction.Axis.Z) + box.getMin(Direction.Axis.Z)) / 2 - this.getZ();
-                    var multiplier = 1.8 / attackSpeed;
-
-                    if (this.ticksToSeek == -1 && !this.inGround) {
-                        this.ticksToSeek = (int) Math.round(Math.log(0.05) / Math.log(multiplier));
-                    }
-
-                    if (this.ticksToSeek > 0 && !this.inGround) {
-                        this.setVelocity(this.getVelocity().multiply(multiplier));
-                        this.ticksToSeek--;
-                    } else {
-                        var normalized = new Vec3d(dx, dy, dz).normalize();
-
-                        if (this.ticksToSeek != 0) {
-                            this.ticksToSeek = 0;
-                        }
-
-                        if (this.inGround) {
-                            this.setVelocity(0, 0, 0);
-                            this.inGround = false;
-                        }
-
-                        if (this.ticksSeeking > 5) {
-                            multiplier = Math.min(0.08 * this.ticksSeeking, 5);
-
-                            if (MathHelper.magnitude(dx, dy, dz) <= 5 && this.ticksSeeking > 100) {
-                                this.setVelocity(dx, dy, dz);
-                            } else {
-                                this.setVelocity(normalized.multiply(multiplier));
-                            }
-                        } else {
-                            multiplier = 0.08;
-                            this.setVelocity(this.getVelocity().add(normalized.multiply(multiplier)));
-                        }
-
-                        this.ticksSeeking++;
-
-                        // break top;
-                    }
-
-                    this.move(MovementType.SELF, this.getVelocity());
-*/
-                }
-
-                // return;
-            }
+        if (this.inGround) {
+            this.ticksInGround++;
+        } else {
+            this.ticksInGround = 0;
         }
 
-        super.tick();
+        top: if (this.component().isPresent()) {
+            var component = this.component().get();
+            var owner = component.player;
+            var attackSpeed = component.attackSpeed();
+
+            if (this.seeking()
+                || component.hasSkill(Skills.sneakReturn) && owner.isSneaking() && this.age >= 60 / attackSpeed
+                || component.hasSkill(Skills.returning) && (this.ticksInGround >= 60 / attackSpeed || this.getY() < this.world.getBottomY())
+            ) {
+                this.inGround = false;
+                this.setNoClip(true);
+                this.setYaw((float) Math.toDegrees(MathHelper.atan2(this.velocityX(), this.velocityZ())));
+                var velocity = this.getOwner().getEyePos().subtract(this.getPos()).normalize();
+
+                if (!this.seeking()) {
+                    this.setVelocity(velocity);
+                } else {
+                    this.setVelocity(velocity.multiply(Math.min(3, this.getVelocity().length() * 1.03)));
+                }
+
+                this.ticksSeeking++;
+            }
+        }
     }
 
     @Override
@@ -165,6 +128,18 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     @Override
     public boolean isClient() {
         return this.world.isClient;
+    }
+
+    @Override public void writeSpawnData(PacketByteBuf buffer) {
+        buffer.writeItemStack(this.asItemStack());
+    }
+
+    @Override public void readSpawnData(PacketByteBuf buffer) {
+        this.stack = buffer.readItemStack();
+    }
+
+    @Override public Packet<?> createSpawnPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
@@ -191,12 +166,17 @@ public class SoulboundDaggerEntity extends ExtendedProjectile {
     @Override
     protected void onBlockHit(BlockHitResult result) {
         if (!this.seeking()) {
+            this.setSound(null);
             super.onBlockHit(result);
 
             if (this.isServer()) {
                 var blockState = this.world.getBlockState(result.getBlockPos());
-                this.playSound(blockState.getBlock().getSoundGroup(blockState).getHitSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+                this.playSound(blockState.getBlock().getSoundGroup(blockState).getBreakSound(), 1, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
             }
+        }
+
+        if (this.clone && this.component().filter(component -> component.hasSkill(Skills.returning)).isEmpty()) {
+            this.discard();
         }
     }
 
