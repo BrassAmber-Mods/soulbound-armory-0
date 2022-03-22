@@ -7,6 +7,7 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillInstance;
+import soulboundarmory.skill.Skills;
 
 public final class SkillRecord extends Record {
     private Skill skill;
@@ -48,7 +49,7 @@ public final class SkillRecord extends Record {
 
     @Override
     public void deserialize(NbtCompound tag) {
-        this.skill = Skill.registry.get(new Identifier(tag.getString("skill")));
+        this.skill = Skills.registry().getValue(new Identifier(tag.getString("skill")));
         this.points = tag.getInt("points");
     }
 

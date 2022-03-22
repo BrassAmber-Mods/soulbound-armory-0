@@ -26,7 +26,7 @@ public final class S2CUnlock extends BufferPacket {
             marker.unlock();
 
             Widget.client.particleManager.addEmitter(player, SoulboundArmory.unlockParticle, 30);
-            player.world.playSound(player.getX(), player.getY(), player.getZ(), SoulboundArmory.unlockAnimationSound, player.getSoundCategory(), 1, 1, false);
+            player.world.playSound(player.getX(), player.getY(), player.getZ(), SoulboundArmory.unlockSound, player.getSoundCategory(), 1, 1, false);
 
             if (player == Widget.player()) {
                 Widget.gameRenderer.showFloatingItem(marker.stack);

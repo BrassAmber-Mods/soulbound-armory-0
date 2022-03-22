@@ -2,15 +2,18 @@ package soulboundarmory.skill;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.lib.gui.AbstractNode;
 import soulboundarmory.lib.gui.widget.Widget;
@@ -20,21 +23,18 @@ import soulboundarmory.util.Util;
 /**
  An active or passive ability; locked by default and possibly having multiple levels and dependencies.
  */
+@EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public abstract class Skill extends RegistryElement<Skill> {
-    public static final Registry<Skill> registry = Util.newRegistry("skill");
-
     public final int maxLevel;
 
     protected final Identifier texture;
 
-    private Set<Skill> dependencies;
     private int tier = -1;
 
     public Skill(Identifier identifier, Identifier texture, int maxLevel) {
-        super(identifier);
-
         this.texture = texture;
         this.maxLevel = maxLevel;
+        this.setRegistryName(identifier);
     }
 
     public Skill(Identifier identifier, int maxLevel) {
@@ -72,7 +72,7 @@ public abstract class Skill extends RegistryElement<Skill> {
     }
 
     public Set<Skill> dependencies() {
-        return Objects.requireNonNullElse(this.dependencies, Collections.emptySet());
+        return Collections.emptySet();
     }
 
     public boolean hasDependencies() {
@@ -100,15 +100,19 @@ public abstract class Skill extends RegistryElement<Skill> {
      Register dependencies for this skill.
      Must be invoked <b>after</b> all skills are initialized.
      */
-     void initDependencies() {
+     private void initializeDependencies() {
         if (this.tier == -1) {
-            this.dependencies = this.dependencies();
             this.tier = this.hasDependencies() ? 1 : 0;
 
-            for (var dependency : this.dependencies) {
-                dependency.initDependencies();
+            for (var dependency : this.dependencies()) {
+                dependency.initializeDependencies();
                 this.tier = Math.max(this.tier, dependency.tier() + 1);
             }
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void initializeDependencies(RegistryEvent.Register<Skill> event) {
+        Skills.registry().forEach(Skill::initializeDependencies);
     }
 }

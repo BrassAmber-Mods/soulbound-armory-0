@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -18,12 +19,12 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Lifecycle;
-import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import net.auoeke.reflect.ClassTransformer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
@@ -36,7 +37,12 @@ import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
@@ -182,8 +188,12 @@ public class Util extends net.minecraft.util.Util {
         return mod instanceof MinecraftModContainer ? SoulboundArmory.ID : mod.getNamespace();
     }
 
+    public static Identifier id(String namespace, String path) {
+        return path.contains(":") ? new Identifier(path) : new Identifier(namespace, path);
+    }
+
     public static Identifier id(String path) {
-        return new Identifier(namespace(), path);
+        return id(namespace(), path);
     }
 
     public static void ifPresent(NbtCompound tag, String key, Consumer<NbtCompound> action) {
@@ -192,6 +202,10 @@ public class Util extends net.minecraft.util.Util {
         if (child != null) {
             action.accept(child);
         }
+    }
+
+    public static <T extends IForgeRegistryEntry<T>> Supplier<IForgeRegistry<T>> newForgeRegistry(NewRegistryEvent event, String name) {
+        return event.create(new RegistryBuilder<T>().setName(id(name)));
     }
 
     public static <T extends RegistryElement<T>> SimplerRegistry<T> newRegistry(String path, T... dummy) {
@@ -266,7 +280,7 @@ public class Util extends net.minecraft.util.Util {
         }
 
         if (mapper == null) {
-            mapper = Launcher.INSTANCE.environment().findNameMapping("srg").get();
+            mapper = FMLLoader.getNameFunction("srg").get();
         }
 
         return mapper.apply(domain, production);

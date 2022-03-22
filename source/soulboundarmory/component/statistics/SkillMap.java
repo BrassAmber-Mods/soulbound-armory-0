@@ -8,6 +8,7 @@ import soulboundarmory.component.statistics.history.SkillHistory;
 import soulboundarmory.serial.Serializable;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.skill.SkillInstance;
+import soulboundarmory.skill.Skills;
 
 public class SkillMap extends Reference2ObjectLinkedOpenHashMap<Skill, SkillInstance> implements Serializable {
     public SkillHistory history;
@@ -36,7 +37,7 @@ public class SkillMap extends Reference2ObjectLinkedOpenHashMap<Skill, SkillInst
     @Override
     public void deserialize(NbtCompound tag) {
         for (var identifier : tag.getKeys()) {
-            var skill = this.get(Skill.registry.get(new Identifier(identifier)));
+            var skill = this.get(Skills.registry().getValue(new Identifier(identifier)));
 
             if (skill != null) {
                 skill.deserialize(tag.getCompound(identifier));

@@ -11,12 +11,12 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.util.Util;
 
-public class ItemComponentArgumentType extends RegistryArgumentType<ItemComponentType<?>> {
+public class ItemComponentArgumentType extends RegistryArgumentType {
     protected ItemComponentArgumentType() {
-        super(ItemComponentType.registry);
+        super(ItemComponentType.registry());
     }
 
-    public static ItemComponentArgumentType itemComponents() {
+    public static <C extends ItemComponent<C>> RegistryArgumentType<ItemComponentType<C>> itemComponents() {
         return new ItemComponentArgumentType();
     }
 
@@ -34,7 +34,7 @@ public class ItemComponentArgumentType extends RegistryArgumentType<ItemComponen
     }
 
     @Override
-    protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    protected Stream<String> suggestions(CommandContext context, SuggestionsBuilder builder) {
         return Stream.concat(Stream.of("current"), super.suggestions(context,builder));
     }
 }

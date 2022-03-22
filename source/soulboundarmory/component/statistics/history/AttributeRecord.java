@@ -37,7 +37,7 @@ public final class AttributeRecord extends Record {
 
     @Override
     public void deserialize(NbtCompound tag) {
-        this.type = StatisticType.registry.get(new Identifier(tag.getString("attribute")));
+        this.type = StatisticType.registry().getValue(new Identifier(tag.getString("attribute")));
         this.points = tag.getInt("points");
     }
 

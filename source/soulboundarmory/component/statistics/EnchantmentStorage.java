@@ -1,13 +1,12 @@
 package soulboundarmory.component.statistics;
 
-import it.unimi.dsi.fastutil.objects.Reference2IntLinkedOpenHashMap;
 import java.util.Iterator;
 import java.util.function.Predicate;
+import it.unimi.dsi.fastutil.objects.Reference2IntLinkedOpenHashMap;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.history.EnchantmentHistory;
@@ -69,7 +68,7 @@ public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantme
     @Override
     public void deserialize(NbtCompound tag) {
         for (var key : tag.getKeys()) {
-            var enchantment = Registry.ENCHANTMENT.get(new Identifier(key));
+            var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new Identifier(key));
 
             if (this.containsKey(enchantment)) {
                 this.put(enchantment, tag.getInt(key));

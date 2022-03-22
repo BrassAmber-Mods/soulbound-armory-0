@@ -1,23 +1,23 @@
 package soulboundarmory.network;
 
-import net.minecraft.util.registry.Registry;
-import soulboundarmory.lib.gui.widget.Widget;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
+import soulboundarmory.lib.gui.widget.Widget;
 import soulboundarmory.util.Util;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
@@ -47,8 +47,8 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         return this;
     }
 
-    public <T> T readRegistryEntry(Registry<T> registry) {
-        return registry.get(this.readIdentifier());
+    public <T extends IForgeRegistryEntry<T>> T readRegistryEntry(IForgeRegistry<T> registry) {
+        return registry.getValue(this.readIdentifier());
     }
 
     @Override

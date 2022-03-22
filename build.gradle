@@ -85,6 +85,12 @@ publishing {
     }
 }
 
+afterEvaluate {
+    genSources {
+        dependsOn = [genSourcesWithFernFlower]
+    }
+}
+
 loom {
     forge {
         mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")

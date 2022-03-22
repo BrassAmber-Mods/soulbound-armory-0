@@ -52,14 +52,14 @@ public final class SoulboundArmoryCommand {
                                 .then(argument("players", EntityArgumentType.players()).executes(context -> set(context, true)))))))
                 .then(literal("reset").executes(context -> reset(context, false, false, false))
                     .then(argument(ITEM, itemComponents()).executes(context -> reset(context, true, false, false))
-                        .then(argument("category", registry(Category.registry)).executes(context -> reset(context, true, false, true))
+                        .then(argument("category", registry(Category.registry())).executes(context -> reset(context, true, false, true))
                             .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, true, true))))
                         .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, true, false)))))
         );
     }
 
     private static RegistryArgumentType<StatisticType> statisticTypes() {
-        return registry(StatisticType.registry);
+        return registry(StatisticType.registry());
     }
 
     private static int add(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {

@@ -1,31 +1,15 @@
 package soulboundarmory.registry;
 
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import soulboundarmory.util.Util;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 @SuppressWarnings("unchecked")
-public abstract class RegistryElement<T extends RegistryElement<T>> {
-    protected Identifier id;
-
-    public RegistryElement(Identifier id) {
-        this.id = id;
-        Registry.register(this.registry(), this.id, (T) this);
-    }
-
-    public RegistryElement(String path) {
-        this(Util.id(path));
-    }
-
+public abstract class RegistryElement<T extends RegistryElement<T>> extends ForgeRegistryEntry<T> {
     public Identifier id() {
-        return this.id;
+        return this.getRegistryName();
     }
 
     public String string() {
-        return this.id.toString();
-    }
-
-    public Registry<? super T> registry() {
-        return Util.registry((Class<T>) this.getClass());
+        return this.id().toString();
     }
 }

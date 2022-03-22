@@ -546,7 +546,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     public SkillInstance skill(Identifier identifier) {
-        return this.skill(Skill.registry.get(identifier));
+        return this.skill(Skills.registry().getValue(identifier));
     }
 
     public boolean hasSkill(Skill skill) {
@@ -651,7 +651,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public void reset() {
         var level = this.level();
 
-        for (var category : Category.registry) {
+        for (var category : Category.registry()) {
             this.reset(category);
         }
 

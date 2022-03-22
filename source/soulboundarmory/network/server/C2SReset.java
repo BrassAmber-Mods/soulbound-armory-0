@@ -10,7 +10,7 @@ import soulboundarmory.network.ItemComponentPacket;
 public final class C2SReset extends ItemComponentPacket {
     @Override
     public void execute(ItemComponent<?> component) {
-        var category = this.message.readRegistryEntry(Category.registry);
+        var category = this.message.readRegistryEntry(Category.registry());
 
         if (category == null) {
             component.reset();

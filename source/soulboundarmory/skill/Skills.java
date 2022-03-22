@@ -1,5 +1,7 @@
 package soulboundarmory.skill;
 
+import net.minecraftforge.registries.IForgeRegistry;
+import soulboundarmory.lib.transform.Register;
 import soulboundarmory.skill.tool.common.AbsorptionSkill;
 import soulboundarmory.skill.tool.common.CircumspectionSkill;
 import soulboundarmory.skill.tool.common.EnderPullSkill;
@@ -13,8 +15,8 @@ import soulboundarmory.skill.weapon.greatsword.FreezingSkill;
 import soulboundarmory.skill.weapon.greatsword.LeapingSkill;
 import soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 
+@Register("skill")
 public class Skills {
-    // Should not be visible in the game if not implemented.
     // public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
     public static final Skill absorption = new AbsorptionSkill();
     public static final Skill circumspection = new CircumspectionSkill();
@@ -29,7 +31,5 @@ public class Skills {
     public static final Skill summonLightning = new SummonLightningSkill();
     public static final Skill throwing = new ThrowingSkill();
 
-    static {
-        Skill.registry.forEach(Skill::initDependencies);
-    }
+    @Register("skill") public static native IForgeRegistry<Skill> registry();
 }
