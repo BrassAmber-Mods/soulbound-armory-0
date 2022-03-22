@@ -34,7 +34,7 @@ sourceSets {
             srcDirs = ["dev"]
         }
 
-        compileClasspath += main.compileClasspath
+        compileClasspath += main.compileClasspath + main.output
     }
 }
 
