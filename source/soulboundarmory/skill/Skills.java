@@ -1,7 +1,7 @@
 package soulboundarmory.skill;
 
 import net.minecraftforge.registries.IForgeRegistry;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.transform.Register;
 import soulboundarmory.skill.tool.common.AbsorptionSkill;
 import soulboundarmory.skill.tool.common.CircumspectionSkill;
 import soulboundarmory.skill.tool.common.EnderPullSkill;

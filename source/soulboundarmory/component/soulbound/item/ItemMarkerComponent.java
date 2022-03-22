@@ -9,9 +9,9 @@ import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.bar.ExperienceBar;
-import soulboundarmory.lib.component.ItemStackComponent;
-import soulboundarmory.lib.gui.AbstractNode;
-import soulboundarmory.lib.gui.Node;
+import soulboundarmory.module.component.ItemStackComponent;
+import soulboundarmory.module.gui.AbstractNode;
+import soulboundarmory.module.gui.Node;
 import soulboundarmory.util.Util;
 
 public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerComponent>, TooltipData {

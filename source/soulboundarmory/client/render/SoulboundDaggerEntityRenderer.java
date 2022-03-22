@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
 import soulboundarmory.entity.SoulboundDaggerEntity;
-import soulboundarmory.lib.gui.Node;
+import soulboundarmory.module.gui.Node;
 import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntityRenderer extends EntityRenderer<SoulboundDaggerEntity> {

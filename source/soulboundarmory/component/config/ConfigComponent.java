@@ -3,7 +3,7 @@ package soulboundarmory.component.config;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.lib.component.EntityComponent;
+import soulboundarmory.module.component.EntityComponent;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 

@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.tool.PickComponent;
 import soulboundarmory.item.SoulboundToolItem;
-import soulboundarmory.lib.component.EntityComponentKey;
+import soulboundarmory.module.component.EntityComponentKey;
 
 public class MasterToolComponent extends MasterComponent<MasterToolComponent> {
     public MasterToolComponent(PlayerEntity player) {

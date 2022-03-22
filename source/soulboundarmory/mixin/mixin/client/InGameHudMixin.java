@@ -12,7 +12,7 @@ import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.component.Components;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.lib.gui.screen.ScreenWidget;
+import soulboundarmory.module.gui.screen.ScreenWidget;
 
 @Mixin(InGameHud.class)
 abstract class InGameHudMixin {

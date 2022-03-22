@@ -18,7 +18,7 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.skill.Skills;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.transform.Register;
 import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntityAdditionalSpawnData {

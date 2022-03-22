@@ -6,7 +6,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.component.Components;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.network.BufferPacket;
 
 /**

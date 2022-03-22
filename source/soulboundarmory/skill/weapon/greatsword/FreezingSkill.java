@@ -3,7 +3,7 @@ package soulboundarmory.skill.weapon.greatsword;
 import java.util.Collections;
 import java.util.Set;
 import net.minecraft.item.Items;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.skill.Skill;
 

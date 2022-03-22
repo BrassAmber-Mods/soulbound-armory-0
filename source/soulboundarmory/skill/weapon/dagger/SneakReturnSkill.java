@@ -5,7 +5,7 @@ import java.util.Set;
 import net.minecraft.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.skill.Skill;
 

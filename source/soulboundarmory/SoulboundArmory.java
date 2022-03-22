@@ -5,7 +5,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.transform.Register;
 import soulboundarmory.util.Util;
 
 @Mod(SoulboundArmory.ID)

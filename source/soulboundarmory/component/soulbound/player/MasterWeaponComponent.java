@@ -9,7 +9,7 @@ import soulboundarmory.component.soulbound.item.weapon.GreatswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.soulbound.item.weapon.TridentComponent;
 import soulboundarmory.item.SoulboundWeaponItem;
-import soulboundarmory.lib.component.EntityComponentKey;
+import soulboundarmory.module.component.EntityComponentKey;
 
 public class MasterWeaponComponent extends MasterComponent<MasterWeaponComponent> {
     public MasterWeaponComponent(PlayerEntity player) {

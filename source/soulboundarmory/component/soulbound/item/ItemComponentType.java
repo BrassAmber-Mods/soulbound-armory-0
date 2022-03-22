@@ -14,8 +14,8 @@ import soulboundarmory.component.soulbound.item.weapon.SwordComponent;
 import soulboundarmory.component.soulbound.item.weapon.TridentComponent;
 import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.MasterComponent;
-import soulboundarmory.lib.component.EntityComponentKey;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.component.EntityComponentKey;
+import soulboundarmory.module.transform.Register;
 import soulboundarmory.registry.RegistryElement;
 
 public final class ItemComponentType<C extends ItemComponent<C>> extends RegistryElement<ItemComponentType<C>> {

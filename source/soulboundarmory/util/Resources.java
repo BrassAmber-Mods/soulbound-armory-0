@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
-import soulboundarmory.lib.gui.AbstractNode;
+import soulboundarmory.module.gui.AbstractNode;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;

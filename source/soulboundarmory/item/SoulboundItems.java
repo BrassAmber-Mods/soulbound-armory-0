@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.common.ForgeTier;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.transform.Register;
 
 public class SoulboundItems {
     private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<TagKey<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();

@@ -1,7 +1,7 @@
 package soulboundarmory.component.entity;
 
 import soulboundarmory.item.SoulboundDaggerItem;
-import soulboundarmory.lib.component.ItemStackComponent;
+import soulboundarmory.module.component.ItemStackComponent;
 
 /**
  Used as a marker in {@link SoulboundDaggerItem#canPerformAction}.

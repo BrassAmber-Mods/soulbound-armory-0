@@ -9,8 +9,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
-import soulboundarmory.lib.gui.widget.Widget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 

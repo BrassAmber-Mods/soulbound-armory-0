@@ -2,7 +2,7 @@ package soulboundarmory.network.client;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.network.BufferPacket;
 

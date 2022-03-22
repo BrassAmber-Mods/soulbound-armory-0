@@ -12,7 +12,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import soulboundarmory.component.soulbound.item.ItemMarkerComponent;
-import soulboundarmory.lib.component.EntityComponent;
+import soulboundarmory.module.component.EntityComponent;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 

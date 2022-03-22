@@ -1,5 +1,5 @@
 package soulboundarmory.component.entity;
 
-import soulboundarmory.lib.component.EntityComponent;
+import soulboundarmory.module.component.EntityComponent;
 
 public class EnderPullComponent implements EntityComponent<EnderPullComponent> {}

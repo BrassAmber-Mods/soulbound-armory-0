@@ -17,7 +17,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.util.Util;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {

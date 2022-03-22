@@ -1,7 +1,7 @@
 package soulboundarmory.component.statistics;
 
 import net.minecraftforge.registries.IForgeRegistry;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.transform.Register;
 import soulboundarmory.registry.RegistryElement;
 
 public class Category extends RegistryElement<Category> {

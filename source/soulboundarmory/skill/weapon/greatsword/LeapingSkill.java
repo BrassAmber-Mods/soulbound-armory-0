@@ -1,7 +1,7 @@
 package soulboundarmory.skill.weapon.greatsword;
 
 import net.minecraft.item.Items;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.skill.Skill;
 
 public class LeapingSkill extends Skill {

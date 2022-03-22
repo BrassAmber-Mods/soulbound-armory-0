@@ -5,10 +5,10 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.lib.gui.widget.GraphicWidget;
-import soulboundarmory.lib.gui.widget.TextWidget;
-import soulboundarmory.lib.gui.widget.Widget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.GraphicWidget;
+import soulboundarmory.module.gui.widget.TextWidget;
+import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.skill.SkillInstance;
 
 public class SkillWidget extends Widget<SkillWidget> {

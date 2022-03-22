@@ -5,7 +5,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent;
-import soulboundarmory.lib.gui.AbstractNode;
+import soulboundarmory.module.gui.AbstractNode;
 
 /**
  The base packet type.

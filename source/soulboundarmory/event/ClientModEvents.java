@@ -16,7 +16,7 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemMarkerComponent;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.item.SoulboundItem;
-import soulboundarmory.lib.gui.Node;
+import soulboundarmory.module.gui.Node;
 import soulboundarmory.particle.CriticalHitParticle;
 import soulboundarmory.particle.UnlockParticle;
 import soulboundarmory.util.Util;

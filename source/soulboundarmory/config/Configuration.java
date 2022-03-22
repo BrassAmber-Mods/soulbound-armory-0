@@ -10,9 +10,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import soulboundarmory.client.gui.bar.BarStyle;
-import soulboundarmory.lib.config.Category;
-import soulboundarmory.lib.config.Comment;
-import soulboundarmory.lib.config.Interval;
+import soulboundarmory.module.config.Category;
+import soulboundarmory.module.config.Comment;
+import soulboundarmory.module.config.Interval;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Util;
 

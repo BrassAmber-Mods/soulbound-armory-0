@@ -1,6 +1,6 @@
 package soulboundarmory.network;
 
-import soulboundarmory.lib.component.ComponentRegistry;
+import soulboundarmory.module.component.ComponentRegistry;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 
 public abstract class ComponentPacket extends BufferPacket {

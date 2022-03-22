@@ -8,7 +8,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import soulboundarmory.component.statistics.SkillMap;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.serial.Serializable;
 
 public final class SkillInstance implements Comparable<SkillInstance>, Serializable {

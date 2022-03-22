@@ -2,7 +2,7 @@ package soulboundarmory.component.statistics;
 
 import java.util.function.Consumer;
 import net.minecraftforge.registries.IForgeRegistry;
-import soulboundarmory.lib.transform.Register;
+import soulboundarmory.module.transform.Register;
 import soulboundarmory.registry.RegistryElement;
 
 public class StatisticType extends RegistryElement<StatisticType> {

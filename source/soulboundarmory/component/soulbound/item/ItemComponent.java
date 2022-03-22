@@ -55,7 +55,7 @@ import soulboundarmory.entity.Attributes;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.entity.SoulboundLightningEntity;
 import soulboundarmory.item.SoulboundItems;
-import soulboundarmory.lib.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.serial.Serializable;

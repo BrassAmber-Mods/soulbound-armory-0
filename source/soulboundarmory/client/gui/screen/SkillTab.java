@@ -6,9 +6,9 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import net.minecraft.util.Identifier;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.lib.gui.coordinate.Offset;
-import soulboundarmory.lib.gui.widget.Widget;
-import soulboundarmory.lib.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.coordinate.Offset;
+import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
 import soulboundarmory.skill.SkillInstance;
 
 /**
