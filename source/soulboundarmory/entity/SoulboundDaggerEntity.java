@@ -18,10 +18,11 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.skill.Skills;
+import soulboundarmory.transform.Register;
 import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntityAdditionalSpawnData {
-    public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
+    @Register("dagger") public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new, SpawnGroup.MISC)
         .setDimensions(.3F, .5F)
         .build(Util.id("dagger").toString());
