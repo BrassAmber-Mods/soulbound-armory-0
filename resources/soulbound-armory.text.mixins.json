@@ -1,7 +1,7 @@
 {
     "required": true,
-    "package": "soulboundarmory.lib.text.mixin",
-    "plugin": "soulboundarmory.lib.text.Transformer",
+    "package": "soulboundarmory.module.text.mixin",
+    "plugin": "soulboundarmory.module.text.Transformer",
     "compatibilityLevel": "JAVA_17",
     "minVersion": "0.8",
     "mixins": [
