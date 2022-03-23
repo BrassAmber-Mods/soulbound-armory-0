@@ -21,7 +21,6 @@ import net.auoeke.reflect.Flags;
 import net.auoeke.reflect.Invoker;
 import net.auoeke.reflect.Methods;
 import net.auoeke.reflect.Reflect;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -131,7 +130,7 @@ public class Registrar {
                 .get();
             var field = (FieldNode) node.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL, method.name + UUID.randomUUID(), Type.getDescriptor(IForgeRegistry.class), null, null);
 
-            var instrumentation = Reflect.instrumentation();
+            var instrumentation = Reflect.instrument().value();
             instrumentation.addTransformer(new SingleUseTransformer(instrumentation, node.name, (module, loader, name, type, domain, classFile) -> {
                 method.access &= ~Flags.NATIVE;
                 method.visitFieldInsn(Opcodes.GETSTATIC, node.name, field.name, field.desc);
