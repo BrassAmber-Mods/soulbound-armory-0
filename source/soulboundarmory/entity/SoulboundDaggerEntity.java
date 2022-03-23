@@ -10,15 +10,14 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
-import soulboundarmory.skill.Skills;
 import soulboundarmory.module.transform.Register;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntityAdditionalSpawnData {
@@ -102,7 +101,6 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
             ) {
                 this.inGround = false;
                 this.setNoClip(true);
-                this.setYaw((float) Math.toDegrees(MathHelper.atan2(this.velocityX(), this.velocityZ())));
                 var velocity = this.getOwner().getEyePos().subtract(this.getPos()).normalize();
 
                 if (!this.seeking()) {
