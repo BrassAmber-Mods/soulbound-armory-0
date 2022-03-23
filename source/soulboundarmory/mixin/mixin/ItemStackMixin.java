@@ -24,7 +24,7 @@ import soulboundarmory.util.Util;
 abstract class ItemStackMixin {
     @Inject(method = "hasGlint", at = @At("HEAD"), cancellable = true)
     private void disableGlint(CallbackInfoReturnable<Boolean> info) {
-        Components.marker.nullable((ItemStack) (Object) this)
+        Components.marker.optional((ItemStack) (Object) this)
             .map(ItemMarkerComponent::item)
             .map(component -> Components.config.of(component.player))
             .filter(component -> !component.glint)

@@ -51,7 +51,7 @@ public final class ItemComponentType<C extends ItemComponent<C>> extends Registr
     }
 
     public C of(Entity entity) {
-        return this.parentKey.nullable(entity).map(component -> component.item(this)).orElse(null);
+        return this.parentKey.optional(entity).map(component -> component.item(this)).orElse(null);
     }
 
     public Optional<C> nullable(Entity entity) {

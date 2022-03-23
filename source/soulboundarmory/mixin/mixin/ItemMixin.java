@@ -15,7 +15,7 @@ abstract class ItemMixin {
     @Inject(method = "getTooltipData", at = @At("RETURN"), cancellable = true)
     private void getSoulboundItemTooltipData(ItemStack stack, CallbackInfoReturnable<Optional<? extends TooltipData>> info) {
         if (info.getReturnValue().isEmpty()) {
-            info.setReturnValue(Components.marker.nullable(stack));
+            info.setReturnValue(Components.marker.optional(stack));
         }
     }
 }

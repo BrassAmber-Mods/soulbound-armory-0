@@ -23,7 +23,7 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
     }
 
     private static double damageRatio(double attackSpeed, int timeLeft) {
-        return Math.min(attackSpeed * (USE_TIME - timeLeft) / 40F, 1);
+        return Math.min(1, attackSpeed * (USE_TIME - timeLeft) / 40F);
     }
 
     @Override
@@ -50,8 +50,7 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
     @Override
     public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
         if (entity instanceof ServerPlayerEntity player) {
-            var component = ItemComponentType.dagger.of(player);
-            var attackSpeed = component.attributeTotal(StatisticType.attackSpeed);
+            var attackSpeed = ItemComponentType.dagger.of(player).attributeTotal(StatisticType.attackSpeed);
             var damageRatio = damageRatio(attackSpeed, timeLeft);
 
             world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed, damageRatio));

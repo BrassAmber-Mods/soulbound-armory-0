@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
 import soulboundarmory.component.Components;
+import soulboundarmory.component.soulbound.item.ItemMarkerComponent;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.module.gui.screen.ScreenWidget;
 
@@ -25,11 +26,6 @@ abstract class InGameHudMixin {
 
     @Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
     private void hideSoulboundItemWhileTransforming(int x, int y, float tickDelta, PlayerEntity player, ItemStack stack, int seed, CallbackInfo info) {
-        var component = Components.entityData.of(player);
-
-        // todo: fix condition
-        if (component.animationProgress > 0 && component.unlockedStack.filter(item -> item.stack == stack).isPresent()) {
-            info.cancel();
-        }
+        Components.marker.optional(stack).filter(ItemMarkerComponent::animating).ifPresent(__ -> info.cancel());
     }
 }
