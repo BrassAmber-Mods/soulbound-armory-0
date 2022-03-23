@@ -1,9 +1,7 @@
 package soulboundarmory.event;
 
-import net.auoeke.reflect.Accessor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.GameRules;
@@ -23,9 +21,6 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.Logger;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.command.SoulboundArmoryCommand;
 import soulboundarmory.component.Components;
@@ -212,7 +207,7 @@ public final class CommonEvents {
 
                         for (double i = 0; i <= 2 * radiusXZ; i += radiusXZ / 48D) {
                             var x = radiusXZ - i;
-                            var z = Math.sqrt((radiusXZ * radiusXZ - x * x));
+                            var z = Math.sqrt(radiusXZ * radiusXZ - x * x);
                             var particles = 1;
 
                             world.spawnParticles(
@@ -265,9 +260,5 @@ public final class CommonEvents {
     @SubscribeEvent
     public static void registerCommand(RegisterCommandsEvent event) {
         SoulboundArmoryCommand.register(event);
-
-        if (!FMLEnvironment.production) {
-            Accessor.<Logger>getReference(Accessor.<Object>getReference(CommandManager.class, "LOGGER"), "logger").setLevel(Level.DEBUG);
-        }
     }
 }
