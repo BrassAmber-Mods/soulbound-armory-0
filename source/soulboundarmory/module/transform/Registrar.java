@@ -72,45 +72,41 @@ public class Registrar {
                                 default -> throw new IllegalArgumentException("value = %s; must be 1 element or absent".formatted(value));
                             };
 
-                            try {
-                                var node = new ClassNode();
-                                new ClassReader(annotation.clazz().getInternalName()).accept(node, annotation.targetType() == ElementType.METHOD ? 0 : ClassReader.SKIP_CODE);
+                            var node = new ClassNode();
+                            new ClassReader(Classes.classFile(annotation.clazz().getInternalName())).accept(node, annotation.targetType() == ElementType.METHOD ? 0 : ClassReader.SKIP_CODE);
 
-                                if (annotation.targetType() == ElementType.METHOD) {
-                                    if (value == null || value.size() != 1) {
-                                        throw new IllegalArgumentException("@Register on %s::%s must have 1 argument containing its identifier".formatted(node.name, annotation.memberName()));
+                            if (annotation.targetType() == ElementType.METHOD) {
+                                if (value == null || value.size() != 1) {
+                                    throw new IllegalArgumentException("@Register on %s::%s must have 1 argument containing its identifier".formatted(node.name, annotation.memberName()));
+                                }
+
+                                processMethod(annotation, identifier, node);
+                            } else if (value != null || annotation.targetType() == ElementType.FIELD) {
+                                node.fields.stream().filter(field -> {
+                                    if (annotation.targetType() == ElementType.FIELD) {
+                                        if (field.name.equals(annotation.memberName())) {
+                                            if (!Flags.isStatic(field.access) || !Flags.isFinal(field.access)) {
+                                                throw new IllegalArgumentException("bad modifiers \"%s\" (%d) on %s.%s; must be static final".formatted(Flags.string(field.access), field.access, node.name, field.name));
+                                            }
+                                        } else {
+                                            return false;
+                                        }
                                     }
 
-                                    processMethod(annotation, identifier, node);
-                                } else if (value != null || annotation.targetType() == ElementType.FIELD) {
-                                    node.fields.stream().filter(field -> {
-                                        if (annotation.targetType() == ElementType.FIELD) {
-                                            if (field.name.equals(annotation.memberName())) {
-                                                if (!Flags.isStatic(field.access) || !Flags.isFinal(field.access)) {
-                                                    throw new IllegalArgumentException("bad modifiers \"%s\" (%d) on %s.%s; must be static final".formatted(Flags.string(field.access), field.access, node.name, field.name));
-                                                }
-                                            } else {
-                                                return false;
+                                    return true;
+                                }).forEach(field -> {
+                                    if (value == null || annotation.targetType() == ElementType.FIELD) {
+                                        registrationsByType.add(registry -> {
+                                            if (registry.getRegistrySuperType().isAssignableFrom(Classes.load(Type.getType(field.desc).getClassName()))) {
+                                                register(registry, identifier, node, field);
                                             }
-                                        }
-
-                                        return true;
-                                    }).forEach(field -> {
-                                        if (value == null || annotation.targetType() == ElementType.FIELD) {
-                                            registrationsByType.add(registry -> {
-                                                if (registry.getRegistrySuperType().isAssignableFrom(Classes.load(Type.getType(field.desc).getClassName()))) {
-                                                    register(registry, identifier, node, field);
-                                                }
-                                            });
-                                        } else for (var id : value) {
-                                            var registration = new Registration(registry -> register(registry, identifier, node, field));
-                                            registrations.computeIfAbsent(new Identifier(id), key -> ReferenceArrayList.of()).add(registration);
-                                            registrations.computeIfAbsent(Util.id(id), key -> ReferenceArrayList.of()).add(registration);
-                                        }
-                                    });
-                                }
-                            } catch (Throwable trouble) {
-                                throw Unsafe.throwException(trouble);
+                                        });
+                                    } else for (var id : value) {
+                                        var registration = new Registration(registry -> register(registry, identifier, node, field));
+                                        registrations.computeIfAbsent(new Identifier(id), key -> ReferenceArrayList.of()).add(registration);
+                                        registrations.computeIfAbsent(Util.id(id), key -> ReferenceArrayList.of()).add(registration);
+                                    }
+                                });
                             }
                         });
                     }
