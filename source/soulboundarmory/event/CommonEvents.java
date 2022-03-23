@@ -117,6 +117,7 @@ public final class CommonEvents {
 
         if (damage.getAttacker() instanceof ServerPlayerEntity player) {
             ItemComponent.fromAttacker(target, damage).ifPresent(component -> {
+                Components.entityData.of(target).unfreeze();
                 var amount = event.getAmount();
 
                 if (((WeaponComponent<?>) component).hit()) {

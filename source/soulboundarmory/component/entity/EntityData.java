@@ -80,6 +80,11 @@ public final class EntityData implements EntityComponent<EntityData> {
         return this.freezeTicks > 0 && this.entity.isAlive() && !this.entity.isOnFire();
     }
 
+    public void unfreeze() {
+        this.freezeTicks = 0;
+        this.update(false);
+    }
+
     public int overlay() {
         return this.isFrozen() ? 0x3EDBFF : 0;
     }
