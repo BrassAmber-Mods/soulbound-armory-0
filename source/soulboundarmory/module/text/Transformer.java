@@ -42,7 +42,7 @@ public class Transformer implements IMixinConfigPlugin {
     @Override
     public void preApply(String targetClassName, ClassNode target, String mixinClassName, IMixinInfo mixinInfo) {
         switch (mixinClassName) {
-            case "soulboundarmory.lib.text.mixin.StyleMixin" -> {
+            case "soulboundarmory.module.text.mixin.StyleMixin" -> {
                 var methodNames = Util.hashSet(Util.mapMethod(131152), Util.mapMethod(131157), Util.mapMethod(131164));
 
                 target.methods.stream().filter(method -> methodNames.contains(method.name)).forEach(method -> {
@@ -62,7 +62,7 @@ public class Transformer implements IMixinConfigPlugin {
                     }
                 });
             }
-            case "soulboundarmory.lib.text.mixin.dummy.LanguageDummyMixin" -> {
+            case "soulboundarmory.module.text.mixin.dummy.LanguageDummyMixin" -> {
                 var get = Util.mapMethod(6834);
                 var method = target.methods.stream().filter(m -> m.name.equals(get)).findAny().get();
                 var instructions = new InsnList();
@@ -84,7 +84,7 @@ public class Transformer implements IMixinConfigPlugin {
 
                 method.instructions.insertBefore(method.instructions.getFirst(), instructions);
             }
-            case "soulboundarmory.lib.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
+            case "soulboundarmory.module.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
                 target.superName = Util.mapClass("net/minecraft/ChatFormatting");
 
                 target.methods.forEach(method -> {
