@@ -46,6 +46,12 @@ configurations {
 
 shadowJar {
     configurations = [project.configurations.lib]
+
+    transform(net.auoeke.gronk.ManifestMerger) {
+        include {
+            it.manifest.mainAttributes.getValue("Agent-Class") == "net.auoeke.reflect.Agent"
+        }
+    }
 }
 
 remapJar {
