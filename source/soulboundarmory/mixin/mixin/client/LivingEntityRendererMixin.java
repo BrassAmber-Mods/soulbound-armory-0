@@ -48,14 +48,6 @@ abstract class LivingEntityRendererMixin {
     }
 
     @ModifyVariable(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
-                    at = @At(value = "HEAD"),
-                    ordinal = 1)
-    private float doNotUpdateTickDeltaForFrozenEntity(float tickDelta, LivingEntity entity) {
-        var component = Components.entityData.of(entity);
-        return component.isFrozen() ? component.tickDelta : tickDelta;
-    }
-
-    @ModifyVariable(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
                     at = @At(value = "STORE"),
                     index = 12)
     private float cancelAnimationProgressForFrozenEntity(float progress, LivingEntity entity) {
