@@ -50,7 +50,7 @@ public final class CommonEvents {
             if (!player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
                 Components.soulbound(player)
                     .map(MasterComponent::item)
-                    .filter(component -> component != null && component.level() >= Configuration.instance().preservationLevel)
+                    .filter(component -> component != null && component.level() >= Configuration.preservationLevel)
                     .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.getInventory().insertStack(drop.getStack())));
             }
         } else {

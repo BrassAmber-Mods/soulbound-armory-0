@@ -12,7 +12,7 @@ public class Offset {
      @return the offset
      */
     public int resolve(int origin, int length) {
-        return (int) (this.type.resolve(origin) + length * this.value);
+        return (int) Math.round(this.type.resolve(origin) + length * this.value);
     }
 
     /**

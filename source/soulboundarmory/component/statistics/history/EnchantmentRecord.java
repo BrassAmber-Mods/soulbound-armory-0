@@ -24,7 +24,7 @@ public final class EnchantmentRecord extends Record {
 
     @Override
     public boolean revert(int level) {
-        var interval = Configuration.instance().levelsPerEnchantment;
+        var interval = Configuration.levelsPerEnchantment;
         var change = this.component.level() / interval - level / interval;
         var deduction = Math.min(this.points, change);
         this.component.addEnchantment(this.enchantment, -deduction);

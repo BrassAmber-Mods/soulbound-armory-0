@@ -1,216 +1,138 @@
 package soulboundarmory.config;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import net.auoeke.reflect.Accessor;
-import net.auoeke.reflect.Fields;
-import net.auoeke.reflect.Flags;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
 import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.module.config.Category;
 import soulboundarmory.module.config.Comment;
+import soulboundarmory.module.config.ConfigurationFile;
+import soulboundarmory.module.config.Flat;
 import soulboundarmory.module.config.Interval;
 import soulboundarmory.util.Math2;
-import soulboundarmory.util.Util;
 
 // @Config(name = SoulboundArmory.ID)
 // @Background("minecraft:textures/block/andesite.png")
-public final class Configuration {
+public final class Configuration implements ConfigurationFile {
     private static final String MULTIPLIERS = "multipliers";
     private static final String CLIENT = "client";
 
-    public static final Configuration instance = new Configuration();
+    @Comment("experience points required to reach the first level for tools")
+    public static int initialToolXP = 16;
 
-    @Comment("the amount of experience points required to reach the first level for tools")
-    public int initialToolXP = 16;
+    @Comment("experience points required to reach the first level for weapons")
+    public static int initialWeaponXP = 64;
 
-    @Comment("the amount of experience points required to reach the first level for weapons")
-    public int initialWeaponXP = 64;
+    @Comment("levels required in order to gain an enchantment point")
+    public static int levelsPerEnchantment = 10;
 
-    @Comment("the number of levels required in order to gain an enchantment point")
-    public int levelsPerEnchantment = 10;
+    @Comment("levels required in order to gain a skill point")
+    public static int levelsPerSkillPoint = 5;
 
-    @Comment("the number of levels required in order to gain a skill point")
-    public int levelsPerSkillPoint = 5;
+    @Comment({"maximum level", "maximum level < 0 => no limit"})
+    public static int maxLevel = -1;
 
-    @Comment({"the maximum soulbound item level", "< 0 => no limit"})
-    public int maxLevel = -1;
+    @Comment("minimum level for items to be preserved after death")
+    public static int preservationLevel = 0;
 
-    @Comment("the minimum level for soul weapons to be preserved after death")
-    public int preservationLevel = 0;
+    @Comment("free point restoration")
+    public static boolean freeRestoration = true;
 
-    @Comment("whether point restoration is free")
-    public boolean freeRestoration = true;
-
+    @Flat
     @Category(MULTIPLIERS)
-    @Comment("1 + (armor multiplier) * armor")
-    public double armorMultiplier = 0.2;
+    public static class Multipliers {
+        @Comment("1 + (armor multiplier) * armor")
+        public static double armorMultiplier = 0.2;
 
-    @Category(MULTIPLIERS)
-    @Comment("1 + (attack damage multiplier) * damage")
-    public double attackDamageMultiplier = 0.35;
+        @Comment("1 + (attack damage multiplier) * damage")
+        public static double attackDamageMultiplier = 0.35;
 
-    @Category(MULTIPLIERS)
-    @Comment("1 + (attack speed multiplier) * damage")
-    public double attackSpeedMultiplier = 0.5;
+        @Comment("1 + (attack speed multiplier) * damage")
+        public static double attackSpeedMultiplier = 0.5;
 
-    @Category(MULTIPLIERS)
-    @Comment({"(difficulty multiplier) * difficulty", "Difficulty ranges from 0 to 3."})
-    public double difficultyMultiplier = 0.5;
+        @Comment({"(difficulty multiplier) * difficulty (peaceful = 0; hard = 3)"})
+        public static double difficultyMultiplier = 0.5;
 
-    @Category(MULTIPLIERS)
-    @Comment("peaceful mode multiplier")
-    public double peacefulMultiplier = 0;
+        @Comment("peaceful mode multiplier")
+        public static double peacefulMultiplier = 0;
 
-    @Category(MULTIPLIERS)
-    @Comment("the multiplier for XPs gained by killing baby entities")
-    public double babyMultiplier = 2;
+        @Comment("hostile babies kill XP multiplier")
+        public static double babyMultiplier = 2;
 
-    @Category(MULTIPLIERS)
-    @Comment("the multiplier for XPs gained by killing bosses")
-    public double bossMultiplier = 3;
+        @Comment("boss kill XP multiplier")
+        public static double bossMultiplier = 3;
 
-    @Category(MULTIPLIERS)
-    @Comment("the multiplier for XPs gained in hardcore mode")
-    public double hardcoreMultiplier = 2;
+        @Comment("hardcore mode XP multiplier")
+        public static double hardcoreMultiplier = 2;
 
-    @Category(MULTIPLIERS)
-    @Comment("the multiplier for XPs gained by killing passive entities")
-    public double passiveMultiplier = 0;
+        @Comment("passive entity kill XP multiplier")
+        public static double passiveMultiplier = 0;
+    }
 
-    // @TransitiveObject
-    @Category(CLIENT)
     @OnlyIn(Dist.CLIENT)
-    public Client client;
-
-    public Configuration() {
-        if (Util.isClient()) {
-            this.client = new Client();
-        }
-    }
-
-    public static Configuration instance() {
-        return instance;
-    }
-
-    private static ForgeConfigSpec configuration(Class<?> type) {
-        var builder = new ForgeConfigSpec.Builder();
-
-        Fields.of(type).forEach(field -> {
-            if (Flags.isTransient(field) || Flags.isInstance(field)) {
-                return;
-            }
-
-            var category = field.getAnnotation(Category.class);
-
-            if (category != null) {
-                builder.push(category.value());
-            }
-
-            var comment = field.getAnnotation(Comment.class);
-
-            if (comment != null) {
-                builder.comment(comment.value());
-            }
-
-            var defaultValue = Accessor.get(field);
-            var interval = field.getAnnotation(Interval.class);
-
-            if (interval == null) {
-                builder.define(field.getName(), defaultValue);
-            } else if (field.getType() == int.class) {
-                builder.defineInRange(field.getName(), (int) defaultValue, interval.min(), interval.max());
-            } else {
-                throw new ClassCastException("Interval-annotated field %s must be of type int");
-            }
-
-            if (category != null) {
-                builder.pop();
-            }
-        });
-
-        return builder.build();
-    }
-
-    public static void paths(String mod, Class<?> holder) {
-        var paths = new HashMap<Field, String>();
-        Fields.of(holder).forEach(field -> paths(paths, field, String.format("config.%s.%s", mod, field.getName())));
-    }
-
-    public static void paths(Map<Field, String> paths, Field field, String path) {
-        paths.put(field, path);
-        Fields.of(field.getType()).filter(child -> Accessor.get(child) != null).forEach(child -> paths(paths, child, path + "." + child.getName()));
-    }
-
+    @Category(CLIENT)
     public static class Client {
         @Comment("receive levelup notifications above the hotbar")
-        public boolean levelupNotifications = false;
+        public static boolean levelupNotifications = false;
 
         @Comment("display option button and sliders in the menu")
-        public boolean displayOptions = false;
+        public static boolean displayOptions = false;
 
-        @Comment("replace the default XP bar with an XP bar for the currently held soulbound item")
-        public boolean overlayExperienceBar = true;
+        @Comment("use a custom experience bar for the currently held soulbound item")
+        public static boolean overlayExperienceBar = true;
 
         @Comment("enable enchantment glint for enchanted items")
-        public boolean enchantmentGlint = false;
+        public static boolean enchantmentGlint = false;
 
         @Comment("display attributes in tooltips")
-        public boolean tooltipAttributes = true;
+        public static boolean tooltipAttributes = true;
 
-        // @EnumHandler(option = EnumDisplayOption.BUTTON)
-        public BarStyle style = BarStyle.EXPERIENCE;
-
-        @Comment("the colors of this mod's XP bar")
-        // @CollapsibleObject(startExpanded = true)
-        public Color color = new Color();
+        @Comment("experience bar style")
+        public static BarStyle style = BarStyle.EXPERIENCE;
 
         public void toggleOverlayExperienceBar() {
-            this.overlayExperienceBar = !this.overlayExperienceBar;
+            overlayExperienceBar ^= true;
         }
 
+        @Comment("XP bar color")
         public static class Color {
             @Interval(max = 255)
-            public int red = 160;
+            public static int red = 160;
 
             @Interval(max = 255)
-            public int green = 255;
+            public static int green = 255;
 
             @Interval(max = 255)
-            public int blue = 160;
+            public static int blue = 160;
 
             @Interval(max = 255)
-            public int alpha = 255;
+            public static int alpha = 255;
 
-            public void set(int id, int value) {
+            public static void set(int id, int value) {
                 switch (id) {
-                    case 0 -> this.red = value;
-                    case 1 -> this.green = value;
-                    case 2 -> this.blue = value;
-                    case 3 -> this.alpha = value;
-                    default -> throw new IllegalArgumentException("invalid color component ID: " + id);
+                    case 0 -> red = value;
+                    case 1 -> green = value;
+                    case 2 -> blue = value;
+                    case 3 -> alpha = value;
+                    default -> throw new IllegalArgumentException("color component ID: " + id);
                 }
             }
 
-            public int get(int id) {
+            public static int get(int id) {
                 return switch (id) {
-                    case 0 -> this.red;
-                    case 1 -> this.green;
-                    case 2 -> this.blue;
-                    case 3 -> this.alpha;
-                    default -> throw new IllegalArgumentException("invalid color component ID: " + id);
+                    case 0 -> red;
+                    case 1 -> green;
+                    case 2 -> blue;
+                    case 3 -> alpha;
+                    default -> throw new IllegalArgumentException("color component ID: " + id);
                 };
             }
 
-            public float getf(int id) {
-                return this.get(id) / 255F;
+            public static float getf(int id) {
+                return get(id) / 255F;
             }
 
-            public int argb() {
-                return Math2.pack(this.red, this.green, this.blue, this.alpha);
+            public static int argb() {
+                return Math2.pack(red, green, blue, alpha);
             }
         }
     }

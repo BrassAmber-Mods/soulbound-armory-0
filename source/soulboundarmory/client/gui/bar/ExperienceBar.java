@@ -11,8 +11,6 @@ import soulboundarmory.module.gui.widget.TextWidget;
 import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
 
 public class ExperienceBar extends ScalableWidget<ExperienceBar> {
-    protected static final Configuration.Client configuration = Configuration.instance().client;
-    protected static final Configuration.Client.Color color = configuration.color;
 
     private static final ExperienceBar overlayBar = new ExperienceBar().center().x(.5).y(1D, -27);
 
@@ -21,7 +19,7 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
         .y(5)
         .centerX()
         .alignDown()
-        .color(color::argb)
+        .color(Configuration.Client.Color::argb)
         .stroke()
         .text(() -> this.component.level())
         .visible(() -> this.component.level() > 0)
@@ -55,19 +53,19 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
 
     @Override
     public boolean isPresent() {
-        return this.component != null && color.alpha > 25 && super.isPresent();
+        return this.component != null && Configuration.Client.Color.alpha > 25 && super.isPresent();
     }
 
     @Override
     public void render() {
-        this.v(configuration.style.v).viewWidth(1D).color4f(color.getf(0), color.getf(1), color.getf(2), color.getf(3));
+        this.v(Configuration.Client.style.v).viewWidth(1D).color4f(Configuration.Client.Color.getf(0), Configuration.Client.Color.getf(1), Configuration.Client.Color.getf(2), Configuration.Client.Color.getf(3));
         super.render();
 
         if (this.component.canLevelUp()) {
             this.viewWidth(Math.min(1, this.component.experience() / this.component.nextLevelXP()));
         }
 
-        this.v(configuration.style.v + 5);
+        this.v(Configuration.Client.style.v + 5);
         super.render();
     }
 

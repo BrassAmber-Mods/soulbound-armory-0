@@ -224,7 +224,7 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
         if (!this.player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
             var item = this.item();
 
-            if (item != null && item.level() >= Configuration.instance().preservationLevel) {
+            if (item != null && item.level() >= Configuration.preservationLevel) {
                 this.player.getInventory().insertStack(item.stack());
             }
         }

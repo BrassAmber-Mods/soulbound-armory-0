@@ -244,7 +244,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     public int maxLevel() {
-        return Configuration.instance().maxLevel;
+        return Configuration.maxLevel;
     }
 
     /**
@@ -477,7 +477,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             return;
         }
 
-        if (points > 0 || Configuration.instance().freeRestoration) {
+        if (points > 0 || Configuration.freeRestoration) {
             attributePoints.add(-points);
 
             if (points > 0) {
@@ -505,8 +505,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @return whether this item can level up further, taking the configuration into account
      */
     public boolean canLevelUp() {
-        var configuration = Configuration.instance();
-        return this.level() < configuration.maxLevel || configuration.maxLevel < 0;
+        return this.level() < Configuration.maxLevel || Configuration.maxLevel < 0;
     }
 
     /**
@@ -517,13 +516,12 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     public void levelUp(int sign) {
         var level = this.statistic(StatisticType.level);
         level.add(sign);
-        var configuration = Configuration.instance();
 
-        if (level.intValue() % configuration.levelsPerEnchantment == 0) {
+        if (level.intValue() % Configuration.levelsPerEnchantment == 0) {
             this.add(StatisticType.enchantmentPoints, sign);
         }
 
-        if (level.intValue() % configuration.levelsPerSkillPoint == 0) {
+        if (level.intValue() % Configuration.levelsPerSkillPoint == 0) {
             this.add(StatisticType.skillPoints, sign);
         }
 
@@ -598,10 +596,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         var change = Math.max(0, current + levels) - current;
         this.enchantments.add(enchantment, change);
 
-        if (change > 0 || Configuration.instance().freeRestoration) {
+        if (change > 0 || Configuration.freeRestoration) {
             enchantmentPoints.add(-change);
         } else {
-            this.add(StatisticType.level, Configuration.instance().levelsPerEnchantment * change);
+            this.add(StatisticType.level, Configuration.levelsPerEnchantment * change);
         }
 
         this.updateItemStack();
@@ -632,10 +630,10 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             }
         } else if (category == Category.skill) {
             this.skills.values().forEach(skill -> {
-                if (Configuration.instance().freeRestoration) {
+                if (Configuration.freeRestoration) {
                     this.statistic(StatisticType.skillPoints).add(skill.spentPoints());
                 } else {
-                    this.add(StatisticType.level, Configuration.instance().levelsPerSkillPoint * -skill.spentPoints());
+                    this.add(StatisticType.level, Configuration.levelsPerSkillPoint * -skill.spentPoints());
                 }
 
                 skill.reset();
@@ -655,7 +653,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
             this.reset(category);
         }
 
-        if (Configuration.instance().freeRestoration) {
+        if (Configuration.freeRestoration) {
             this.set(StatisticType.attributePoints, level);
         }
 

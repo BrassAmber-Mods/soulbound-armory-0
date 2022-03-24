@@ -75,13 +75,13 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     public void drop() {}
 
     public T x(Offset.Type offset) {
-        super.x.offset.type = offset;
+        this.x.offset.type = offset;
 
         return (T) this;
     }
 
     public T x(Coordinate.Position position) {
-        super.x.position = position;
+        this.x.position = position;
 
         return (T) this;
     }
@@ -93,7 +93,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
      @return this
      */
     public T x(double value) {
-        super.x.offset.value = value;
+        this.x.offset.value = value;
 
         return this.x(Offset.Type.RELATIVE);
     }
@@ -107,13 +107,13 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public T y(Offset.Type offset) {
-        super.y.offset.type = offset;
+        this.y.offset.type = offset;
 
         return (T) this;
     }
 
     public T y(Coordinate.Position position) {
-        super.y.position = position;
+        this.y.position = position;
 
         return (T) this;
     }
@@ -125,7 +125,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
      @return this
      */
     public T y(double y) {
-        super.y.offset.value = y;
+        this.y.offset.value = y;
 
         return this.y(Offset.Type.RELATIVE);
     }

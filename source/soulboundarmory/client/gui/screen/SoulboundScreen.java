@@ -27,9 +27,6 @@ import soulboundarmory.util.Util;
  It keeps track of 4 tabs and stores the currently open tab as its child for rendering and input event handling.
  */
 public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
-    protected static final Configuration.Client configuration = Configuration.instance().client;
-    protected static final Configuration.Client.Color color = configuration.color;
-
     public final ExperienceBar xpBar = new ExperienceBar()
         .x(.5)
         .y(1D, -27)
@@ -37,8 +34,8 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
         .tooltip(tooltip -> tooltip.text(() -> {
             var xp = (int) this.item.experience();
             return this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp);
-        })).primaryAction(() -> configuration.displayOptions ^= true)
-        .secondaryAction(() -> configuration.overlayExperienceBar ^= true)
+        })).primaryAction(() -> Configuration.Client.displayOptions ^= true)
+        .secondaryAction(() -> Configuration.Client.overlayExperienceBar ^= true)
         .scrollAction(amount -> this.cycleStyle((int) amount))
         .present(this::displayTabs);
 
@@ -47,8 +44,8 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
         this.colorSlider(Translations.green, 1),
         this.colorSlider(Translations.blue, 2),
         this.colorSlider(Translations.alpha, 3),
-        this.optionButton(4, () -> Translations.style.format(configuration.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1))
-    ).peek(option -> option.present(() -> configuration.displayOptions && this.displayTabs())).toList();
+        this.optionButton(4, () -> Translations.style.format(Configuration.Client.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1))
+    ).peek(option -> option.present(() -> Configuration.Client.displayOptions && this.displayTabs())).toList();
     protected final MasterComponent<?> component;
     protected final int slot;
     protected ItemStack stack;
@@ -195,9 +192,9 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
             .min(0)
             .max(255)
             .discrete()
-            .value(color.get(id))
+            .value(Configuration.Client.Color.get(id))
             .text(text)
-            .onSlide(slider -> color.set(id, (int) slider.value()));
+            .onSlide(slider -> Configuration.Client.Color.set(id, (int) slider.value()));
     }
 
     private ScalableWidget<?> button(SoulboundTab tab) {
@@ -220,7 +217,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
     }
 
     private void cycleStyle(int change) {
-        var index = (Configuration.instance().client.style.ordinal() + change) % BarStyle.count;
-        Configuration.instance().client.style = BarStyle.styles.get(index >= 0 ? index : index + BarStyle.count);
+        var index = (Configuration.Client.style.ordinal() + change) % BarStyle.count;
+        Configuration.Client.style = BarStyle.styles.get(index >= 0 ? index : index + BarStyle.count);
     }
 }

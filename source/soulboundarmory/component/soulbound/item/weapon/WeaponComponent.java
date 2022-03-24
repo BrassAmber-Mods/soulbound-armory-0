@@ -48,7 +48,7 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
     @Override
     public int levelXP(int level) {
         return this.canLevelUp()
-            ? Configuration.instance().initialWeaponXP + 3 * (int) Math.round(Math.pow(level, 1.65))
+            ? Configuration.initialWeaponXP + 3 * (int) Math.round(Math.pow(level, 1.65))
             : -1;
     }
 
@@ -57,25 +57,24 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
         if (this.isServer()) {
             var damage = EntityUtil.attribute(entity, EntityAttributes.GENERIC_ATTACK_DAMAGE);
             var speed = EntityUtil.attribute(entity, EntityAttributes.GENERIC_ATTACK_SPEED);
-            var configuration = Configuration.instance();
             var difficulty = this.player.world.getDifficulty().getId();
 
             var xp = entity.getMaxHealth()
-                * (difficulty == 0 ? configuration.peacefulMultiplier : difficulty) * configuration.difficultyMultiplier
-                * (1 + EntityUtil.attribute(entity, EntityAttributes.GENERIC_ARMOR) * configuration.armorMultiplier)
-                * (damage <= 0 ? configuration.passiveMultiplier : 1 + damage * configuration.attackDamageMultiplier)
-                * (1 + speed * configuration.attackSpeedMultiplier);
+                * (difficulty == 0 ? Configuration.Multipliers.peacefulMultiplier : difficulty) * Configuration.Multipliers.difficultyMultiplier
+                * (1 + EntityUtil.attribute(entity, EntityAttributes.GENERIC_ARMOR) * Configuration.Multipliers.armorMultiplier)
+                * (damage <= 0 ? Configuration.Multipliers.passiveMultiplier : 1 + damage * Configuration.Multipliers.attackDamageMultiplier)
+                * (1 + speed * Configuration.Multipliers.attackSpeedMultiplier);
 
             if (EntityUtil.isBoss(entity)) {
-                xp *= configuration.bossMultiplier;
+                xp *= Configuration.Multipliers.bossMultiplier;
             }
 
             if (this.player.world.getServer().isHardcore()) {
-                xp *= configuration.hardcoreMultiplier;
+                xp *= Configuration.Multipliers.hardcoreMultiplier;
             }
 
             if (damage > 0 && entity.isBaby()) {
-                xp *= configuration.babyMultiplier;
+                xp *= Configuration.Multipliers.babyMultiplier;
             }
 
             this.add(StatisticType.experience, Math.round(xp));

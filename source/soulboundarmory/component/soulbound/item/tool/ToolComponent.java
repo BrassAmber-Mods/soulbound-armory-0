@@ -61,7 +61,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
     @Override
     public int levelXP(int level) {
         return this.canLevelUp()
-            ? Configuration.instance().initialToolXP + (int) Math.round(4 * Math.pow(level, 1.25))
+            ? Configuration.initialToolXP + (int) Math.round(4 * Math.pow(level, 1.25))
             : -1;
     }
 

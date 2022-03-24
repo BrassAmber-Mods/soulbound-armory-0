@@ -19,8 +19,7 @@ public final class ConfigComponent implements EntityComponent<ConfigComponent> {
     @Override
     public void spawn() {
         if (this.player.world.isClient) {
-            var configuration = Configuration.instance().client;
-            Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(configuration.levelupNotifications).writeBoolean(configuration.enchantmentGlint));
+            Packets.serverConfig.send(new ExtendedPacketBuffer().writeBoolean(Configuration.Client.levelupNotifications).writeBoolean(Configuration.Client.enchantmentGlint));
         }
     }
 

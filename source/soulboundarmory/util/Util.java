@@ -1,6 +1,8 @@
 package soulboundarmory.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +26,8 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import net.auoeke.reflect.ClassTransformer;
+import net.auoeke.reflect.Methods;
+import net.jodah.typetools.TypeResolver;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
@@ -56,6 +59,20 @@ public class Util extends net.minecraft.util.Util {
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
+
+    public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, T fallback) {
+        var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
+        return annotation == null ? fallback : getter.apply(annotation);
+    }
+
+    public static <A extends Annotation, T> T value(AnnotatedElement element, Function<A, T> getter) {
+        return value(element, getter, (T) null);
+    }
+
+    public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, Supplier<? extends T> fallback) {
+        var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
+        return annotation == null ? fallback.get() : getter.apply(annotation);
+    }
 
     public static <T, C extends Collection<? super T>> C add(C collection, T... things) {
         Collections.addAll(collection, things);
