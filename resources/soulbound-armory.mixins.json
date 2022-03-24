@@ -12,9 +12,9 @@
         "MiningToolItemMixin",
         "AbstractBlockStateMixin",
         "access.PlayerInventoryAccess",
+        "entity.EntityAttributeModifierMixin",
         "entity.LightningEntityMixin",
         "entity.LivingEntityMixin",
-        "entity.EntityAttributeModifierMixin",
         "entity.OperationMixin",
         "entity.PersistentProjectileEntityMixin",
         "entity.PlayerEntityMixin",
@@ -25,6 +25,7 @@
         "maxShiftBy": 5
     },
     "client": [
+        "client.EntityRenderDispatcherMixin",
         "client.GameRendererMixin",
         "client.HeldItemRendererMixin",
         "client.InGameHudMixin",

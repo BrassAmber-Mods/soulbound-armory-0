@@ -2,8 +2,8 @@ package soulboundarmory.network.client;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.component.Components;
+import soulboundarmory.module.gui.AbstractNode;
 import soulboundarmory.network.BufferPacket;
 
 /**
@@ -22,7 +22,7 @@ public class S2CFreeze extends BufferPacket {
             component.freeze(this.player(), 0, frozen ? 1 : 0, 0);
 
             if (frozen) {
-                component.tickDelta = Widget.tickDelta();
+                component.tickDelta = AbstractNode.tickDelta();
                 component.animationProgress = -1;
             }
         });
