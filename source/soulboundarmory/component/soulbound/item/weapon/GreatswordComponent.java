@@ -3,6 +3,7 @@ package soulboundarmory.component.soulbound.item.weapon;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -11,8 +12,8 @@ import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.skill.Skills;
 import soulboundarmory.item.SoulboundItems;
+import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Util;
 
@@ -71,6 +72,10 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
 
     public float zenith() {
         return this.zenith;
+    }
+
+    public boolean canFreeze(Entity entity) {
+        return !(entity instanceof ItemEntity);
     }
 
     public void freeze(Entity entity, int ticks, double damage) {

@@ -192,7 +192,7 @@ public final class CommonEvents {
                     var nearbyEntities = player.world.getOtherEntities(player, new Box(
                         player.getX() - radiusXZ, player.getY() - radiusY, player.getZ() - radiusXZ,
                         player.getX() + radiusXZ, player.getY() + radiusY, player.getZ() + radiusXZ
-                    ));
+                    ), greatsword::canFreeze);
 
                     var froze = false;
 
