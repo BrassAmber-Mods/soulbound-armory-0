@@ -19,7 +19,7 @@ import org.objectweb.asm.Type;
 
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public final class ConfigurationManager {
-    private static final Map<ModContainer, List<ConfigurationEntry<?>>> entries = new Reference2ReferenceOpenHashMap<>();
+    private static final Map<ModContainer, List<Entry<?>>> entries = new Reference2ReferenceOpenHashMap<>();
 
     @SubscribeEvent
     public static void begin(FMLConstructModEvent event) {
@@ -28,28 +28,9 @@ public final class ConfigurationManager {
 
         for (var type : classes) {
             if (type.interfaces().contains(Type.getType(ConfigurationFile.class))) {
-                entries.computeIfAbsent(mod, m -> ReferenceArrayList.of()).add(new ConfigurationEntry(mod, Classes.load(type.clazz().getClassName())));
+                entries.computeIfAbsent(mod, m -> ReferenceArrayList.of()).add(new Entry<>(mod, Classes.load(type.clazz().getClassName())));
             }
         }
-    }
-
-    private static ForgeConfigSpec configuration(Class<?> type) {
-        var builder = new ForgeConfigSpec.Builder();
-
-        Fields.of(type).forEach(field -> {
-            var defaultValue = Accessor.get(field);
-            var interval = field.getAnnotation(Interval.class);
-
-            if (interval == null) {
-                builder.define(field.getName(), defaultValue);
-            } else if (field.getType() == int.class) {
-                builder.defineInRange(field.getName(), (int) defaultValue, interval.min(), interval.max());
-            } else {
-                throw new ClassCastException("@Interval field %s.%s must be of type int".formatted(type.getName(), field.getName()));
-            }
-        });
-
-        return builder.build();
     }
 
     public static void paths(String mod, Class<?> holder) {

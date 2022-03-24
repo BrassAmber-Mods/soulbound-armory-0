@@ -6,12 +6,12 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import soulboundarmory.util.Util;
 
-public final class ConfigurationEntry<C extends ConfigurationFile> extends ConfigurationParent {
+public final class Entry<C extends ConfigurationFile> extends Parent {
     public final ModContainer mod;
     public final C instance;
     public final Path path;
 
-    public ConfigurationEntry(ModContainer mod, Class<C> type) {
+    public Entry(ModContainer mod, Class<C> type) {
         super(type, mod.getModId() + Util.value(type, (Name name) -> ':' + name.value(), ""), Util.value(type, Category::value, "main"));
 
         this.mod = mod;

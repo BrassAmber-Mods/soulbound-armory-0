@@ -4,14 +4,14 @@ import java.lang.reflect.Field;
 import net.auoeke.reflect.Pointer;
 import soulboundarmory.util.Util;
 
-public final class ConfigurationField<T> extends ConfigurationNode {
-    public final ConfigurationNode parent;
+public final class Property<T> extends Node {
+    public final Parent parent;
     public final String comment;
     public final T defaultValue;
 
     private final Pointer field;
 
-    public ConfigurationField(ConfigurationNode parent, Field field) {
+    public Property(Parent parent, Field field) {
         super(field.getName(), Util.value(field, (Category category) -> {
             if (ConfigurationFile.class.isAssignableFrom(field.getDeclaringClass())) {
                 return category.value();
@@ -24,6 +24,12 @@ public final class ConfigurationField<T> extends ConfigurationNode {
         this.comment = Util.value(field, (Comment comment) -> String.join("\n", comment.value()));
         this.field = Pointer.of(field);
         this.defaultValue = this.get();
+
+        var interval = field.getAnnotation(Interval.class);
+
+        if (interval != null && field.getType() != int.class) {
+            throw new ClassCastException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName()));
+        }
     }
 
     public T get() {
