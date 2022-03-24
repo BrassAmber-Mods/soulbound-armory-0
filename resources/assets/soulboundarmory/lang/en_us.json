@@ -75,7 +75,7 @@
     "skill.soulboundarmory.return.name": "return",
     "skill.soulboundarmory.throwing.name": "throwing",
     "skill.soulboundarmory.vulnerability.name": "vulnerability",
-    "skill.soulboundarmory.absorption.desc": "enables your tool to absorb the strength of stronger tools.",
+    "skill.soulboundarmory.absorption.desc": "enables your tool to absorb the strength of more powerful tools.",
     "skill.soulboundarmory.ambidexterity.desc": "allows its user to mine with their left hand. (Not yet implemented.)",
     "skill.soulboundarmory.circumspection.desc": "prevents hit blocks from breaking instantly.",
     "skill.soulboundarmory.endermanacle.desc": "prevents hit entities from teleporting.",
