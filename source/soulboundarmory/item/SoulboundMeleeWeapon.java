@@ -14,7 +14,7 @@ public abstract class SoulboundMeleeWeapon extends SwordItem implements Soulboun
     protected final float attackSpeed;
 
     public SoulboundMeleeWeapon(int attackDamage, float attackSpeed, float reach) {
-        super(SoulboundItems.material, attackDamage, attackSpeed, new Settings().group(ItemGroup.COMBAT));
+        super(SoulboundItems.baseMaterial, attackDamage, attackSpeed, new Settings().group(ItemGroup.COMBAT));
 
         this.reach = reach;
         this.attackSpeed = attackSpeed;

@@ -17,7 +17,7 @@ import soulboundarmory.module.transform.Register;
 public class SoulboundItems {
     private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<TagKey<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();
 
-    public static final ToolMaterial material = material(ToolMaterials.WOOD);
+    public static final ToolMaterial baseMaterial = material(ToolMaterials.WOOD);
 
     @Register("dagger") public static final SoulboundDaggerItem dagger = new SoulboundDaggerItem();
     @Register("sword") public static final SoulboundSwordItem sword = new SoulboundSwordItem();
@@ -26,11 +26,11 @@ public class SoulboundItems {
     @Register("bigsword") public static final SoulboundBigswordItem bigsword = new SoulboundBigswordItem();
     @Register("trident") public static final SoulboundTridentItem trident = new SoulboundTridentItem();
 
-    public static ToolMaterial material(ToolMaterial previous) {
-        return materials.computeIfAbsent(previous, previous1 -> new Reference2ReferenceOpenHashMap<>()).computeIfAbsent(previous.getTag(), tag -> {
+    public synchronized static ToolMaterial material(ToolMaterial previous) {
+        return materials.computeIfAbsent(previous, p -> new Reference2ReferenceOpenHashMap<>()).computeIfAbsent(previous.getTag(), tag -> {
             var material = TierSortingRegistry.registerTier(
                 new ForgeTier(previous.getMiningLevel(), 0, 1.5F, 0, 0, tag, () -> null),
-                new Identifier(SoulboundArmory.ID, TierSortingRegistry.getSortedTiers().contains(previous) ? TierSortingRegistry.getName(previous).toUnderscoreSeparatedString() : "material"),
+                new Identifier(SoulboundArmory.ID, TierSortingRegistry.getSortedTiers().contains(previous) ? TierSortingRegistry.getName(previous).toUnderscoreSeparatedString() : "base"),
                 List.of(previous),
                 List.of()
             );

@@ -251,7 +251,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
      @return this item's current tool material
      */
     public ToolMaterial material() {
-        return SoulboundItems.material;
+        return SoulboundItems.baseMaterial;
     }
 
     public int totalXP(int level) {
