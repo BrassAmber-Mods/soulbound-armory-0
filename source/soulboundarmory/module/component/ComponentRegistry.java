@@ -1,14 +1,14 @@
 package soulboundarmory.module.component;
 
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import it.unimi.dsi.fastutil.objects.ReferenceLists;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import it.unimi.dsi.fastutil.objects.ReferenceLists;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -24,6 +24,7 @@ import soulboundarmory.util.Util;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public final class ComponentRegistry {
+    public static final String componentKey = SoulboundArmory.id("components").toString();
     public static final Map<Identifier, ItemStackComponentKey<?>> item = new Object2ReferenceOpenHashMap<>();
     private static final Map<Identifier, EntityComponentKey<?>> entity = new Object2ReferenceOpenHashMap<>();
 

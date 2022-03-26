@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import soulboundarmory.SoulboundArmory;
+import soulboundarmory.module.component.ComponentRegistry;
 import soulboundarmory.module.component.EntityComponent;
 import soulboundarmory.module.component.EntityComponentKey;
 import soulboundarmory.module.component.access.EntityAccess;
@@ -30,12 +30,12 @@ abstract class EntityMixin implements EntityAccess {
     public void serializeComponents(NbtCompound tag, CallbackInfoReturnable<NbtCompound> info) {
         var components = new NbtCompound();
         this.components.forEach((key, component) -> components.put(key.key, component.serialize()));
-        tag.put(SoulboundArmory.componentKey, components);
+        tag.put(ComponentRegistry.componentKey, components);
     }
 
     @Inject(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V"))
     public void deserializeComponents(NbtCompound tag, CallbackInfo info) {
-        Util.ifPresent(tag, SoulboundArmory.componentKey, components -> this.components.forEach((key, component) -> Util.ifPresent(components, key.key, component::deserialize)));
+        Util.ifPresent(tag, ComponentRegistry.componentKey, components -> this.components.forEach((key, component) -> Util.ifPresent(components, key.key, component::deserialize)));
     }
 
     @Inject(method = "copyFrom", at = @At("RETURN"))

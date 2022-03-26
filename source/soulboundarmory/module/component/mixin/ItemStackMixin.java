@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import soulboundarmory.SoulboundArmory;
 import soulboundarmory.module.component.ComponentRegistry;
 import soulboundarmory.module.component.ItemStackComponent;
 import soulboundarmory.module.component.ItemStackComponentKey;
@@ -54,7 +53,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
     @Inject(method = "<init>(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("RETURN"))
     private void deserializeComponents(NbtCompound tag, CallbackInfo info) {
         if (this.components != null) {
-            Util.ifPresent(tag, SoulboundArmory.componentKey, components -> this.components.forEach((key, component) -> Util.ifPresent(components, key.key, component::deserialize)));
+            Util.ifPresent(tag, ComponentRegistry.componentKey, components -> this.components.forEach((key, component) -> Util.ifPresent(components, key.key, component::deserialize)));
         }
     }
 
@@ -63,7 +62,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
         if (this.components != null) {
             var components = new NbtCompound();
             this.components.forEach((key, component) -> components.put(key.key, component.serialize()));
-            tag.put(SoulboundArmory.componentKey, components);
+            tag.put(ComponentRegistry.componentKey, components);
         }
     }
 

@@ -20,6 +20,7 @@ def forgeVersion = "40."
 
 gronk {
     javaVersion(17)
+    uncheck()
 }
 
 sourceSets {

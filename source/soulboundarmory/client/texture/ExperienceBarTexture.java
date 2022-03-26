@@ -5,17 +5,17 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.resource.ResourceManager;
+import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.module.gui.Node;
 import soulboundarmory.util.Math2;
 import soulboundarmory.util.Resources;
-import soulboundarmory.util.Util;
 
 public class ExperienceBarTexture extends ResourceTexture {
     public static final ExperienceBarTexture instance = new ExperienceBarTexture();
 
     private ExperienceBarTexture() {
-        super(Util.id("gui/experience_bar"));
+        super(SoulboundArmory.id("gui/experience_bar"));
 
         Node.textureManager.registerTexture(this.location, this);
     }
