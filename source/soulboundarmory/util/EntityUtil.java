@@ -1,8 +1,8 @@
 package soulboundarmory.util;
 
+import java.util.UUID;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
-import java.util.UUID;
 import net.auoeke.reflect.Fields;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -38,7 +38,7 @@ public class EntityUtil {
         return isBoss(entity.getClass());
     }
 
-    private static boolean isBoss(Class<?> type) {
-        return type != null && bosses.computeBooleanIfAbsent(type, type1 -> Fields.of(type1).anyMatch(field -> BossBar.class.isAssignableFrom(field.getType())) || isBoss(type1.getSuperclass()));
+    private static synchronized boolean isBoss(Class<?> type) {
+        return type != null && bosses.computeBooleanIfAbsent(type, t -> Fields.of(t).anyMatch(field -> BossBar.class.isAssignableFrom(field.getType())) || isBoss(t.getSuperclass()));
     }
 }
