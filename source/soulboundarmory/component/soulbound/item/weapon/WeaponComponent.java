@@ -60,21 +60,21 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
             var difficulty = this.player.world.getDifficulty().getId();
 
             var xp = entity.getMaxHealth()
-                * (difficulty == 0 ? Configuration.Multipliers.peacefulMultiplier : difficulty) * Configuration.Multipliers.difficultyMultiplier
-                * (1 + EntityUtil.attribute(entity, EntityAttributes.GENERIC_ARMOR) * Configuration.Multipliers.armorMultiplier)
-                * (damage <= 0 ? Configuration.Multipliers.passiveMultiplier : 1 + damage * Configuration.Multipliers.attackDamageMultiplier)
-                * (1 + speed * Configuration.Multipliers.attackSpeedMultiplier);
+                * (difficulty == 0 ? Configuration.Multipliers.peaceful : difficulty) * Configuration.Multipliers.difficulty
+                * (1 + EntityUtil.attribute(entity, EntityAttributes.GENERIC_ARMOR) * Configuration.Multipliers.armor)
+                * (damage <= 0 ? Configuration.Multipliers.passive : 1 + damage * Configuration.Multipliers.attackDamage)
+                * (1 + speed * Configuration.Multipliers.attackSpeed);
 
             if (EntityUtil.isBoss(entity)) {
-                xp *= Configuration.Multipliers.bossMultiplier;
+                xp *= Configuration.Multipliers.boss;
             }
 
             if (this.player.world.getServer().isHardcore()) {
-                xp *= Configuration.Multipliers.hardcoreMultiplier;
+                xp *= Configuration.Multipliers.hardcore;
             }
 
             if (damage > 0 && entity.isBaby()) {
-                xp *= Configuration.Multipliers.babyMultiplier;
+                xp *= Configuration.Multipliers.baby;
             }
 
             this.add(StatisticType.experience, Math.round(xp));

@@ -41,31 +41,31 @@ public final class Configuration implements ConfigurationFile {
     @Category(MULTIPLIERS)
     public static class Multipliers {
         @Comment("1 + (armor multiplier) * armor")
-        public static double armorMultiplier = 0.2;
+        public static double armor = 0.2;
 
         @Comment("1 + (attack damage multiplier) * damage")
-        public static double attackDamageMultiplier = 0.35;
+        public static double attackDamage = 0.35;
 
         @Comment("1 + (attack speed multiplier) * damage")
-        public static double attackSpeedMultiplier = 0.5;
+        public static double attackSpeed = 0.5;
 
         @Comment({"(difficulty multiplier) * difficulty (peaceful = 0; hard = 3)"})
-        public static double difficultyMultiplier = 0.5;
+        public static double difficulty = 0.5;
 
         @Comment("peaceful mode multiplier")
-        public static double peacefulMultiplier = 0;
+        public static double peaceful = 0;
 
-        @Comment("hostile babies kill XP multiplier")
-        public static double babyMultiplier = 2;
+        @Comment("hostile baby kill XP multiplier")
+        public static double baby = 2;
 
         @Comment("boss kill XP multiplier")
-        public static double bossMultiplier = 3;
+        public static double boss = 3;
 
         @Comment("hardcore mode XP multiplier")
-        public static double hardcoreMultiplier = 2;
+        public static double hardcore = 2;
 
         @Comment("passive entity kill XP multiplier")
-        public static double passiveMultiplier = 0;
+        public static double passive = 0;
     }
 
     @OnlyIn(Dist.CLIENT)
