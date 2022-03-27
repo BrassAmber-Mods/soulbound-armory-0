@@ -20,11 +20,6 @@ public final class SoulboundArmory {
     @Register("unlock") public static final DefaultParticleType unlockParticle = new DefaultParticleType(false);
     @Register("unlock") public static final SoundEvent unlockSound = new SoundEvent(id("unlock"));
 
-    public SoulboundArmory() {
-        // ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, );
-        // ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, (minecaft, parent) -> );
-    }
-
     public static Identifier id(String path) {
         return new Identifier(ID, path);
     }

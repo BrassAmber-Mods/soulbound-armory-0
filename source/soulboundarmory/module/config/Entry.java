@@ -10,9 +10,12 @@ import java.util.TimerTask;
 import net.auoeke.eson.Eson;
 import net.auoeke.eson.element.EsonMap;
 import net.auoeke.reflect.Constructors;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import soulboundarmory.SoulboundArmory;
+import soulboundarmory.module.config.gui.ConfigurationScreen;
+import soulboundarmory.module.gui.screen.ScreenWidget;
 import soulboundarmory.util.Util;
 
 public final class Entry<C extends ConfigurationFile> extends Parent {
@@ -41,6 +44,10 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
                 Entry.this.deserialize();
             }
         }, 1000, 1000);
+    }
+
+    public Screen screen(Screen parent) {
+        return new ConfigurationScreen(this, parent).asScreen();
     }
 
     public boolean deserialize() {

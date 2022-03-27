@@ -11,13 +11,18 @@ import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.util.Util;
 
 public final class ScreenDelegate extends Screen {
-    public final Screen parent = Widget.screen();
+    public final Screen parent;
     public final ScreenWidget<?> screen;
 
-    public ScreenDelegate(Text title, ScreenWidget<?> screen) {
+    public ScreenDelegate(Text title, ScreenWidget<?> screen, Screen parent) {
         super(title);
 
+        this.parent = parent;
         this.screen = screen;
+    }
+
+    public ScreenDelegate(Text title, ScreenWidget<?> screen) {
+        this(title, screen, Widget.screen());
     }
 
     @Override
