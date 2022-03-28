@@ -17,12 +17,12 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46C;
 import soulboundarmory.function.NulliPredicate;
-import soulboundarmory.module.gui.AbstractNode;
 import soulboundarmory.module.gui.Node;
 import soulboundarmory.module.gui.coordinate.Coordinate;
 import soulboundarmory.module.gui.coordinate.Offset;
@@ -37,13 +37,13 @@ import soulboundarmory.util.Util;
  @param <T> the type of the widget
  */
 @OnlyIn(Dist.CLIENT)
-public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> implements TooltipComponent {
+public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements TooltipComponent {
     public Optional<Widget<?>> parent = Optional.empty();
     public ReferenceArrayList<Widget<?>> children = ReferenceArrayList.of();
     public ReferenceArrayList<Widget<?>> tooltips = ReferenceArrayList.of();
 
     /**
-     The element selected by the keyboard; may be `null`, `this` or a child.
+     The element selected by the keyboard; may be {@code null}, {@code this} or a child.
      */
     public Optional<Widget<?>> selected = Optional.empty();
     public PressCallback<T> primaryAction;
@@ -103,7 +103,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public T x(Node<?, ?> node) {
-        return this.x(__ -> node.x());
+        return this.x(__ -> node.absoluteX());
     }
 
     public T y(Offset.Type offset) {
@@ -135,7 +135,7 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public T y(Node<?, ?> node) {
-        return this.y(__ -> node.y());
+        return this.y(__ -> node.absoluteY());
     }
 
     public T offset(Offset.Type offset) {
@@ -399,14 +399,38 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
         return index;
     }
 
-    @Override
     public int x() {
-        return this.x.resolve(this.width(), this.parent.map(Widget::x).orElse(0), this.parent.map(Widget::width).orElse(windowWidth()));
+        return this.x.resolve(this::width, Util.zeroSupplier, () -> this.parent.map(Widget::width).orElseGet(Node::windowWidth));
+    }
+
+    public int y() {
+        return this.y.resolve(this::height, Util.zeroSupplier, () -> this.parent.map(Widget::height).orElseGet(Node::windowHeight));
+    }
+
+    public int middleX() {
+        return this.x() + this.width() / 2;
+    }
+
+    public int middleY() {
+        return this.y() + this.height() / 2;
+    }
+
+    public int endX() {
+        return this.x() + this.width();
+    }
+
+    public int endY() {
+        return this.y() + this.height();
     }
 
     @Override
-    public int y() {
-        return this.y.resolve(this.height(), this.parent.map(Widget::y).orElse(0), this.parent.map(Widget::height).orElse(windowHeight()));
+    public int absoluteX() {
+        return this.x.resolve(this::width, () -> this.parent.map(Widget::absoluteX).orElse(0), () -> this.parent.map(Widget::width).orElseGet(Node::windowWidth));
+    }
+
+    @Override
+    public int absoluteY() {
+        return this.y.resolve(this::height, () -> this.parent.map(Widget::absoluteY).orElse(0), () -> this.parent.map(Widget::height).orElseGet(Node::windowHeight));
     }
 
     @Override
@@ -670,7 +694,11 @@ public class Widget<T extends Widget<T>> extends AbstractNode<Widget<?>, T> impl
     }
 
     public void renderBackground() {
-        super.renderBackground(this.matrixes);
+        this.renderBackground(this.matrixes);
+    }
+
+    public void renderBackground(Identifier background) {
+        this.renderBackground(background, 0, 0, windowWidth(), windowHeight());
     }
 
     public void renderTooltip(List<? extends StringVisitable> lines) {

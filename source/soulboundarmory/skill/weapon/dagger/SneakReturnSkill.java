@@ -26,6 +26,6 @@ public class SneakReturnSkill extends Skill {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.LEAD, tab.x(), tab.y());
+        tab.renderGuiItem(Items.LEAD, tab.absoluteX(), tab.absoluteY());
     }
 }

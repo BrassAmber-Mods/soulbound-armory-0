@@ -1,7 +1,7 @@
 package soulboundarmory.module.gui.widget.slider;
 
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -112,7 +112,7 @@ public class Slider extends ScalableWidget<Slider> {
 
     @Override
     public void drag() {
-        this.progress(MathHelper.clamp(mouseX() - this.owner().x(), 0D, this.maxX()) / this.maxX());
+        this.progress(MathHelper.clamp(mouseX() - this.owner().absoluteX(), 0D, this.maxX()) / this.maxX());
     }
 
     @Override

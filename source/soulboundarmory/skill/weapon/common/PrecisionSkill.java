@@ -15,6 +15,6 @@ public class PrecisionSkill extends Skill {
     }
 
     @Override public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.DIAMOND_SWORD, tab.x(), tab.y());
+        tab.renderGuiItem(Items.DIAMOND_SWORD, tab.absoluteX(), tab.absoluteY());
     }
 }

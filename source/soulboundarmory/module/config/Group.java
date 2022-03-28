@@ -5,6 +5,7 @@ import soulboundarmory.util.Util;
 
 public class Group extends Parent {
     public final Parent parent;
+    public final boolean flat;
 
     public Group(Parent parent, Class<?> type) {
         super(type, type.getSimpleName().toLowerCase(Locale.ROOT), Util.value(type, (Category category) -> {
@@ -16,5 +17,6 @@ public class Group extends Parent {
         }, parent.category));
 
         this.parent = parent;
+        this.flat = type.isAnnotationPresent(Flat.class);
     }
 }

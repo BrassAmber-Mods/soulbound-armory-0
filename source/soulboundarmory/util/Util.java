@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -26,7 +27,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import net.auoeke.reflect.Methods;
 import net.jodah.typetools.TypeResolver;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
@@ -55,6 +55,7 @@ import soulboundarmory.registry.SimplerRegistry;
 public class Util extends net.minecraft.util.Util {
     public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
     public static final String formattingValueField = map("field_1072", "$VALUES");
+    public static final IntSupplier zeroSupplier = () -> 0;
 
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();

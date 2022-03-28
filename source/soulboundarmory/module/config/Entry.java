@@ -11,11 +11,11 @@ import net.auoeke.eson.Eson;
 import net.auoeke.eson.element.EsonMap;
 import net.auoeke.reflect.Constructors;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.module.config.gui.ConfigurationScreen;
-import soulboundarmory.module.gui.screen.ScreenWidget;
 import soulboundarmory.util.Util;
 
 public final class Entry<C extends ConfigurationFile> extends Parent {
@@ -25,6 +25,7 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
     public final ModContainer mod;
     public final C instance;
     public final Path path;
+    public final Identifier background;
 
     private FileTime mtime = FileTime.from(Instant.EPOCH);
 
@@ -34,6 +35,8 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
         this.mod = mod;
         this.instance = Constructors.instantiate(type);
         this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".eson");
+        var background = new Identifier(Util.value(type, Background::value, "block/andesite.png"));
+        this.background = new Identifier(background.getNamespace(), "textures/" + background.getPath());
 
         if (this.deserialize()) {
             this.serialize();
@@ -84,10 +87,6 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
         } catch (Throwable trouble) {
             SoulboundArmory.logger.error("Unable to serialize configuration %s.".formatted(this.name), trouble);
         }
-    }
-
-    public FileTime mtime() {
-        return this.mtime;
     }
 
     private void deserialize(Parent parent, EsonMap map) {

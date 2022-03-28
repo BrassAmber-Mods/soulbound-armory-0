@@ -138,20 +138,20 @@ public class TextWidget extends Widget<TextWidget> {
     @Override
     protected void render() {
         this.withZ(() -> Util.enumerate(this.text().toList(), (text, row) -> {
-            var y = this.y() + fontHeight() * row;
+            var y = this.absoluteY() + fontHeight() * row;
 
             if (this.hasStroke) {
-                drawStrokedText(this.matrixes, text, this.x(), y, this.color(), this.strokeColor());
+                drawStrokedText(this.matrixes, text, this.absoluteX(), y, this.color(), this.strokeColor());
             }
 
             if (this.shadow) {
-                textRenderer.drawWithShadow(this.matrixes, text, this.x(), y, this.color());
+                textRenderer.drawWithShadow(this.matrixes, text, this.absoluteX(), y, this.color());
             } else {
-                textRenderer.draw(this.matrixes, text, this.x(), y, this.color());
+                textRenderer.draw(this.matrixes, text, this.absoluteX(), y, this.color());
             }
 
             if (this.isFocused() && this.isActive()) {
-                drawStrokedText(this.matrixes, text, this.x(), y, this.strokeColor(), this.color());
+                drawStrokedText(this.matrixes, text, this.absoluteX(), y, this.strokeColor(), this.color());
             }
         }));
     }

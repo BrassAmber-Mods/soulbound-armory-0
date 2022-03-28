@@ -1,6 +1,7 @@
 package soulboundarmory.module.gui.coordinate;
 
 import java.util.function.IntSupplier;
+import soulboundarmory.util.Util;
 
 /**
  A point on an axis indicating one of start, center and end of the dimension of an element on the axis and possibly offset from a point on the element's parent.
@@ -9,7 +10,7 @@ public final class Coordinate {
     public Offset offset = new Offset();
     public Position position = Position.START;
 
-    private IntSupplier value = () -> 0;
+    private IntSupplier value = Util.zeroSupplier;
 
     /**
      Compute the absolute value of this coordinate.
@@ -19,7 +20,7 @@ public final class Coordinate {
      @param parentDimension the parent's dimension on the axis
      @return this coordinate's value
      */
-    public int resolve(int dimension, int parentCoordinate, int parentDimension) {
+    public int resolve(IntSupplier dimension, IntSupplier parentCoordinate, IntSupplier parentDimension) {
         return this.value.getAsInt() + this.offset.resolve(parentCoordinate, parentDimension) + this.position.resolve(dimension);
     }
 
@@ -56,11 +57,11 @@ public final class Coordinate {
          @param interval the length of the interval
          @return the displacement
          */
-        public int resolve(int interval) {
+        public int resolve(IntSupplier interval) {
             return switch (this) {
                 case START -> 0;
-                case CENTER -> -interval / 2;
-                case END -> -interval;
+                case CENTER -> -interval.getAsInt() / 2;
+                case END -> -interval.getAsInt();
             };
         }
     }

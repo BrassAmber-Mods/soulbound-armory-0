@@ -8,7 +8,7 @@ import net.minecraft.util.Identifier;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.module.gui.coordinate.Offset;
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 import soulboundarmory.skill.SkillInstance;
 
 /**
@@ -41,14 +41,14 @@ public class SkillTab extends SoulboundTab {
             this.chroma = 1;
         }
 
-        this.window.x(Math.max(this.button.endX() + this.window.width() / 2 + 4, this.middleX())).y(Math.min(this.container().xpBar.y() - 16 - this.window.height() / 2, this.middleY())).center();
+        this.window.x(Math.max(this.button.absoluteEndX() + this.window.width() / 2 + 4, this.absoluteMiddleX())).y(Math.min(this.container().xpBar.absoluteY() - 16 - this.window.height() / 2, this.absoluteMiddleY())).center();
         this.insideWidth = this.window.width() - 18;
         this.insideHeight = this.window.height() - 27;
-        this.insideCenterY = this.window.middleY() + 4;
-        this.insideX = this.window.middleX() - this.insideWidth / 2;
+        this.insideCenterY = this.window.absoluteMiddleY() + 4;
+        this.insideX = this.window.absoluteMiddleX() - this.insideWidth / 2;
         this.insideY = this.insideCenterY - this.insideHeight / 2;
-        this.insideEndX = this.window.middleX() + this.insideWidth / 2;
-        this.insideEndY = this.window.middleY() + this.insideHeight / 2;
+        this.insideEndX = this.window.absoluteMiddleX() + this.insideWidth / 2;
+        this.insideEndY = this.window.absoluteMiddleY() + this.insideHeight / 2;
 
         this.add(this.window);
         this.updateWidgets();
@@ -56,7 +56,7 @@ public class SkillTab extends SoulboundTab {
         if (!this.container().options.isEmpty()) {
             var option = this.container().options.get(0);
 
-            if (option.x() < this.window.endX()) {
+            if (option.absoluteX() < this.window.absoluteEndX()) {
                 this.remove(this.container().options);
             }
         }
@@ -118,12 +118,12 @@ public class SkillTab extends SoulboundTab {
                 var total = 0;
 
                 for (var other : dependencies) {
-                    total += this.skills.get(other).x();
+                    total += this.skills.get(other).absoluteX();
                 }
 
                 x += total / dependencies.size();
             } else {
-                x += this.window.middleX();
+                x += this.window.absoluteMiddleX();
             }
 
             this.skills.computeIfAbsent(skill, skil -> this.window.add(new SkillWidget(this, skil).size(24).center().offset(Offset.Type.ABSOLUTE))).x(x).y(this.insideY + 24 + 32 * tier);

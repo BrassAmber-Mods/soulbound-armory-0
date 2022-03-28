@@ -15,7 +15,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
-import soulboundarmory.module.gui.AbstractNode;
 import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.registry.RegistryElement;
 import soulboundarmory.util.Util;
@@ -92,8 +91,8 @@ public abstract class Skill extends RegistryElement<Skill> {
      */
     @OnlyIn(Dist.CLIENT)
     public void render(Widget<?> tab, int level) {
-        AbstractNode.shaderTexture(this.texture);
-        DrawableHelper.drawTexture(tab.matrixes, tab.x(), tab.y(), tab.z(), 0, 0, 16, 16, 16, 16);
+        Widget.shaderTexture(this.texture);
+        DrawableHelper.drawTexture(tab.matrixes, tab.absoluteX(), tab.absoluteY(), tab.z(), 0, 0, 16, 16, 16, 16);
     }
 
     /**

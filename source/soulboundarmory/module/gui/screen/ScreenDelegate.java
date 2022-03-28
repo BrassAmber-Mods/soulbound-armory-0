@@ -14,15 +14,15 @@ public final class ScreenDelegate extends Screen {
     public final Screen parent;
     public final ScreenWidget<?> screen;
 
-    public ScreenDelegate(Text title, ScreenWidget<?> screen, Screen parent) {
-        super(title);
+    public ScreenDelegate(ScreenWidget<?> screen, Screen parent) {
+        super(screen.title);
 
         this.parent = parent;
         this.screen = screen;
     }
 
-    public ScreenDelegate(Text title, ScreenWidget<?> screen) {
-        this(title, screen, Widget.screen());
+    public ScreenDelegate(ScreenWidget<?> screen) {
+        this(screen, Widget.screen());
     }
 
     @Override

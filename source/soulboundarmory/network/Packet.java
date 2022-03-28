@@ -5,7 +5,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent;
-import soulboundarmory.module.gui.AbstractNode;
+import soulboundarmory.module.gui.widget.Widget;
 
 /**
  The base packet type.
@@ -47,6 +47,6 @@ public abstract class Packet<T> {
 
     @OnlyIn(Dist.CLIENT)
     private static PlayerEntity player0() {
-        return AbstractNode.player();
+        return Widget.player();
     }
 }

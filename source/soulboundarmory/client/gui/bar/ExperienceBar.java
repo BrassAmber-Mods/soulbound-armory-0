@@ -8,7 +8,7 @@ import soulboundarmory.client.texture.ExperienceBarTexture;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.module.gui.widget.TextWidget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 
 public class ExperienceBar extends ScalableWidget<ExperienceBar> {
 

@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
@@ -40,7 +40,7 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     }
 
     public int top(int separation, int rows) {
-        return this.middleY() - (rows - 1) * separation / 2;
+        return this.absoluteMiddleY() - (rows - 1) * separation / 2;
     }
 
     public int height(int rows, int row) {

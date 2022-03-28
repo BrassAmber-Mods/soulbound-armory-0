@@ -4,10 +4,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
-import soulboundarmory.module.gui.AbstractNode;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
+import soulboundarmory.module.gui.widget.Widget;
 
 public class Resources {
     public static BufferedImage readTexture(Identifier identifier) {
@@ -30,7 +30,7 @@ public class Resources {
 
     public static Resource resource(Identifier identifier) {
         try {
-            return AbstractNode.resourceManager.getResource(identifier);
+            return Widget.resourceManager.getResource(identifier);
         } catch (IOException exception) {
             throw Unsafe.throwException(exception);
         }

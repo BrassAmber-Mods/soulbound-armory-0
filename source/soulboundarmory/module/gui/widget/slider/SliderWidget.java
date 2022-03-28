@@ -1,7 +1,7 @@
 package soulboundarmory.module.gui.widget.slider;
 
 import soulboundarmory.module.gui.widget.TextWidget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 import java.text.NumberFormat;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;

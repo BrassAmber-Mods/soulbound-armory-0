@@ -1,5 +1,7 @@
 package soulboundarmory.module.gui.coordinate;
 
+import java.util.function.IntSupplier;
+
 public class Offset {
     public Type type = Type.RELATIVE;
     public double value;
@@ -11,8 +13,8 @@ public class Offset {
      @param length the interval's length
      @return the offset
      */
-    public int resolve(int origin, int length) {
-        return (int) Math.round(this.type.resolve(origin) + length * this.value);
+    public int resolve(IntSupplier origin, IntSupplier length) {
+        return (int) Math.round(this.type.resolve(origin) + (this.value == 0 ? 0 : length.getAsInt() * this.value));
     }
 
     /**
@@ -35,10 +37,10 @@ public class Offset {
          @param origin the origin of the interval
          @return the absolute value of the offset
          */
-        public int resolve(int origin) {
+        public int resolve(IntSupplier origin) {
             return switch (this) {
                 case ABSOLUTE -> 0;
-                case RELATIVE -> origin;
+                case RELATIVE -> origin.getAsInt();
             };
         }
     }

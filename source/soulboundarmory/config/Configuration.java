@@ -3,6 +3,7 @@ package soulboundarmory.config;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.bar.BarStyle;
+import soulboundarmory.module.config.Background;
 import soulboundarmory.module.config.Category;
 import soulboundarmory.module.config.Comment;
 import soulboundarmory.module.config.ConfigurationFile;
@@ -11,11 +12,7 @@ import soulboundarmory.module.config.Interval;
 import soulboundarmory.util.Math2;
 
 // @Config(name = SoulboundArmory.ID)
-// @Background("minecraft:textures/block/andesite.png")
 public final class Configuration implements ConfigurationFile {
-    private static final String MULTIPLIERS = "multipliers";
-    private static final String CLIENT = "client";
-
     @Comment("experience points required to reach the first level for tools")
     public static int initialToolXP = 16;
 
@@ -38,7 +35,7 @@ public final class Configuration implements ConfigurationFile {
     public static boolean freeRestoration = true;
 
     @Flat
-    @Category(MULTIPLIERS)
+    @Category("multipliers")
     public static class Multipliers {
         @Comment("1 + (armor multiplier) * armor")
         public static double armor = 0.2;
@@ -69,7 +66,7 @@ public final class Configuration implements ConfigurationFile {
     }
 
     @OnlyIn(Dist.CLIENT)
-    @Category(CLIENT)
+    @Category("client")
     public static class Client {
         @Comment("receive levelup notifications above the hotbar")
         public static boolean levelupNotifications = false;

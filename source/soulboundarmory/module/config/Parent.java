@@ -24,4 +24,8 @@ public abstract class Parent extends Node {
     public Stream<Node> category(String category) {
         return this.children.values().stream().filter(child -> child.category.equals(category));
     }
+
+    public Stream<Node> children() {
+        return this.children.values().stream().flatMap(node -> node instanceof Group group && group.flat ? group.children() : Stream.of(node));
+    }
 }

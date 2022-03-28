@@ -1,4 +1,4 @@
-package soulboundarmory.module.gui.widget.scalable;
+package soulboundarmory.module.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -9,8 +9,7 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.util.Identifier;
 import soulboundarmory.module.gui.util.Rectangle;
-import soulboundarmory.module.gui.widget.Length;
-import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.Length;
 import soulboundarmory.util.Util;
 
 /**
@@ -148,12 +147,12 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
     @Override
     public int width() {
-        return this.width.get(this.textureWidth);
+        return this.resolve(this.width, this.textureWidth);
     }
 
     @Override
     public int height() {
-        return this.height.get(this.textureHeight);
+        return this.resolve(this.height, this.textureHeight);
     }
 
     public T fullView() {
@@ -161,33 +160,33 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     public int viewWidth() {
-        return this.viewWidth.get(this.width());
+        return this.resolve(this.viewWidth, this.width());
     }
 
     public int viewHeight() {
-        return this.viewHeight.get(this.height());
+        return this.resolve(this.viewHeight, this.height());
     }
 
     public T viewWidth(int width) {
-        this.viewWidth.set(width);
+        this.viewWidth.base(width);
 
         return (T) this;
     }
 
     public T viewWidth(double width) {
-        this.viewWidth.set(width);
+        this.viewWidth.base(width);
 
         return (T) this;
     }
 
     public T viewHeight(int height) {
-        this.viewHeight.set(height);
+        this.viewHeight.base(height);
 
         return (T) this;
     }
 
     public T viewHeight(double height) {
-        this.viewHeight.set(height);
+        this.viewHeight.base(height);
 
         return (T) this;
     }
@@ -288,7 +287,7 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     @Override
     protected void render() {
         var viewHeight = unscale(this.viewHeight());
-        RenderSystem.enableScissor(unscale(this.x()), window.getFramebufferHeight() - unscale(this.y()) - viewHeight, unscale(this.viewWidth()), viewHeight);
+        RenderSystem.enableScissor(unscale(this.absoluteX()), window.getFramebufferHeight() - unscale(this.absoluteY()) - viewHeight, unscale(this.viewWidth()), viewHeight);
         RenderSystem.enableBlend();
         shaderTexture(this.texture);
         this.resetColor();
@@ -310,8 +309,8 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 
             drawTexture(
                 this.matrixes,
-                this.x() + index % 2 * (this.width() - corner.width()),
-                this.y() + index / 2 * (this.height() - corner.height()),
+                this.absoluteX() + index % 2 * (this.width() - corner.width()),
+                this.absoluteY() + index / 2 * (this.height() - corner.height()),
                 this.z(),
                 this.u + corner.start.x,
                 this.v + corner.start.y,
@@ -331,24 +330,24 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
         for (var index = 0; index < this.middles.length; ++index) {
             var middle = this.middles[index];
             var x = switch (index) {
-                case 1 -> this.x();
-                case 3 -> this.endX() - middle.width();
-                default -> this.x() + this.middles[1].width();
+                case 1 -> this.absoluteX();
+                case 3 -> this.absoluteEndX() - middle.width();
+                default -> this.absoluteX() + this.middles[1].width();
             };
             var y = switch (index) {
-                case 0 -> this.y();
-                case 4 -> this.endY() - middle.height();
-                default -> this.y() + this.middles[0].height();
+                case 0 -> this.absoluteY();
+                case 4 -> this.absoluteEndY() - middle.height();
+                default -> this.absoluteY() + this.middles[0].height();
             };
             var endX = switch (index) {
-                case 1 -> this.x() + middle.width();
-                case 3 -> this.endX();
-                default -> this.endX() - this.middles[3].width();
+                case 1 -> this.absoluteX() + middle.width();
+                case 3 -> this.absoluteEndX();
+                default -> this.absoluteEndX() - this.middles[3].width();
             };
             var endY = switch (index) {
-                case 0 -> this.y() + middle.height();
-                case 4 -> this.endY();
-                default -> this.endY() - this.middles[4].height();
+                case 0 -> this.absoluteY() + middle.height();
+                case 4 -> this.absoluteEndY();
+                default -> this.absoluteEndY() - this.middles[4].height();
             };
 
             var textureWidth = (float) this.textureWidth();
@@ -367,12 +366,12 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
     }
 
     protected void drawBorder() {
-        var endX = this.endX() - 1;
-        var endY = this.endY();
-        drawHorizontalLine(this.matrixes, this.x(), endX, this.y(), this.z(), -1);
-        drawVerticalLine(this.matrixes, this.x(), this.y(), endY, this.z(), -1);
-        drawVerticalLine(this.matrixes, endX, this.y(), endY, this.z(), -1);
-        drawHorizontalLine(this.matrixes, this.x(), endX, endY - 1, this.z(), -1);
+        var endX = this.absoluteEndX() - 1;
+        var endY = this.absoluteEndY();
+        drawHorizontalLine(this.matrixes, this.absoluteX(), endX, this.absoluteY(), this.z(), -1);
+        drawVerticalLine(this.matrixes, this.absoluteX(), this.absoluteY(), endY, this.z(), -1);
+        drawVerticalLine(this.matrixes, endX, this.absoluteY(), endY, this.z(), -1);
+        drawHorizontalLine(this.matrixes, this.absoluteX(), endX, endY - 1, this.z(), -1);
     }
 
     protected void resetColor() {

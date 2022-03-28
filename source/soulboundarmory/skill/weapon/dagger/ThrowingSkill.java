@@ -15,6 +15,6 @@ public class ThrowingSkill extends Skill {
 
     @Override
     public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.TRIDENT, tab.x(), tab.y());
+        tab.renderGuiItem(Items.TRIDENT, tab.absoluteX(), tab.absoluteY());
     }
 }

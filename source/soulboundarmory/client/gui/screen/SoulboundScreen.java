@@ -16,7 +16,7 @@ import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.module.gui.screen.ScreenWidget;
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 import soulboundarmory.module.gui.widget.slider.SliderWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;

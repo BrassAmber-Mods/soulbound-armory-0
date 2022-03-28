@@ -10,8 +10,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.bar.ExperienceBar;
 import soulboundarmory.module.component.ItemStackComponent;
-import soulboundarmory.module.gui.AbstractNode;
 import soulboundarmory.module.gui.Node;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.util.Util;
 
 public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerComponent>, TooltipData {
@@ -55,7 +55,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
 
     @OnlyIn(Dist.CLIENT)
     public ExperienceBar tooltip() {
-        return new ExperienceBar().item(this.item()).width(AbstractNode.width(this.stack.getName()));
+        return new ExperienceBar().item(this.item()).width(Widget.width(this.stack.getName()));
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
 
     @OnlyIn(Dist.CLIENT)
     private ItemComponent<?> initializeItem() {
-        return this.item = ItemComponent.of(AbstractNode.player(), this.stack).orElse(null);
+        return this.item = ItemComponent.of(Widget.player(), this.stack).orElse(null);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -90,7 +90,7 @@ public class ItemMarkerComponent implements ItemStackComponent<ItemMarkerCompone
         var player = this.item.player;
         var animation = (Sprite.Animation) Node.itemRenderer.getModel(this.stack, player.world, player, player.getId()).getParticleSprite().getAnimation();
         animation.frameTicks = Integer.MIN_VALUE;
-        AbstractNode.bind(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
+        Widget.bind(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
         animation.upload(Math.max(0, this.animationTick - 5) / 2);
     }
 }

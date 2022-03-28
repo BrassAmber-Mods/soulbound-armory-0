@@ -8,7 +8,7 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.module.gui.widget.GraphicWidget;
 import soulboundarmory.module.gui.widget.TextWidget;
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.module.gui.widget.scalable.ScalableWidget;
+import soulboundarmory.module.gui.widget.ScalableWidget;
 import soulboundarmory.skill.SkillInstance;
 
 public class SkillWidget extends Widget<SkillWidget> {
@@ -46,7 +46,7 @@ public class SkillWidget extends Widget<SkillWidget> {
             sections.add(0, tooltip);
 
             var height = 1 + (1 + tooltip.size()) * fontHeight();
-            var y = this.y() - 4 > this.tab.insideCenterY ? -56 : -7;
+            var y = this.absoluteY() - 4 > this.tab.insideCenterY ? -56 : -7;
             var textY = 7;
             this.clear();
 

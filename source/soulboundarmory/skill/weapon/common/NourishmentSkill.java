@@ -16,6 +16,6 @@ public final class NourishmentSkill extends Skill {
 
     @Override
     public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.COOKED_BEEF, tab.x(), tab.y());
+        tab.renderGuiItem(Items.COOKED_BEEF, tab.absoluteX(), tab.absoluteY());
     }
 }

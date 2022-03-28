@@ -15,6 +15,6 @@ public final class AbsorptionSkill extends Skill {
     }
 
     @Override public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.SLIME_BALL, tab.x(), tab.y());
+        tab.renderGuiItem(Items.SLIME_BALL, tab.absoluteX(), tab.absoluteY());
     }
 }

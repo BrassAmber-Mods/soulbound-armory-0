@@ -1,10 +1,11 @@
 package soulboundarmory.module.gui.screen;
 
-import soulboundarmory.module.gui.widget.Widget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
+import soulboundarmory.module.gui.Node;
+import soulboundarmory.module.gui.widget.Widget;
 
 public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> {
     public Text title = LiteralText.EMPTY;
@@ -14,6 +15,12 @@ public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> 
         this.z(100);
     }
 
+    public ScreenWidget(Screen parent) {
+        this();
+
+        this.screen = new ScreenDelegate(this, parent);
+    }
+
     public T title(Text title) {
         this.title = title;
 
@@ -21,7 +28,7 @@ public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> 
     }
 
     public Screen asScreen() {
-        return this.screen == null ? this.screen = new ScreenDelegate(this.title, this) : this.screen;
+        return this.screen == null ? this.screen = new ScreenDelegate(this) : this.screen;
     }
 
     public void open() {
@@ -41,11 +48,6 @@ public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> 
     }
 
     @Override
-    protected void render() {
-        this.renderBackground(this.matrixes);
-    }
-
-    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
@@ -58,5 +60,10 @@ public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> 
         }
 
         return false;
+    }
+
+    @Override
+    protected void render() {
+        this.renderBackground(this.matrixes);
     }
 }

@@ -15,6 +15,6 @@ public final class CircumspectionSkill extends Skill {
     }
 
     @Override public void render(Widget<?> tab, int level) {
-        tab.renderGuiItem(Items.GLASS, tab.x(), tab.y());
+        tab.renderGuiItem(Items.GLASS, tab.absoluteX(), tab.absoluteY());
     }
 }
