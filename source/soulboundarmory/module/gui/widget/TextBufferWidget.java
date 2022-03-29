@@ -2,18 +2,19 @@ package soulboundarmory.module.gui.widget;
 
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.auoeke.reflect.Flags;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 public abstract class TextBufferWidget<T extends TextBufferWidget<T>> extends Widget<T> {
-    protected final List<StringBuffer> lines = ReferenceArrayList.of(new StringBuffer());
-    protected final TextWidget text = this.add(new TextWidget().x(2).y(2));
-    protected final TextWidget caret = this.add(new TextWidget().x(2).y(2).text("_").color(0xE0E0E0).present(this::isFocused));
+    public final List<StringBuffer> lines = ReferenceArrayList.of(new StringBuffer());
+    public final TextWidget text = this.add(new TextWidget().x(2).y(2));
+    public final TextWidget caret = this.add(new TextWidget().x(2).y(2).text("_").color(0xE0E0E0).present(this::isFocused));
+
     protected int index;
     protected int row;
 
@@ -44,8 +45,6 @@ public abstract class TextBufferWidget<T extends TextBufferWidget<T>> extends Wi
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
-
-        keyboard.setRepeatEvents(true);
 
         if (this.isFocused()) {
             switch (keyCode) {
@@ -127,17 +126,8 @@ public abstract class TextBufferWidget<T extends TextBufferWidget<T>> extends Wi
         this.update();
     }
 
-    protected synchronized void update() {
-        this.text.clear();
-        this.lines.stream()
-            .map(StringBuffer::toString)
-            .forEach(line -> {
-                if (line.isEmpty()) {
-                    this.text.text("");
-                } else {
-                    textHandler.wrapLines(line, this.width() - 4, Style.EMPTY, false, (style, start, end) -> this.text.text(line.substring(start, end)));
-                }
-            });
+    protected void update() {
+        this.text.overwrite(this.lines().map(Text::of).toList());
 
         var column = 0;
         var row = 0;
@@ -184,17 +174,15 @@ public abstract class TextBufferWidget<T extends TextBufferWidget<T>> extends Wi
         return this.lines.get(this.row);
     }
 
-    public enum Caret {
-        UNDERSCORE("_");
-
-        public final Text character;
-
-        Caret(String character) {
-            this(Text.of(character));
-        }
-
-        Caret(Text character) {
-            this.character = character;
-        }
+    protected Stream<String> lines() {
+        return this.lines.stream()
+            .map(StringBuffer::toString)
+            .mapMulti((line, add) -> {
+                if (line.isEmpty()) {
+                    add.accept("");
+                } else {
+                    textHandler.wrapLines(line, this.width() - 4, Style.EMPTY, false, (style, start, end) -> add.accept(line.substring(start, end)));
+                }
+            });
     }
 }

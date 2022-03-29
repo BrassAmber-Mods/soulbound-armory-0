@@ -1,47 +1,46 @@
 package soulboundarmory.module.gui.widget;
 
-import soulboundarmory.module.gui.Length;
 import soulboundarmory.module.gui.Node;
 
-public class WidgetBox extends Widget<WidgetBox> {
+public class WidgetBox<T extends WidgetBox<T>> extends Widget<T> {
     public int xSpacing;
     public int ySpacing;
     public boolean horizontal = true;
 
     @Override public int width() {
-        return this.horizontal ? this.children.stream().mapToInt(Node::width).sum() + this.xSpacing * Math.max(0, this.degree() - 1) : super.width();
+        return this.horizontal ? Math.max(this.minWidth, this.children.stream().filter(Widget::isVisible).mapToInt(Node::width).sum() + this.xSpacing * Math.max(0, this.degree() - 1)) : super.width();
     }
 
     @Override public int height() {
-        return this.horizontal ? super.height() : this.children.stream().mapToInt(Node::height).sum() + this.ySpacing * Math.max(0, this.degree() - 1);
+        return this.horizontal ? super.height() : Math.max(this.minHeight, this.children.stream().filter(Widget::isVisible).mapToInt(Node::height).sum() + this.ySpacing * Math.max(0, this.degree() - 1));
     }
 
     @Override public <C extends Widget> C add(int index, C child) {
         return this.update(super.add(index, child));
     }
 
-    public WidgetBox xSpacing(int spacing) {
+    public T xSpacing(int spacing) {
         this.xSpacing = spacing;
 
         return this.horizontal();
     }
 
-    public WidgetBox ySpacing(int spacing) {
+    public T ySpacing(int spacing) {
         this.xSpacing = spacing;
 
         return this.vertical();
     }
 
-    public WidgetBox horizontal() {
+    public T horizontal() {
         this.horizontal = true;
 
-        return this;
+        return (T) this;
     }
 
-    public WidgetBox vertical() {
+    public T vertical() {
         this.horizontal = false;
 
-        return this;
+        return (T) this;
     }
 
     protected <C extends Widget<?>> C update(C child) {

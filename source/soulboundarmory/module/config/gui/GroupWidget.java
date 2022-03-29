@@ -1,15 +1,14 @@
 package soulboundarmory.module.config.gui;
 
-import java.util.Objects;
 import soulboundarmory.module.config.Group;
-import soulboundarmory.module.gui.widget.ScalableWidget;
-import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.TextWidget;
+import soulboundarmory.module.gui.widget.WidgetBox;
 
-public class GroupWidget extends Widget<GroupWidget>  {
-    private CategoryWidget category;
+public class GroupWidget extends WidgetBox<GroupWidget> {
+    private boolean expanded;
 
     public GroupWidget(Group group) {
-        var tab = this.add(new CategoryWidget(group.children.values()).y(8).with(c -> c.present(() -> c == this.category)));
-        this.category = Objects.requireNonNullElse(this.category, tab);
+        this.ySpacing(8).add(new EntryWidget<>().height(32).with(new TextWidget().text("> " + group.name).centerY().x(8).y(.5)).primaryAction(() -> this.expanded ^= true));
+        this.add(new CategoryWidget(group.children().toList()).x(8).y(32).with(c -> c.present(() -> this.expanded)));
     }
 }

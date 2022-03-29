@@ -4,13 +4,13 @@ import net.auoeke.reflect.Types;
 import soulboundarmory.module.config.Property;
 import soulboundarmory.module.gui.widget.Widget;
 
-public class PropertyWidget extends Widget<PropertyWidget> {
+public class PropertyWidget extends EntryWidget<PropertyWidget> {
     private final Property<?> property;
     private final Widget<?> value;
 
     public PropertyWidget(Property<?> property) {
         this.property = property;
-        this.height(32).text(text -> text.text(this.property.name).centerY().x(8).y(.5));
+        this.text(text -> text.text(this.property.name).centerY().x(8).y(.5));
 
         if (Types.equals(property.type, int.class)) {
             this.value = new IntegerPropertyWidget((Property<Integer>) property).width(100).height(11);
@@ -26,11 +26,5 @@ public class PropertyWidget extends Widget<PropertyWidget> {
         }
 
         this.add(this.value.x(1, -8).y(.5).alignRight().centerY());
-    }
-
-    @Override protected void render() {
-        if (this.isHovered()) {
-            fill(this.matrixes, this.absoluteX(), this.absoluteY(), this.absoluteEndX(), this.absoluteEndY(), this.z(), 0x20FFFFFF);
-        }
     }
 }

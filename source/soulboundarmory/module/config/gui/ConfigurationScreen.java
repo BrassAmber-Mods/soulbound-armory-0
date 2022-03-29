@@ -3,7 +3,6 @@ package soulboundarmory.module.config.gui;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.client.gui.screen.Screen;
 import soulboundarmory.module.config.Entry;
 import soulboundarmory.module.config.Node;
@@ -13,8 +12,7 @@ import soulboundarmory.module.gui.widget.WidgetBox;
 
 public class ConfigurationScreen extends ScreenWidget<ConfigurationScreen> {
     protected final Entry<?> entry;
-    protected final List<CategoryWidget> categories = ReferenceArrayList.of();
-    protected final WidgetBox box = this.add(new WidgetBox().centerX().x(0.5).y(16).xSpacing(8));
+    protected final WidgetBox categories = this.add(new WidgetBox<>().centerX().x(0.5).y(16).xSpacing(8));
     protected CategoryWidget category;
 
     public ConfigurationScreen(Entry<?> entry, Screen parent) {
@@ -31,7 +29,9 @@ public class ConfigurationScreen extends ScreenWidget<ConfigurationScreen> {
         categories.forEach(this::addCategory);
     }
 
-    @Override public void preinitialize() {}
+    @Override public void preinitialize() {
+        keyboard.setRepeatEvents(true);
+    }
 
     @Override protected void render() {
         this.renderBackground(this.entry.background);
@@ -41,7 +41,7 @@ public class ConfigurationScreen extends ScreenWidget<ConfigurationScreen> {
     private void addCategory(String category, List<Node> nodes) {
         var tab = this.add(new CategoryWidget(nodes).with(c -> c.present(() -> c == this.category)));
         this.category = Objects.requireNonNullElse(this.category, tab);
-        var button = this.box.add(new ScalableWidget<>().button().text(category).width(b -> Math.max(70, b.descendantWidth() + 10)).height(20).active(() -> !tab.isPresent()).primaryAction(() -> this.category = tab));
+        var button = this.categories.add(new ScalableWidget<>().button().text(category).width(b -> Math.max(70, b.descendantWidth() + 10)).height(20).active(() -> !tab.isPresent()).primaryAction(() -> this.category = tab));
         tab.y(t -> button.endY() + 20);
     }
 }

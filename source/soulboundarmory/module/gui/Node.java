@@ -41,6 +41,7 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -73,6 +74,9 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
     public static final BakedModelManager bakedModelManager = client.getBakedModelManager();
     public static final GameRenderer gameRenderer = client.gameRenderer;
     public static final SoundManager soundManager = client.getSoundManager();
+
+    public int minWidth;
+    public int minHeight;
 
     protected Coordinate x = new Coordinate();
     protected Coordinate y = new Coordinate();
@@ -420,11 +424,11 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
      @return this node's current width
      */
     public int width() {
-        return this.width.value.getAsInt() + (int) switch (this.width.type) {
+        return Math.max(this.minWidth, this.width.value.getAsInt() + (int) switch (this.width.type) {
             case EXACT -> this.width.base().getAsDouble();
             case PARENT_PROPORTION -> this.width.base().getAsDouble() * this.parent().map(B::width).orElse(1);
             case CHILD_SUM -> this.descendantWidth();
-        };
+        });
     }
 
     public T width(int width) {
@@ -451,15 +455,21 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
         return (T) this;
     }
 
+    public T minWidth(int width) {
+        this.minWidth = width;
+
+        return (T) this;
+    }
+
     /**
      @return this node's current height
      */
     public int height() {
-        return this.height.value.getAsInt() + (int) switch (this.height.type) {
+        return Math.max(this.minHeight, this.height.value.getAsInt() + (int) switch (this.height.type) {
             case EXACT -> this.height.base().getAsDouble();
             case PARENT_PROPORTION -> this.height.base().getAsDouble() * this.parent().map(B::height).orElse(1);
             case CHILD_SUM -> this.descendantHeight();
-        };
+        });
     }
 
     public T height(int height) {
@@ -482,6 +492,12 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
 
     public T heightProportion(ToDoubleFunction<T> height) {
         this.height.base(() -> height.applyAsDouble((T) this));
+
+        return (T) this;
+    }
+
+    public T minHeight(int height) {
+        this.minHeight = height;
 
         return (T) this;
     }
@@ -701,21 +717,21 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
      @return whether this node should be treated as existent
      */
     public boolean isPresent() {
-        return this.parent().isEmpty() || this.parent().get().isPresent();
+        return this.parent().filter(parent -> !parent.isPresent()).isEmpty();
     }
 
     /**
      @return whether this node should be rendered
      */
     public boolean isVisible() {
-        return this.parent().isEmpty() || this.parent().get().isVisible();
+        return this.isPresent() && this.parent().filter(parent -> !parent.isVisible()).isEmpty();
     }
 
     /**
      @return whether this node is active
      */
     public boolean isActive() {
-        return this.parent().isEmpty() || this.parent().get().isActive();
+        return this.isPresent() && this.parent().filter(parent -> !parent.isActive()).isEmpty();
     }
 
     public boolean isFocused() {
