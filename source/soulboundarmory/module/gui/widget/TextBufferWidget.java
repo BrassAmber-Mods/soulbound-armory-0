@@ -121,6 +121,22 @@ public abstract class TextBufferWidget<T extends TextBufferWidget<T>> extends Wi
         return this.isActive();
     }
 
+    public Stream<String> lines() {
+        return this.lines.stream()
+            .map(StringBuffer::toString)
+            .mapMulti((line, add) -> {
+                if (line.isEmpty()) {
+                    add.accept("");
+                } else {
+                    textHandler.wrapLines(line, this.width() - 4, Style.EMPTY, false, (style, start, end) -> add.accept(line.substring(start, end)));
+                }
+            });
+    }
+
+    public String text() {
+        return String.join("\n", this.lines);
+    }
+
     @Override
     protected void render() {
         this.update();
@@ -172,17 +188,5 @@ public abstract class TextBufferWidget<T extends TextBufferWidget<T>> extends Wi
 
     protected StringBuffer line() {
         return this.lines.get(this.row);
-    }
-
-    protected Stream<String> lines() {
-        return this.lines.stream()
-            .map(StringBuffer::toString)
-            .mapMulti((line, add) -> {
-                if (line.isEmpty()) {
-                    add.accept("");
-                } else {
-                    textHandler.wrapLines(line, this.width() - 4, Style.EMPTY, false, (style, start, end) -> add.accept(line.substring(start, end)));
-                }
-            });
     }
 }

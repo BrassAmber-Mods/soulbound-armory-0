@@ -1,10 +1,14 @@
 package soulboundarmory.module.config.gui;
 
+import java.math.BigDecimal;
 import soulboundarmory.module.config.Property;
-import soulboundarmory.module.gui.widget.TextBoxWidget;
 
-public class IntegerPropertyWidget extends TextBoxWidget {
+public class IntegerPropertyWidget extends TextPropertyWidget<Integer> {
     public IntegerPropertyWidget(Property<Integer> property) {
-        this.line().append(property.get());
+        super(property);
+    }
+
+    @Override protected void validate() {
+        this.property.set(new BigDecimal(this.text()).intValueExact());
     }
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
@@ -210,7 +211,7 @@ public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements T
     }
 
     public T text(String text) {
-        return this.text(Text.of(text));
+        return this.text(Stream.of(text.split("\n")).map(Text::of).toList());
     }
 
     public T text(Text text) {
@@ -383,6 +384,11 @@ public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements T
 
     public void clear() {
         this.children.clear();
+        this.tooltips.clear();
+    }
+
+    public void clearTooltips() {
+        this.children.removeAll(this.tooltips);
         this.tooltips.clear();
     }
 

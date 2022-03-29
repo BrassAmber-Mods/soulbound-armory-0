@@ -13,6 +13,7 @@ public final class Property<T> extends Node {
     public final Class<?> type;
     public final String comment;
     public final T defaultValue;
+    public final Interval interval;
 
     private final Pointer field;
 
@@ -31,9 +32,9 @@ public final class Property<T> extends Node {
         this.field = Pointer.of(field);
         this.defaultValue = this.get();
 
-        var interval = field.getAnnotation(Interval.class);
+        this.interval = field.getAnnotation(Interval.class);
 
-        if (interval != null && field.getType() != int.class) {
+        if (this.interval != null && field.getType() != int.class) {
             Unsafe.throwException(new InvalidTypeException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName())));
         }
 
