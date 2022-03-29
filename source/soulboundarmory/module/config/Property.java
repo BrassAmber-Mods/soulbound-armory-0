@@ -1,6 +1,8 @@
 package soulboundarmory.module.config;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
+import java.util.stream.Stream;
 import com.sun.jdi.InvalidTypeException;
 import net.auoeke.reflect.Pointer;
 import net.gudenau.lib.unsafe.Unsafe;
@@ -42,15 +44,24 @@ public final class Property<T> extends Node {
         }
     }
 
+    public Entry<?> entry() {
+        return (Entry<?>) Stream.iterate(this.parent, Objects::nonNull, parent -> parent instanceof Group group ? group.parent : null).reduce(this.parent, (a, b) -> b);
+    }
+
     public T get() {
         return (T) this.field.get();
     }
 
     public void set(Object value) {
         this.field.put(value);
+        this.entry().desynced();
     }
 
     public void reset() {
         this.set(this.defaultValue);
+    }
+
+    @Override public String toString() {
+        return this.name + " = " + this.get();
     }
 }

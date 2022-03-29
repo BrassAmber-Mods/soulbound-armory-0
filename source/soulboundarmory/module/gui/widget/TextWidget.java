@@ -6,7 +6,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import soulboundarmory.function.ObjectSupplier;
@@ -17,8 +17,12 @@ public class TextWidget extends Widget<TextWidget> {
     public List<Supplier<? extends Text>> text = new ReferenceArrayList<>();
     public IntSupplier color = () -> 0xFFFFFFFF;
     public boolean shadow;
-    public int stroke;
     public boolean hasStroke;
+    public int stroke;
+
+    @Override public void clear() {
+        this.text.clear();
+    }
 
     @Override public TextWidget text(Supplier<? extends Text> text) {
         this.text.add(text);
@@ -28,16 +32,6 @@ public class TextWidget extends Widget<TextWidget> {
 
     @Override public TextWidget text(Consumer<? super TextWidget> configure) {
         return this.with(configure);
-    }
-
-    public TextWidget text(StringVisitable text) {
-        return this.text(text::getString);
-    }
-
-    public TextWidget text(ObjectSupplier text) {
-        this.text.add(() -> Text.of(String.valueOf(text.get())));
-
-        return this;
     }
 
     public TextWidget overwrite(Text text) {

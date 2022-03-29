@@ -1,9 +1,10 @@
 package soulboundarmory.module.config.gui;
 
 import soulboundarmory.module.config.Property;
+import soulboundarmory.module.gui.widget.TextBoxWidget;
 
-public class IntegerPropertyWidget extends PropertyValueWidget<Integer, IntegerPropertyWidget>  {
+public class IntegerPropertyWidget extends TextBoxWidget {
     public IntegerPropertyWidget(Property<Integer> property) {
-        super(property);
+        this.line().append(property.get());
     }
 }

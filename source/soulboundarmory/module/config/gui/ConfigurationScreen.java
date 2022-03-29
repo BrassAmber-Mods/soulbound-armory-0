@@ -39,7 +39,7 @@ public class ConfigurationScreen extends ScreenWidget<ConfigurationScreen> {
     }
 
     private void addCategory(String category, List<Node> nodes) {
-        var tab = this.add(new CategoryWidget(category, nodes).with(c -> c.present(() -> c == this.category)));
+        var tab = this.add(new CategoryWidget(nodes).with(c -> c.present(() -> c == this.category)));
         this.category = Objects.requireNonNullElse(this.category, tab);
         var button = this.box.add(new ScalableWidget<>().button().text(category).width(b -> Math.max(70, b.descendantWidth() + 10)).height(20).active(() -> !tab.isPresent()).primaryAction(() -> this.category = tab));
         tab.y(t -> button.endY() + 20);

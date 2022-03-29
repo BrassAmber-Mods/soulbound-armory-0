@@ -23,6 +23,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46C;
 import soulboundarmory.function.NulliPredicate;
+import soulboundarmory.function.ObjectSupplier;
 import soulboundarmory.module.gui.Node;
 import soulboundarmory.module.gui.coordinate.Coordinate;
 import soulboundarmory.module.gui.coordinate.Offset;
@@ -214,6 +215,14 @@ public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements T
 
     public T text(Text text) {
         return this.text(() -> text);
+    }
+
+    public T text(StringVisitable text) {
+        return this.text(text::getString);
+    }
+
+    public T text(ObjectSupplier text) {
+        return this.text(() -> Text.of(String.valueOf(text.get())));
     }
 
     public T text(Supplier<? extends Text> text) {
