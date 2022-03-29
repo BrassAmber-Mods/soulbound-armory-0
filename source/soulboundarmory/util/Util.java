@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -104,6 +105,10 @@ public class Util extends net.minecraft.util.Util {
 
     public static <T> Iterable<T> iterate(Stream<T> stream) {
         return stream::iterator;
+    }
+
+    public static <T> Iterable<T> iterate(Iterator<T> iterator) {
+        return () -> iterator;
     }
 
     public static <T> T[] fill(T[] array, Supplier<T> element) {

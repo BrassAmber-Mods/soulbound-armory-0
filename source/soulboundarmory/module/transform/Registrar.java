@@ -121,40 +121,39 @@ public class Registrar {
         );
     }
 
-    private static void processMethod(ModFileScanData.AnnotationData annotation, Identifier id, ClassNode node) {
+    private static void processMethod(ModFileScanData.AnnotationData annotation, Identifier id, ClassNode type) {
         FMLJavaModLoadingContext.get().getModEventBus().<NewRegistryEvent>addListener(event -> {
             var signature = annotation.memberName();
-            var method = node.methods.stream()
-                .filter(m -> m.name.equals(signature.substring(0, signature.indexOf('('))) && m.desc.equals(signature.substring(signature.indexOf('('))))
-                .findFirst()
-                .get();
-            var field = (FieldNode) node.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL, method.name + UUID.randomUUID(), Type.getDescriptor(IForgeRegistry.class), null, null);
+            var name = signature.substring(0, signature.indexOf('('));
+            var fieldName = name + UUID.randomUUID();
+            var fieldDescriptor = Type.getDescriptor(IForgeRegistry.class);
 
-            var instrumentation = Reflect.instrument().value();
-            instrumentation.addTransformer(new SingleUseTransformer(instrumentation, node.name, (module, loader, name, type, domain, classFile) -> {
+            ClassNodeTransformer.addSingleUseTransformer(type.name, node -> {
+                var field = (FieldNode) node.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL, fieldName, fieldDescriptor, null, null);
+                var method = node.methods.stream()
+                    .filter(m -> m.name.equals(name) && m.desc.equals(signature.substring(signature.indexOf('('))))
+                    .findFirst()
+                    .get();
+
                 method.access &= ~Flags.NATIVE;
                 method.visitFieldInsn(Opcodes.GETSTATIC, node.name, field.name, field.desc);
                 method.visitInsn(Opcodes.ARETURN);
+            });
 
-                var writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-                node.accept(writer);
-
-                return writer.toByteArray();
-            }));
             var declaringType = Classes.load(false, annotation.clazz().getClassName());
 
-            if (Methods.of(declaringType, method.name).getGenericReturnType() instanceof ParameterizedType pt) {
+            if (Methods.of(declaringType, name).getGenericReturnType() instanceof ParameterizedType pt) {
                 if (IForgeRegistry.class.isAssignableFrom((Class<?>) pt.getRawType())) {
                     var argument = pt.getActualTypeArguments()[0];
 
                     event.create(new RegistryBuilder<>().setName(id).setType(Util.cast(argument instanceof ParameterizedType p ? p.getRawType() : argument)), registry -> {
-                        Accessor.putReference(declaringType, field.name, registry);
+                        Accessor.putReference(declaringType, fieldName, registry);
                     });
                 } else {
-                    throw new WrongMethodTypeException("@Register %s::%s return type must be assignable from IForgeRegistry".formatted(node.name, method.name));
+                    throw new WrongMethodTypeException("@Register %s::%s return type must be assignable from IForgeRegistry".formatted(type.name, name));
                 }
             } else {
-                throw new WrongMethodTypeException("@Register %s::%s return type must be a specialized form of IForgeRegistry".formatted(node.name, method.name));
+                throw new WrongMethodTypeException("@Register %s::%s return type must be a specialized form of IForgeRegistry".formatted(type.name, name));
             }
         });
     }

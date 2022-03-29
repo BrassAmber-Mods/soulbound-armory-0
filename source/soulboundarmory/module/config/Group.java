@@ -6,6 +6,7 @@ import soulboundarmory.util.Util;
 public class Group extends Parent {
     public final Parent parent;
     public final boolean flat;
+    public final String comment;
 
     public Group(Parent parent, Class<?> type) {
         super(type, type.getSimpleName().toLowerCase(Locale.ROOT), Util.value(type, (Category category) -> {
@@ -18,5 +19,6 @@ public class Group extends Parent {
 
         this.parent = parent;
         this.flat = type.isAnnotationPresent(Flat.class);
+        this.comment = Util.value(type, (Comment comment) -> String.join("\n", comment.value()));
     }
 }
