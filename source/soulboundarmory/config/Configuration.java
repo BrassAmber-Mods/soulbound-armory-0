@@ -66,6 +66,7 @@ public final class Configuration implements ConfigurationFile {
     }
 
     @OnlyIn(Dist.CLIENT)
+    @Flat
     @Category("client")
     public static class Client {
         @Comment("receive levelup notifications above the hotbar")
@@ -85,10 +86,6 @@ public final class Configuration implements ConfigurationFile {
 
         @Comment("experience bar style")
         public static BarStyle style = BarStyle.EXPERIENCE;
-
-        public void toggleOverlayExperienceBar() {
-            overlayExperienceBar ^= true;
-        }
 
         @Comment("XP bar color")
         public static class Color {

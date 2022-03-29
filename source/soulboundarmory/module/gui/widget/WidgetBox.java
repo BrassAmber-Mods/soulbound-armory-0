@@ -9,7 +9,6 @@ public class WidgetBox extends Widget<WidgetBox> {
     public boolean horizontal = true;
 
     public WidgetBox() {
-        this.width.type(Length.Type.CHILD_SUM);
     }
 
     @Override public int width() {
@@ -26,12 +25,14 @@ public class WidgetBox extends Widget<WidgetBox> {
 
     public WidgetBox xSpacing(int spacing) {
         this.xSpacing = spacing;
+        // this.width.type(Length.Type.CHILD_SUM);
 
         return this.horizontal();
     }
 
     public WidgetBox ySpacing(int spacing) {
         this.xSpacing = spacing;
+        // this.height.type(Length.Type.CHILD_SUM);
 
         return this.vertical();
     }
@@ -48,7 +49,7 @@ public class WidgetBox extends Widget<WidgetBox> {
         return this;
     }
 
-    protected <W extends Widget<?>> W update(W child) {
+    protected <C extends Widget<?>> C update(C child) {
         var previous = this.degree() < 2 ? null : this.children.get(this.degree() - 2);
 
         if (this.horizontal) {
