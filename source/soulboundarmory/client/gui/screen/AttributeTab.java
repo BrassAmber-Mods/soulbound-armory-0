@@ -3,9 +3,10 @@ package soulboundarmory.client.gui.screen;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.statistics.Category;
 import soulboundarmory.component.statistics.Statistic;
+import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.widget.WidgetBox;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
-import soulboundarmory.util.Util;
 
 public class AttributeTab extends SoulboundTab {
     public AttributeTab() {
@@ -16,17 +17,16 @@ public class AttributeTab extends SoulboundTab {
         var component = this.container().item();
         var attributeTypes = component.screenAttributes();
         var attributes = attributeTypes.stream().map(component::statistic).toList();
-        var length = Math.max(this.container().xpBar.width(), width(attributeTypes.stream().map(component::format)) + 40);
-        this.add(this.resetButton(Category.attribute)).active(component.statistics.get(Category.attribute).values().stream().anyMatch(Statistic::aboveMin));
+        var length = Math.max(this.container().xpBar.width(), width(attributeTypes.stream().map(component::format)) + 60);
+        this.add(this.resetButton(Category.attribute)).active(() -> component.statistics.get(Category.attribute).values().stream().anyMatch(Statistic::aboveMin));
         this.displayPoints(component::attributePoints);
 
-        Util.enumerate(attributes, (statistic, row) -> {
-            var x = length / 2;
-            var y = this.height(attributes.size(), row) + 4;
-            this.add(this.squareButton(x - 20, y, "-", () -> this.removePoint(statistic))).active(statistic::aboveMin);
-            this.add(this.squareButton(x, y, "+", () -> this.addPointAction(statistic))).active(() -> component.attributePoints() > 0 && statistic.belowMax());
-            this.text(widget -> widget.shadow().x(.5, -length / 2).y(this.height(attributes.size(), row)).text(() -> component.format(statistic.type)));
-        });
+        var box = this.add(new WidgetBox<>().ySpacing(4).center().x(.5).y(.5).width(length));
+        attributes.forEach(statistic -> box.add(new Widget<>().width(length).height(20).with(row -> {
+            row.add(this.squareButton("-", () -> this.removePoint(statistic)).alignRight().x(1, -20).active(statistic::aboveMin));
+            row.add(this.squareButton("+", () -> this.addPointAction(statistic)).alignRight().x(1D).active(() -> component.attributePoints() > 0 && statistic.belowMax()));
+            row.text(widget -> widget.shadow().text(() -> component.format(statistic.type)));
+        })));
     }
 
     protected void addPointAction(Statistic statistic) {

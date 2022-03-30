@@ -143,7 +143,7 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
     }
 
     public static int width(Stream<? extends StringVisitable> text) {
-        return text.mapToInt(Widget::width).max().orElse(0);
+        return text.mapToInt(Node::width).max().orElse(0);
     }
 
     public static int width(Iterable<? extends StringVisitable> text) {

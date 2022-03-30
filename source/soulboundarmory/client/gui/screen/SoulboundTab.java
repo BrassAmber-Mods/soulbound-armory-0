@@ -51,12 +51,10 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
         return this.top(rows, separation) + row * separation;
     }
 
-    public Widget<?> squareButton(int x, int y, String text, Runnable action) {
+    public Widget<?> squareButton(String text, Runnable action) {
         return new ScalableWidget<>()
             .button()
             .center()
-            .x(.5, x)
-            .y(y)
             .size(20)
             .text(Text.of(text))
             .primaryAction(action);
