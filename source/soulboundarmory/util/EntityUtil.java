@@ -39,6 +39,10 @@ public class EntityUtil {
     }
 
     private static synchronized boolean isBoss(Class<?> type) {
-        return type != null && bosses.computeBooleanIfAbsent(type, t -> Fields.of(t).anyMatch(field -> BossBar.class.isAssignableFrom(field.getType())) || isBoss(t.getSuperclass()));
+        if (type == null) {
+            return false;
+        }
+
+        return bosses.containsKey(type) ? bosses.get(type) : Boolean.valueOf(bosses.put(type, Fields.of(type).anyMatch(field -> BossBar.class.isAssignableFrom(field.getType())) || isBoss(type.getSuperclass())));
     }
 }

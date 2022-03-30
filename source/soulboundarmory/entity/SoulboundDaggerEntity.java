@@ -1,6 +1,7 @@
 package soulboundarmory.entity;
 
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
@@ -10,12 +11,14 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
+import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.module.transform.Register;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
@@ -70,18 +73,15 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
         return ItemComponentType.dagger.nullable(this.getOwner());
     }
 
-    @Override
-    public ItemStack asItemStack() {
+    @Override public ItemStack asItemStack() {
         return this.component().map(ItemComponent::stack).orElse(this.stack);
     }
 
-    @Override
-    public byte getPierceLevel() {
+    @Override public byte getPierceLevel() {
         return -1;
     }
 
-    @Override
-    public void tick() {
+    @Override public void tick() {
         super.tick();
 
         if (this.inGround) {
@@ -90,7 +90,7 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
             this.ticksInGround = 0;
         }
 
-        top: if (this.component().isPresent()) {
+        if (this.component().isPresent()) {
             var component = this.component().get();
             var owner = component.player;
             var attackSpeed = component.attackSpeed();
@@ -114,18 +114,16 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
         }
     }
 
-    @Override
-    public void onPlayerCollision(PlayerEntity player) {
+    @Override public void onPlayerCollision(PlayerEntity player) {
         if (this.isServer() && player == this.getOwner()) {
-            if (this.clone || (this.hit || this.age >= Math.max(1, 20 / this.component().get().attackSpeed())) && player.getInventory().insertStack(this.asItemStack())) {
+            if (this.clone ? this.seeking() || this.onGround : (this.hit || this.age >= Math.max(1, 20 / this.component().get().attackSpeed())) && (player.getInventory().containsAny(Set.of(SoulboundItems.dagger)) || player.getInventory().insertStack(this.asItemStack()))) {
                 player.sendPickup(this, 1);
                 this.discard();
             }
         }
     }
 
-    @Override
-    public boolean isClient() {
+    @Override public boolean isClient() {
         return this.world.isClient;
     }
 
@@ -141,9 +139,8 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
-    @Override
-    protected void onEntityHit(EntityHitResult target) {
-        this.hit = true;
+    @Override protected void onEntityHit(EntityHitResult target) {
+        this.hit = !this.clone;
 
         if (!this.seeking() && this.spawnClone) {
             this.world.spawnEntity(new SoulboundDaggerEntity(this));
@@ -155,15 +152,14 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
             attacker = null;
 
             if (!this.clone && !this.seeking()) {
-                this.setVelocity(this.getVelocity().multiply(-.2, 1, -.2));
+                this.setVelocity(this.getVelocity().multiply(-0.2, 1, -0.2));
                 this.setYaw(this.getYaw() + 180);
                 this.prevYaw += 180;
             }
         }
     }
 
-    @Override
-    protected void onBlockHit(BlockHitResult result) {
+    @Override protected void onBlockHit(BlockHitResult result) {
         if (!this.seeking()) {
             this.setSound(null);
             super.onBlockHit(result);
@@ -179,8 +175,15 @@ public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntity
         }
     }
 
-    @Override
-    protected void age() {}
+    @Override protected EntityHitResult getEntityCollision(Vec3d currentPosition, Vec3d nextPosition) {
+        this.world.getOtherEntities(this, this.getBoundingBox().stretch(this.getVelocity()).expand(1), this::canHit).stream()
+            .filter(entity -> entity.getBoundingBox().expand(0.3).raycast(currentPosition, nextPosition).isPresent())
+            .forEach(entity -> this.onCollision(new EntityHitResult(entity)));
+
+        return null;
+    }
+
+    @Override protected void age() {}
 
     private boolean seeking() {
         return this.ticksSeeking > 0;

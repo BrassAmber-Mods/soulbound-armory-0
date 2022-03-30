@@ -10,10 +10,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
 import soulboundarmory.entity.SoulboundDaggerEntity;
-import soulboundarmory.util.Util;
 
 @Mixin(PlayerEntity.class)
 abstract class PlayerEntityMixin {
@@ -39,7 +37,7 @@ abstract class PlayerEntityMixin {
 
     @Unique
     private Optional<DaggerComponent> daggerComponent() {
-        return this.dagger().map(dagger -> ItemComponentType.dagger.of(Util.cast(this)));
+        return this.dagger().flatMap(SoulboundDaggerEntity::component);
     }
 
     @Unique
