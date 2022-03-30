@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -36,6 +37,16 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
         return UseAction.SPEAR;
     }
 
+    @Override public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
+        if (ItemComponentType.dagger.of(user).hasSkill(Skills.throwing)) {
+            user.setCurrentHand(hand);
+
+            return ActionResult.CONSUME;
+        }
+
+        return ActionResult.PASS;
+    }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         if (ItemComponentType.dagger.of(player).hasSkill(Skills.throwing)) {
@@ -52,7 +63,6 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
         if (entity instanceof ServerPlayerEntity player) {
             var attackSpeed = ItemComponentType.dagger.of(player).attributeTotal(StatisticType.attackSpeed);
             var damageRatio = damageRatio(attackSpeed, timeLeft);
-
             world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed, damageRatio));
 
             if (!player.isCreative()) {
