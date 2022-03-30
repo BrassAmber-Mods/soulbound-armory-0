@@ -406,9 +406,8 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         if (type == StatisticType.experience) {
             var statistic = this.statistic(StatisticType.experience);
             statistic.add(amount);
-            var xp = statistic.intValue();
 
-            if (xp >= this.nextLevelXP() && this.canLevelUp()) {
+            if (statistic.greaterThan(this.nextLevelXP()) && this.canLevelUp()) {
                 var nextLevelXP = this.nextLevelXP();
 
                 this.add(StatisticType.level, 1);
@@ -417,7 +416,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
                 leveledUp = true;
             }
 
-            if (xp < 0) {
+            if (statistic.lessThan(0)) {
                 this.add(StatisticType.level, -1);
                 this.add(StatisticType.experience, this.levelXP(this.level() - 1));
             }
