@@ -53,12 +53,8 @@ public class SkillTab extends SoulboundTab {
         this.add(this.window);
         this.updateWidgets();
 
-        if (!this.container().options.isEmpty()) {
-            var option = this.container().options.get(0);
-
-            if (option.absoluteX() < this.window.absoluteEndX()) {
-                this.remove(this.container().options);
-            }
+        if (this.container().options.isPresent() && this.container().options.absoluteX() < this.window.absoluteEndX()) {
+            this.remove(this.container().options);
         }
     }
 

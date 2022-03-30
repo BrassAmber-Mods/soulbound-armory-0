@@ -1,4 +1,4 @@
-package soulboundarmory.function;
+package soulboundarmory.module.gui.util.function;
 
 import java.util.function.BooleanSupplier;
 

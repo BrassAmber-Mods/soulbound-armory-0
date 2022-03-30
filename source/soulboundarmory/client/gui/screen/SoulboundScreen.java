@@ -2,7 +2,6 @@ package soulboundarmory.client.gui.screen;
 
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -14,9 +13,10 @@ import soulboundarmory.client.keyboard.GUIKeyBinding;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.config.Configuration;
+import soulboundarmory.module.config.ConfigurationManager;
 import soulboundarmory.module.gui.screen.ScreenWidget;
-import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.module.gui.widget.ScalableWidget;
+import soulboundarmory.module.gui.widget.WidgetBox;
 import soulboundarmory.module.gui.widget.slider.SliderWidget;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
@@ -39,13 +39,19 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
         .scrollAction(amount -> this.cycleStyle((int) amount))
         .present(this::displayTabs);
 
-    protected final List<Widget<?>> options = Stream.<Widget<?>>of(
-        this.colorSlider(Translations.red, 0),
-        this.colorSlider(Translations.green, 1),
-        this.colorSlider(Translations.blue, 2),
-        this.colorSlider(Translations.alpha, 3),
-        this.optionButton(4, () -> Translations.style.format(Configuration.Client.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1))
-    ).peek(option -> option.present(() -> Configuration.Client.displayOptions && this.displayTabs())).toList();
+    protected final WidgetBox<?> options = new WidgetBox<>()
+        .x(box -> Math.round(this.width() * 23 / 24F) - 100)
+        .y(box -> this.optionY(0))
+        .ySpacing(4)
+        .present(() -> Configuration.Client.displayOptions && this.displayTabs())
+        .add(
+            this.colorSlider(Translations.red, 0),
+            this.colorSlider(Translations.green, 1),
+            this.colorSlider(Translations.blue, 2),
+            this.colorSlider(Translations.alpha, 3),
+            this.optionButton(() -> Translations.style.format(Configuration.Client.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1)),
+            this.optionButton(() -> Translations.configure, () -> ConfigurationManager.entry(Configuration.class).screen(this.asScreen()).open(), null)
+        );
     protected final MasterComponent<?> component;
     protected final int slot;
     protected ItemStack stack;
@@ -163,19 +169,13 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
         return this.component.boundSlot() == this.slot;
     }
 
-    private int optionX() {
-        return Math.round(this.width() * 23 / 24F) - 100;
-    }
-
     private int optionY(int row) {
-        return this.height() / 16 + Math.max(this.height() / 16, 30) * row;
+        return this.height() / 16 + 28 * row;
     }
 
-    private <T extends ScalableWidget<T>> T optionButton(int row, Supplier<? extends Text> text, Runnable primaryAction, Runnable secondaryAction) {
+    private <T extends ScalableWidget<T>> T optionButton(Supplier<? extends Text> text, Runnable primaryAction, Runnable secondaryAction) {
         return new ScalableWidget<T>()
             .button()
-            .x(__ -> this.optionX())
-            .y(__ -> this.optionY(row))
             .width(100)
             .height(20)
             .centeredText(widget -> widget.text(text))
@@ -185,8 +185,6 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
 
     private SliderWidget colorSlider(Text text, int id) {
         return new SliderWidget()
-            .x(__ -> this.optionX())
-            .y(__ -> this.optionY(id))
             .width(100)
             .height(20)
             .min(0)

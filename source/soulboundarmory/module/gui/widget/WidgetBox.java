@@ -26,7 +26,7 @@ public class WidgetBox<T extends WidgetBox<T>> extends Widget<T> {
     }
 
     public T ySpacing(int spacing) {
-        this.xSpacing = spacing;
+        this.ySpacing = spacing;
 
         return this.vertical();
     }

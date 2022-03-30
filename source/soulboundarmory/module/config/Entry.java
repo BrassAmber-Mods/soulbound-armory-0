@@ -55,8 +55,8 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
         }, 1000, 1000);
     }
 
-    public Screen screen(Screen parent) {
-        return new ConfigurationScreen(this, parent).asScreen();
+    public ConfigurationScreen screen(Screen parent) {
+        return new ConfigurationScreen(this, parent);
     }
 
     public boolean deserialize() {

@@ -23,8 +23,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46C;
-import soulboundarmory.function.NulliPredicate;
-import soulboundarmory.function.ObjectSupplier;
+import soulboundarmory.module.gui.util.function.NulliPredicate;
+import soulboundarmory.module.gui.util.function.ObjectSupplier;
 import soulboundarmory.module.gui.Node;
 import soulboundarmory.module.gui.coordinate.Coordinate;
 import soulboundarmory.module.gui.coordinate.Offset;
@@ -271,15 +271,21 @@ public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements T
     }
 
     public T primaryAction(Runnable action) {
-        return this.primaryAction(widget -> action.run());
+        this.primaryAction = widget -> action.run();
+
+        return (T) this;
     }
 
     public T secondaryAction(Runnable action) {
-        return this.secondaryAction(widget -> action.run());
+        this.secondaryAction = widget -> action.run();
+
+        return (T) this;
     }
 
     public T tertiaryAction(Runnable action) {
-        return this.tertiaryAction(widget -> action.run());
+        this.tertiaryAction = widget -> action.run();
+
+        return (T) this;
     }
 
     public T scrollAction(ContextScrollAction<T> action) {
@@ -338,18 +344,15 @@ public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements T
         return this.add(this.degree(), children);
     }
 
-    public boolean add(int index, Widget<?>... children) {
-        var added = false;
-
+    public T add(int index, Widget<?>... children) {
         for (var child : children) {
             this.add(index++, child);
-            added = true;
         }
 
-        return added;
+        return (T) this;
     }
 
-    public boolean add(Widget<?>... children) {
+    public T add(Widget<?>... children) {
         return this.add(this.degree(), children);
     }
 

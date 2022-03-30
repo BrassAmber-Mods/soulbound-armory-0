@@ -59,6 +59,7 @@ public class Translations {
     public static final Translation xpStyle = gui("style.experience");
     public static final Translation bossStyle = gui("style.boss");
     public static final Translation horseStyle = gui("style.horse");
+    public static final Translation configure = gui("configure");
 
     public static final Translation levelupMessage = message("levelup");
     public static final Translation cannotAbsorbDamaged = message("cannot_absorb_damaged");

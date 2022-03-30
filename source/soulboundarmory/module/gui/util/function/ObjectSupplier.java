@@ -1,4 +1,4 @@
-package soulboundarmory.function;
+package soulboundarmory.module.gui.util.function;
 
 @FunctionalInterface
 public interface ObjectSupplier {

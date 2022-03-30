@@ -29,7 +29,7 @@ public final class ConfigurationManager {
                 var entry = new Entry<>(mod, Classes.load(type.clazz().getClassName()));
                 entriesByType.put(entry.type, entry);
                 entries.computeIfAbsent(mod, m -> ReferenceArrayList.of()).add(entry);
-                mod.registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigurationManager.entry(Configuration.class).screen(parent)));
+                mod.registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigurationManager.entry(Configuration.class).screen(parent).asScreen()));
             }
         }
     }

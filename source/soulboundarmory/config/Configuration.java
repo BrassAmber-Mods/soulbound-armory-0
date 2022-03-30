@@ -52,16 +52,16 @@ public final class Configuration implements ConfigurationFile {
         @Comment("peaceful mode multiplier")
         public static double peaceful = 0;
 
-        @Comment("hostile baby kill XP multiplier")
+        @Comment("hostile baby kill experience multiplier")
         public static double baby = 2;
 
-        @Comment("boss kill XP multiplier")
+        @Comment("boss kill experience multiplier")
         public static double boss = 3;
 
-        @Comment("hardcore mode XP multiplier")
+        @Comment("hardcore mode experience multiplier")
         public static double hardcore = 2;
 
-        @Comment("passive entity kill XP multiplier")
+        @Comment("passive entity kill experience multiplier")
         public static double passive = 0;
     }
 
@@ -87,7 +87,7 @@ public final class Configuration implements ConfigurationFile {
         @Comment("experience bar style")
         public static BarStyle style = BarStyle.EXPERIENCE;
 
-        @Comment("XP bar color")
+        @Comment("experience bar color")
         public static class Color {
             @Interval(max = 255)
             public static int red = 160;
