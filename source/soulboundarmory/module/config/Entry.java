@@ -48,9 +48,9 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
                 if (Entry.this.desynced) {
                     Entry.this.desynced = false;
                     Entry.this.serialize();
+                } else {
+                    Entry.this.deserialize();
                 }
-
-                Entry.this.deserialize();
             }
         }, 1000, 1000);
     }
