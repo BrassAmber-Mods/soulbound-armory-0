@@ -16,11 +16,10 @@ version("3.0.0")
 
 def gameVersion = "1.18.2"
 def yarn = "2"
-def forgeVersion = "40."
+def forgeVersion = "40"
 
 gronk {
     javaVersion(17)
-    uncheck()
 }
 
 sourceSets {
@@ -46,12 +45,11 @@ configurations {
 }
 
 shadowJar {
+    assemble.dependsOn(it)
     configurations = [project.configurations.lib]
 
     transform(net.auoeke.gronk.ManifestMerger) {
-        include {
-            it.manifest.mainAttributes.getValue("Agent-Class") == "net.auoeke.reflect.Agent"
-        }
+        include {manifest.mainAttributes.getValue("Specification-Title") == "reflect"}
     }
 }
 
@@ -66,8 +64,9 @@ repositories {
 dependencies {
     minecraft("com.mojang:minecraft:$gameVersion")
     mappings("net.fabricmc:yarn:$gameVersion+build.$yarn:v2")
-    forge("net.minecraftforge:forge:$gameVersion-$forgeVersion+")
+    forge("net.minecraftforge:forge:$gameVersion-$forgeVersion.+")
 
+    annotationProcessor("net.auoeke:uncheck:0.2.+")
     lib("net.auoeke:eson")
     lib("net.auoeke:reflect")
 	lib("net.auoeke:romeral")
