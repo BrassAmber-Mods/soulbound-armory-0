@@ -10,7 +10,7 @@ public class Group extends Parent {
 
     public Group(Parent parent, Class<?> type) {
         super(type, type.getSimpleName().toLowerCase(Locale.ROOT), Util.value(type, (Category category) -> {
-            if (!ConfigurationFile.class.isAssignableFrom(type.getDeclaringClass())) {
+            if (!type.getDeclaringClass().isAnnotationPresent(ConfigurationFile.class)) {
                 throw new IllegalArgumentException("@Category found on 2+ level nested " + type);
             }
 

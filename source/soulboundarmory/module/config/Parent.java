@@ -17,7 +17,7 @@ public abstract class Parent extends Node {
         this.type = Classes.initialize(type);
         Stream.concat(
             Fields.staticOf(type).filter(field -> !Flags.any(field, Flags.FINAL | Flags.TRANSIENT)).map(field -> new Property<>(this, field)),
-            Stream.of(type.getDeclaredClasses()).filter(t -> Flags.isStatic(t) && !ConfigurationFile.class.isAssignableFrom(t)).map(t -> new Group(this, t))
+            Stream.of(type.getDeclaredClasses()).filter(inner -> Flags.isStatic(inner) && !inner.isAnnotationPresent(ConfigurationFile.class)).map(t -> new Group(this, t))
         ).forEach(node -> this.children.put(node.name, node));
     }
 

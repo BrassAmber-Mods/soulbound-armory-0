@@ -1,16 +1,16 @@
 package soulboundarmory.module.text;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.auoeke.reflect.Pointer;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import soulboundarmory.util.Util;
 
 public class FormattingRegistry {
-    private static final Pointer values = new Pointer().staticField(Formatting.class, Util.formattingValueField);
+    private static final Pointer values = Pointer.of(Formatting.class, Util.formattingValueField);
 
     public static ExtendedFormatting register(String name, char code, int colorIndex, @Nullable Integer color) {
         return register(new ExtendedFormatting(name, code, colorIndex, color));
@@ -39,7 +39,7 @@ public class FormattingRegistry {
             throw new IllegalArgumentException(String.format("a Formatting with name %s already exists.", cast.getName()));
         }
 
-        var oldValues = values.<Formatting[]>getT();
+        Formatting[] oldValues = values.getT();
         var valueCount = oldValues.length;
         var newValues = Arrays.copyOf(oldValues, valueCount + 1);
         newValues[valueCount] = cast;

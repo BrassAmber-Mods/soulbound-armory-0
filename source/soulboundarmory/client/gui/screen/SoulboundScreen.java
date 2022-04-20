@@ -50,7 +50,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
             this.colorSlider(Translations.blue, 2),
             this.colorSlider(Translations.alpha, 3),
             this.optionButton(() -> Translations.style.format(Configuration.Client.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1)),
-            this.optionButton(() -> Translations.configure, () -> ConfigurationManager.entry(Configuration.class).screen(this.asScreen()).open(), null)
+            this.optionButton(() -> Translations.configure, () -> ConfigurationManager.instance(Configuration.class).screen(this.asScreen()).open(), null)
         );
     protected final MasterComponent<?> component;
     protected final int slot;

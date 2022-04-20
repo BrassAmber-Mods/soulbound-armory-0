@@ -11,8 +11,8 @@ import soulboundarmory.module.config.Flat;
 import soulboundarmory.module.config.Interval;
 import soulboundarmory.util.Math2;
 
-// @Config(name = SoulboundArmory.ID)
-public final class Configuration implements ConfigurationFile {
+@ConfigurationFile
+public final class Configuration {
     @Comment("experience points required to reach the first level for tools")
     public static int initialToolXP = 16;
 

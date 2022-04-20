@@ -11,7 +11,6 @@ import soulboundarmory.module.gui.widget.TextWidget;
 import soulboundarmory.module.gui.widget.ScalableWidget;
 
 public class ExperienceBar extends ScalableWidget<ExperienceBar> {
-
     private static final ExperienceBar overlayBar = new ExperienceBar().center().x(.5).y(1D, -27);
 
     protected final TextWidget level = this.add(new TextWidget())

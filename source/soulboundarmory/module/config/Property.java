@@ -19,7 +19,7 @@ public final class Property<T> extends Node {
 
     public Property(Parent parent, Field field) {
         super(field.getName(), Util.value(field, (Category category) -> {
-            if (ConfigurationFile.class.isAssignableFrom(field.getDeclaringClass())) {
+            if (field.getDeclaringClass().isAnnotationPresent(ConfigurationFile.class)) {
                 return category.value();
             }
 
@@ -45,8 +45,8 @@ public final class Property<T> extends Node {
         }
     }
 
-    public Entry<?> entry() {
-        return (Entry<?>) Stream.iterate(this.parent, Objects::nonNull, parent -> parent instanceof Group group ? group.parent : null).reduce(this.parent, (a, b) -> b);
+    public ConfigurationInstance configuration() {
+        return (ConfigurationInstance) Stream.iterate(this.parent, Objects::nonNull, parent -> parent instanceof Group group ? group.parent : null).reduce(this.parent, (a, b) -> b);
     }
 
     public T get() {
@@ -55,7 +55,7 @@ public final class Property<T> extends Node {
 
     public void set(Object value) {
         this.field.put(value);
-        this.entry().desynced();
+        this.configuration().desynced();
     }
 
     public void reset() {

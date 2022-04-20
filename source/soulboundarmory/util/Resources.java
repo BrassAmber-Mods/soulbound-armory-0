@@ -1,39 +1,20 @@
 package soulboundarmory.util;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import javax.imageio.ImageIO;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
-import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.module.gui.Node;
 
 public class Resources {
     public static BufferedImage readTexture(Identifier identifier) {
-        try {
-            try (var resource = resource(identifier)) {
-                return ImageIO.read(resource.getInputStream());
-            }
-        } catch (IOException exception) {
-            throw Unsafe.throwException(exception);
-        }
-    }
-
-    public static byte[] bytes(InputStream input) {
-        try {
-            return input.readAllBytes();
-        } catch (IOException exception) {
-            throw Unsafe.throwException(exception);
+        try (var resource = resource(identifier)) {
+            return ImageIO.read(resource.getInputStream());
         }
     }
 
     public static Resource resource(Identifier identifier) {
-        try {
-            return Widget.resourceManager.getResource(identifier);
-        } catch (IOException exception) {
-            throw Unsafe.throwException(exception);
-        }
+        return Node.resourceManager.getResource(identifier);
     }
 
     public static int[][][] pixels(BufferedImage image, int u, int v, int width, int height) {

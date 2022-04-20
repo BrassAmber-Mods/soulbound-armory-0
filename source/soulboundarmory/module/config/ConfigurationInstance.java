@@ -9,7 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import net.auoeke.eson.Eson;
 import net.auoeke.eson.element.EsonMap;
-import net.auoeke.reflect.Constructors;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.ModContainer;
@@ -18,23 +17,21 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.module.config.gui.ConfigurationScreen;
 import soulboundarmory.util.Util;
 
-public final class Entry<C extends ConfigurationFile> extends Parent {
+public final class ConfigurationInstance extends Parent {
     private static final Timer deserializationTimer = new Timer(true);
     private static final Eson eson = new Eson();
 
     public final ModContainer mod;
-    public final C instance;
     public final Path path;
     public final Identifier background;
 
     private FileTime mtime = FileTime.from(Instant.EPOCH);
     private boolean desynced;
 
-    public Entry(ModContainer mod, Class<C> type) {
+    public ConfigurationInstance(ModContainer mod, Class<?> type) {
         super(type, mod.getModId() + Util.value(type, (Name name) -> ':' + name.value(), ""), Util.value(type, Category::value, "main"));
 
         this.mod = mod;
-        this.instance = Constructors.instantiate(type);
         this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".eson");
         var background = new Identifier(Util.value(type, Background::value, "block/andesite.png"));
         this.background = new Identifier(background.getNamespace(), "textures/" + background.getPath());
@@ -45,11 +42,11 @@ public final class Entry<C extends ConfigurationFile> extends Parent {
 
         deserializationTimer.schedule(new TimerTask() {
             @Override public void run() {
-                if (Entry.this.desynced) {
-                    Entry.this.desynced = false;
-                    Entry.this.serialize();
+                if (ConfigurationInstance.this.desynced) {
+                    ConfigurationInstance.this.desynced = false;
+                    ConfigurationInstance.this.serialize();
                 } else {
-                    Entry.this.deserialize();
+                    ConfigurationInstance.this.deserialize();
                 }
             }
         }, 1000, 1000);
