@@ -19,13 +19,14 @@ public final class ConfigurationManager {
     @SubscribeEvent
     public static void begin(FMLConstructModEvent event) {
         var mod = ModLoadingContext.get().getActiveContainer();
-        var annotations = mod.getModInfo().getOwningFile().getFile().getScanResult().getAnnotations();
-
-        for (var annotation : annotations.stream().collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType)).get(Type.getType(ConfigurationFile.class))) {
-            var instance = new ConfigurationInstance(mod, Classes.load(annotation.clazz().getClassName()));
-            entries.put(instance.type, instance);
-            mod.registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> instance.screen(parent).asScreen()));
-        }
+        mod.getModInfo().getOwningFile().getFile().getScanResult().getAnnotations().stream()
+            .collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType))
+            .get(Type.getType(ConfigurationFile.class))
+            .forEach(annotation -> {
+                var instance = new ConfigurationInstance(mod, Classes.load(annotation.clazz().getClassName()));
+                entries.put(instance.type, instance);
+                mod.registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> instance.screen(parent).asScreen()));
+            });
     }
 
     public static ConfigurationInstance instance(Class<?> type) {
