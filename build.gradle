@@ -5,6 +5,7 @@ buildscript {
 }
 
 plugins {
+    id("java")
     id("maven-publish")
     id("gronk").version("latest.release")
     id("dev.architectury.loom").version("latest.release")
@@ -13,13 +14,16 @@ plugins {
 
 group("net.auoeke")
 version("3.0.0")
+javaVersion(17)
 
-def gameVersion = "1.18.2"
-def yarn = "2"
-def forgeVersion = "40"
+final versions = [
+    minecraft: "1.19.2",
+    yarn: "11",
+    forge: "43"
+]
 
 gronk {
-    javaVersion(17)
+    uncheck()
 }
 
 sourceSets {
@@ -62,15 +66,16 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:$gameVersion")
-    mappings("net.fabricmc:yarn:$gameVersion+build.$yarn:v2")
-    forge("net.minecraftforge:forge:$gameVersion-$forgeVersion.+")
+    minecraft("com.mojang:minecraft:" + versions.minecraft)
+    mappings("net.fabricmc:yarn:${versions.minecraft}+build.${versions.yarn}:v2")
+    forge("net.minecraftforge:forge:${versions.minecraft}-${versions.forge}.+")
 
-    annotationProcessor("net.auoeke:uncheck:0.2.+")
-    lib("net.auoeke:eson")
-    lib("net.auoeke:reflect")
-	lib("net.auoeke:romeral")
-    lib("net.auoeke:unsafe")
+    lib(
+        "net.auoeke:eson",
+        "net.auoeke:reflect",
+	    "net.auoeke:romeral",
+        "net.auoeke:unsafe"
+    )
 }
 
 tasks.withType(JavaCompile) {
@@ -86,8 +91,8 @@ processResources {
 publishing {
     repositories {
         maven("maven.auoeke.net") {
-            username(systemProperty("maven.username"))
-            password(systemProperty("maven.password"))
+            username(findProperty("maven.username"))
+            password(findProperty("maven.password"))
         }
     }
 }
