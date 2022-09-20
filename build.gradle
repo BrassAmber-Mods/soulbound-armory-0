@@ -7,7 +7,7 @@ buildscript {
 plugins {
     id("java")
     id("maven-publish")
-    id("gronk").version("latest.release")
+    id("net.auoeke.gronk").version("latest.release")
     id("dev.architectury.loom").version("latest.release")
     id("com.github.johnrengelman.shadow").version("latest.release")
 }
@@ -52,7 +52,7 @@ shadowJar {
     assemble.dependsOn(it)
     configurations = [project.configurations.lib]
 
-    transform(net.auoeke.gronk.ManifestMerger) {
+    transform(ManifestMerger) {
         include {manifest.mainAttributes.getValue("Specification-Title") == "reflect"}
     }
 }
@@ -61,17 +61,13 @@ remapJar {
     inputFile = shadowJar.archiveFile
 }
 
-repositories {
-    maven("maven.auoeke.net")
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:" + versions.minecraft)
     mappings("net.fabricmc:yarn:${versions.minecraft}+build.${versions.yarn}:v2")
     forge("net.minecraftforge:forge:${versions.minecraft}-${versions.forge}.+")
 
     lib(
-        "net.auoeke:eson",
+        "net.auoeke:lusr",
         "net.auoeke:reflect",
 	    "net.auoeke:romeral",
         "net.auoeke:unsafe"
@@ -79,7 +75,7 @@ dependencies {
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs.add("-nowarn")
+    options.compilerArgs << "-nowarn"
 }
 
 processResources {
@@ -90,7 +86,7 @@ processResources {
 
 publishing {
     repositories {
-        maven("maven.auoeke.net") {
+        maven(findProperty("maven.repository")) {
             username(findProperty("maven.username"))
             password(findProperty("maven.password"))
         }
