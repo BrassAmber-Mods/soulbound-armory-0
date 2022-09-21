@@ -16,9 +16,12 @@ import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.module.component.EntityComponentKey;
 import soulboundarmory.module.transform.Register;
-import soulboundarmory.registry.RegistryElement;
+import soulboundarmory.module.transform.RegisterAll;
+import soulboundarmory.module.transform.Registry;
+import soulboundarmory.registry.Identifiable;
 
-public final class ItemComponentType<C extends ItemComponent<C>> extends RegistryElement<ItemComponentType<C>> {
+@RegisterAll(type = ItemComponentType.class, registry = "item_component")
+public final class ItemComponentType<C extends ItemComponent<C>> extends Identifiable {
     @Register("dagger") public static final ItemComponentType<DaggerComponent> dagger = weapon();
     @Register("sword") public static final ItemComponentType<SwordComponent> sword = weapon();
     @Register("bigsword") public static final ItemComponentType<BigswordComponent> bigsword = weapon();
@@ -32,7 +35,7 @@ public final class ItemComponentType<C extends ItemComponent<C>> extends Registr
         this.parentKey = key;
     }
 
-    @Register("item_component") public static native <C extends ItemComponent<C>> IForgeRegistry<ItemComponentType<C>> registry();
+    @Registry("item_component") public static native <C extends ItemComponent<C>> IForgeRegistry<ItemComponentType<C>> registry();
 
     public static <T extends WeaponComponent<T>> ItemComponentType<T> weapon() {
         return new ItemComponentType<>(Components.weapon);

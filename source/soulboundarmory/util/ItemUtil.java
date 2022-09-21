@@ -13,6 +13,6 @@ public class ItemUtil {
     }
 
     public static Stream<ItemStack> handStacks(Entity entity) {
-        return Util.stream(entity.getItemsHand());
+        return Util.stream(entity.getHandItems());
     }
 }

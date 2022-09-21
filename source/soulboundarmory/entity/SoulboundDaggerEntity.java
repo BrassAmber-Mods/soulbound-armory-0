@@ -24,7 +24,7 @@ import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Util;
 
 public class SoulboundDaggerEntity extends ExtendedProjectile implements IEntityAdditionalSpawnData {
-    @Register("dagger") public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
+    @Register(value = "dagger", registry = "entity_type") public static final EntityType<SoulboundDaggerEntity> type = EntityType.Builder
         .create((EntityType.EntityFactory<SoulboundDaggerEntity>) SoulboundDaggerEntity::new, SpawnGroup.MISC)
         .setDimensions(.3F, .5F)
         .build(Util.id("dagger").toString());

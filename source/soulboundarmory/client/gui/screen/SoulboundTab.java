@@ -3,7 +3,6 @@ package soulboundarmory.client.gui.screen;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.function.IntSupplier;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -85,10 +84,6 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
     }
 
     protected Text pointText(int points) {
-        return switch (points) {
-            case 0 -> LiteralText.EMPTY;
-            case 1 -> Translations.guiUnspentPoint;
-            default -> Translations.guiUnspentPoints.format(points);
-        };
+        return points == 0 ? Translations.empty : Translations.guiUnspentPoints.text(points);
     }
 }

@@ -3,9 +3,12 @@ package soulboundarmory.component.statistics;
 import java.util.function.Consumer;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.module.transform.Register;
-import soulboundarmory.registry.RegistryElement;
+import soulboundarmory.module.transform.RegisterAll;
+import soulboundarmory.module.transform.Registry;
+import soulboundarmory.registry.Identifiable;
 
-public class StatisticType extends RegistryElement<StatisticType> {
+@RegisterAll(type = StatisticType.class, registry = "statistic")
+public class StatisticType extends Identifiable {
     @Register("attribute_points") public static final StatisticType attributePoints = new StatisticType(Category.datum);
     @Register("enchantment_points") public static final StatisticType enchantmentPoints = new StatisticType(Category.datum);
     @Register("xp") public static final StatisticType experience = new StatisticType(Category.datum);
@@ -32,7 +35,7 @@ public class StatisticType extends RegistryElement<StatisticType> {
         this(category, statistic -> {});
     }
 
-    @Register("statistic") public static native IForgeRegistry<StatisticType> registry();
+    @Registry("statistic") public static native IForgeRegistry<StatisticType> registry();
 
     public final Statistic instantiate() {
         var statistic = new Statistic(this);

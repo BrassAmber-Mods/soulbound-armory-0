@@ -1,10 +1,12 @@
 package soulboundarmory.item;
 
+import java.lang.invoke.MethodHandle;
 import java.util.List;
 import java.util.Map;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.auoeke.reflect.Invoker;
 import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.tag.TagKey;
@@ -13,12 +15,14 @@ import net.minecraftforge.common.ForgeTier;
 import net.minecraftforge.common.TierSortingRegistry;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.module.transform.Register;
+import soulboundarmory.module.transform.RegisterAll;
 
+@RegisterAll(type = Item.class, registry = "item")
 public class SoulboundItems {
     private static final Reference2ReferenceOpenHashMap<ToolMaterial, Map<TagKey<Block>, ToolMaterial>> materials = new Reference2ReferenceOpenHashMap<>();
+    private static final MethodHandle recalculateItemTiers = Invoker.findStatic(TierSortingRegistry.class, "recalculateItemTiers", void.class);
 
     public static final ToolMaterial baseMaterial = material(ToolMaterials.WOOD);
-
     @Register("dagger") public static final SoulboundDaggerItem dagger = new SoulboundDaggerItem();
     @Register("sword") public static final SoulboundSwordItem sword = new SoulboundSwordItem();
     @Register("greatsword") public static final SoulboundGreatswordItem greatsword = new SoulboundGreatswordItem();
@@ -35,7 +39,7 @@ public class SoulboundItems {
                 List.of()
             );
 
-            Invoker.invoke(Invoker.findStatic(TierSortingRegistry.class, "recalculateItemTiers", void.class));
+            recalculateItemTiers.invoke();
 
             return material;
         });

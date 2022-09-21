@@ -43,14 +43,9 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.registry.RegistryElement;
+import soulboundarmory.registry.Identifiable;
 import soulboundarmory.registry.SimplerRegistry;
 
 public class Util extends net.minecraft.util.Util {
@@ -61,6 +56,10 @@ public class Util extends net.minecraft.util.Util {
     private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
     private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
     private static BiFunction<INameMappingService.Domain, String, String> mapper;
+
+    public static IllegalArgumentException illegalArgument(String message, Object... arguments) {
+        throw new IllegalArgumentException(message.formatted(arguments));
+    }
 
     public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, T fallback) {
         var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
@@ -227,11 +226,7 @@ public class Util extends net.minecraft.util.Util {
         }
     }
 
-    public static <T extends IForgeRegistryEntry<T>> Supplier<IForgeRegistry<T>> newForgeRegistry(NewRegistryEvent event, String name) {
-        return event.create(new RegistryBuilder<T>().setName(id(name)));
-    }
-
-    public static <T extends RegistryElement<T>> SimplerRegistry<T> newRegistry(String path, T... dummy) {
+    public static <T extends Identifiable> SimplerRegistry<T> newRegistry(String path, T... dummy) {
         var key = RegistryKey.<T>ofRegistry(id(path));
         var registry = Registry.register(cast(Registry.REGISTRIES), key, new SimplerRegistry<T>(key, Lifecycle.experimental(), null));
         registries.put(componentType(dummy), registry);
@@ -266,7 +261,7 @@ public class Util extends net.minecraft.util.Util {
             var reference = iterator.next();
 
             if (reference == null) {
-                LogManager.getLogger("soulbound-armory").error("🤨 Something's fishy.");
+                SoulboundArmory.logger.error("🤨 Something's fishy.");
             } else if (!reference.refersTo(null)) {
                 action.accept(reference.get());
 
@@ -276,7 +271,7 @@ public class Util extends net.minecraft.util.Util {
             try {
                 iterator.remove();
             } catch (IndexOutOfBoundsException __)  {
-                LogManager.getLogger("soulbound-armory").error("Something is very fishy.");
+                SoulboundArmory.logger.error("Something is very fishy.");
             }
         }
     }

@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,7 +30,7 @@ public final class SoulboundArmoryCommand {
     private static final String STATISTIC = "statistic";
     private static final String VALUE = "value";
 
-    private static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType(player -> Translations.commandNoItem.format(((PlayerEntity) player).getName()));
+    private static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType(player -> Translations.commandNoItem.text(((PlayerEntity) player).getName()));
 
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(
@@ -62,7 +61,7 @@ public final class SoulboundArmoryCommand {
         return registry(StatisticType.registry());
     }
 
-    private static int add(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static int add(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) {
         var players = players(context, hasPlayerArgument);
         var types = componentTypes(context);
 
@@ -75,7 +74,7 @@ public final class SoulboundArmoryCommand {
         return players.size();
     }
 
-    private static int get(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static int get(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) {
         var players = players(context, hasPlayerArgument);
         var types = componentTypes(context);
 
@@ -88,7 +87,7 @@ public final class SoulboundArmoryCommand {
         return players.size();
     }
 
-    private static int set(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static int set(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) {
         var players = players(context, hasPlayerArgument);
         var types = componentTypes(context);
 
@@ -101,7 +100,7 @@ public final class SoulboundArmoryCommand {
         return players.size();
     }
 
-    private static int reset(CommandContext<ServerCommandSource> context, boolean hasItemArgument, boolean hasPlayerArgument, boolean hasCategoryArgument) throws CommandSyntaxException {
+    private static int reset(CommandContext<ServerCommandSource> context, boolean hasItemArgument, boolean hasPlayerArgument, boolean hasCategoryArgument) {
         var players = players(context, hasPlayerArgument);
 
         if (hasItemArgument) {
@@ -133,7 +132,7 @@ public final class SoulboundArmoryCommand {
         return RegistryArgumentType.get(context, STATISTIC);
     }
 
-    private static Collection<ServerPlayerEntity> players(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) throws CommandSyntaxException {
+    private static Collection<ServerPlayerEntity> players(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) {
         return hasPlayerArgument ? EntityArgumentType.getPlayers(context, "players") : List.of(player(context));
     }
 
@@ -141,11 +140,11 @@ public final class SoulboundArmoryCommand {
         return (ServerPlayerEntity) context.getSource().getEntity();
     }
 
-    private static ItemComponent<?> item(PlayerEntity player) throws CommandSyntaxException {
+    private static ItemComponent<?> item(PlayerEntity player) {
         return ItemComponent.fromHands(player).orElseThrow(() -> noItemException.create(player));
     }
 
-    private static Stream<ItemComponent<?>> components(PlayerEntity player, Collection<ItemComponentType<?>> types) throws CommandSyntaxException {
+    private static Stream<ItemComponent<?>> components(PlayerEntity player, Collection<ItemComponentType<?>> types) {
         return types.isEmpty() ? Stream.of(item(player)) : types.stream().map(type -> type.of(player));
     }
 }

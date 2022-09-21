@@ -16,7 +16,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -54,7 +54,7 @@ public final class CommonEvents {
                     .forEach(component -> event.getDrops().removeIf(drop -> component.accepts(drop.getStack()) && player.getInventory().insertStack(drop.getStack())));
             }
         } else {
-            ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> {
+            ItemComponent.fromAttacker(event.getEntity(), event.getSource()).ifPresent(component -> {
                 if (component.hasSkill(Skills.enderPull)) {
                     event.getDrops().forEach(drop -> component.player.getInventory().insertStack(drop.getStack()));
                 }
@@ -67,7 +67,7 @@ public final class CommonEvents {
      */
     @SubscribeEvent
     public static void breakSpeed(PlayerEvent.BreakSpeed event) {
-        ItemComponent.fromMainHand(event.getPlayer()).ifPresent(item -> {
+        ItemComponent.fromMainHand(event.getEntity()).ifPresent(item -> {
             var efficiency = item.floatValue(StatisticType.efficiency);
 
             if (item instanceof ToolComponent) {
@@ -113,7 +113,7 @@ public final class CommonEvents {
     @SubscribeEvent
     public static void damage(LivingDamageEvent event) {
         var damage = event.getSource();
-        var target = event.getEntityLiving();
+        var target = event.getEntity();
 
         if (damage.getAttacker() instanceof ServerPlayerEntity player) {
             ItemComponent.fromAttacker(target, damage).ifPresent(component -> {
@@ -138,7 +138,7 @@ public final class CommonEvents {
      */
     @SubscribeEvent
     public static void livingAttack(LivingAttackEvent event) {
-        var target = event.getEntityLiving();
+        var target = event.getEntity();
         var damage = event.getSource();
 
         if (target instanceof ServerPlayerEntity && ItemComponentType.greatsword.of(target).leapForce() > 0 && damage.getAttacker() != null && !damage.isExplosive() && !damage.isProjectile()) {
@@ -163,7 +163,7 @@ public final class CommonEvents {
      */
     @SubscribeEvent
     public static void death(LivingDeathEvent event) {
-        ItemComponent.fromAttacker(event.getEntityLiving(), event.getSource()).ifPresent(component -> component.killed(event.getEntityLiving()));
+        ItemComponent.fromAttacker(event.getEntity(), event.getSource()).ifPresent(component -> component.killed(event.getEntity()));
     }
 
     /**
@@ -237,7 +237,7 @@ public final class CommonEvents {
      Tick components.
      */
     @SubscribeEvent
-    public static void livingTick(LivingEvent.LivingUpdateEvent event) {
+    public static void livingTick(LivingEvent.LivingTickEvent event) {
         ((EntityAccess) event.getEntity()).soulboundarmory$components().values().forEach(EntityComponent::tickStart);
 
         if (Components.entityData.of(event.getEntity()).isFrozen()) {

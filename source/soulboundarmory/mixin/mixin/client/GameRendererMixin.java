@@ -1,25 +1,18 @@
 package soulboundarmory.mixin.mixin.client;
 
-import soulboundarmory.module.gui.widget.Widget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.RaycastContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import soulboundarmory.component.soulbound.item.ItemComponent;
+import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Math2;
 
 @Mixin(GameRenderer.class)
 abstract class GameRendererMixin {
-    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
-    private double extendEntityReach(double nine) {
-        return Math2.square(Widget.client.interactionManager.getReachDistance());
-    }
-
     @ModifyVariable(method = "updateTargetedEntity", at = @At(value = "STORE", ordinal = 3), ordinal = 1)
     private double reachThroughNonCollidableBlocks(double blockDistance, float tickDelta) {
         return Widget.client.cameraEntity instanceof PlayerEntity player ? ItemComponent.of(player, player.getMainHandStack())

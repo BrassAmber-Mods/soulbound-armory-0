@@ -9,35 +9,30 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.registries.RegisterEvent;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.registry.RegistryElement;
+import soulboundarmory.registry.Identifiable;
 import soulboundarmory.util.Util;
 
 /**
  An active or passive ability; locked by default and possibly having multiple levels and dependencies.
  */
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
-public abstract class Skill extends RegistryElement<Skill> {
+public abstract class Skill extends Identifiable {
     public final int maxLevel;
 
     protected final Identifier texture;
 
     private int tier = -1;
 
-    public Skill(Identifier identifier, Identifier texture, int maxLevel) {
-        this.texture = texture;
-        this.maxLevel = maxLevel;
-        this.setRegistryName(identifier);
-    }
-
     public Skill(Identifier identifier, int maxLevel) {
-        this(identifier, new Identifier(identifier.getNamespace(), "textures/skill/%s.png".formatted(identifier.getPath())), maxLevel);
+        this.texture = new Identifier(identifier.getNamespace(), "textures/skill/%s.png".formatted(identifier.getPath()));
+        this.maxLevel = maxLevel;
     }
 
     public Skill(String path, int maxLevel) {
@@ -111,7 +106,7 @@ public abstract class Skill extends RegistryElement<Skill> {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void initializeDependencies(RegistryEvent.Register<Skill> event) {
-        Skills.registry().forEach(Skill::initializeDependencies);
+    public static void initializeDependencies(RegisterEvent event) {
+         event.register(Skills.registry().getRegistryKey(), helper -> Skills.registry().forEach(Skill::initializeDependencies));
     }
 }

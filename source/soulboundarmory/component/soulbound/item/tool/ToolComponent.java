@@ -110,7 +110,7 @@ public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComp
 
     @Override public Text format(StatisticType statistic) {
         if (statistic == StatisticType.upgradeProgress) {
-            return this.nextMaterial == null ? Translations.tier.format(this.materialName()) : Translations.guiUpgradeProgress.format(this.formatValue(statistic), Translations.toolMaterial(this.nextMaterial));
+            return this.nextMaterial == null ? Translations.tier.text(this.materialName()) : Translations.guiUpgradeProgress.text(this.formatValue(statistic), Translations.toolMaterial(this.nextMaterial));
         }
 
         return super.format(statistic);

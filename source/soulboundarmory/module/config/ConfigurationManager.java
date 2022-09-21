@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.auoeke.reflect.Classes;
-import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -25,7 +25,7 @@ public final class ConfigurationManager {
             .forEach(annotation -> {
                 var instance = new ConfigurationInstance(mod, Classes.load(annotation.clazz().getClassName()));
                 entries.put(instance.type, instance);
-                mod.registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> instance.screen(parent).asScreen()));
+                mod.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> instance.screen(parent).asScreen()));
             });
     }
 

@@ -14,7 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -151,7 +151,7 @@ public final class ComponentRegistry {
     }
 
     @SubscribeEvent
-    public static void spawn(EntityJoinWorldEvent event) {
+    public static void spawn(EntityJoinLevelEvent event) {
         ((EntityAccess) event.getEntity()).soulboundarmory$components().values().forEach(EntityComponent::spawn);
     }
 
@@ -159,7 +159,7 @@ public final class ComponentRegistry {
     public static void copy(PlayerEvent.Clone event) {
         for (var key : entity.values()) {
             var original = key.of(event.getOriginal());
-            var copy = key.of(event.getPlayer());
+            var copy = key.of(event.getEntity());
 
             if (original != null && copy != null) {
                 original.copy(Util.cast(copy));

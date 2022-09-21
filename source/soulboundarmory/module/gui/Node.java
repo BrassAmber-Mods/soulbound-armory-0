@@ -220,9 +220,8 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
         bufferBuilder.vertex(matrix, x2, y2, z).color(r, g, b, a).next();
         bufferBuilder.vertex(matrix, x2, y1, z).color(r, g, b, a).next();
         bufferBuilder.vertex(matrix, x1, y1, z).color(r, g, b, a).next();
-        bufferBuilder.end();
 
-        BufferRenderer.draw(bufferBuilder);
+        BufferRenderer.drawWithShader(bufferBuilder.end());
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }

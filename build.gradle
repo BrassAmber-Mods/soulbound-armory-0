@@ -18,8 +18,7 @@ javaVersion(17)
 
 final versions = [
     minecraft: "1.19.2",
-    yarn: "11",
-    forge: "43"
+    yarn: "17"
 ]
 
 gronk {
@@ -64,7 +63,7 @@ remapJar {
 dependencies {
     minecraft("com.mojang:minecraft:" + versions.minecraft)
     mappings("net.fabricmc:yarn:${versions.minecraft}+build.${versions.yarn}:v2")
-    forge("net.minecraftforge:forge:${versions.minecraft}-${versions.forge}.+")
+    forge("net.minecraftforge:forge:${versions.minecraft}-+")
 
     lib(
         "net.auoeke:lusr",

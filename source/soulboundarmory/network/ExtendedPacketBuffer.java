@@ -13,11 +13,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.module.gui.widget.Widget;
+import soulboundarmory.registry.Identifiable;
 import soulboundarmory.util.Util;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
@@ -41,13 +41,13 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
         this.writeItemComponent(component);
     }
 
-    public ExtendedPacketBuffer writeRegistryEntry(IForgeRegistryEntry<?> entry) {
-        this.writeIdentifier(entry.getRegistryName());
+    public ExtendedPacketBuffer writeRegistryEntry(Identifiable entry) {
+        this.writeIdentifier(entry.id());
 
         return this;
     }
 
-    public <T extends IForgeRegistryEntry<T>> T readRegistryEntry(IForgeRegistry<T> registry) {
+    public <T> T readRegistryEntry(IForgeRegistry<T> registry) {
         return registry.getValue(this.readIdentifier());
     }
 

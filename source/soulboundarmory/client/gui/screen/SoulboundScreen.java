@@ -33,7 +33,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
         .center()
         .tooltip(tooltip -> tooltip.text(() -> {
             var xp = (int) this.item.experience();
-            return this.item.canLevelUp() ? Translations.barXP.format(xp, this.item.nextLevelXP()) : Translations.barFullXP.format(xp);
+            return this.item.canLevelUp() ? Translations.barXP.text(xp, this.item.nextLevelXP()) : Translations.barFullXP.text(xp);
         })).primaryAction(() -> Configuration.Client.displayOptions ^= true)
         .secondaryAction(() -> Configuration.Client.overlayExperienceBar ^= true)
         .scrollAction(amount -> this.cycleStyle((int) amount))
@@ -49,7 +49,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
             this.colorSlider(Translations.green, 1),
             this.colorSlider(Translations.blue, 2),
             this.colorSlider(Translations.alpha, 3),
-            this.optionButton(() -> Translations.style.format(Configuration.Client.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1)),
+            this.optionButton(() -> Translations.style.text(Configuration.Client.style.text), () -> this.cycleStyle(1), () -> this.cycleStyle(-1)),
             this.optionButton(() -> Translations.configure, () -> ConfigurationManager.instance(Configuration.class).screen(this.asScreen()).open(), null)
         );
     protected final MasterComponent<?> component;

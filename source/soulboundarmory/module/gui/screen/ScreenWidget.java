@@ -1,14 +1,13 @@
 package soulboundarmory.module.gui.screen;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
-import soulboundarmory.module.gui.Node;
+import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.module.gui.widget.Widget;
 
 public abstract class ScreenWidget<T extends ScreenWidget<T>> extends Widget<T> {
-    public Text title = LiteralText.EMPTY;
+    public Text title = Translations.empty;
     public ScreenDelegate screen;
 
     public ScreenWidget() {

@@ -4,7 +4,6 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,7 +21,7 @@ import soulboundarmory.util.EntityUtil;
 abstract class LivingEntityMixin {
     @Shadow protected abstract void dropXp();
 
-    @Shadow protected abstract int getXpToDrop(PlayerEntity player);
+    @Shadow protected abstract int getXpToDrop();
 
     @Inject(method = "tickCramming",
             at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;)Ljava/util/List;"),
@@ -55,6 +54,6 @@ abstract class LivingEntityMixin {
         var mixin = (LivingEntityMixin) (Object) entity;
         ItemComponent.fromAttacker(entity, source)
             .filter(component -> component.hasSkill(Skills.enderPull))
-            .ifPresentOrElse(component -> component.player.addExperience(mixin.getXpToDrop(component.player)), mixin::dropXp);
+            .ifPresentOrElse(component -> component.player.addExperience(mixin.getXpToDrop()), mixin::dropXp);
     }
 }

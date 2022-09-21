@@ -17,8 +17,8 @@ import soulboundarmory.util.Util;
 public final class ModEvents {
     @SubscribeEvent
     public static void setup(FMLCommonSetupEvent event) {
-        ArgumentTypes.register(Util.id("item_component_registry").toString(), Util.cast(ItemComponentArgumentType.class), new ConstantArgumentSerializer<>(ItemComponentArgumentType::itemComponents));
-        ArgumentTypes.register(Util.id("registry").toString(), Util.cast(RegistryArgumentType.class), new RegistryArgumentType.Serializer());
+        ArgumentTypes.registerByClass(Util.cast(ItemComponentArgumentType.class), ConstantArgumentSerializer.of(ItemComponentArgumentType::itemComponents));
+        ArgumentTypes.registerByClass(Util.cast(RegistryArgumentType.class), new RegistryArgumentType.Serializer());
     }
 
     @SubscribeEvent

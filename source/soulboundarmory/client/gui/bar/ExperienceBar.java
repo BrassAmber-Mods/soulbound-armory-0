@@ -22,7 +22,7 @@ public class ExperienceBar extends ScalableWidget<ExperienceBar> {
         .stroke()
         .text(() -> this.component.level())
         .visible(() -> this.component.level() > 0)
-        .tooltip(tooltip -> tooltip.alignDown().text(() -> Translations.barLevel.format(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel())));
+        .tooltip(tooltip -> tooltip.alignDown().text(() -> Translations.barLevel.text(this.component.level(), this.component.maxLevel() < 0 ? "∞" : this.component.maxLevel())));
 
     protected ItemComponent<?> component;
 

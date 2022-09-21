@@ -12,22 +12,22 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 
-public class RegistryArgumentType<T extends IForgeRegistryEntry<T>> implements ArgumentType<Set<T>> {
+public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
     protected final IForgeRegistry<T> registry;
 
     protected RegistryArgumentType(IForgeRegistry<T> registry) {
         this.registry = registry;
     }
 
-    public static <T extends IForgeRegistryEntry<T>> RegistryArgumentType<T> registry(IForgeRegistry<T> registry) {
+    public static <T> RegistryArgumentType<T> registry(IForgeRegistry<T> registry) {
         return new RegistryArgumentType<>(registry);
     }
 
@@ -35,8 +35,7 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<T>> implements A
         return context.getArgument(name, Set.class);
     }
 
-    @Override
-    public Set<T> parse(StringReader reader) throws CommandSyntaxException {
+    @Override public Set<T> parse(StringReader reader) throws CommandSyntaxException {
         var input = reader.readString();
 
         if (input.equalsIgnoreCase("all")) {
@@ -52,8 +51,7 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<T>> implements A
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.literalIncorrect().createWithContext(reader, input);
     }
 
-    @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    @Override public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         return CommandSource.suggestMatching(this.suggestions(context, builder), builder);
     }
 
@@ -61,20 +59,31 @@ public class RegistryArgumentType<T extends IForgeRegistryEntry<T>> implements A
         return Stream.concat(Stream.of("all"), this.registry.getKeys().stream().map(Identifier::getPath));
     }
 
-    public static class Serializer<T extends IForgeRegistryEntry<T>> implements ArgumentSerializer<RegistryArgumentType<T>> {
-        @Override
-        public void toPacket(RegistryArgumentType<T> type, PacketByteBuf buf) {
-            buf.writeIdentifier(type.registry.getRegistryName());
+    public static class Serializer<T> implements ArgumentSerializer<RegistryArgumentType<T>, Serializer.Properties<T>> {
+        @Override public void writePacket(Serializer.Properties properties, PacketByteBuf buf) {
+            buf.writeIdentifier(properties.registry.getRegistryName());
         }
 
-        @Override
-        public RegistryArgumentType<T> fromPacket(PacketByteBuf buf) {
-            return new RegistryArgumentType<>(RegistryManager.ACTIVE.<T>getRegistry(buf.readIdentifier()));
+        @Override public Properties<T> fromPacket(PacketByteBuf buf) {
+            return new Properties<>(this, RegistryManager.ACTIVE.<T>getRegistry(buf.readIdentifier()));
         }
 
-        @Override
-        public void toJson(RegistryArgumentType<T> type, JsonObject json) {
-            json.addProperty("registry", type.registry.getRegistryName().toString());
+        @Override public void writeJson(Serializer.Properties properties, JsonObject json) {
+            json.addProperty("registry", properties.registry.getRegistryName().toString());
+        }
+
+        @Override public Properties<T> getArgumentTypeProperties(RegistryArgumentType<T> argumentType) {
+            return new Properties<>(this, argumentType.registry);
+        }
+
+        private record Properties<T>(Serializer serializer, IForgeRegistry<?> registry) implements ArgumentTypeProperties<RegistryArgumentType<T>> {
+            @Override public RegistryArgumentType<T> createType(CommandRegistryAccess commandRegistryAccess) {
+                return null;
+            }
+
+            @Override public ArgumentSerializer<RegistryArgumentType<T>, ?> getSerializer() {
+                return this.serializer;
+            }
         }
     }
 }

@@ -7,8 +7,8 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Timer;
 import java.util.TimerTask;
-import net.auoeke.eson.Eson;
-import net.auoeke.eson.element.EsonMap;
+import net.auoeke.lusr.Lusr;
+import net.auoeke.lusr.element.LusrMap;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.ModContainer;
@@ -19,7 +19,7 @@ import soulboundarmory.util.Util;
 
 public final class ConfigurationInstance extends Parent {
     private static final Timer deserializationTimer = new Timer(true);
-    private static final Eson eson = new Eson();
+    private static final Lusr lusr = new Lusr();
 
     public final ModContainer mod;
     public final Path path;
@@ -32,7 +32,7 @@ public final class ConfigurationInstance extends Parent {
         super(type, mod.getModId() + Util.value(type, (Name name) -> ':' + name.value(), ""), Util.value(type, Category::value, "main"));
 
         this.mod = mod;
-        this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".eson");
+        this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".lusr");
         var background = new Identifier(Util.value(type, Background::value, "block/andesite.png"));
         this.background = new Identifier(background.getNamespace(), "textures/" + background.getPath());
 
@@ -63,7 +63,7 @@ public final class ConfigurationInstance extends Parent {
 
                 if (mtime.compareTo(this.mtime) > 0) {
                     try {
-                        if (Eson.parseResource(this.path) instanceof EsonMap configuration) {
+                        if (Lusr.parseResource(this.path) instanceof LusrMap configuration) {
                             this.deserialize(this, configuration);
                         }
                     } finally {
@@ -85,7 +85,7 @@ public final class ConfigurationInstance extends Parent {
     public void serialize() {
         try {
             try (var output = Files.newBufferedWriter(this.path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-                eson.serialize(output, this.toEson(this));
+                lusr.serialize(output, this.toLusr(this));
             }
         } catch (Throwable trouble) {
             SoulboundArmory.logger.error("Unable to serialize configuration %s.".formatted(this.name), trouble);
@@ -96,28 +96,28 @@ public final class ConfigurationInstance extends Parent {
         this.desynced = true;
     }
 
-    private void deserialize(Parent parent, EsonMap map) {
+    private void deserialize(Parent parent, LusrMap map) {
         map.forEach((key, value) -> {
             var node = parent.children.get(key);
 
-            if (value instanceof EsonMap submap) {
+            if (value instanceof LusrMap submap) {
                 if (node instanceof Group group) {
                     this.deserialize(group, submap);
                 }
             } else if (node instanceof Property<?> property) {
-                property.set(eson.fromEson(property.type, value));
+                property.set(lusr.fromLusr(property.type, value));
             }
         });
     }
 
-    private EsonMap toEson(Parent parent) {
-        var map = new EsonMap();
+    private LusrMap toLusr(Parent parent) {
+        var map = new LusrMap();
 
         for (var child : parent.children.values()) {
             if (child instanceof Group group) {
-                map.put(group.name, this.toEson(group));
+                map.put(group.name, this.toLusr(group));
             } else if (child instanceof Property<?> property) {
-                map.put(property.name, eson.toEson(property.get()));
+                map.put(property.name, lusr.toLusr(property.get()));
             }
         }
 

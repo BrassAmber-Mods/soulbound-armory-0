@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.client.gui.screen.AttributeTab;
 import soulboundarmory.client.gui.screen.EnchantmentTab;
 import soulboundarmory.client.gui.screen.SelectionTab;
@@ -113,7 +114,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 
         var components = Components.soulbound(entity).toList();
 
-        for (var stack : entity.getItemsHand()) {
+        for (var stack : entity.getHandItems()) {
             for (var component : components) {
                 if (component.accepts(stack)) {
                     return component.component(stack);
@@ -434,7 +435,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         this.synchronize();
 
         if (leveledUp && Components.config.of(this.player).levelupNotifications) {
-            this.player.sendMessage(Translations.levelupMessage.format(this.itemStack.getName(), this.level()), true);
+            this.player.sendMessage(Translations.levelupMessage.text(this.itemStack.getName(), this.level()), true);
         }
     }
 
@@ -604,7 +605,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         this.updateItemStack();
 
         Packets.clientEnchant.sendIfServer(this.player, new ExtendedPacketBuffer(this)
-            .writeRegistryEntry(enchantment)
+            .writeIdentifier(ForgeRegistries.ENCHANTMENTS.getKey(enchantment))
             .writeInt(current + change)
             .writeInt(enchantmentPoints.intValue())
         );
@@ -725,6 +726,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
         if (slot == EquipmentSlot.MAINHAND) {
             modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
             modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
+            modifiers.put(ForgeMod.ATTACK_RANGE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
             modifiers.put(ForgeMod.REACH_DISTANCE.get(), this.weaponModifier(Attributes.reach, StatisticType.reach));
         }
     }
@@ -740,11 +742,11 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
     }
 
     public Text format(StatisticType statistic) {
-        if (statistic == StatisticType.attackDamage) return Translations.guiAttackDamage.format(this.formatValue(statistic));
-        if (statistic == StatisticType.attackSpeed) return Translations.guiAttackSpeed.format(this.formatValue(statistic));
-        if (statistic == StatisticType.criticalHitRate) return Translations.guiCriticalHitRate.format(this.formatValue(statistic));
-        if (statistic == StatisticType.efficiency) return Translations.guiEfficiency.format(this.formatValue(statistic));
-        if (statistic == StatisticType.reach) return Translations.guiReach.format(this.formatValue(statistic));
+        if (statistic == StatisticType.attackDamage) return Translations.guiAttackDamage.text(this.formatValue(statistic));
+        if (statistic == StatisticType.attackSpeed) return Translations.guiAttackSpeed.text(this.formatValue(statistic));
+        if (statistic == StatisticType.criticalHitRate) return Translations.guiCriticalHitRate.text(this.formatValue(statistic));
+        if (statistic == StatisticType.efficiency) return Translations.guiEfficiency.text(this.formatValue(statistic));
+        if (statistic == StatisticType.reach) return Translations.guiReach.text(this.formatValue(statistic));
 
         return Text.of("%s: %s".formatted(statistic.id().getPath(), this.formatValue(statistic)));
     }
