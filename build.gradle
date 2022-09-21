@@ -27,16 +27,11 @@ gronk {
 
 sourceSets {
     main {
-        resources {
-            include("assets/", "META-INF/", "pack.mcmeta", "*.json")
-        }
+        resources.include("assets/", "META-INF/", "pack.mcmeta", "*.json")
     }
 
     dev {
-        java {
-            srcDirs = ["dev"]
-        }
-
+        java.srcDirs = ["dev"]
         compileClasspath += main.compileClasspath + main.output
     }
 }
@@ -52,7 +47,7 @@ shadowJar {
     configurations = [project.configurations.lib]
 
     transform(ManifestMerger) {
-        include {manifest.mainAttributes.getValue("Specification-Title") == "reflect"}
+        include {manifest.mainAttributes.getValue("MixinConfigs") || manifest.mainAttributes.getValue("Specification-Title") == "reflect"}
     }
 }
 
@@ -111,6 +106,8 @@ loom {
 
         runs {
             all {run ->
+                run.vmArgs << "-Dmixin.hotSwap=true"
+
                 net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
                     String put(String key, String value) {
                         if (key == "MOD_CLASSES") {
