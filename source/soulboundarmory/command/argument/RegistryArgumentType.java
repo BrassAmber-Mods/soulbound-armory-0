@@ -65,7 +65,7 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
         }
 
         @Override public Properties<T> fromPacket(PacketByteBuf buf) {
-            return new Properties<>(this, RegistryManager.ACTIVE.<T>getRegistry(buf.readIdentifier()));
+            return new Properties<>(this, RegistryManager.ACTIVE.getRegistry(buf.readIdentifier()));
         }
 
         @Override public void writeJson(Serializer.Properties properties, JsonObject json) {
@@ -76,9 +76,9 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
             return new Properties<>(this, argumentType.registry);
         }
 
-        private record Properties<T>(Serializer serializer, IForgeRegistry<?> registry) implements ArgumentTypeProperties<RegistryArgumentType<T>> {
+        private record Properties<T>(Serializer serializer, IForgeRegistry<T> registry) implements ArgumentTypeProperties<RegistryArgumentType<T>> {
             @Override public RegistryArgumentType<T> createType(CommandRegistryAccess commandRegistryAccess) {
-                return null;
+                return RegistryArgumentType.registry(this.registry);
             }
 
             @Override public ArgumentSerializer<RegistryArgumentType<T>, ?> getSerializer() {
