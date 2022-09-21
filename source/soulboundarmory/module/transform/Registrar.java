@@ -25,7 +25,6 @@ import net.minecraft.util.Identifier;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -60,55 +59,51 @@ public class Registrar {
 
             var registerAlls = new HashMap<Type, RegistrationInfo>();
 
-            Optional.ofNullable(annotationMap.get(Type.getType(RegisterAll.class))).ifPresent(annotations -> {
-                annotations.forEach(annotation -> {
-                    var elements = annotation.annotationData();
-                    registerAlls.put(annotation.clazz(), new RegistrationInfo((String) elements.get("registry"), (Type) elements.get("type")));
-                });
-            });
+            Optional.ofNullable(annotationMap.get(Type.getType(RegisterAll.class))).ifPresent(annotations -> annotations.forEach(annotation -> {
+                var elements = annotation.annotationData();
+                registerAlls.put(annotation.clazz(), new RegistrationInfo((String) elements.get("registry"), (Type) elements.get("type")));
+            }));
 
             var idPointer = Pointer.of(Identifiable.class, "id");
 
-            Optional.ofNullable(annotationMap.get(Type.getType(Register.class))).ifPresent(annotations -> {
-                annotations.forEach(annotation -> {
-                    var value = (String) annotation.annotationData().get("value");
-                    var registry = (String) annotation.annotationData().get("registry");
-                    var checkType = registry == null;
-                    var ownerName = annotation.clazz();
-                    var registerAll = registerAlls.get(ownerName);
+            Optional.ofNullable(annotationMap.get(Type.getType(Register.class))).ifPresent(annotations -> annotations.forEach(annotation -> {
+                var value = (String) annotation.annotationData().get("value");
+                var registry = (String) annotation.annotationData().get("registry");
+                var checkType = registry == null;
+                var ownerName = annotation.clazz();
+                var registerAll = registerAlls.get(ownerName);
 
-                    if (checkType) {
-                        if (registerAll == null) {
-                            throw new IllegalArgumentException("registry not specified for @Register %s.%s".formatted(ownerName.getInternalName(), annotation.memberName()));
-                        }
-
-                        registry = registerAll.registry;
+                if (checkType) {
+                    if (registerAll == null) {
+                        throw new IllegalArgumentException("registry not specified for @Register %s.%s".formatted(ownerName.getInternalName(), annotation.memberName()));
                     }
 
-                    Consumer<RegisterEvent> register = event -> {
-                        var owner = Class.forName(ownerName.getClassName());
-                        var field = Fields.of(owner, annotation.memberName());
+                    registry = registerAll.registry;
+                }
 
-                        if (Flags.not(field, Flags.STATIC | Flags.FINAL)) {
-                            throw new IllegalArgumentException("bad modifiers \"%s\" (%d) on %s.%s; must be static final".formatted(Flags.string(field.getModifiers()), field.getModifiers(), ownerName.getInternalName(), field.getName()));
+                Consumer<RegisterEvent> register = event -> {
+                    var owner = Class.forName(ownerName.getClassName());
+                    var field = Fields.of(owner, annotation.memberName());
+
+                    if (Flags.not(field, Flags.STATIC | Flags.FINAL)) {
+                        throw new IllegalArgumentException("bad modifiers \"%s\" (%d) on %s.%s; must be static final".formatted(Flags.string(field.getModifiers()), field.getModifiers(), ownerName.getInternalName(), field.getName()));
+                    }
+
+                    if (!checkType || Class.forName(registerAll.type.getClassName()).isAssignableFrom(field.getType())) {
+                        var identifier = Util.id(mod.getModId(), value);
+                        SoulboundArmory.logger.info("Registering {}.{} to \"{}\" as \"{}\".", ownerName.getInternalName(), field.getName(), event.getRegistryKey().getValue(), identifier);
+                        var object = Accessor.getReference(owner, field.getName());
+                        event.register(Util.cast(event.getRegistryKey()), helper -> helper.register(identifier, object));
+
+                        if (object instanceof Identifiable) {
+                            idPointer.put(object, identifier);
                         }
+                    }
+                };
 
-                        if (!checkType || Class.forName(registerAll.type.getClassName()).isAssignableFrom(field.getType())) {
-                            var identifier = Util.id(mod.getModId(), value);
-                            SoulboundArmory.logger.info("Registering {}.{} to \"{}\" as \"{}\".", ownerName.getInternalName(), field.getName(), event.getRegistryKey().getValue(), identifier);
-                            var object = Accessor.getReference(owner, field.getName());
-                            event.register(Util.cast(event.getRegistryKey()), helper -> helper.register(identifier, object));
-
-                            if (object instanceof Identifiable) {
-                                idPointer.put(object, identifier);
-                            }
-                        }
-                    };
-
-                    registrations.computeIfAbsent(new Identifier(registry), id -> ReferenceArrayList.of()).add(register);
-                    registrations.computeIfAbsent(Util.id(mod.getModId(), registry), id -> ReferenceArrayList.of()).add(register);
-                });
-            });
+                registrations.computeIfAbsent(new Identifier(registry), id -> ReferenceArrayList.of()).add(register);
+                registrations.computeIfAbsent(Util.id(mod.getModId(), registry), id -> ReferenceArrayList.of()).add(register);
+            }));
         });
     }
 

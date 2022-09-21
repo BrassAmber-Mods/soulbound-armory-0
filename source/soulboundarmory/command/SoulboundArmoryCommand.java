@@ -29,6 +29,8 @@ public final class SoulboundArmoryCommand {
     private static final String ITEM = "item";
     private static final String STATISTIC = "statistic";
     private static final String VALUE = "value";
+    private static final String CATEGORY = "category";
+    private static final String PLAYERS = "players";
 
     private static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType(player -> Translations.commandNoItem.text(((PlayerEntity) player).getName()));
 
@@ -39,21 +41,21 @@ public final class SoulboundArmoryCommand {
                     .then(argument(ITEM, itemComponents())
                         .then(argument(STATISTIC, statisticTypes())
                             .then(argument(VALUE, doubleArg()).executes(context -> add(context, false))
-                                .then(argument("players", EntityArgumentType.players()).executes(context -> add(context, true)))))))
+                                .then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> add(context, true)))))))
                 .then(literal("get")
                     .then(argument(ITEM, itemComponents())
                         .then(argument(STATISTIC, statisticTypes()).executes(context -> get(context, false))
-                            .then(argument("players", EntityArgumentType.players()).executes(context -> get(context, true))))))
+                            .then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> get(context, true))))))
                 .then(literal("set")
                     .then(argument(ITEM, itemComponents())
                         .then(argument(STATISTIC, statisticTypes())
                             .then(argument(VALUE, doubleArg()).executes(context -> set(context, false))
-                                .then(argument("players", EntityArgumentType.players()).executes(context -> set(context, true)))))))
+                                .then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> set(context, true)))))))
                 .then(literal("reset").executes(context -> reset(context, false, false, false))
                     .then(argument(ITEM, itemComponents()).executes(context -> reset(context, true, false, false))
-                        .then(argument("category", registry(Category.registry())).executes(context -> reset(context, true, false, true))
-                            .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, true, true))))
-                        .then(argument("players", EntityArgumentType.players()).executes(context -> reset(context, true, true, false)))))
+                        .then(argument(CATEGORY, registry(Category.registry())).executes(context -> reset(context, true, false, true))
+                            .then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> reset(context, true, true, true))))
+                        .then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> reset(context, true, true, false)))))
         );
     }
 
@@ -109,7 +111,7 @@ public final class SoulboundArmoryCommand {
             for (var player : players) {
                 components(player, types).forEach(item -> {
                     if (hasCategoryArgument) {
-                        for (var category : RegistryArgumentType.<Category>get(context, "category")) {
+                        for (var category : RegistryArgumentType.<Category>get(context, CATEGORY)) {
                             item.reset(category);
                         }
                     } else {
@@ -133,7 +135,7 @@ public final class SoulboundArmoryCommand {
     }
 
     private static Collection<ServerPlayerEntity> players(CommandContext<ServerCommandSource> context, boolean hasPlayerArgument) {
-        return hasPlayerArgument ? EntityArgumentType.getPlayers(context, "players") : List.of(player(context));
+        return hasPlayerArgument ? EntityArgumentType.getPlayers(context, PLAYERS) : List.of(player(context));
     }
 
     private static ServerPlayerEntity player(CommandContext<ServerCommandSource> context) {

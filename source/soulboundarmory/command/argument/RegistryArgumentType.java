@@ -35,7 +35,7 @@ public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
         return context.getArgument(name, Set.class);
     }
 
-    @Override public Set<T> parse(StringReader reader) throws CommandSyntaxException {
+    @Override public Set<T> parse(StringReader reader) {
         var input = reader.readString();
 
         if (input.equalsIgnoreCase("all")) {

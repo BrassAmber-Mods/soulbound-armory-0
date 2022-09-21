@@ -3,7 +3,6 @@ package soulboundarmory.config;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.bar.BarStyle;
-import soulboundarmory.module.config.Background;
 import soulboundarmory.module.config.Category;
 import soulboundarmory.module.config.Comment;
 import soulboundarmory.module.config.ConfigurationFile;

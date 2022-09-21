@@ -226,18 +226,6 @@ public class Util extends net.minecraft.util.Util {
         }
     }
 
-    public static <T extends Identifiable> SimplerRegistry<T> newRegistry(String path, T... dummy) {
-        var key = RegistryKey.<T>ofRegistry(id(path));
-        var registry = Registry.register(cast(Registry.REGISTRIES), key, new SimplerRegistry<T>(key, Lifecycle.experimental(), null));
-        registries.put(componentType(dummy), registry);
-
-        return registry;
-    }
-
-    public static <T> Registry<? super T> registry(Class<T> type) {
-        return type == null ? null : (Registry<? super T>) registries.computeIfAbsent(type, __ -> registry(type.getSuperclass()));
-    }
-
     public static <K, V> void enumerate(Map<K, V> map, TriConsumer<K, V, Integer> action) {
         var count = 0;
 
