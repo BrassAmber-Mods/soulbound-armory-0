@@ -7,7 +7,7 @@ buildscript {
 plugins {
     id("java")
     id("maven-publish")
-    id("net.auoeke.gronk").version("latest.release")
+    id("net.auoeke.gronk").version("2.+")
     id("dev.architectury.loom").version("latest.release")
     id("com.github.johnrengelman.shadow").version("latest.release")
 }
@@ -46,8 +46,8 @@ shadowJar {
     assemble.dependsOn(it)
     configurations = [project.configurations.lib]
 
-    transform(ManifestMerger) {
-        include {manifest.mainAttributes.getValue("MixinConfigs") || manifest.mainAttributes.getValue("Specification-Title") == "reflect"}
+    mergeManifests {
+        include {hasAttribute("MixinConfigs") || hasAttribute("Specification-Title", "reflect")}
     }
 }
 
