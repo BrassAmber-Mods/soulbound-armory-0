@@ -74,7 +74,7 @@ tasks.withType(JavaCompile) {
 
 processResources {
 	filesMatching("META-INF/mods.toml") {
-		filter(line -> line.replace("0VERSION", version as String))
+		filter(line -> line.replace("0VERSION", version as String).replaceFirst(/#.*/, ""))
 	}
 }
 
