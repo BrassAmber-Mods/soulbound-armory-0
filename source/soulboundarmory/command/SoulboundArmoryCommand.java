@@ -36,22 +36,22 @@ public final class SoulboundArmoryCommand {
 
 	public static void register(RegisterCommandsEvent event) {
 		event.getDispatcher().register(
-			literal("sa").requires(source -> source.hasPermissionLevel(2))
-				.then(literal("add")
+			literal("sa")
+				.then(literal("get")
+					.then(argument(ITEM, itemComponents())
+						.then(argument(STATISTIC, statisticTypes()).executes(context -> get(context, false))
+							.then(argument(PLAYERS, EntityArgumentType.players()).requires(source -> source.hasPermissionLevel(2)).executes(context -> get(context, true))))))
+				.then(literal("add").requires(source -> source.hasPermissionLevel(2))
 					.then(argument(ITEM, itemComponents())
 						.then(argument(STATISTIC, statisticTypes())
 							.then(argument(VALUE, doubleArg()).executes(context -> add(context, false))
 								.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> add(context, true)))))))
-				.then(literal("get")
-					.then(argument(ITEM, itemComponents())
-						.then(argument(STATISTIC, statisticTypes()).executes(context -> get(context, false))
-							.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> get(context, true))))))
-				.then(literal("set")
+				.then(literal("set").requires(source -> source.hasPermissionLevel(2))
 					.then(argument(ITEM, itemComponents())
 						.then(argument(STATISTIC, statisticTypes())
 							.then(argument(VALUE, doubleArg()).executes(context -> set(context, false))
 								.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> set(context, true)))))))
-				.then(literal("reset").executes(context -> reset(context, false, false, false))
+				.then(literal("reset").requires(source -> source.hasPermissionLevel(2)).executes(context -> reset(context, false, false, false))
 					.then(argument(ITEM, itemComponents()).executes(context -> reset(context, true, false, false))
 						.then(argument(CATEGORY, registry(Category.registry())).executes(context -> reset(context, true, false, true))
 							.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> reset(context, true, true, true))))
@@ -80,11 +80,12 @@ public final class SoulboundArmoryCommand {
 		var players = players(context, hasPlayerArgument);
 		var types = componentTypes(context);
 
-		for (var player : players) {
-			for (var statistic : statistics(context)) {
-				components(player, types).forEach(item -> context.getSource().sendFeedback(item.format(statistic), false));
-			}
-		}
+		players.forEach(player -> {
+			components(player, types).forEach(item -> {
+				context.getSource().sendFeedback(item.name(), false);
+				statistics(context).forEach(statistic -> context.getSource().sendFeedback(item.format(statistic), false));
+			});
+		});
 
 		return players.size();
 	}
