@@ -35,8 +35,8 @@ public class Translations {
 	public static final Text guiButtonReset = gui("reset").text();
 	public static final Text guiButtonBind = gui("bind").text();
 	public static final Text guiButtonUnbind = gui("unbind").text();
-	public static final PluralizableTranslation guiUnspentPoints = new PluralizableTranslation(gui("unspent_points"), gui("unspent_point"));
-	public static final PluralizableTranslation guiPoints = new PluralizableTranslation(gui("points"), gui("point"));
+	public static final PluralizableTranslation guiUnspentPoints = new PluralizableTranslation(gui("unspent_point"), gui("unspent_points"));
+	public static final PluralizableTranslation guiPoints = new PluralizableTranslation(gui("point"), gui("points"));
 	public static final PluralizableTranslation guiSkillUpgradeCost = new PluralizableTranslation(gui("upgrade_cost_singular"), gui("upgrade_cost_plural"));
 	public static final PluralizableTranslation guiSkillLearnCost = new PluralizableTranslation(gui("learn_cost_singular"), gui("learn_cost_plural"));
 	public static final Translation guiLevel = gui("level");
