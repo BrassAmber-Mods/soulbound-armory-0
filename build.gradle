@@ -105,20 +105,25 @@ loom {
 		final project = this.project
 
 		runs {
+			client2 {
+				evaluateLater {
+					println "evaluateLater"
+					inherit(client)
+					programArgs.addAll(["--username", "Dev2"])
+					envVariables.putAll(client.envVariables)
+				}
+			}
+
 			all {run ->
 				run.vmArgs << "-Dmixin.hotSwap=true"
 
 				net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
 					String put(String key, String value) {
-						if (key == "MOD_CLASSES") {
-							// Replace Gradle's output by IntelliJ IDEA's output.
-							// Gradle's output interferes even if it is specified last.
-							value = ["main", "dev"]*.with {"main%%" + file("out/production/$project.name.$it")}.join(File.pathSeparator)
-						}
-
-						return super.put(key, value)
+						// Ignore Gradle's output because it interferes even if it is last.
+						return key == "MOD_CLASSES" && this["MOD_CLASSES"] ? null : super.put(key, value)
 					}
-				})
+				// Use IntelliJ IDEA's output.
+				}.tap {it["MOD_CLASSES"] = ["main", "dev"]*.with {"main%%" + file("out/production/$project.name.$it")}.join(File.pathSeparator)})
 			}
 		}
 	}
