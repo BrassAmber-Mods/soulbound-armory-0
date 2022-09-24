@@ -11,6 +11,8 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.util.Formatting;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.command.argument.RegistryArgumentType;
@@ -82,7 +84,7 @@ public final class SoulboundArmoryCommand {
 
 		players.forEach(player -> {
 			components(player, types).forEach(item -> {
-				context.getSource().sendFeedback(item.name(), false);
+				context.getSource().sendFeedback(item.name().copy().styled(style -> style.withBold(true).withUnderline(true).withFormatting(Formatting.DARK_RED).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(item.stack())))), false);
 				statistics(context).forEach(statistic -> context.getSource().sendFeedback(item.format(statistic), false));
 			});
 		});
