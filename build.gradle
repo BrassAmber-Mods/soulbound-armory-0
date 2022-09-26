@@ -107,7 +107,6 @@ loom {
 		runs {
 			client2 {
 				evaluateLater {
-					println "evaluateLater"
 					inherit(client)
 					programArgs.addAll(["--username", "Dev2"])
 					envVariables.putAll(client.envVariables)
