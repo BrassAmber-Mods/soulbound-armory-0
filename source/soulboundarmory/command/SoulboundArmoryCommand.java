@@ -3,6 +3,7 @@ package soulboundarmory.command;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -35,6 +36,7 @@ public final class SoulboundArmoryCommand {
 	private static final String PLAYERS = "players";
 
 	private static final DynamicCommandExceptionType noItemException = new DynamicCommandExceptionType(player -> Translations.commandNoItem.text(((PlayerEntity) player).getName()));
+	private static final Predicate<ServerCommandSource> isPrivileged = source -> source.hasPermissionLevel(2);
 
 	public static void register(RegisterCommandsEvent event) {
 		event.getDispatcher().register(
@@ -42,18 +44,18 @@ public final class SoulboundArmoryCommand {
 				.then(literal("get")
 					.then(argument(ITEM, itemComponents())
 						.then(argument(STATISTIC, statisticTypes()).executes(context -> get(context, false))
-							.then(argument(PLAYERS, EntityArgumentType.players()).requires(source -> source.hasPermissionLevel(2)).executes(context -> get(context, true))))))
-				.then(literal("add").requires(source -> source.hasPermissionLevel(2))
+							.then(argument(PLAYERS, EntityArgumentType.players()).requires(isPrivileged).executes(context -> get(context, true))))))
+				.then(literal("add").requires(isPrivileged)
 					.then(argument(ITEM, itemComponents())
 						.then(argument(STATISTIC, statisticTypes())
 							.then(argument(VALUE, doubleArg()).executes(context -> add(context, false))
 								.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> add(context, true)))))))
-				.then(literal("set").requires(source -> source.hasPermissionLevel(2))
+				.then(literal("set").requires(isPrivileged)
 					.then(argument(ITEM, itemComponents())
 						.then(argument(STATISTIC, statisticTypes())
 							.then(argument(VALUE, doubleArg()).executes(context -> set(context, false))
 								.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> set(context, true)))))))
-				.then(literal("reset").requires(source -> source.hasPermissionLevel(2)).executes(context -> reset(context, false, false, false))
+				.then(literal("reset").requires(isPrivileged).executes(context -> reset(context, false, false, false))
 					.then(argument(ITEM, itemComponents()).executes(context -> reset(context, true, false, false))
 						.then(argument(CATEGORY, registry(Category.registry())).executes(context -> reset(context, true, false, true))
 							.then(argument(PLAYERS, EntityArgumentType.players()).executes(context -> reset(context, true, true, true))))
@@ -84,7 +86,12 @@ public final class SoulboundArmoryCommand {
 
 		players.forEach(player -> {
 			components(player, types).forEach(item -> {
-				context.getSource().sendFeedback(item.name().copy().styled(style -> style.withBold(true).withUnderline(true).withFormatting(Formatting.DARK_RED).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(item.stack())))), false);
+				context.getSource().sendFeedback(item.name().copy().styled(style -> style
+					.withBold(true)
+					.withUnderline(true)
+					.withFormatting(Formatting.DARK_RED)
+					.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(item.stack())))
+				), false);
 				statistics(context).forEach(statistic -> context.getSource().sendFeedback(item.format(statistic), false));
 			});
 		});
