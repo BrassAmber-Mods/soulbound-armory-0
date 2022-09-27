@@ -11,6 +11,8 @@ import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 
 public class BigswordComponent extends WeaponComponent<BigswordComponent> {
+	private int chargeDelay;
+
 	public BigswordComponent(MasterComponent<?> component) {
 		super(component);
 
@@ -48,5 +50,19 @@ public class BigswordComponent extends WeaponComponent<BigswordComponent> {
 		if (type == StatisticType.efficiency) return 0.03;
 
 		return 0;
+	}
+
+	@Override public void tick() {
+		super.tick();
+
+		this.chargeDelay--;
+	}
+
+	public void charge() {
+		this.chargeDelay = 16;
+	}
+
+	public boolean canCharge() {
+		return this.chargeDelay <= 0;
 	}
 }
