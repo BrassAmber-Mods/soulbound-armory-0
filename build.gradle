@@ -114,7 +114,7 @@ loom {
 			}
 
 			all {run ->
-				run.vmArgs << "-Dmixin.hotSwap=true"
+				run.vmArgs.addAll(["-XX:+IgnoreUnrecognizedOptions", "-XX:+AllowEnhancedClassRedefinition", "-Dmixin.hotSwap=true"])
 
 				net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
 					String put(String key, String value) {
