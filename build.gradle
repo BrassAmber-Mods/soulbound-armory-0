@@ -1,6 +1,11 @@
 buildscript {
 	dependencies {
 		classpath("net.auoeke:reflect:latest.release")
+		classpath("dev.architectury:architectury-loom") {
+			version {
+				branch = "dev/1.0"
+			}
+		}
 	}
 }
 
@@ -8,13 +13,16 @@ plugins {
 	id("java")
 	id("maven-publish")
 	id("net.auoeke.gronk").version("2.+")
-	id("dev.architectury.loom").version("latest.release")
 	id("com.github.johnrengelman.shadow").version("latest.release")
 }
+
+plugins.apply("dev.architectury.loom")
 
 group("net.auoeke")
 version("3.1.0")
 javaVersion(17)
+
+defaultTasks("genSources")
 
 final versions = [
 	minecraft: "1.19.2",
@@ -88,9 +96,26 @@ publishing {
 }
 
 afterEvaluate {
+	tasks.withType(genSourcesWithCfr.class) {
+		final marker = new File(outputJar.asFile.get().parentFile, project.name + "-marker")
+		onlyIf {!marker.exists()}
+
+		doLast {
+			marker.createNewFile()
+		}
+	}
+
+	unpickJar {
+		onlyIf {!outputJar.asFile.get().exists()}
+	}
+
 	genSources {
 		dependsOn = [genSourcesWithFernFlower]
 	}
+}
+
+tasks.findByName("ideaSyncTask")?.tap {
+	dependsOn("genSources")
 }
 
 loom {
