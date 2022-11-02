@@ -5,7 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.registries.IForgeRegistry;
 import soulboundarmory.component.Components;
-import soulboundarmory.component.soulbound.item.tool.PickComponent;
+import soulboundarmory.component.soulbound.item.tool.PickaxeComponent;
 import soulboundarmory.component.soulbound.item.tool.ToolComponent;
 import soulboundarmory.component.soulbound.item.weapon.BigswordComponent;
 import soulboundarmory.component.soulbound.item.weapon.DaggerComponent;
@@ -27,7 +27,7 @@ public final class ItemComponentType<C extends ItemComponent<C>> extends Identif
 	@Register("bigsword") public static final ItemComponentType<BigswordComponent> bigsword = weapon();
 	@Register("greatsword") public static final ItemComponentType<GreatswordComponent> greatsword = weapon();
 	@Register("trident") public static final ItemComponentType<TridentComponent> trident = weapon();
-	@Register("pick") public static final ItemComponentType<PickComponent> pick = tool();
+	@Register("pickaxe") public static final ItemComponentType<PickaxeComponent> pickaxe = tool();
 
 	public final EntityComponentKey<? extends MasterComponent<?>> parentKey;
 

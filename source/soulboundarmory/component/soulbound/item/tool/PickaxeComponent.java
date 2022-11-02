@@ -15,8 +15,8 @@ import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.item.SoulboundItems;
 
-public class PickComponent extends ToolComponent<PickComponent> {
-	public PickComponent(MasterComponent<?> component) {
+public class PickaxeComponent extends ToolComponent<PickaxeComponent> {
+	public PickaxeComponent(MasterComponent<?> component) {
 		super(component);
 
 		this.statistics
@@ -31,13 +31,13 @@ public class PickComponent extends ToolComponent<PickComponent> {
 	}
 
 	@Override
-	public ItemComponentType<PickComponent> type() {
-		return ItemComponentType.pick;
+	public ItemComponentType<PickaxeComponent> type() {
+		return ItemComponentType.pickaxe;
 	}
 
 	@Override
 	public Item item() {
-		return SoulboundItems.pick;
+		return SoulboundItems.pickaxe;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class PickComponent extends ToolComponent<PickComponent> {
 
 	@Override
 	public Text name() {
-		return Translations.guiPick;
+		return Translations.guiPickaxe;
 	}
 
 	@Override

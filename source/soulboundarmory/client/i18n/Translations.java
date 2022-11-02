@@ -27,7 +27,7 @@ public interface Translations {
 	Text guiGreatsword = gui("greatsword").text();
 	Text guiBigsword = gui("bigsword").text();
 	Text guiTrident = gui("trident").text();
-	Text guiPick = gui("pick").text();
+	Text guiPickaxe = gui("pickaxe").text();
 	Text guiToolSelection = gui("selection").text();
 	Text guiButtonAttributes = gui("attributes").text();
 	Text guiButtonEnchantments = gui("enchantments").text();

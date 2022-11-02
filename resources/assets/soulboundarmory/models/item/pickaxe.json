@@ -1,26 +1,26 @@
 {
 	"parent": "item/handheld",
 	"textures": {
-		"layer0": "soulboundarmory:item/pick/0"
+		"layer0": "soulboundarmory:item/pickaxe/0"
 	},
 	"overrides": [
 		{
 			"predicate": {
 				"soulboundarmory:animating": 1
 			},
-			"model": "soulboundarmory:item/pick/animation"
+			"model": "soulboundarmory:item/pickaxe/animation"
 		},
 		{
 			"predicate": {
 				"soulboundarmory:level": 50
 			},
-			"model": "soulboundarmory:item/pick/50"
+			"model": "soulboundarmory:item/pickaxe/50"
 		},
 		{
 			"predicate": {
 				"soulboundarmory:level": 100
 			},
-			"model": "soulboundarmory:item/pick/100"
+			"model": "soulboundarmory:item/pickaxe/100"
 		}
 	]
 }

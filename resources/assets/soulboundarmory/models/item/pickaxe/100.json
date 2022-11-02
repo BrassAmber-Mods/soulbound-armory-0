@@ -1,6 +1,6 @@
 {
 	"parent": "item/handheld",
 	"textures": {
-		"layer0": "soulboundarmory:item/pick/50"
+		"layer0": "soulboundarmory:item/pickaxe/100"
 	}
 }
