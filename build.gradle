@@ -52,6 +52,7 @@ configurations {
 
 shadowJar {
 	assemble.dependsOn(it)
+	destinationDirectory.set(file("build/devlibs"))
 	configurations = [project.configurations.lib]
 
 	mergeManifests {
