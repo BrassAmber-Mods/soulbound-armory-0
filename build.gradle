@@ -134,12 +134,11 @@ loom {
 				evaluateLater {
 					inherit(client)
 					programArgs.addAll(["--username", "Dev2"])
-					envVariables.putAll(client.envVariables)
 				}
 			}
 
 			all {run ->
-				run.vmArgs.addAll(["-XX:+IgnoreUnrecognizedOptions", "-XX:+AllowEnhancedClassRedefinition", "-Dmixin.hotSwap=true"])
+				run.vmArgs.addAll(["-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition", "-Dmixin.hotSwap=true"])
 
 				net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
 					String put(String key, String value) {
