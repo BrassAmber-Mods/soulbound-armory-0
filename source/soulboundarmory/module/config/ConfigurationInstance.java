@@ -73,16 +73,14 @@ public final class ConfigurationInstance extends Parent {
 
 				return true;
 			}
-
-			return false;
 		} catch (Throwable trouble) {
 			SoulboundArmory.logger.error("Unable to deserialize configuration %s.".formatted(this.name), trouble);
-
-			return false;
 		}
+
+		return false;
 	}
 
-	public void serialize() {
+	public synchronized void serialize() {
 		try {
 			try (var output = Files.newBufferedWriter(this.path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
 				lusr.serialize(output, this.toLusr(this));

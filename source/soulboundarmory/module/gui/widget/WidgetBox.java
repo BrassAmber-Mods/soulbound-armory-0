@@ -46,12 +46,7 @@ public class WidgetBox<T extends WidgetBox<T>> extends Widget<T> {
 	protected <C extends Widget<?>> C update(C child) {
 		var previous = this.degree() < 2 ? null : this.children.get(this.degree() - 2);
 
-		if (this.horizontal) {
-			child.x(previous == null ? 0 : previous.endX() + this.xSpacing);
-		} else {
-			child.y(previous == null ? 0 : previous.endY() + this.ySpacing);
-		}
-
-		return child;
+		return this.horizontal ? (C) child.x(previous == null ? 0 : previous.endX() + this.xSpacing)
+			: (C) child.y(previous == null ? 0 : previous.endY() + this.ySpacing);
 	}
 }
