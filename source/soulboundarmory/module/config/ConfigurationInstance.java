@@ -56,7 +56,7 @@ public final class ConfigurationInstance extends Parent {
 		return new ConfigurationScreen(this, parent);
 	}
 
-	public boolean deserialize() {
+	public synchronized boolean deserialize() {
 		try {
 			if (Files.exists(this.path)) {
 				var mtime = Files.getLastModifiedTime(this.path);
