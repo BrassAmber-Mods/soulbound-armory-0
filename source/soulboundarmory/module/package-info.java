@@ -1,5 +1,5 @@
 /**
- Subpackages here are modules that mostly do not depend on soulbound armory.
+ Subpackages here are mostly self-contained modules that could be independent libraries.
  <p>
  gui and text were taken from 3 of my Fabric-based libraries.
  */
