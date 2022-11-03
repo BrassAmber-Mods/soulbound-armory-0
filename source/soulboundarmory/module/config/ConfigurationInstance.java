@@ -86,6 +86,7 @@ public final class ConfigurationInstance extends Parent {
 		try {
 			try (var output = Files.newBufferedWriter(this.path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
 				lusr.serialize(output, this.toLusr(this));
+				this.mtime = FileTime.from(Instant.now());
 			}
 		} catch (Throwable trouble) {
 			SoulboundArmory.logger.error("Unable to serialize configuration %s.".formatted(this.name), trouble);
