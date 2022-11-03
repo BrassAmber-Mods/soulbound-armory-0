@@ -1,10 +1,11 @@
 package soulboundarmory.client.gui.screen;
 
+import soulboundarmory.client.gui.widget.SelectionEntryWidget;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponent;
-import soulboundarmory.module.gui.widget.ScalableWidget;
+import soulboundarmory.config.Configuration;
+import soulboundarmory.module.gui.widget.WidgetBox;
 import soulboundarmory.util.ItemUtil;
-import soulboundarmory.util.Util;
 
 /**
  The item selection tab, which adds a button for each {@linkplain ItemComponent#canConsume unlockable} item in the inventory and each {@linkplain ItemComponent#isUnlocked unlocked} item.
@@ -15,20 +16,23 @@ public class SelectionTab extends SoulboundTab {
 		super(Translations.guiToolSelection);
 	}
 
-	@Override
-	public void initialize() {
+	@Override public void initialize() {
 		var parent = this.container();
-		var selection = parent.component.items.values().stream().filter(item -> item.isUnlocked() && parent.component.accepts(parent.stack) || item.canConsume(parent.stack)).toList();
+		var component = parent.component;
+		var box = this.add(new WidgetBox<>().center());
 
-		Util.enumerate(selection, (component, row) -> this.add(new ScalableWidget<>()
-			.button()
-			.x(.5)
-			.y(this.height(24, selection.size(), row))
-			.center()
-			.size(128, 20)
-			.text(component.name())
-			.primaryAction(() -> component.select(parent.slot))
-			.active(() -> !parent.displayTabs() || ItemUtil.inventory(player()).noneMatch(component::accepts))
-		));
+		if (Configuration.Client.selectionEntryType == SelectionEntryWidget.Type.ICON) {
+			box.xSpacing(80).x(0.5).y(1D);
+		} else {
+			box.ySpacing(24).x(1D).y(0.5D);
+		}
+
+		component.items.values().stream()
+			.filter(item -> item.isUnlocked() && component.accepts(parent.stack) || item.canConsume(parent.stack))
+			.forEach(tool -> box.add(new SelectionEntryWidget(tool))
+				.center()
+				.primaryAction(() -> tool.select(parent.slot))
+				.active(() -> (tool.canConsume(parent.stack) || component.cooledDown()) && (!parent.displayTabs() || ItemUtil.inventory(player()).noneMatch(tool::accepts)))
+			);
 	}
 }

@@ -3,6 +3,7 @@ package soulboundarmory.config;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.bar.BarStyle;
+import soulboundarmory.client.gui.widget.SelectionEntryWidget;
 import soulboundarmory.module.config.Category;
 import soulboundarmory.module.config.Comment;
 import soulboundarmory.module.config.ConfigurationFile;
@@ -85,6 +86,13 @@ public final class Configuration {
 
 		@Comment("experience bar style")
 		public static BarStyle style = BarStyle.EXPERIENCE;
+
+		@Comment({
+			"the style of selection entries",
+			"ICON: white (locked) or yellow (unlocked) advancement box with item's icon",
+			"TEXT: button with item's name"
+		})
+		public static SelectionEntryWidget.Type selectionEntryType = SelectionEntryWidget.Type.ICON;
 
 		@Comment("experience bar color")
 		public static class Color {

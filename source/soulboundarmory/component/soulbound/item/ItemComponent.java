@@ -310,7 +310,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 			Packets.serverSelectItem.send(new ExtendedPacketBuffer(this).writeInt(slot));
 		}
 
-		if (this.isUnlocked() || this.canConsume(this.player.getInventory().getStack(slot))) {
+		if (this.isUnlocked() && this.component.cooledDown() || this.canConsume(this.player.getInventory().getStack(slot))) {
 			this.player.getInventory().setStack(slot, this.stack());
 			this.component.select(this);
 			this.updateInventory(slot);

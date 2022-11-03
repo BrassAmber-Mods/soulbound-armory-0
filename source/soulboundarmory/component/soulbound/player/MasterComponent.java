@@ -20,7 +20,7 @@ import soulboundarmory.config.Configuration;
 import soulboundarmory.module.component.ComponentRegistry;
 import soulboundarmory.module.component.EntityComponent;
 import soulboundarmory.module.component.EntityComponentKey;
-import soulboundarmory.module.gui.screen.ScreenWidget;
+import soulboundarmory.module.gui.Node;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 import soulboundarmory.util.ItemUtil;
@@ -36,6 +36,7 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 	 */
 	protected int tab;
 	protected int boundSlot;
+	protected int cooldown;
 	protected ItemComponent<?> item;
 
 	public MasterComponent(PlayerEntity player) {
@@ -124,8 +125,20 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 	 @param item the item's component.
 	 */
 	public void select(ItemComponent<?> item) {
+		if (item != this.item || !item.isUnlocked()) {
+			this.cooldown = 600;
+		}
+
 		this.item = item;
 		item.unlock();
+	}
+
+	public int cooldown() {
+		return this.cooldown;
+	}
+
+	public boolean cooledDown() {
+		return this.cooldown <= 0;
 	}
 
 	/**
@@ -172,7 +185,7 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 	 */
 	public void refresh() {
 		if (this.isClient()) {
-			if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen) {
+			if (Node.cellScreen() instanceof SoulboundScreen screen) {
 				screen.refresh();
 			}
 		} else {
@@ -180,8 +193,7 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 		}
 	}
 
-	@Override
-	public void tickStart() {
+	@Override public void tickStart() {
 		var component = this.heldItemComponent().orElse(null);
 
 		if (component == null) {
@@ -195,6 +207,10 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 		}
 
 		this.items.values().forEach(ItemComponent::tick);
+
+		if (!this.cooledDown()) {
+			this.cooldown--;
+		}
 	}
 
 	/**
