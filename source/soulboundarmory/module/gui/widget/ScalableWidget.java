@@ -287,7 +287,11 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 	@Override
 	protected void render() {
 		var viewHeight = unscale(this.viewHeight());
-		RenderSystem.enableScissor(unscale(this.absoluteX()), window.getFramebufferHeight() - unscale(this.absoluteY()) - viewHeight, unscale(this.viewWidth()), viewHeight);
+
+		if (this.viewWidth() < this.width() || this.viewHeight() < this.height()) {
+			RenderSystem.enableScissor(unscale(this.absoluteX()), window.getFramebufferHeight() - unscale(this.absoluteY()) - viewHeight, unscale(this.viewWidth()), viewHeight);
+		}
+
 		RenderSystem.enableBlend();
 		shaderTexture(this.texture);
 		this.resetColor();
