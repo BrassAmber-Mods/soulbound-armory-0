@@ -125,12 +125,14 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 	 @param item the item's component.
 	 */
 	public void select(ItemComponent<?> item) {
-		if (item != this.item || !item.isUnlocked()) {
-			this.cooldown = 600;
-		}
+		if (item.isEnabled()) {
+			if (item != this.item || !item.isUnlocked()) {
+				this.cooldown = 600;
+			}
 
-		this.item = item;
-		item.unlock();
+			this.item = item;
+			item.unlock();
+		}
 	}
 
 	public int cooldown() {

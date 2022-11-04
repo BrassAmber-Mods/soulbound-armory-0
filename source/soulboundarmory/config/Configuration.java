@@ -35,6 +35,17 @@ public final class Configuration {
 	public static boolean freeRestoration = true;
 
 	@Flat
+	@Category("items")
+	public static class Items {
+		public static boolean dagger = true;
+		public static boolean sword = true;
+		public static boolean bigsword = true;
+		public static boolean greatsword = true;
+		public static boolean trident;
+		public static boolean pickaxe = true;
+	}
+
+	@Flat
 	@Category("multipliers")
 	public static class Multipliers {
 		@Comment("1 + (armor multiplier) * armor")

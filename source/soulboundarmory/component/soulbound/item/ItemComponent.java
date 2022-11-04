@@ -24,6 +24,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -284,6 +285,15 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 	}
 
 	/**
+	 Returns whether this item is enabled.
+	 If it is enabled, then it will be made available in selection;
+	 otherwise it will be hidden and removed from players' inventories.
+
+	 @return whether this item is enabled
+	 */
+	public abstract boolean isEnabled();
+
+	/**
 	 @return whether the user has permanently unlocked this item
 	 */
 	public boolean isUnlocked() {
@@ -291,7 +301,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 	}
 
 	public void unlock() {
-		if (!this.unlocked) {
+		if (!this.unlocked && this.isEnabled()) {
 			this.unlocked = true;
 
 			if (this.isClient()) {
@@ -306,16 +316,18 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 	}
 
 	public void select(int slot) {
-		if (this.isClient()) {
-			Packets.serverSelectItem.send(new ExtendedPacketBuffer(this).writeInt(slot));
-		}
+		if (this.isEnabled()) {
+			if (this.isClient()) {
+				Packets.serverSelectItem.send(new ExtendedPacketBuffer(this).writeInt(slot));
+			}
 
-		if (this.isUnlocked() && this.component.cooledDown() || this.canConsume(this.player.getInventory().getStack(slot))) {
-			this.player.getInventory().setStack(slot, this.stack());
-			this.component.select(this);
-			this.updateInventory(slot);
-			this.synchronize();
-			this.component.refresh();
+			if (this.isUnlocked() && this.component.cooledDown() || this.canConsume(this.player.getInventory().getStack(slot))) {
+				this.player.getInventory().setStack(slot, this.stack());
+				this.component.select(this);
+				this.updateInventory(slot);
+				this.synchronize();
+				this.component.refresh();
+			}
 		}
 	}
 
@@ -678,6 +690,8 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 	/**
 	 Scan the inventory and clean it up.
 	 <br>
+	 - Remove {@link #isEnabled disabled} soulbound items.
+	 <br>
 	 - If the player is not in creative mode,
 	 then remove their item stacks that do not correspond to this component or are not in the slot specified by `slot`.
 	 <br>
@@ -685,33 +699,38 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 	 <br>
 	 - If a matching item stack is encountered and it does not equal {@link #itemStack}, then replace it by a copy thereof.
 
-	 @param slot the slot from which to not remove
+	 @param slot the slot wherefrom to not remove
 	 */
 	public void updateInventory(int slot) {
-		var inventory = ItemUtil.inventory(this.player).toList().listIterator();
+		var inventory = this.player.getInventory();
+		var itemStacks = ItemUtil.inventory(this.player).toList().listIterator();
 
-		while (inventory.hasNext()) {
-			var stack = inventory.next();
+		while (itemStacks.hasNext()) {
+			var stack = itemStacks.next();
 
 			if (this.component.accepts(stack)) {
 				if (this.accepts(stack)) {
-					if (slot == -1) {
-						slot = inventory.previousIndex();
+					if (this.isEnabled()) {
+						if (slot == -1) {
+							slot = itemStacks.previousIndex();
 
-						if (this.component.hasBoundSlot()) {
-							this.component.bindSlot(slot);
+							if (this.component.hasBoundSlot()) {
+								this.component.bindSlot(slot);
+							}
+						} else if (itemStacks.previousIndex() != slot) {
+							inventory.removeOne(stack);
+
+							continue;
 						}
-					} else if (inventory.previousIndex() != slot) {
-						this.player.getInventory().removeOne(stack);
 
-						continue;
-					}
-
-					if (!stack.equals(this.itemStack, false)) {
-						this.player.getInventory().setStack(slot, this.stack());
+						if (!stack.equals(this.itemStack, false)) {
+							inventory.setStack(slot, this.stack());
+						}
+					} else {
+						inventory.removeOne(stack);
 					}
 				} else if (!this.player.isCreative()) {
-					this.player.getInventory().removeOne(stack);
+					inventory.removeOne(stack);
 				}
 			}
 		}

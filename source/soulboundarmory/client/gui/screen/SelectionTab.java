@@ -28,6 +28,7 @@ public class SelectionTab extends Tab {
 		}
 
 		component.items.values().stream()
+			.filter(ItemComponent::isEnabled)
 			.filter(item -> item.isUnlocked() && component.accepts(parent.stack) || item.canConsume(parent.stack))
 			.forEach(tool -> box.add(new SelectionEntryWidget(tool))
 				.center()
