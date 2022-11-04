@@ -37,11 +37,22 @@ public final class Configuration {
 	@Flat
 	@Category("items")
 	public static class Items {
+		@Comment("whether soulbound dagger is enabled")
 		public static boolean dagger = true;
+
+		@Comment("whether soulbound sword is enabled")
 		public static boolean sword = true;
+
+		@Comment("whether soulbound big sword is enabled")
 		public static boolean bigsword = true;
+
+		@Comment("whether soulbound greatsword is enabled")
 		public static boolean greatsword = true;
+
+		@Comment("whether soulbound trident is enabled")
 		public static boolean trident;
+
+		@Comment("whether soulbound pickaxe is enabled")
 		public static boolean pickaxe = true;
 	}
 
