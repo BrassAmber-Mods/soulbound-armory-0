@@ -10,7 +10,7 @@ import soulboundarmory.module.gui.widget.WidgetBox;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
-public class EnchantmentTab extends SoulboundTab {
+public class EnchantmentTab extends Tab {
 	public EnchantmentTab() {
 		super(Translations.guiButtonEnchantments);
 	}

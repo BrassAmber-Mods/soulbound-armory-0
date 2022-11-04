@@ -14,18 +14,18 @@ import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class SoulboundTab extends Widget<SoulboundTab> {
+public abstract class Tab extends Widget<Tab> {
 	protected static final NumberFormat format = DecimalFormat.getInstance();
 
 	public final Text title;
 	public int index;
 	public Widget<?> button;
 
-	public SoulboundTab(Text title) {
+	public Tab(Text title) {
 		this.title = title;
 	}
 
-	@Override public SoulboundTab parent(Widget<?> parent) {
+	@Override public Tab parent(Widget<?> parent) {
 		if (parent != null) {
 			this.width(parent.width()).height(parent.height());
 		}

@@ -12,7 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
-import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.client.gui.screen.Tab;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
@@ -145,7 +145,7 @@ public abstract class MasterComponent<C extends MasterComponent<C>> implements E
 	 @return the selection tab for this component
 	 */
 	@OnlyIn(Dist.CLIENT)
-	public SoulboundTab selectionTab() {
+	public Tab selectionTab() {
 		return new SelectionTab();
 	}
 

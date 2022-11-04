@@ -11,7 +11,7 @@ import soulboundarmory.util.ItemUtil;
  The item selection tab, which adds a button for each {@linkplain ItemComponent#canConsume unlockable} item in the inventory and each {@linkplain ItemComponent#isUnlocked unlocked} item.
  When a button is pressed, {@link ItemComponent#select} is invoked.
  */
-public class SelectionTab extends SoulboundTab {
+public class SelectionTab extends Tab {
 	public SelectionTab() {
 		super(Translations.guiToolSelection);
 	}

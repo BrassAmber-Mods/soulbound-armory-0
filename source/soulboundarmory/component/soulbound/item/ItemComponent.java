@@ -40,7 +40,7 @@ import soulboundarmory.client.gui.screen.EnchantmentTab;
 import soulboundarmory.client.gui.screen.SelectionTab;
 import soulboundarmory.client.gui.screen.SkillTab;
 import soulboundarmory.client.gui.screen.SoulboundScreen;
-import soulboundarmory.client.gui.screen.SoulboundTab;
+import soulboundarmory.client.gui.screen.Tab;
 import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.weapon.WeaponComponent;
@@ -279,7 +279,7 @@ public abstract class ItemComponent<T extends ItemComponent<T>> implements Seria
 	 @return the tabs to display in the menu for this item
 	 */
 	@OnlyIn(Dist.CLIENT)
-	public List<SoulboundTab> tabs() {
+	public List<Tab> tabs() {
 		return ReferenceList.of(new SelectionTab(), new AttributeTab(), new EnchantmentTab(), new SkillTab());
 	}
 

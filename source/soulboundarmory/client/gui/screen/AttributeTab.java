@@ -8,7 +8,7 @@ import soulboundarmory.module.gui.widget.WidgetBox;
 import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
-public class AttributeTab extends SoulboundTab {
+public class AttributeTab extends Tab {
 	public AttributeTab() {
 		super(Translations.guiButtonAttributes);
 	}

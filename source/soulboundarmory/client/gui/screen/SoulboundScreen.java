@@ -56,9 +56,9 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
 	protected final int slot;
 	protected ItemStack stack;
 
-	private final List<SoulboundTab> tabs = ReferenceArrayList.of();
+	private final List<Tab> tabs = ReferenceArrayList.of();
 	private ItemComponent<?> item;
-	private SoulboundTab tab;
+	private Tab tab;
 
 	public SoulboundScreen(MasterComponent<?> component, int slot) {
 		this.component = component;
@@ -195,7 +195,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
 			.onSlide(slider -> Configuration.Client.Color.set(id, (int) slider.value()));
 	}
 
-	private ScalableWidget<?> button(SoulboundTab tab) {
+	private ScalableWidget<?> button(Tab tab) {
 		return new ScalableWidget<>()
 			.button()
 			.x(1D / 24)
@@ -208,7 +208,7 @@ public class SoulboundScreen extends ScreenWidget<SoulboundScreen> {
 			.active(() -> tab != this.tab);
 	}
 
-	private void tab(SoulboundTab tab) {
+	private void tab(Tab tab) {
 		this.renew(this.tab, this.tab = tab);
 		tab.preinitialize();
 		this.component.tab(tab.index);

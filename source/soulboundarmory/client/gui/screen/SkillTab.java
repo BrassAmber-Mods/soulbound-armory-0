@@ -14,7 +14,7 @@ import soulboundarmory.skill.SkillInstance;
 /**
  The skill tab; design (not code of course) blatantly copied from the advancement screen.
  */
-public class SkillTab extends SoulboundTab {
+public class SkillTab extends Tab {
 	protected static final Identifier background = new Identifier("textures/block/andesite.png");
 
 	protected final Map<SkillInstance, SkillWidget> skills = new Reference2ReferenceLinkedOpenHashMap<>();
