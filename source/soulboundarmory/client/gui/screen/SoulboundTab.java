@@ -45,12 +45,17 @@ public abstract class SoulboundTab extends Widget<SoulboundTab> {
 	public Widget<?> resetButton(Category category) {
 		return new ScalableWidget<>()
 			.button()
+			.with(new ScalableWidget<>()
+				.x(0.5)
+				.y(0.5)
+				.texture("soulboundarmory:textures/gui/counterclockwise_arrow.png")
+				.slice(0, 16, 16, 0, 16, 16)
+				.textureSize(16, 16)
+				.center())
 			.alignEnd()
 			.x(23D / 24)
 			.y(15D / 16)
-			.width(112)
-			.height(20)
-			.text(Translations.guiButtonReset)
+			.size(20)
 			.primaryAction(() -> this.reset(category));
 	}
 

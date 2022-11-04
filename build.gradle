@@ -35,7 +35,10 @@ gronk {
 
 sourceSets {
 	main {
-		resources.include("assets/", "META-INF/", "pack.mcmeta", "*.json")
+		resources {
+			include("assets/", "META-INF/", "pack.mcmeta", "*.json")
+			exclude("**/*.xcf")
+		}
 	}
 
 	dev {
