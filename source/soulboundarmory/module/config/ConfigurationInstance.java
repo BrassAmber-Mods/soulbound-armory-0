@@ -7,8 +7,8 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Timer;
 import java.util.TimerTask;
-import net.auoeke.lusr.Lusr;
-import net.auoeke.lusr.element.LusrMap;
+import net.auoeke.sp.StructuredProperties;
+import net.auoeke.sp.element.SpMap;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.ModContainer;
@@ -19,7 +19,7 @@ import soulboundarmory.util.Util;
 
 public final class ConfigurationInstance extends Parent {
 	private static final Timer deserializationTimer = new Timer(true);
-	private static final Lusr lusr = new Lusr();
+	private static final StructuredProperties sp = new StructuredProperties();
 
 	public final ModContainer mod;
 	public final Path path;
@@ -32,7 +32,7 @@ public final class ConfigurationInstance extends Parent {
 		super(type, mod.getModId() + Util.value(type, (Name name) -> ':' + name.value(), ""), Util.value(type, Category::value, "main"));
 
 		this.mod = mod;
-		this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".lusr");
+		this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".str");
 		var background = new Identifier(Util.value(type, Background::value, "block/andesite.png"));
 		this.background = new Identifier(background.getNamespace(), "textures/" + background.getPath());
 
@@ -63,7 +63,7 @@ public final class ConfigurationInstance extends Parent {
 
 				if (mtime.compareTo(this.mtime) > 0) {
 					try {
-						if (Lusr.parseResource(this.path) instanceof LusrMap configuration) {
+						if (StructuredProperties.parseResource(this.path) instanceof SpMap configuration) {
 							this.deserialize(this, configuration);
 						}
 					} finally {
@@ -83,7 +83,7 @@ public final class ConfigurationInstance extends Parent {
 	public synchronized void serialize() {
 		try {
 			try (var output = Files.newBufferedWriter(this.path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-				lusr.serialize(output, this.toLusr(this));
+				sp.serialize(output, this.toSp(this));
 				this.mtime = FileTime.from(Instant.now());
 			}
 		} catch (Throwable trouble) {
@@ -95,28 +95,28 @@ public final class ConfigurationInstance extends Parent {
 		this.desynced = true;
 	}
 
-	private void deserialize(Parent parent, LusrMap map) {
+	private void deserialize(Parent parent, SpMap map) {
 		map.forEach((key, value) -> {
 			var node = parent.children.get(key);
 
-			if (value instanceof LusrMap submap) {
+			if (value instanceof SpMap submap) {
 				if (node instanceof Group group) {
 					this.deserialize(group, submap);
 				}
 			} else if (node instanceof Property<?> property) {
-				property.set(lusr.fromLusr(property.type, value));
+				property.set(sp.fromSp(property.type, value));
 			}
 		});
 	}
 
-	private LusrMap toLusr(Parent parent) {
-		var map = new LusrMap();
+	private SpMap toSp(Parent parent) {
+		var map = new SpMap();
 
 		for (var child : parent.children.values()) {
 			if (child instanceof Group group) {
-				map.put(group.name, this.toLusr(group));
+				map.put(group.name, this.toSp(group));
 			} else if (child instanceof Property<?> property) {
-				map.put(property.name, lusr.toLusr(property.get()));
+				map.put(property.name, sp.toSp(property.get()));
 			}
 		}
 

@@ -73,7 +73,7 @@ dependencies {
 	forge("net.minecraftforge:forge:${versions.minecraft}-+")
 
 	lib(
-		"net.auoeke:lusr",
+		"net.auoeke:structured-properties",
 		"net.auoeke:reflect",
 		"net.auoeke:romeral",
 		"net.auoeke:unsafe"
