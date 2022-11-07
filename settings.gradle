@@ -6,9 +6,3 @@ pluginManagement {
         maven {url = "https://maven.architectury.dev"}
     }
 }
-
-sourceControl {
-	gitRepository("https://github.com/architectury/architectury-loom") {
-		producesModule("dev.architectury:architectury-loom")
-	}
-}

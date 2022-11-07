@@ -1,19 +1,9 @@
-buildscript {
-	dependencies {
-		classpath("net.auoeke:reflect:latest.release")
-		classpath("dev.architectury:architectury-loom") {
-			version {
-				branch = "dev/1.0"
-			}
-		}
-	}
-}
-
 plugins {
 	id("java")
 	id("maven-publish")
 	id("net.auoeke.gronk").version("2.+")
 	id("com.github.johnrengelman.shadow").version("latest.release")
+	id("dev.architectury.loom").version("latest.release")
 }
 
 plugins.apply("dev.architectury.loom")
