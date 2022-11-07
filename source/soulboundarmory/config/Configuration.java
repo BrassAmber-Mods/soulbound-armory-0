@@ -54,7 +54,7 @@ public final class Configuration {
 
 		@Name("big sword")
 		public static class Bigsword {
-			public static double submergedChargeAccelerationFactor = 1;
+			public static double fluidChargeAccelerationFactor = 1;
 		}
 	}
 

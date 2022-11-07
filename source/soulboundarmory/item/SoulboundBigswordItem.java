@@ -30,7 +30,12 @@ public class SoulboundBigswordItem extends SoulboundMeleeWeapon {
 	public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int timeLeft) {
 		ItemComponentType.bigsword.nullable(user).filter(BigswordComponent::canCharge).ifPresent(component -> {
 			var look = user.getRotationVector();
-			var speed = 1.5 * Configuration.Items.Bigsword.submergedChargeAccelerationFactor;
+			var speed = 1.5;
+
+			if (user.isInFluidType()) {
+				speed *= Configuration.Items.Bigsword.fluidChargeAccelerationFactor;
+			}
+
 			user.addVelocity(look.x * speed, 0, look.z * speed);
 			component.charge();
 		});
