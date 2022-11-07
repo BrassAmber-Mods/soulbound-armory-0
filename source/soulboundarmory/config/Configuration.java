@@ -116,7 +116,7 @@ public final class Configuration {
 			"ICON: white (locked) or yellow (unlocked) advancement box with item's icon",
 			"TEXT: button with item's name"
 		})
-		public static SelectionEntryWidget.Type selectionEntryType = SelectionEntryWidget.Type.ICON;
+		public static SelectionEntryWidget.Type selectionEntryType = SelectionEntryWidget.Type.TEXT;
 
 		@Comment("experience bar color")
 		public static class Color {
