@@ -8,7 +8,7 @@ import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.objectweb.asm.Type;
 
@@ -17,7 +17,7 @@ public final class ConfigurationManager {
 	private static final Map<Class<?>, ConfigurationInstance> entries = new Reference2ReferenceOpenHashMap<>();
 
 	@SubscribeEvent
-	public static void begin(FMLConstructModEvent event) {
+	public static void register(FMLLoadCompleteEvent event) {
 		var mod = ModLoadingContext.get().getActiveContainer();
 		mod.getModInfo().getOwningFile().getFile().getScanResult().getAnnotations().stream()
 			.collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType))
