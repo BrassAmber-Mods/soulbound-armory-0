@@ -8,6 +8,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.item.weapon.BigswordComponent;
+import soulboundarmory.config.Configuration;
 
 public class SoulboundBigswordItem extends SoulboundMeleeWeapon {
 	public SoulboundBigswordItem() {
@@ -29,7 +30,7 @@ public class SoulboundBigswordItem extends SoulboundMeleeWeapon {
 	public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity user, int timeLeft) {
 		ItemComponentType.bigsword.nullable(user).filter(BigswordComponent::canCharge).ifPresent(component -> {
 			var look = user.getRotationVector();
-			var speed = 1.5;
+			var speed = 1.5 * Configuration.Items.Bigsword.submergedChargeAccelerationFactor;
 			user.addVelocity(look.x * speed, 0, look.z * speed);
 			component.charge();
 		});

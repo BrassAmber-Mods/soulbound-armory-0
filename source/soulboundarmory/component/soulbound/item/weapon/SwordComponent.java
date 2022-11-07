@@ -75,10 +75,6 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
 		return Util.add(super.screenAttributes(), StatisticType.efficiency);
 	}
 
-	@Override public boolean isEnabled() {
-		return Configuration.Items.sword;
-	}
-
 	@Override
 	public double increase(StatisticType type) {
 		if (type == StatisticType.attackSpeed) return 0.03;

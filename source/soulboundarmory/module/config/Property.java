@@ -18,7 +18,7 @@ public final class Property<T> extends Node {
 	private final Pointer field;
 
 	public Property(Parent parent, Field field) {
-		super(field.getName(), Util.value(field, (Category category) -> {
+		super(Util.value(field, Name::value, field.getName()), Util.value(field, (Category category) -> {
 			if (field.getDeclaringClass().isAnnotationPresent(ConfigurationFile.class)) {
 				return category.value();
 			}

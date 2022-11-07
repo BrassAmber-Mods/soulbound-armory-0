@@ -47,10 +47,6 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
 		return Util.add(super.screenAttributes(), StatisticType.efficiency);
 	}
 
-	@Override public boolean isEnabled() {
-		return Configuration.Items.dagger;
-	}
-
 	@Override
 	public double increase(StatisticType type) {
 		if (type == StatisticType.attackSpeed) return 0.04;

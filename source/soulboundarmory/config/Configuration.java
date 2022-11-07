@@ -1,14 +1,20 @@
 package soulboundarmory.config;
 
+import java.util.stream.Collectors;
+import com.google.common.base.Functions;
+import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import soulboundarmory.client.gui.bar.BarStyle;
 import soulboundarmory.client.gui.widget.SelectionEntryWidget;
+import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.module.config.Category;
 import soulboundarmory.module.config.Comment;
 import soulboundarmory.module.config.ConfigurationFile;
 import soulboundarmory.module.config.Flat;
 import soulboundarmory.module.config.Interval;
+import soulboundarmory.module.config.Name;
 import soulboundarmory.util.Math2;
 
 @ConfigurationFile
@@ -37,27 +43,23 @@ public final class Configuration {
 	@Flat
 	@Category("items")
 	public static class Items {
-		@Comment("whether soulbound dagger is enabled")
-		public static boolean dagger = true;
+		public static Object2BooleanLinkedOpenHashMap<String> enabled = new Object2BooleanLinkedOpenHashMap<>(
+			ItemComponentType.registry().getKeys().stream().collect(Collectors.toMap(Identifier::toString, Functions.constant(true)))
+		);
 
-		@Comment("whether soulbound sword is enabled")
-		public static boolean sword = true;
+		@Name("dagger")
+		public static class Dagger {
+			public static double throwSpeedFactor = 1;
+		}
 
-		@Comment("whether soulbound big sword is enabled")
-		public static boolean bigsword = true;
-
-		@Comment("whether soulbound greatsword is enabled")
-		public static boolean greatsword = true;
-
-		@Comment("whether soulbound trident is enabled")
-		public static boolean trident;
-
-		@Comment("whether soulbound pickaxe is enabled")
-		public static boolean pickaxe = true;
+		@Name("big sword")
+		public static class Bigsword {
+			public static double submergedChargeAccelerationFactor = 1;
+		}
 	}
 
 	@Flat
-	@Category("multipliers")
+	@Category("experience multipliers")
 	public static class Multipliers {
 		@Comment("1 + (armor multiplier) * armor")
 		public static double armor = 0.2;

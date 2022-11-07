@@ -8,7 +8,6 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 
@@ -54,9 +53,5 @@ public class TridentComponent extends WeaponComponent<TridentComponent> {
 		if (type == StatisticType.criticalHitRate) return 0.005;
 
 		return 0;
-	}
-
-	@Override public boolean isEnabled() {
-		return Configuration.Items.trident;
 	}
 }

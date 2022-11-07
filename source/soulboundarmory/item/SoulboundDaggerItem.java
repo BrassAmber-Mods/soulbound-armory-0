@@ -13,6 +13,7 @@ import net.minecraftforge.common.ToolAction;
 import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.statistics.StatisticType;
+import soulboundarmory.config.Configuration;
 import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.skill.Skills;
 
@@ -63,7 +64,7 @@ public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
 		if (entity instanceof ServerPlayerEntity player) {
 			var attackSpeed = ItemComponentType.dagger.of(player).attributeTotal(StatisticType.attackSpeed);
 			var damageRatio = damageRatio(attackSpeed, timeLeft);
-			world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed, damageRatio));
+			world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed * Configuration.Items.Dagger.throwSpeedFactor, damageRatio));
 
 			if (!player.isCreative()) {
 				player.getInventory().removeOne(itemStack);

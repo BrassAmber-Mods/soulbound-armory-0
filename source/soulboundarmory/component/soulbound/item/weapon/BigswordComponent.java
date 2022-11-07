@@ -7,7 +7,6 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 
@@ -51,10 +50,6 @@ public class BigswordComponent extends WeaponComponent<BigswordComponent> {
 		if (type == StatisticType.efficiency) return 0.03;
 
 		return 0;
-	}
-
-	@Override public boolean isEnabled() {
-		return Configuration.Items.bigsword;
 	}
 
 	@Override public void tick() {

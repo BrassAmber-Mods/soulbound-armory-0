@@ -13,7 +13,6 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
 
 public class PickaxeComponent extends ToolComponent<PickaxeComponent> {
@@ -58,10 +57,6 @@ public class PickaxeComponent extends ToolComponent<PickaxeComponent> {
 		if (type == StatisticType.upgradeProgress) return 0.2;
 
 		return 0;
-	}
-
-	@Override public boolean isEnabled() {
-		return Configuration.Items.pickaxe;
 	}
 
 	@Override

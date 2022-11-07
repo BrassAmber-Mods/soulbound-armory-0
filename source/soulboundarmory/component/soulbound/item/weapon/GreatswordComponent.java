@@ -12,7 +12,6 @@ import soulboundarmory.component.Components;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Math2;
@@ -93,10 +92,6 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
 	@Override
 	public List<StatisticType> screenAttributes() {
 		return Util.add(super.screenAttributes(), StatisticType.efficiency);
-	}
-
-	@Override public boolean isEnabled() {
-		return Configuration.Items.greatsword;
 	}
 
 	@Override
