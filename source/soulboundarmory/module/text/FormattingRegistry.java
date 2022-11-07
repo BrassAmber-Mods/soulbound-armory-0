@@ -7,10 +7,10 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.auoeke.reflect.Pointer;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import soulboundarmory.util.Util;
+import soulboundarmory.mixin.MixinUtil;
 
 public class FormattingRegistry {
-	private static final Pointer values = Pointer.of(Formatting.class, Util.formattingValueField);
+	private static final Pointer values = Pointer.of(Formatting.class, MixinUtil.formattingValueField);
 
 	public static ExtendedFormatting register(String name, char code, int colorIndex, @Nullable Integer color) {
 		return register(new ExtendedFormatting(name, code, colorIndex, color));

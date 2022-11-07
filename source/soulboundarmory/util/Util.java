@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -22,7 +21,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import com.mojang.blaze3d.systems.RenderSystem;
-import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -39,19 +37,16 @@ import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
 
 public class Util extends net.minecraft.util.Util {
 	public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
-	public static final String formattingValueField = map("field_1072", "$VALUES");
 	public static final IntSupplier zeroSupplier = () -> 0;
 
 	private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
 	private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
-	private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
 	public static IllegalArgumentException illegalArgument(String message, Object... arguments) {
 		throw new IllegalArgumentException(message.formatted(arguments));
@@ -178,10 +173,6 @@ public class Util extends net.minecraft.util.Util {
 		return StreamSupport.stream(iterable.spliterator(), false);
 	}
 
-	public static <T> Set<T> hashSet(T... elements) {
-		return new ObjectOpenHashSet<>(elements);
-	}
-
 	public static <T> Class<T> componentType(T... array) {
 		return (Class<T>) array.getClass().getComponentType();
 	}
@@ -258,33 +249,5 @@ public class Util extends net.minecraft.util.Util {
 				SoulboundArmory.logger.error("Something is very fishy.");
 			}
 		}
-	}
-
-	public static String map(String development, String production) {
-		return FMLEnvironment.production ? production : development;
-	}
-
-	public static String mapClass(String production) {
-		return map(INameMappingService.Domain.CLASS, production);
-	}
-
-	public static String mapMethod(int production) {
-		return map(INameMappingService.Domain.METHOD, "m_%d_".formatted(production));
-	}
-
-	public static String mapField(int production) {
-		return map(INameMappingService.Domain.FIELD, "f_%d_".formatted(production));
-	}
-
-	private static String map(INameMappingService.Domain domain, String production) {
-		if (FMLEnvironment.production) {
-			return production;
-		}
-
-		if (mapper == null) {
-			mapper = FMLLoader.getNameFunction("srg").get();
-		}
-
-		return mapper.apply(domain, production);
 	}
 }

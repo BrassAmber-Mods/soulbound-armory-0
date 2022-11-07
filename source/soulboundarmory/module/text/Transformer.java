@@ -1,5 +1,6 @@
 package soulboundarmory.module.text;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -15,7 +16,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import soulboundarmory.util.Util;
+import soulboundarmory.mixin.MixinUtil;
 
 public class Transformer implements IMixinConfigPlugin {
 	@Override
@@ -43,7 +44,7 @@ public class Transformer implements IMixinConfigPlugin {
 	public void preApply(String targetClassName, ClassNode target, String mixinClassName, IMixinInfo mixinInfo) {
 		switch (mixinClassName) {
 			case "soulboundarmory.module.text.mixin.StyleMixin" -> {
-				var methodNames = Util.hashSet(Util.mapMethod(131152), Util.mapMethod(131157), Util.mapMethod(131164));
+				var methodNames = new HashSet<>(List.of(MixinUtil.mapMethod(131152), MixinUtil.mapMethod(131157), MixinUtil.mapMethod(131164)));
 
 				target.methods.stream().filter(method -> methodNames.contains(method.name)).forEach(method -> {
 					for (var instruction : method.instructions) {
@@ -63,7 +64,7 @@ public class Transformer implements IMixinConfigPlugin {
 				});
 			}
 			case "soulboundarmory.module.text.mixin.dummy.LanguageDummyMixin" -> {
-				var get = Util.mapMethod(6834);
+				var get = MixinUtil.mapMethod(6834);
 				var method = target.methods.stream().filter(m -> m.name.equals(get)).findAny().get();
 				var instructions = new InsnList();
 				var end = new LabelNode();
@@ -85,7 +86,7 @@ public class Transformer implements IMixinConfigPlugin {
 				method.instructions.insertBefore(method.instructions.getFirst(), instructions);
 			}
 			case "soulboundarmory.module.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
-				target.superName = Util.mapClass("net/minecraft/ChatFormatting");
+				target.superName = MixinUtil.mapClass("net/minecraft/ChatFormatting");
 
 				target.methods.forEach(method -> {
 					switch (method.name) {
@@ -101,7 +102,7 @@ public class Transformer implements IMixinConfigPlugin {
 
 							method.visitVarInsn(Opcodes.ALOAD, 0);
 							method.visitVarInsn(Opcodes.ALOAD, 1);
-							method.visitFieldInsn(Opcodes.GETSTATIC, target.superName, Util.formattingValueField, "[L%s;".formatted(target.superName));
+							method.visitFieldInsn(Opcodes.GETSTATIC, target.superName, MixinUtil.formattingValueField, "[L%s;".formatted(target.superName));
 							method.visitInsn(Opcodes.ARRAYLENGTH);
 							IntStream.range(1, parameterTypes.length + 1).forEach(index -> method.visitVarInsn(parameterTypes[index - 1].getOpcode(Opcodes.ILOAD), index));
 							method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, method.name, Type.getMethodDescriptor(Type.VOID_TYPE, actualTypes), false);
@@ -111,14 +112,14 @@ public class Transformer implements IMixinConfigPlugin {
 							method.access &= ~Opcodes.ACC_NATIVE;
 
 							method.visitVarInsn(Opcodes.ALOAD, 0);
-							method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, Util.mapMethod(126665), "()Ljava/lang/Integer;", false);
+							method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, MixinUtil.mapMethod(126665), "()Ljava/lang/Integer;", false);
 							method.visitInsn(Opcodes.ARETURN);
 						}
 						case "code" -> {
 							method.access &= ~Opcodes.ACC_NATIVE;
 
 							method.visitVarInsn(Opcodes.ALOAD, 0);
-							method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, Util.mapMethod(178510), "()C", false);
+							method.visitMethodInsn(Opcodes.INVOKESPECIAL, target.superName, MixinUtil.mapMethod(178510), "()C", false);
 							method.visitInsn(Opcodes.IRETURN);
 						}
 					}
