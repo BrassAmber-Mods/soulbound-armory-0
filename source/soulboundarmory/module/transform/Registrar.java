@@ -130,7 +130,7 @@ public class Registrar {
 			});
 
 			var declaringType = Classes.load(false, annotation.clazz().getClassName());
-			var method = Methods.of(declaringType, name);
+			var method = Methods.firstOf(declaringType, name);
 
 			if (!Flags.isStatic(method)) {
 				throw new WrongMethodTypeException("@Register %s::%s is not static".formatted(type, name));
