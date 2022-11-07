@@ -70,14 +70,14 @@ public final class ConfigurationInstance extends Parent {
 						this.mtime = mtime;
 					}
 				}
-
-				return true;
 			}
+
+			return true;
 		} catch (Throwable trouble) {
 			SoulboundArmory.logger.error("Unable to deserialize configuration %s.".formatted(this.name), trouble);
-		}
 
-		return false;
+			return false;
+		}
 	}
 
 	public synchronized void serialize() {
