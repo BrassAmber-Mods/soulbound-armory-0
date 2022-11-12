@@ -1,7 +1,7 @@
 plugins {
 	id("java")
 	id("maven-publish")
-	id("net.auoeke.gronk").version("2.+")
+	id("net.auoeke.gronk").version("3.+")
 	id("com.github.johnrengelman.shadow").version("latest.release")
 	id("dev.architectury.loom").version("latest.release")
 }
@@ -64,7 +64,7 @@ dependencies {
 
 	lib(
 		"net.auoeke:structured-properties",
-		"net.auoeke:reflect:latest.release",
+		"net.auoeke:reflect",
 		"net.auoeke:romeral",
 		"net.auoeke:unsafe"
 	)
