@@ -1,11 +1,10 @@
 package soulboundarmory.module.config;
 
+import java.io.InvalidClassException;
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.stream.Stream;
-import com.sun.jdi.InvalidTypeException;
 import net.auoeke.reflect.Pointer;
-import net.gudenau.lib.unsafe.Unsafe;
 import soulboundarmory.util.Util;
 
 public final class Property<T> extends Node {
@@ -35,13 +34,13 @@ public final class Property<T> extends Node {
 		this.interval = field.getAnnotation(Interval.class);
 
 		if (this.interval != null && field.getType() != int.class) {
-			Unsafe.throwException(new InvalidTypeException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName())));
+			throw new InvalidClassException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName()));
 		}
 
 		var quotientInterval = field.getAnnotation(QuotientInterval.class);
 
 		if (quotientInterval != null && field.getType() != double.class) {
-			Unsafe.throwException(new InvalidTypeException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName())));
+			throw new InvalidClassException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName()));
 		}
 	}
 

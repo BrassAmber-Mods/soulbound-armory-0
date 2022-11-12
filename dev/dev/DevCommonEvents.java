@@ -11,7 +11,7 @@ import org.apache.logging.log4j.core.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.tools.agent.MixinAgent;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.module.transform.ClassNodeTransformer;
+import soulboundarmory.module.transform.TransformerManager;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public class DevCommonEvents implements Opcodes {
@@ -23,7 +23,7 @@ public class DevCommonEvents implements Opcodes {
 	static {
 		MixinAgent.agentmain(null, Reflect.instrument().value());
 
-		ClassNodeTransformer.addSingleUseTransformer("com/mojang/text2speech/Narrator", node -> {
+		TransformerManager.addSingleUseTransformer("com/mojang/text2speech/Narrator", node -> {
 			var getNarrator = node.methods.stream().filter(method -> method.name.equals("getNarrator")).findAny().get();
 			var dummy = "com/mojang/text2speech/NarratorDummy";
 			getNarrator.instructions.clear();

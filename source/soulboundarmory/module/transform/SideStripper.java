@@ -13,29 +13,44 @@ import soulboundarmory.util.Util;
 /**
  This class adds a transformer that strips inner classes from the wrong environment in order to prevent errors arising from {@link Class#getDeclaredClasses}.
 
- @see Configuration.Client */
+ @see Configuration.Client
+ */
 @EventBusSubscriber
 public class SideStripper {
-	static {
-		ClassNodeTransformer.addTransformer((type, context) -> {
-			var innerClasses = type.innerClasses.listIterator();
+	private static boolean transform(ClassNode type) {
+		var innerClasses = type.innerClasses.listIterator();
+		var transformed = false;
 
-			for (var innerClass : Util.iterate(innerClasses)) {
-				var node = new ClassNode();
-				new ClassReader(Classes.classFile(context.loader(), innerClass.name)).accept(node, ClassReader.SKIP_CODE);
+		for (var innerClass : Util.iterate(innerClasses)) {
+			var node = new ClassNode();
+			var classFile = Classes.classFile(SideStripper.class.getClassLoader(), innerClass.name);
 
-				node.visibleAnnotations.stream().filter(annotation -> annotation.desc.equals(OnlyIn.class.descriptorString())).findAny().ifPresent(onlyIn -> {
-					var values = onlyIn.values.listIterator();
+			if (classFile != null) {
+				new ClassReader(classFile).accept(node, ClassReader.SKIP_CODE);
 
-					for (var value : Util.iterate(values)) {
-						if (value instanceof String name && name.equals("value") && values.next() instanceof String[] array && array[0].equals(Dist.class.descriptorString()) && !array[1].equals(FMLEnvironment.dist.name())) {
-							innerClasses.remove();
+				if (node.visibleAnnotations != null) {
+					var onlyIn = node.visibleAnnotations.stream().filter(annotation -> annotation.desc.equals(OnlyIn.class.descriptorString())).findAny();
 
-							break;
+					if (onlyIn.isPresent()) {
+						var values = onlyIn.get().values.listIterator();
+
+						for (var value : Util.iterate(values)) {
+							if (value instanceof String name && name.equals("value") && values.next() instanceof String[] array && array[0].equals(Dist.class.descriptorString()) && !array[1].equals(FMLEnvironment.dist.name())) {
+								transformed = true;
+								innerClasses.remove();
+
+								break;
+							}
 						}
 					}
-				});
+				}
 			}
-		});
+		}
+
+		return transformed;
+	}
+
+	static {
+		TransformerManager.addTransformer(SideStripper::transform);
 	}
 }

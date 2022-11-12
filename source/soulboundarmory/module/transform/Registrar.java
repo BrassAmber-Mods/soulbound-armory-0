@@ -117,7 +117,7 @@ public class Registrar {
 			var fieldName = name + UUID.randomUUID();
 			var fieldDescriptor = Type.getDescriptor(IForgeRegistry.class);
 
-			ClassNodeTransformer.addSingleUseTransformer(type, node -> {
+			TransformerManager.addSingleUseTransformer(type, node -> {
 				var field = (FieldNode) node.visitField(Flags.PRIVATE | Flags.STATIC | Flags.FINAL, fieldName, fieldDescriptor, null, null);
 				var method = node.methods.stream()
 					.filter(m -> m.name.equals(name) && m.desc.equals(signature.substring(signature.indexOf('('))))
