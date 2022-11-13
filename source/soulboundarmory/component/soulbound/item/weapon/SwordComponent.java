@@ -14,11 +14,10 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.AttributeModifierIdentifiers;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public class SwordComponent extends WeaponComponent<SwordComponent> {
 	protected int lightningCooldown;
@@ -72,7 +71,7 @@ public class SwordComponent extends WeaponComponent<SwordComponent> {
 
 	@Override
 	public List<StatisticType> screenAttributes() {
-		return Util.add(super.screenAttributes(), StatisticType.efficiency);
+		return Util2.add(super.screenAttributes(), StatisticType.efficiency);
 	}
 
 	@Override

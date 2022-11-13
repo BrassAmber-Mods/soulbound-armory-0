@@ -16,6 +16,7 @@ import soulboundarmory.module.component.ItemStackComponent;
 import soulboundarmory.module.component.ItemStackComponentKey;
 import soulboundarmory.module.component.access.ItemStackAccess;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin implements ItemStackAccess {
@@ -40,7 +41,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
 	@Inject(method = {"<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/nbt/NbtCompound;)V", "<init>(Lnet/minecraft/nbt/NbtCompound;)V"}, at = @At(value = "RETURN"))
 	private void addComponents(CallbackInfo info) {
 		for (var key : ComponentRegistry.item.values()) {
-			if (key.predicate == null || key.predicate.test(Util.cast(this))) {
+			if (key.predicate == null || key.predicate.test(Util2.cast(this))) {
 				key.attach((ItemStack) (Object) this);
 			}
 		}
@@ -69,7 +70,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
 	@ModifyVariable(method = "copy", at = @At(value = "STORE"), ordinal = 1)
 	private ItemStack copyComponents(ItemStack copy) {
 		if (this.components != null) {
-			this.components.forEach((key, component) -> component.copy(Util.cast(key.of(copy))));
+			this.components.forEach((key, component) -> component.copy(Util2.cast(key.of(copy))));
 		}
 
 		return copy;
@@ -80,7 +81,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
 		if (this.components != null && info.getReturnValueZ()) {
 			info.setReturnValue(this.components.entrySet().stream().allMatch(entry -> {
 				var component = entry.getKey().of(other);
-				return component != null && entry.getValue().equals(Util.cast(component));
+				return component != null && entry.getValue().equals(Util2.cast(component));
 			}));
 		}
 	}
@@ -92,7 +93,7 @@ abstract class ItemStackMixin implements ItemStackAccess {
 		if (mixin.components != null && info.getReturnValueZ()) {
 			info.setReturnValue(mixin.components.entrySet().stream().allMatch(entry -> {
 				var component = entry.getKey().of(other);
-				return component != null && entry.getValue().equals(Util.cast(component));
+				return component != null && entry.getValue().equals(Util2.cast(component));
 			}));
 		}
 	}

@@ -15,7 +15,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.FMLPaths;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.module.config.gui.ConfigurationScreen;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public final class ConfigurationInstance extends Parent {
 	private static final Timer deserializationTimer = new Timer(true);
@@ -29,11 +29,11 @@ public final class ConfigurationInstance extends Parent {
 	private boolean desynced;
 
 	public ConfigurationInstance(ModContainer mod, Class<?> type) {
-		super(type, mod.getModId() + Util.value(type, (Name name) -> ':' + name.value(), ""), Util.value(type, Category::value, "main"));
+		super(type, mod.getModId() + Util2.value(type, (Name name) -> ':' + name.value(), ""), Util2.value(type, Category::value, "main"));
 
 		this.mod = mod;
-		this.path = FMLPaths.CONFIGDIR.get().resolve(Util.value(type, Name::value, mod.getModId()) + ".str");
-		var background = new Identifier(Util.value(type, Background::value, "block/andesite.png"));
+		this.path = FMLPaths.CONFIGDIR.get().resolve(Util2.value(type, Name::value, mod.getModId()) + ".str");
+		var background = new Identifier(Util2.value(type, Background::value, "block/andesite.png"));
 		this.background = new Identifier(background.getNamespace(), "textures/" + background.getPath());
 
 		if (this.deserialize()) {

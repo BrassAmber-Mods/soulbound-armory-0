@@ -15,7 +15,7 @@ import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 import soulboundarmory.util.Math2;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
 	public int leapDuration;
@@ -91,7 +91,7 @@ public class GreatswordComponent extends WeaponComponent<GreatswordComponent> {
 
 	@Override
 	public List<StatisticType> screenAttributes() {
-		return Util.add(super.screenAttributes(), StatisticType.efficiency);
+		return Util2.add(super.screenAttributes(), StatisticType.efficiency);
 	}
 
 	@Override

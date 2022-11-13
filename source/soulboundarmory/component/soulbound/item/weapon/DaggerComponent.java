@@ -8,10 +8,9 @@ import soulboundarmory.client.i18n.Translations;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
-import soulboundarmory.config.Configuration;
 import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public class DaggerComponent extends WeaponComponent<DaggerComponent> {
 	public DaggerComponent(MasterComponent<?> component) {
@@ -44,7 +43,7 @@ public class DaggerComponent extends WeaponComponent<DaggerComponent> {
 
 	@Override
 	public List<StatisticType> screenAttributes() {
-		return Util.add(super.screenAttributes(), StatisticType.efficiency);
+		return Util2.add(super.screenAttributes(), StatisticType.efficiency);
 	}
 
 	@Override

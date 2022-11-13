@@ -32,6 +32,7 @@ import soulboundarmory.module.gui.widget.callback.PressCallback;
 import soulboundarmory.module.gui.widget.scroll.ContextScrollAction;
 import soulboundarmory.module.gui.widget.scroll.ScrollAction;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 /**
  A flexible and fluent element that supports nesting.
@@ -598,7 +599,7 @@ public class Widget<T extends Widget<T>> extends Node<Widget<?>, T> implements T
 			if (this.isHovered()) {
 				mouseFocused:
 				if (this.focusable()) {
-					for (var ancestor : Util.iterate(this.ancestors())) {
+					for (var ancestor : Util2.iterate(this.ancestors())) {
 						if (ancestor.z() > this.z() && ancestor.mouseFocused) {
 							break mouseFocused;
 						}

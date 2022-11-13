@@ -10,7 +10,7 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.skill.Skill;
 import soulboundarmory.text.PluralizableTranslation;
 import soulboundarmory.text.Translation;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public interface Translations {
 	Text empty = Text.empty();
@@ -76,7 +76,7 @@ public interface Translations {
 	}
 
 	static Text skillName(Skill skill) {
-		return Text.of(Util.capitalize(I18n.translate("skill.%s.%s.name".formatted(skill.id().getNamespace(), skill.id().getPath()))));
+		return Text.of(Util2.capitalize(I18n.translate("skill.%s.%s.name".formatted(skill.id().getNamespace(), skill.id().getPath()))));
 	}
 
 	static Text toolMaterial(ToolMaterial material) {

@@ -10,7 +10,7 @@ import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.util.Identifier;
 import soulboundarmory.module.gui.Length;
 import soulboundarmory.module.gui.util.Rectangle;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 /**
  A textured widget that supports 9-slice scaling.
@@ -20,8 +20,8 @@ public class ScalableWidget<T extends ScalableWidget<T>> extends Widget<T> {
 	private static final Identifier widgetsID = new Identifier("textures/gui/advancements/widgets.png");
 	private static final Identifier windowID = new Identifier("textures/gui/advancements/window.png");
 
-	public final Rectangle[] middles = Util.fill(new Rectangle[5], Rectangle::new);
-	public final Rectangle[] corners = Util.fill(new Rectangle[4], Rectangle::new);
+	public final Rectangle[] middles = Util2.fill(new Rectangle[5], Rectangle::new);
+	public final Rectangle[] corners = Util2.fill(new Rectangle[4], Rectangle::new);
 	public final Rectangle border = new Rectangle();
 	public AbstractTexture texture;
 	public int u, v;

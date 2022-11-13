@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.statistics.history.EnchantmentHistory;
 import soulboundarmory.serial.Serializable;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantment> implements Iterable<Enchantment>, Serializable {
 	public final EnchantmentHistory history;
@@ -27,7 +27,7 @@ public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantme
 		ForgeRegistries.ENCHANTMENTS.getValues().stream()
 			.filter(enchantment -> enchantment.type.isAcceptableItem(this.component.item())
 				&& !enchantment.isCursed()
-				&& !Util.contains(enchantment, Enchantments.UNBREAKING, Enchantments.MENDING))
+				&& !Util2.contains(enchantment, Enchantments.UNBREAKING, Enchantments.MENDING))
 			.filter(predicate)
 			.forEach(enchantment -> this.put(enchantment, 0));
 	}

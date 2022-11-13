@@ -50,6 +50,7 @@ import soulboundarmory.module.gui.screen.ScreenWidget;
 import soulboundarmory.module.gui.util.function.BiFloatIntConsumer;
 import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 /**
  A node in a tree of GUI elements.
@@ -146,7 +147,7 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
 	}
 
 	public static int width(Iterable<? extends StringVisitable> text) {
-		return width(Util.stream(text));
+		return width(Util2.stream(text));
 	}
 
 	/**
@@ -656,7 +657,7 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
 	 @return the currently hovered node starting at this node as the root
 	 */
 	public Optional<? extends B> hovered() {
-		return this.hoveredDescendant().or(() -> Optional.ofNullable(this.isHovered() ? Util.cast(this) : null));
+		return this.hoveredDescendant().or(() -> Optional.ofNullable(this.isHovered() ? Util2.cast(this) : null));
 	}
 
 	/**
@@ -680,7 +681,7 @@ public abstract class Node<B extends Node<B, ?>, T extends Node<B, T>> extends D
 	 @return the currently focused node starting at this node as the root
 	 */
 	public Optional<? extends B> focused() {
-		return this.focusedDescendant().or(() -> Optional.ofNullable(this.isFocused() ? Util.cast(this) : null));
+		return this.focusedDescendant().or(() -> Optional.ofNullable(this.isFocused() ? Util2.cast(this) : null));
 	}
 
 	/**

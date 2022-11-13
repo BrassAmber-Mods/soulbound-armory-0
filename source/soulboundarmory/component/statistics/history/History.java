@@ -6,7 +6,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.serial.Serializable;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public abstract class History<T extends Record> implements Serializable {
 	private final ReferenceArrayList<T> records = new ReferenceArrayList<>();
@@ -46,7 +46,7 @@ public abstract class History<T extends Record> implements Serializable {
 
 	@Override
 	public void serialize(NbtCompound tag) {
-		tag.put("records", this.records.stream().map(Record::serialize).collect(NbtList::new, NbtList::add, Util::nul)); // Throws if combiner is null.
+		tag.put("records", this.records.stream().map(Record::serialize).collect(NbtList::new, NbtList::add, Util2::nul)); // Throws if combiner is null.
 	}
 
 	protected abstract T skeleton();

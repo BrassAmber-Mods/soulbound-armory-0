@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.stream.Stream;
 import net.auoeke.reflect.Pointer;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public final class Property<T> extends Node {
 	public final Parent parent;
@@ -17,7 +17,7 @@ public final class Property<T> extends Node {
 	private final Pointer field;
 
 	public Property(Parent parent, Field field) {
-		super(Util.value(field, Name::value, field.getName()), Util.value(field, (Category category) -> {
+		super(Util2.value(field, Name::value, field.getName()), Util2.value(field, (Category category) -> {
 			if (field.getDeclaringClass().isAnnotationPresent(ConfigurationFile.class)) {
 				return category.value();
 			}
@@ -27,7 +27,7 @@ public final class Property<T> extends Node {
 
 		this.parent = parent;
 		this.type = field.getType();
-		this.comment = Util.value(field, (Comment comment) -> String.join("\n", comment.value()));
+		this.comment = Util2.value(field, (Comment comment) -> String.join("\n", comment.value()));
 		this.field = Pointer.of(field);
 		this.defaultValue = this.get();
 

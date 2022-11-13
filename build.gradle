@@ -9,7 +9,7 @@ plugins {
 plugins.apply("dev.architectury.loom")
 
 group("net.auoeke")
-version("3.2.1")
+version("3.2.2")
 javaVersion(17)
 
 defaultTasks("genSources")
@@ -113,9 +113,12 @@ tasks.findByName("ideaSyncTask")?.tap {
 }
 
 loom {
-	forge {
-		mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")
-	}
+	forge.mixinConfig(
+		"soulbound-armory.mixins.json",
+		"soulbound-armory.components.mixins.json",
+		"soulbound-armory.text.mixins.json",
+		"soulbound-armory.transform.mixins.json"
+	)
 
 	if (Boolean.getBoolean("idea.sync.active")) {
 		delete(".idea/runConfigurations")

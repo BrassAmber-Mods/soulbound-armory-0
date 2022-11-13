@@ -14,7 +14,7 @@ import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.component.statistics.StatisticType;
 import soulboundarmory.config.Configuration;
 import soulboundarmory.util.EntityUtil;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
 	protected double criticalHitProgress;
@@ -97,7 +97,7 @@ public abstract class WeaponComponent<T extends ItemComponent<T>> extends ItemCo
 
 	@Override
 	public List<Text> tooltip() {
-		var tooltip = Util.list(
+		var tooltip = Util2.list(
 			Translations.tooltipAttackDamage.translate(this.formatValue(StatisticType.attackDamage)),
 			Translations.tooltipAttackSpeed.translate(this.formatValue(StatisticType.attackSpeed))
 		);

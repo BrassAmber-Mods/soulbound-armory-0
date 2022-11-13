@@ -13,7 +13,7 @@ import soulboundarmory.SoulboundArmory;
 import soulboundarmory.command.argument.ItemComponentArgumentType;
 import soulboundarmory.command.argument.RegistryArgumentType;
 import soulboundarmory.component.Components;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public final class ModEvents {
@@ -31,7 +31,7 @@ public final class ModEvents {
 	}
 
 	private static void registerArgumentType(RegisterEvent.RegisterHelper<ArgumentSerializer<?, ?>> helper, String name, Class<?> type, ArgumentSerializer<?, ?> serializer) {
-		ArgumentTypes.registerByClass(Util.cast(type), serializer);
+		ArgumentTypes.registerByClass(Util2.cast(type), serializer);
 		helper.register(name, serializer);
 	}
 }

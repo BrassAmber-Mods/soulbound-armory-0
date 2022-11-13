@@ -8,7 +8,8 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import soulboundarmory.config.Configuration;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Iteratable;
+import soulboundarmory.util.Util2;
 
 /**
  This class adds a transformer that strips inner classes from the wrong environment in order to prevent errors arising from {@link Class#getDeclaredClasses}.
@@ -18,13 +19,16 @@ import soulboundarmory.util.Util;
 @EventBusSubscriber
 public class SideStripper {
 	private static boolean transform(ClassNode type) {
-		var innerClasses = type.innerClasses.listIterator();
+		var innerClasses = Iteratable.of(type.innerClasses);
 		var transformed = false;
 
-		for (var innerClass : Util.iterate(innerClasses)) {
+		for (var innerClass : innerClasses) {
 			var node = new ClassNode();
 			var classFile = Classes.classFile(SideStripper.class.getClassLoader(), innerClass.name);
 
+			if (type.name.contains("Configuration")) {
+				var bp = true;
+			}
 			if (classFile != null) {
 				new ClassReader(classFile).accept(node, ClassReader.SKIP_CODE);
 
@@ -32,9 +36,9 @@ public class SideStripper {
 					var onlyIn = node.visibleAnnotations.stream().filter(annotation -> annotation.desc.equals(OnlyIn.class.descriptorString())).findAny();
 
 					if (onlyIn.isPresent()) {
-						var values = onlyIn.get().values.listIterator();
+						var values = Iteratable.of(onlyIn.get().values);
 
-						for (var value : Util.iterate(values)) {
+						for (var value : values) {
 							if (value instanceof String name && name.equals("value") && values.next() instanceof String[] array && array[0].equals(Dist.class.descriptorString()) && !array[1].equals(FMLEnvironment.dist.name())) {
 								transformed = true;
 								innerClasses.remove();
@@ -51,6 +55,8 @@ public class SideStripper {
 	}
 
 	static {
+		// Load them here in order to prevent a class loading circle later.
+		Classes.cast(Util2.nul(Iteratable.class));
 		TransformerManager.addTransformer(SideStripper::transform);
 	}
 }

@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "soulboundarmory.mixin.mixin",
+	"plugin": "soulboundarmory.module.transform.TransformerManager",
+	"compatibilityLevel": "JAVA_17",
+	"minVersion": "0.8"
+}

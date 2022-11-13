@@ -8,7 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import soulboundarmory.module.gui.widget.Widget;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public final class ScreenDelegate extends Screen {
 	public final Screen parent;
@@ -57,7 +57,7 @@ public final class ScreenDelegate extends Screen {
 
 	@Override
 	public Optional<Element> hoveredElement(double mouseX, double mouseY) {
-		return this.screen.hoveredDescendant().map(Util::cast);
+		return this.screen.hoveredDescendant().map(Util2::cast);
 	}
 
 	@Override

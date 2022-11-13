@@ -40,6 +40,7 @@ import org.objectweb.asm.tree.FieldNode;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.registry.Identifiable;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public class Registrar {
@@ -93,7 +94,7 @@ public class Registrar {
 						var identifier = Util.id(mod.getModId(), value);
 						SoulboundArmory.logger.info("Registering {}.{} to \"{}\" as \"{}\".", ownerName.getInternalName(), field.getName(), event.getRegistryKey().getValue(), identifier);
 						var object = Accessor.getReference(owner, field.getName());
-						event.register(Util.cast(event.getRegistryKey()), helper -> helper.register(identifier, object));
+						event.register(Util2.cast(event.getRegistryKey()), helper -> helper.register(identifier, object));
 
 						if (object instanceof Identifiable) {
 							idPointer.put(object, identifier);

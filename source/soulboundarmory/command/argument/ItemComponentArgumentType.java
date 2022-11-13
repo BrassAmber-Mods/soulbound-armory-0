@@ -8,7 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import soulboundarmory.component.soulbound.item.ItemComponent;
 import soulboundarmory.component.soulbound.item.ItemComponentType;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public class ItemComponentArgumentType<C extends ItemComponent<C>> extends RegistryArgumentType<ItemComponentType<C>> {
 	protected ItemComponentArgumentType() {
@@ -22,7 +22,7 @@ public class ItemComponentArgumentType<C extends ItemComponent<C>> extends Regis
 	@Override public Set<ItemComponentType<C>> parse(StringReader reader) {
 		var cursor = reader.getCursor();
 
-		if (Util.containsIgnoreCase(reader.readString(), "current")) {
+		if (Util2.containsIgnoreCase(reader.readString(), "current")) {
 			return ReferenceOpenHashSet.of();
 		}
 

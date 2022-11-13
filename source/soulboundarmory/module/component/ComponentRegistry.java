@@ -21,6 +21,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import soulboundarmory.SoulboundArmory;
 import soulboundarmory.module.component.access.EntityAccess;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID)
 public final class ComponentRegistry {
@@ -126,25 +127,25 @@ public final class ComponentRegistry {
 	@SubscribeEvent
 	public static void clientTick(TickEvent.ClientTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			Util.each(tickingClient, Component::tickStart);
+			Util2.each(tickingClient, Component::tickStart);
 		} else {
-			Util.each(tickingClient, ItemStackComponent::tickEnd);
+			Util2.each(tickingClient, ItemStackComponent::tickEnd);
 		}
 	}
 
 	@SubscribeEvent
 	public static void serverTick(TickEvent.ServerTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			Util.each(tickingServer, Component::tickStart);
+			Util2.each(tickingServer, Component::tickStart);
 		} else {
-			Util.each(tickingServer, ItemStackComponent::tickEnd);
+			Util2.each(tickingServer, ItemStackComponent::tickEnd);
 		}
 	}
 
 	@SubscribeEvent
 	public static void addComponents(EntityEvent.EntityConstructing event) {
 		entity.values().forEach(key -> {
-			if (key.type.isInstance(event.getEntity()) && (key.predicate == null || key.predicate.test(Util.cast(event.getEntity())))) {
+			if (key.type.isInstance(event.getEntity()) && (key.predicate == null || key.predicate.test(Util2.cast(event.getEntity())))) {
 				key.attach(event.getEntity());
 			}
 		});
@@ -162,7 +163,7 @@ public final class ComponentRegistry {
 			var copy = key.of(event.getEntity());
 
 			if (original != null && copy != null) {
-				original.copy(Util.cast(copy));
+				original.copy(Util2.cast(copy));
 			}
 		}
 	}

@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import soulboundarmory.module.component.access.EntityAccess;
-import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 /**
  A key that corresponds to a registered entity component; used for extracting components from entities.
@@ -24,7 +24,7 @@ public final class EntityComponentKey<C extends EntityComponent<C>> extends Comp
 	@Override
 	public C attach(Entity entity) {
 		if (this.type.isInstance(entity)) {
-			var component = this.instantiate.apply(Util.cast(entity));
+			var component = this.instantiate.apply(Util2.cast(entity));
 			var previous = ((EntityAccess) entity).soulboundarmory$components().put(this, component);
 
 			if (previous != null) {

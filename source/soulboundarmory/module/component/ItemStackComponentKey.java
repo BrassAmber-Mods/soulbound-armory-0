@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import soulboundarmory.module.component.access.ItemStackAccess;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public final class ItemStackComponentKey<C extends ItemStackComponent<C>> extends ComponentKey<ItemStack, C> {
 	ItemStackComponentKey(Identifier id, Predicate<ItemStack> predicate, Function<ItemStack, C> instantiate) {
@@ -15,8 +16,8 @@ public final class ItemStackComponentKey<C extends ItemStackComponent<C>> extend
 
 	@Override
 	public C attach(ItemStack stack) {
-		if (stack != null && (this.predicate == null || this.predicate.test(Util.cast(stack)))) {
-			var component = this.instantiate.apply(Util.cast(stack));
+		if (stack != null && (this.predicate == null || this.predicate.test(Util2.cast(stack)))) {
+			var component = this.instantiate.apply(Util2.cast(stack));
 			var previous = ((ItemStackAccess) (Object) stack).soulboundarmory$component(this, component);
 
 			if (previous != null) {

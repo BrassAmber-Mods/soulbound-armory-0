@@ -19,6 +19,7 @@ import soulboundarmory.component.soulbound.player.MasterComponent;
 import soulboundarmory.module.gui.widget.Widget;
 import soulboundarmory.registry.Identifiable;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 public class ExtendedPacketBuffer extends PacketByteBuf {
 	public ExtendedPacketBuffer() {
@@ -113,7 +114,7 @@ public class ExtendedPacketBuffer extends PacketByteBuf {
 		var id = this.readInt();
 		return Util.isClient()
 			? Optional.ofNullable((T) Widget.client.world.getEntityById(id))
-			: Util.stream(Util.server().getWorlds()).map(world -> (T) world.getEntityById(id)).filter(Objects::nonNull).findAny();
+			: Util2.stream(Util.server().getWorlds()).map(world -> (T) world.getEntityById(id)).filter(Objects::nonNull).findAny();
 	}
 
 	public ExtendedPacketBuffer writeItemComponent(ItemComponent<?> component) {

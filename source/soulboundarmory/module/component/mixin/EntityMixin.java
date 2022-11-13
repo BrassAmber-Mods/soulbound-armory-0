@@ -15,6 +15,7 @@ import soulboundarmory.module.component.EntityComponent;
 import soulboundarmory.module.component.EntityComponentKey;
 import soulboundarmory.module.component.access.EntityAccess;
 import soulboundarmory.util.Util;
+import soulboundarmory.util.Util2;
 
 @Mixin(Entity.class)
 abstract class EntityMixin implements EntityAccess {
@@ -44,7 +45,7 @@ abstract class EntityMixin implements EntityAccess {
 			var originalComponent = key.of(original);
 
 			if (originalComponent != null) {
-				originalComponent.copy(Util.cast(component));
+				originalComponent.copy(Util2.cast(component));
 			}
 		});
 	}
