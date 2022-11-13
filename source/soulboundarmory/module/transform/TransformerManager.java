@@ -39,7 +39,7 @@ public class TransformerManager implements EmptyMixinPlugin {
 		transformers.add(transformer);
 	}
 
-	private static synchronized boolean transform(ClassNode node) {
+	private static boolean transform(ClassNode node) {
 		return transformers.stream().map(transformer -> transformer.test(node)).reduce(false, Boolean::logicalOr);
 	}
 
