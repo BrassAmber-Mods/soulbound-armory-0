@@ -3,4 +3,4 @@
 2. Download the artifact found under "Artifacts".
 3. Unzip the download to get the mod.
 
-[A less up-to-date Modrinth page](https://modrinth.com/mod/soulbound-armory) is also available.
+[A potentially less up-to-date CurseForge page](https://www.curseforge.com/minecraft/mc-mods/soulbound-armory) is also available.
