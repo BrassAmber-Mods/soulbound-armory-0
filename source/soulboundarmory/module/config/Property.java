@@ -40,7 +40,7 @@ public final class Property<T> extends Node {
 		var quotientInterval = field.getAnnotation(QuotientInterval.class);
 
 		if (quotientInterval != null && field.getType() != double.class) {
-			throw new InvalidClassException("@Interval field %s.%s must be of type int".formatted(parent.type.getName(), field.getName()));
+			throw new InvalidClassException("@QuotientInterval field %s.%s must be of type double".formatted(parent.type.getName(), field.getName()));
 		}
 	}
 
