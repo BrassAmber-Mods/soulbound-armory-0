@@ -6,31 +6,31 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.util.math.Matrix4f;
 
 public interface FontRenderer$DrawerAccess {
-    int light();
+	int light();
 
-    float brightnessMultiplier();
+	float brightnessMultiplier();
 
-    float r();
+	float r();
 
-    float g();
+	float g();
 
-    float b();
+	float b();
 
-    float a();
+	float a();
 
-    float x();
+	float x();
 
-    float y();
+	float y();
 
-    boolean shadow();
+	boolean shadow();
 
-    Matrix4f pose();
+	Matrix4f pose();
 
-    List<GlyphRenderer.Rectangle> rectangles();
+	List<GlyphRenderer.Rectangle> rectangles();
 
-    VertexConsumerProvider vertexConsumers();
+	VertexConsumerProvider vertexConsumers();
 
-    float invokeFinish(int underlineColor, float x);
+	float invokeFinish(int underlineColor, float x);
 
-    void invokeAddRectangle(GlyphRenderer.Rectangle rectangle);
+	void invokeAddRectangle(GlyphRenderer.Rectangle rectangle);
 }

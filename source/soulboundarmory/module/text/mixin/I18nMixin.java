@@ -12,10 +12,10 @@ import soulboundarmory.module.text.RomanNumerals;
 @OnlyIn(Dist.CLIENT)
 @Mixin(I18n.class)
 abstract class I18nMixin {
-    @Inject(method = "translate", at = @At("HEAD"), cancellable = true)
-    private static void translate(String key, Object[] args, CallbackInfoReturnable<String> info) {
-        if (key.matches("enchantment\\.level\\.\\d+")) {
-            info.setReturnValue(RomanNumerals.fromDecimal(Integer.parseInt(key.replaceAll("\\D", ""))));
-        }
-    }
+	@Inject(method = "translate", at = @At("HEAD"), cancellable = true)
+	private static void translate(String key, Object[] args, CallbackInfoReturnable<String> info) {
+		if (key.matches("enchantment\\.level\\.\\d+")) {
+			info.setReturnValue(RomanNumerals.fromDecimal(Integer.parseInt(key.replaceAll("\\D", ""))));
+		}
+	}
 }

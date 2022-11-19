@@ -8,19 +8,19 @@ import soulboundarmory.item.SoulboundToolItem;
 import soulboundarmory.module.component.EntityComponentKey;
 
 public class MasterToolComponent extends MasterComponent<MasterToolComponent> {
-    public MasterToolComponent(PlayerEntity player) {
-        super(player);
+	public MasterToolComponent(PlayerEntity player) {
+		super(player);
 
-        this.store(new PickComponent(this));
-    }
+		this.store(new PickComponent(this));
+	}
 
-    @Override
-    public EntityComponentKey<MasterToolComponent> key() {
-        return Components.tool;
-    }
+	@Override
+	public EntityComponentKey<MasterToolComponent> key() {
+		return Components.tool;
+	}
 
-    @Override
-    public boolean accepts(ItemStack stack) {
-        return stack.getItem() instanceof SoulboundToolItem;
-    }
+	@Override
+	public boolean accepts(ItemStack stack) {
+		return stack.getItem() instanceof SoulboundToolItem;
+	}
 }

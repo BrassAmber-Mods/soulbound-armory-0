@@ -14,22 +14,22 @@ import org.objectweb.asm.Type;
 
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public final class ConfigurationManager {
-    private static final Map<Class<?>, ConfigurationInstance> entries = new Reference2ReferenceOpenHashMap<>();
+	private static final Map<Class<?>, ConfigurationInstance> entries = new Reference2ReferenceOpenHashMap<>();
 
-    @SubscribeEvent
-    public static void begin(FMLConstructModEvent event) {
-        var mod = ModLoadingContext.get().getActiveContainer();
-        mod.getModInfo().getOwningFile().getFile().getScanResult().getAnnotations().stream()
-            .collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType))
-            .get(Type.getType(ConfigurationFile.class))
-            .forEach(annotation -> {
-                var instance = new ConfigurationInstance(mod, Classes.load(annotation.clazz().getClassName()));
-                entries.put(instance.type, instance);
-                mod.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> instance.screen(parent).asScreen()));
-            });
-    }
+	@SubscribeEvent
+	public static void begin(FMLConstructModEvent event) {
+		var mod = ModLoadingContext.get().getActiveContainer();
+		mod.getModInfo().getOwningFile().getFile().getScanResult().getAnnotations().stream()
+			.collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType))
+			.get(Type.getType(ConfigurationFile.class))
+			.forEach(annotation -> {
+				var instance = new ConfigurationInstance(mod, Classes.load(annotation.clazz().getClassName()));
+				entries.put(instance.type, instance);
+				mod.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> instance.screen(parent).asScreen()));
+			});
+	}
 
-    public static ConfigurationInstance instance(Class<?> type) {
-        return entries.get(type);
-    }
+	public static ConfigurationInstance instance(Class<?> type) {
+		return entries.get(type);
+	}
 }

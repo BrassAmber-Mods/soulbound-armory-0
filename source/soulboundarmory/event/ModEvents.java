@@ -15,14 +15,14 @@ import soulboundarmory.util.Util;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public final class ModEvents {
-    @SubscribeEvent
-    public static void setup(FMLCommonSetupEvent event) {
-        ArgumentTypes.registerByClass(Util.cast(ItemComponentArgumentType.class), ConstantArgumentSerializer.of(ItemComponentArgumentType::itemComponents));
-        ArgumentTypes.registerByClass(Util.cast(RegistryArgumentType.class), new RegistryArgumentType.Serializer());
-    }
+	@SubscribeEvent
+	public static void setup(FMLCommonSetupEvent event) {
+		ArgumentTypes.registerByClass(Util.cast(ItemComponentArgumentType.class), ConstantArgumentSerializer.of(ItemComponentArgumentType::itemComponents));
+		ArgumentTypes.registerByClass(Util.cast(RegistryArgumentType.class), new RegistryArgumentType.Serializer());
+	}
 
-    @SubscribeEvent
-    public static void registerRegistries(NewRegistryEvent event) {
-        Unsafe.ensureClassInitialized(Components.class);
-    }
+	@SubscribeEvent
+	public static void registerRegistries(NewRegistryEvent event) {
+		Unsafe.ensureClassInitialized(Components.class);
+	}
 }

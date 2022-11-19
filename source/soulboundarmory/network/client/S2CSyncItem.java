@@ -14,9 +14,9 @@ import soulboundarmory.network.ItemComponentPacket;
  - NbtCompound ({@link ItemComponent#serialize(NbtCompound)}) <br>
  */
 public final class S2CSyncItem extends ItemComponentPacket {
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void execute(ItemComponent<?> component) {
-        component.deserialize(this.message.readNbt());
-    }
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void execute(ItemComponent<?> component) {
+		component.deserialize(this.message.readNbt());
+	}
 }

@@ -16,96 +16,96 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import soulboundarmory.module.text.ExtendedFormatting;
 import soulboundarmory.module.text.access.ExtendedStyle;
 import soulboundarmory.module.text.access.FontRenderer$DrawerAccess;
-import soulboundarmory.module.text.ExtendedFormatting;
 
 @SuppressWarnings("public-target")
 @Mixin(targets = "net.minecraft.client.font.TextRenderer$Drawer")
 abstract class FontRenderer$DrawerMixin implements FontRenderer$DrawerAccess {
-    @Override
-    @Accessor("light")
-    public abstract int light();
+	@Override
+	@Accessor("light")
+	public abstract int light();
 
-    @Override
-    @Accessor("brightnessMultiplier")
-    public abstract float brightnessMultiplier();
+	@Override
+	@Accessor("brightnessMultiplier")
+	public abstract float brightnessMultiplier();
 
-    @Override
-    @Accessor("red")
-    public abstract float r();
+	@Override
+	@Accessor("red")
+	public abstract float r();
 
-    @Override
-    @Accessor("green")
-    public abstract float g();
+	@Override
+	@Accessor("green")
+	public abstract float g();
 
-    @Override
-    @Accessor("blue")
-    public abstract float b();
+	@Override
+	@Accessor("blue")
+	public abstract float b();
 
-    @Override
-    @Accessor("alpha")
-    public abstract float a();
+	@Override
+	@Accessor("alpha")
+	public abstract float a();
 
-    @Override
-    @Accessor("x")
-    public abstract float x();
+	@Override
+	@Accessor("x")
+	public abstract float x();
 
-    @Override
-    @Accessor("y")
-    public abstract float y();
+	@Override
+	@Accessor("y")
+	public abstract float y();
 
-    @Override
-    @Accessor("shadow")
-    public abstract boolean shadow();
+	@Override
+	@Accessor("shadow")
+	public abstract boolean shadow();
 
-    @Override
-    @Accessor("matrix")
-    public abstract Matrix4f pose();
+	@Override
+	@Accessor("matrix")
+	public abstract Matrix4f pose();
 
-    @Override
-    @Accessor("rectangles")
-    public abstract List<GlyphRenderer.Rectangle> rectangles();
+	@Override
+	@Accessor("rectangles")
+	public abstract List<GlyphRenderer.Rectangle> rectangles();
 
-    @Override
-    @Accessor("vertexConsumers")
-    public abstract VertexConsumerProvider vertexConsumers();
+	@Override
+	@Accessor("vertexConsumers")
+	public abstract VertexConsumerProvider vertexConsumers();
 
-    @Override
-    @Invoker("drawLayer")
-    public abstract float invokeFinish(int underlineColor, float x);
+	@Override
+	@Invoker("drawLayer")
+	public abstract float invokeFinish(int underlineColor, float x);
 
-    @Override
-    @Invoker("addRectangle")
-    public abstract void invokeAddRectangle(GlyphRenderer.Rectangle rectangle);
+	@Override
+	@Invoker("addRectangle")
+	public abstract void invokeAddRectangle(GlyphRenderer.Rectangle rectangle);
 
-    @Inject(method = "accept",
-            at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/font/TextRenderer$Drawer;x:F"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    public void formatCustom(
-        int charIndex,
-        Style style,
-        int character,
-        CallbackInfoReturnable<Boolean> info,
-        FontStorage font,
-        Glyph glyph,
-        GlyphRenderer glyphRenderer,
-        boolean isBold,
-        float alpha,
-        float red,
-        float green,
-        float blue,
-        TextColor color,
-        float advance
-    ) {
-        for (var formatting : ((ExtendedStyle) style).formattings()) {
-            if ((Object) formatting instanceof ExtendedFormatting extendedFormatting) {
-                var formatter = extendedFormatting.formatter();
+	@Inject(method = "accept",
+	        at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/font/TextRenderer$Drawer;x:F"),
+	        locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+	public void formatCustom(
+		int charIndex,
+		Style style,
+		int character,
+		CallbackInfoReturnable<Boolean> info,
+		FontStorage font,
+		Glyph glyph,
+		GlyphRenderer glyphRenderer,
+		boolean isBold,
+		float alpha,
+		float red,
+		float green,
+		float blue,
+		TextColor color,
+		float advance
+	) {
+		for (var formatting : ((ExtendedStyle) style).formattings()) {
+			if ((Object) formatting instanceof ExtendedFormatting extendedFormatting) {
+				var formatter = extendedFormatting.formatter();
 
-                if (formatter != null) {
-                    formatter.format(this, style, charIndex, character, font, glyph, glyphRenderer, color, red, green, blue, advance);
-                }
-            }
-        }
-    }
+				if (formatter != null) {
+					formatter.format(this, style, charIndex, character, font, glyph, glyphRenderer, color, red, green, blue, advance);
+				}
+			}
+		}
+	}
 }

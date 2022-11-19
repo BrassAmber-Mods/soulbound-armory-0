@@ -17,20 +17,20 @@ import soulboundarmory.network.BufferPacket;
  - ItemStack (unlocked item) <br>
  */
 public final class S2CUnlock extends BufferPacket {
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    protected void execute() {
-        this.message.<AbstractClientPlayerEntity>readEntity().ifPresent(player -> {
-            var marker = Components.marker.of(this.message.readItemStack());
-            Components.entityData.of(player).unlockedStack = Optional.of(marker);
-            marker.unlock();
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	protected void execute() {
+		this.message.<AbstractClientPlayerEntity>readEntity().ifPresent(player -> {
+			var marker = Components.marker.of(this.message.readItemStack());
+			Components.entityData.of(player).unlockedStack = Optional.of(marker);
+			marker.unlock();
 
-            Widget.client.particleManager.addEmitter(player, SoulboundArmory.unlockParticle, 30);
-            player.world.playSound(player.getX(), player.getY(), player.getZ(), SoulboundArmory.unlockSound, player.getSoundCategory(), 1, 1, false);
+			Widget.client.particleManager.addEmitter(player, SoulboundArmory.unlockParticle, 30);
+			player.world.playSound(player.getX(), player.getY(), player.getZ(), SoulboundArmory.unlockSound, player.getSoundCategory(), 1, 1, false);
 
-            if (player == Widget.player()) {
-                Widget.gameRenderer.showFloatingItem(marker.stack);
-            }
-        });
-    }
+			if (player == Widget.player()) {
+				Widget.gameRenderer.showFloatingItem(marker.stack);
+			}
+		});
+	}
 }

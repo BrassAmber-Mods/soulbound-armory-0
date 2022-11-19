@@ -13,9 +13,9 @@ import soulboundarmory.network.ComponentPacket;
  </ul>
  */
 public final class S2CRefresh extends ComponentPacket {
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    protected void execute(MasterComponent<?> component) {
-        component.refresh();
-    }
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	protected void execute(MasterComponent<?> component) {
+		component.refresh();
+	}
 }

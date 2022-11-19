@@ -1,9 +1,9 @@
 package soulboundarmory.util;
 
 public interface Sided {
-    boolean isClient();
+	boolean isClient();
 
-    default boolean isServer() {
-        return !this.isClient();
-    }
+	default boolean isServer() {
+		return !this.isClient();
+	}
 }

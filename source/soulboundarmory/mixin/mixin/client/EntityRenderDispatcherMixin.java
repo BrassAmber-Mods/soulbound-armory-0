@@ -9,9 +9,9 @@ import soulboundarmory.component.Components;
 
 @Mixin(EntityRenderDispatcher.class)
 abstract class EntityRenderDispatcherMixin {
-    @ModifyVariable(method = "render", at = @At(value = "HEAD"), ordinal = 1)
-    float freezeTickDeltaWhileEntityFrozen(float tickDelta, Entity entity) {
-        var component = Components.entityData.of(entity);
-        return component.isFrozen() ? component.tickDelta : tickDelta;
-    }
+	@ModifyVariable(method = "render", at = @At(value = "HEAD"), ordinal = 1)
+	float freezeTickDeltaWhileEntityFrozen(float tickDelta, Entity entity) {
+		var component = Components.entityData.of(entity);
+		return component.isFrozen() ? component.tickDelta : tickDelta;
+	}
 }

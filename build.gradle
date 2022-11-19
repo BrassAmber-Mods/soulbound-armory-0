@@ -1,15 +1,15 @@
 buildscript {
-    dependencies {
-        classpath("net.auoeke:reflect:latest.release")
-    }
+	dependencies {
+		classpath("net.auoeke:reflect:latest.release")
+	}
 }
 
 plugins {
-    id("java")
-    id("maven-publish")
-    id("net.auoeke.gronk").version("2.+")
-    id("dev.architectury.loom").version("latest.release")
-    id("com.github.johnrengelman.shadow").version("latest.release")
+	id("java")
+	id("maven-publish")
+	id("net.auoeke.gronk").version("2.+")
+	id("dev.architectury.loom").version("latest.release")
+	id("com.github.johnrengelman.shadow").version("latest.release")
 }
 
 group("net.auoeke")
@@ -17,109 +17,109 @@ version("3.1.0")
 javaVersion(17)
 
 final versions = [
-    minecraft: "1.19.2",
-    yarn: "17"
+	minecraft: "1.19.2",
+	yarn: "17"
 ]
 
 gronk {
-    uncheck()
+	uncheck()
 }
 
 sourceSets {
-    main {
-        resources.include("assets/", "META-INF/", "pack.mcmeta", "*.json")
-    }
+	main {
+		resources.include("assets/", "META-INF/", "pack.mcmeta", "*.json")
+	}
 
-    dev {
-        java.srcDirs = ["dev"]
-        compileClasspath += main.compileClasspath + main.output
-    }
+	dev {
+		java.srcDirs = ["dev"]
+		compileClasspath += main.compileClasspath + main.output
+	}
 }
 
 configurations {
-    lib {
-        forgeDependencies.extendsFrom(it)
-    }
+	lib {
+		forgeDependencies.extendsFrom(it)
+	}
 }
 
 shadowJar {
-    assemble.dependsOn(it)
-    configurations = [project.configurations.lib]
+	assemble.dependsOn(it)
+	configurations = [project.configurations.lib]
 
-    mergeManifests {
-        include {hasAttribute("MixinConfigs") || hasAttribute("Specification-Title", "reflect")}
-    }
+	mergeManifests {
+		include {hasAttribute("MixinConfigs") || hasAttribute("Specification-Title", "reflect")}
+	}
 }
 
 remapJar {
-    inputFile = shadowJar.archiveFile
+	inputFile = shadowJar.archiveFile
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:" + versions.minecraft)
-    mappings("net.fabricmc:yarn:${versions.minecraft}+build.${versions.yarn}:v2")
-    forge("net.minecraftforge:forge:${versions.minecraft}-+")
+	minecraft("com.mojang:minecraft:" + versions.minecraft)
+	mappings("net.fabricmc:yarn:${versions.minecraft}+build.${versions.yarn}:v2")
+	forge("net.minecraftforge:forge:${versions.minecraft}-+")
 
-    lib(
-        "net.auoeke:lusr",
-        "net.auoeke:reflect",
-	    "net.auoeke:romeral",
-        "net.auoeke:unsafe"
-    )
+	lib(
+		"net.auoeke:lusr",
+		"net.auoeke:reflect",
+		"net.auoeke:romeral",
+		"net.auoeke:unsafe"
+	)
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs << "-nowarn"
+	options.compilerArgs << "-nowarn"
 }
 
 processResources {
-    filesMatching("META-INF/mods.toml") {
-        filter(line -> line.replace("0VERSION", version as String))
-    }
+	filesMatching("META-INF/mods.toml") {
+		filter(line -> line.replace("0VERSION", version as String))
+	}
 }
 
 publishing {
-    repositories {
-        maven(findProperty("maven.repository")) {
-            username(findProperty("maven.username"))
-            password(findProperty("maven.password"))
-        }
-    }
+	repositories {
+		maven(findProperty("maven.repository")) {
+			username(findProperty("maven.username"))
+			password(findProperty("maven.password"))
+		}
+	}
 }
 
 afterEvaluate {
-    genSources {
-        dependsOn = [genSourcesWithFernFlower]
-    }
+	genSources {
+		dependsOn = [genSourcesWithFernFlower]
+	}
 }
 
 loom {
-    forge {
-        mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")
-    }
+	forge {
+		mixinConfig("soulbound-armory.mixins.json", "soulbound-armory.components.mixins.json", "soulbound-armory.text.mixins.json")
+	}
 
-    if (Boolean.getBoolean("idea.sync.active")) {
-        delete(".idea/runConfigurations")
+	if (Boolean.getBoolean("idea.sync.active")) {
+		delete(".idea/runConfigurations")
 
-        // `RunConfigSettings` has a property `project`—which is null—so store the actual project here.
-        def project = this.project
+		// `RunConfigSettings` has a property `project`—which is null—so store the actual project here.
+		final project = this.project
 
-        runs {
-            all {run ->
-                run.vmArgs << "-Dmixin.hotSwap=true"
+		runs {
+			all {run ->
+				run.vmArgs << "-Dmixin.hotSwap=true"
 
-                net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
-                    String put(String key, String value) {
-                        if (key == "MOD_CLASSES") {
-                            // Replace Gradle's output by IntelliJ IDEA's output.
-                            // Gradle's output interferes even if it is specified last.
-                            value = ["main", "dev"]*.with {"main%%" + file("out/production/$project.name.$it")}.join(File.pathSeparator)
-                        }
+				net.auoeke.reflect.Accessor.putReference(run, "envVariables", new HashMap<String, String>() {
+					String put(String key, String value) {
+						if (key == "MOD_CLASSES") {
+							// Replace Gradle's output by IntelliJ IDEA's output.
+							// Gradle's output interferes even if it is specified last.
+							value = ["main", "dev"]*.with {"main%%" + file("out/production/$project.name.$it")}.join(File.pathSeparator)
+						}
 
-                        return super.put(key, value)
-                    }
-                })
-            }
-        }
-    }
+						return super.put(key, value)
+					}
+				})
+			}
+		}
+	}
 }

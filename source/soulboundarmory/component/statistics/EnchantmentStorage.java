@@ -14,70 +14,70 @@ import soulboundarmory.serial.Serializable;
 import soulboundarmory.util.Util;
 
 public class EnchantmentStorage extends Reference2IntLinkedOpenHashMap<Enchantment> implements Iterable<Enchantment>, Serializable {
-    public final EnchantmentHistory history;
+	public final EnchantmentHistory history;
 
-    protected final ItemComponent<?> component;
+	protected final ItemComponent<?> component;
 
-    public EnchantmentStorage(ItemComponent<?> component) {
-        this.component = component;
-        this.history = new EnchantmentHistory(component);
-    }
+	public EnchantmentStorage(ItemComponent<?> component) {
+		this.component = component;
+		this.history = new EnchantmentHistory(component);
+	}
 
-    public void initialize(Predicate<Enchantment> predicate) {
-        ForgeRegistries.ENCHANTMENTS.getValues().stream()
-            .filter(enchantment -> enchantment.type.isAcceptableItem(this.component.item())
-                && !enchantment.isCursed()
-                && !Util.contains(enchantment, Enchantments.UNBREAKING, Enchantments.MENDING))
-            .filter(predicate)
-            .forEach(enchantment -> this.put(enchantment, 0));
-    }
+	public void initialize(Predicate<Enchantment> predicate) {
+		ForgeRegistries.ENCHANTMENTS.getValues().stream()
+			.filter(enchantment -> enchantment.type.isAcceptableItem(this.component.item())
+				&& !enchantment.isCursed()
+				&& !Util.contains(enchantment, Enchantments.UNBREAKING, Enchantments.MENDING))
+			.filter(predicate)
+			.forEach(enchantment -> this.put(enchantment, 0));
+	}
 
-    @Override
-    public Integer get(Object enchantment) {
-        // Can't use getOrDefault here due to recursion.
-        var level = super.get(enchantment);
-        return level == null ? 0 : level;
-    }
+	@Override
+	public Integer get(Object enchantment) {
+		// Can't use getOrDefault here due to recursion.
+		var level = super.get(enchantment);
+		return level == null ? 0 : level;
+	}
 
-    public void add(Enchantment enchantment, int levels) {
-        this.put(enchantment, this.get(enchantment) + levels);
-        this.history.record(enchantment, levels);
-    }
+	public void add(Enchantment enchantment, int levels) {
+		this.put(enchantment, this.get(enchantment) + levels);
+		this.history.record(enchantment, levels);
+	}
 
-    public void reset() {
-        for (var enchantment : this) {
-            this.put(enchantment, 0);
-        }
-    }
+	public void reset() {
+		for (var enchantment : this) {
+			this.put(enchantment, 0);
+		}
+	}
 
-    @Override
-    public void serialize(NbtCompound tag) {
-        for (var enchantment : this) {
-            var level = this.get(enchantment);
+	@Override
+	public void serialize(NbtCompound tag) {
+		for (var enchantment : this) {
+			var level = this.get(enchantment);
 
-            if (level != null) {
-                var identifier = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
+			if (level != null) {
+				var identifier = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
 
-                if (identifier != null) {
-                    tag.putInt(identifier.toString(), level);
-                }
-            }
-        }
-    }
+				if (identifier != null) {
+					tag.putInt(identifier.toString(), level);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void deserialize(NbtCompound tag) {
-        for (var key : tag.getKeys()) {
-            var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new Identifier(key));
+	@Override
+	public void deserialize(NbtCompound tag) {
+		for (var key : tag.getKeys()) {
+			var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new Identifier(key));
 
-            if (this.containsKey(enchantment)) {
-                this.put(enchantment, tag.getInt(key));
-            }
-        }
-    }
+			if (this.containsKey(enchantment)) {
+				this.put(enchantment, tag.getInt(key));
+			}
+		}
+	}
 
-    @Override
-    public Iterator<Enchantment> iterator() {
-        return this.keySet().iterator();
-    }
+	@Override
+	public Iterator<Enchantment> iterator() {
+		return this.keySet().iterator();
+	}
 }

@@ -10,56 +10,56 @@ import soulboundarmory.skill.SkillInstance;
 import soulboundarmory.skill.Skills;
 
 public final class SkillRecord extends Record {
-    private Skill skill;
-    private int points;
+	private Skill skill;
+	private int points;
 
-    public SkillRecord(ItemComponent<?> component, Skill skill, int points) {
-        super(component);
+	public SkillRecord(ItemComponent<?> component, Skill skill, int points) {
+		super(component);
 
-        this.skill = skill;
-        this.points = points;
-    }
+		this.skill = skill;
+		this.points = points;
+	}
 
-    public SkillRecord(ItemComponent<?> component) {
-        super(component);
-    }
+	public SkillRecord(ItemComponent<?> component) {
+		super(component);
+	}
 
-    @Override
-    public boolean revert(int level) {
-        var interval = Configuration.levelsPerSkillPoint;
-        var change = this.component.level() / interval - level / interval;
-        var deduction = Math.min(this.points, change);
+	@Override
+	public boolean revert(int level) {
+		var interval = Configuration.levelsPerSkillPoint;
+		var change = this.component.level() / interval - level / interval;
+		var deduction = Math.min(this.points, change);
 
-        if (deduction > 0) {
-            this.component.add(StatisticType.skillPoints, -deduction);
-            this.skill().downgrade();
-            this.points -= deduction;
+		if (deduction > 0) {
+			this.component.add(StatisticType.skillPoints, -deduction);
+			this.skill().downgrade();
+			this.points -= deduction;
 
-            return this.points + deduction >= change;
-        }
+			return this.points + deduction >= change;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public void pop() {
-        this.component.skill(this.skill).downgrade();
-        this.component.add(StatisticType.skillPoints, -this.points);
-    }
+	@Override
+	public void pop() {
+		this.component.skill(this.skill).downgrade();
+		this.component.add(StatisticType.skillPoints, -this.points);
+	}
 
-    @Override
-    public void deserialize(NbtCompound tag) {
-        this.skill = Skills.registry().getValue(new Identifier(tag.getString("skill")));
-        this.points = tag.getInt("points");
-    }
+	@Override
+	public void deserialize(NbtCompound tag) {
+		this.skill = Skills.registry().getValue(new Identifier(tag.getString("skill")));
+		this.points = tag.getInt("points");
+	}
 
-    @Override
-    public void serialize(NbtCompound tag) {
-        tag.putString("skill", this.skill.string());
-        tag.putInt("points", this.points);
-    }
+	@Override
+	public void serialize(NbtCompound tag) {
+		tag.putString("skill", this.skill.string());
+		tag.putInt("points", this.points);
+	}
 
-    private SkillInstance skill() {
-        return this.component.skill(this.skill);
-    }
+	private SkillInstance skill() {
+		return this.component.skill(this.skill);
+	}
 }

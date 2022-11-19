@@ -8,11 +8,11 @@ import net.minecraft.util.collection.DefaultedList;
 import soulboundarmory.mixin.mixin.access.PlayerInventoryAccess;
 
 public class ItemUtil {
-    public static Stream<ItemStack> inventory(PlayerEntity player) {
-        return ((PlayerInventoryAccess) player.getInventory()).combinedInventory().stream().flatMap(DefaultedList::stream);
-    }
+	public static Stream<ItemStack> inventory(PlayerEntity player) {
+		return ((PlayerInventoryAccess) player.getInventory()).combinedInventory().stream().flatMap(DefaultedList::stream);
+	}
 
-    public static Stream<ItemStack> handStacks(Entity entity) {
-        return Util.stream(entity.getHandItems());
-    }
+	public static Stream<ItemStack> handStacks(Entity entity) {
+		return Util.stream(entity.getHandItems());
+	}
 }

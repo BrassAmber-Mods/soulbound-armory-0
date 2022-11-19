@@ -1,35 +1,35 @@
 {
-    "required": true,
-    "package": "soulboundarmory.mixin.mixin",
-    "compatibilityLevel": "JAVA_17",
-    "minVersion": "0.8",
-    "mixins": [
-        "ServerPlayNetworkHandlerMixin",
-        "ServerPlayerInteractionManagerMixin",
-        "BlockMixin",
-        "ItemMixin",
-        "ItemStackMixin",
-        "MiningToolItemMixin",
-        "AbstractBlockStateMixin",
-        "access.PlayerInventoryAccess",
-        "entity.EntityAttributeModifierMixin",
-        "entity.LightningEntityMixin",
-        "entity.LivingEntityMixin",
-        "entity.OperationMixin",
-        "entity.PersistentProjectileEntityMixin",
-        "entity.PlayerEntityMixin",
-        "entity.PlayerInventoryMixin"
-    ],
-    "injectors": {
-        "defaultRequire": 1,
-        "maxShiftBy": 5
-    },
-    "client": [
-        "client.EntityRenderDispatcherMixin",
-        "client.GameRendererMixin",
-        "client.HeldItemRendererMixin",
-        "client.InGameHudMixin",
-        "client.KeyboardMixin",
-        "client.LivingEntityRendererMixin"
-    ]
+	"required": true,
+	"package": "soulboundarmory.mixin.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"minVersion": "0.8",
+	"mixins": [
+		"AbstractBlockStateMixin",
+		"BlockMixin",
+		"ItemMixin",
+		"ItemStackMixin",
+		"MiningToolItemMixin",
+		"ServerPlayerInteractionManagerMixin",
+		"ServerPlayNetworkHandlerMixin",
+		"access.PlayerInventoryAccess",
+		"entity.EntityAttributeModifierMixin",
+		"entity.LightningEntityMixin",
+		"entity.LivingEntityMixin",
+		"entity.OperationMixin",
+		"entity.PersistentProjectileEntityMixin",
+		"entity.PlayerEntityMixin",
+		"entity.PlayerInventoryMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1,
+		"maxShiftBy": 5
+	},
+	"client": [
+		"client.EntityRenderDispatcherMixin",
+		"client.GameRendererMixin",
+		"client.HeldItemRendererMixin",
+		"client.InGameHudMixin",
+		"client.KeyboardMixin",
+		"client.LivingEntityRendererMixin"
+	]
 }

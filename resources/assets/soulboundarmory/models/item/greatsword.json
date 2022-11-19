@@ -1,96 +1,96 @@
 {
-    "parent": "item/handheld",
-    "textures": {
-        "layer0": "soulboundarmory:item/greatsword/0"
-    },
-    "overrides": [
-        {
-            "predicate": {
-                "soulboundarmory:animating": 1
-            },
-            "model": "soulboundarmory:item/greatsword/animation"
-        },
-        {
-            "predicate": {
-                "soulboundarmory:level": 50
-            },
-            "model": "soulboundarmory:item/greatsword/50"
-        },
-        {
-            "predicate": {
-                "soulboundarmory:level": 100
-            },
-            "model": "soulboundarmory:item/greatsword/100"
-        }
-    ],
-    "display": {
-        "thirdperson_righthand": {
-            "rotation": [
-                0,
-                -90,
-                55
-            ],
-            "translation": [
-                0,
-                16.0,
-                0
-            ],
-            "scale": [
-                2,
-                2,
-                2
-            ]
-        },
-        "thirdperson_lefthand": {
-            "rotation": [
-                0,
-                90,
-                -55
-            ],
-            "translation": [
-                0,
-                16.0,
-                0
-            ],
-            "scale": [
-                2,
-                2,
-                2
-            ]
-        },
-        "firstperson_righthand": {
-            "rotation": [
-                0,
-                -90,
-                25
-            ],
-            "translation": [
-                1,
-                5,
-                1
-            ],
-            "scale": [
-                1,
-                0.9,
-                1
-            ]
-        },
-        "firstperson_lefthand": {
-            "rotation": [
-                0,
-                90,
-                -25
-            ],
-            "translation": [
-                1,
-                5,
-                1
-            ],
-            "scale": [
-                1,
-                0.9,
-                1
-            ]
-        }
-    }
+	"parent": "item/handheld",
+	"textures": {
+		"layer0": "soulboundarmory:item/greatsword/0"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"soulboundarmory:animating": 1
+			},
+			"model": "soulboundarmory:item/greatsword/animation"
+		},
+		{
+			"predicate": {
+				"soulboundarmory:level": 50
+			},
+			"model": "soulboundarmory:item/greatsword/50"
+		},
+		{
+			"predicate": {
+				"soulboundarmory:level": 100
+			},
+			"model": "soulboundarmory:item/greatsword/100"
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [
+				0,
+				-90,
+				55
+			],
+			"translation": [
+				0,
+				16.0,
+				0
+			],
+			"scale": [
+				2,
+				2,
+				2
+			]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [
+				0,
+				90,
+				-55
+			],
+			"translation": [
+				0,
+				16.0,
+				0
+			],
+			"scale": [
+				2,
+				2,
+				2
+			]
+		},
+		"firstperson_righthand": {
+			"rotation": [
+				0,
+				-90,
+				25
+			],
+			"translation": [
+				1,
+				5,
+				1
+			],
+			"scale": [
+				1,
+				0.9,
+				1
+			]
+		},
+		"firstperson_lefthand": {
+			"rotation": [
+				0,
+				90,
+				-25
+			],
+			"translation": [
+				1,
+				5,
+				1
+			],
+			"scale": [
+				1,
+				0.9,
+				1
+			]
+		}
+	}
 }

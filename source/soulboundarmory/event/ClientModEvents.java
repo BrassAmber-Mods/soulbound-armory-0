@@ -22,36 +22,36 @@ import soulboundarmory.util.Util;
 
 @EventBusSubscriber(value = Dist.CLIENT, modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
-    @SubscribeEvent public static void registerTooltipComponentFactory(RegisterClientTooltipComponentFactoriesEvent event) {
-        event.register(ItemMarkerComponent.class, ItemMarkerComponent::tooltip);
-    }
+	@SubscribeEvent public static void registerTooltipComponentFactory(RegisterClientTooltipComponentFactoriesEvent event) {
+		event.register(ItemMarkerComponent.class, ItemMarkerComponent::tooltip);
+	}
 
-    @SubscribeEvent public static void clientSetup(FMLClientSetupEvent event) {
-        ForgeRegistries.ITEMS.getValues().stream().filter(SoulboundItem.class::isInstance).forEach(item -> {
-                ModelPredicateProviderRegistry.register(
-                    item,
-                    Util.id("animating"),
-                    (stack, world, holder, entityID) -> Components.marker.optional(stack)
-                        .filter(ItemMarkerComponent::animating)
-                        .or(() -> Components.entityData.optional(holder).flatMap(data -> data.unlockedStack).filter(marker -> marker.animating() && marker.item() != null && marker.item().accepts(stack)))
-                        .isPresent() ? 1 : 0
-                );
+	@SubscribeEvent public static void clientSetup(FMLClientSetupEvent event) {
+		ForgeRegistries.ITEMS.getValues().stream().filter(SoulboundItem.class::isInstance).forEach(item -> {
+				ModelPredicateProviderRegistry.register(
+					item,
+					Util.id("animating"),
+					(stack, world, holder, entityID) -> Components.marker.optional(stack)
+						.filter(ItemMarkerComponent::animating)
+						.or(() -> Components.entityData.optional(holder).flatMap(data -> data.unlockedStack).filter(marker -> marker.animating() && marker.item() != null && marker.item().accepts(stack)))
+						.isPresent() ? 1 : 0
+				);
 
-                ModelPredicateProviderRegistry.register(
-                    item,
-                    Util.id("level"),
-                    (stack, world, holder, entityID) -> Components.marker.optional(stack).flatMap(ItemMarkerComponent::optionalItem).map(ItemComponent::level).orElse(0)
-                );
-            }
-        );
-    }
+				ModelPredicateProviderRegistry.register(
+					item,
+					Util.id("level"),
+					(stack, world, holder, entityID) -> Components.marker.optional(stack).flatMap(ItemMarkerComponent::optionalItem).map(ItemComponent::level).orElse(0)
+				);
+			}
+		);
+	}
 
-    @SubscribeEvent public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(SoulboundDaggerEntity.type, SoulboundDaggerEntityRenderer::new);
-    }
+	@SubscribeEvent public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+		event.registerEntityRenderer(SoulboundDaggerEntity.type, SoulboundDaggerEntityRenderer::new);
+	}
 
-    @SubscribeEvent public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
-        event.register(SoulboundArmory.criticalHitParticleType, DamageParticle.Factory::new);
-        event.register(SoulboundArmory.unlockParticle, UnlockParticle.Factory::new);
-    }
+	@SubscribeEvent public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
+		event.register(SoulboundArmory.criticalHitParticleType, DamageParticle.Factory::new);
+		event.register(SoulboundArmory.unlockParticle, UnlockParticle.Factory::new);
+	}
 }

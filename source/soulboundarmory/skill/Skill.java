@@ -24,89 +24,89 @@ import soulboundarmory.util.Util;
  */
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public abstract class Skill extends Identifiable {
-    public final int maxLevel;
+	public final int maxLevel;
 
-    protected final Identifier texture;
+	protected final Identifier texture;
 
-    private int tier = -1;
+	private int tier = -1;
 
-    public Skill(Identifier identifier, int maxLevel) {
-        this.texture = new Identifier(identifier.getNamespace(), "textures/skill/%s.png".formatted(identifier.getPath()));
-        this.maxLevel = maxLevel;
-    }
+	public Skill(Identifier identifier, int maxLevel) {
+		this.texture = new Identifier(identifier.getNamespace(), "textures/skill/%s.png".formatted(identifier.getPath()));
+		this.maxLevel = maxLevel;
+	}
 
-    public Skill(String path, int maxLevel) {
-        this(Util.id(path), maxLevel);
-    }
+	public Skill(String path, int maxLevel) {
+		this(Util.id(path), maxLevel);
+	}
 
-    public Skill(String path) {
-        this(path, -1);
-    }
+	public Skill(String path) {
+		this(path, -1);
+	}
 
-    /**
-     @param level the next level; 1 is the level reached after unlocking; never <= 0.
-     @return the cost of unlocking or upgrading this skill; never < 0
-     */
-    public abstract int cost(int level);
+	/**
+	 @param level the next level; 1 is the level reached after unlocking; never <= 0.
+	 @return the cost of unlocking or upgrading this skill; never < 0
+	 */
+	public abstract int cost(int level);
 
-    /**
-     @return whether this skill has multiple levels
-     */
-    public final boolean isTiered() {
-        return this.maxLevel != 1;
-    }
+	/**
+	 @return whether this skill has multiple levels
+	 */
+	public final boolean isTiered() {
+		return this.maxLevel != 1;
+	}
 
-    /**
-     A skill's tier is the number of levels of dependencies that it has.
+	/**
+	 A skill's tier is the number of levels of dependencies that it has.
 
-     @return this skill's tier
-     */
-    public final int tier() {
-        return this.tier;
-    }
+	 @return this skill's tier
+	 */
+	public final int tier() {
+		return this.tier;
+	}
 
-    public Set<Skill> dependencies() {
-        return Collections.emptySet();
-    }
+	public Set<Skill> dependencies() {
+		return Collections.emptySet();
+	}
 
-    public boolean hasDependencies() {
-        return !this.dependencies().isEmpty();
-    }
+	public boolean hasDependencies() {
+		return !this.dependencies().isEmpty();
+	}
 
-    public Text name() {
-        return Translations.skillName(this);
-    }
+	public Text name() {
+		return Translations.skillName(this);
+	}
 
-    public List<? extends StringVisitable> tooltip() {
-        return Translations.skillDescription(this);
-    }
+	public List<? extends StringVisitable> tooltip() {
+		return Translations.skillDescription(this);
+	}
 
-    /**
-     Render an icon of this skill.
-     */
-    @OnlyIn(Dist.CLIENT)
-    public void render(Widget<?> tab, int level) {
-        Widget.shaderTexture(this.texture);
-        DrawableHelper.drawTexture(tab.matrixes, tab.absoluteX(), tab.absoluteY(), tab.z(), 0, 0, 16, 16, 16, 16);
-    }
+	/**
+	 Render an icon of this skill.
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public void render(Widget<?> tab, int level) {
+		Widget.shaderTexture(this.texture);
+		DrawableHelper.drawTexture(tab.matrixes, tab.absoluteX(), tab.absoluteY(), tab.z(), 0, 0, 16, 16, 16, 16);
+	}
 
-    /**
-     Register dependencies for this skill.
-     Must be invoked <b>after</b> all skills are initialized.
-     */
-     private void initializeDependencies() {
-        if (this.tier == -1) {
-            this.tier = this.hasDependencies() ? 1 : 0;
+	/**
+	 Register dependencies for this skill.
+	 Must be invoked <b>after</b> all skills are initialized.
+	 */
+	private void initializeDependencies() {
+		if (this.tier == -1) {
+			this.tier = this.hasDependencies() ? 1 : 0;
 
-            for (var dependency : this.dependencies()) {
-                dependency.initializeDependencies();
-                this.tier = Math.max(this.tier, dependency.tier() + 1);
-            }
-        }
-    }
+			for (var dependency : this.dependencies()) {
+				dependency.initializeDependencies();
+				this.tier = Math.max(this.tier, dependency.tier() + 1);
+			}
+		}
+	}
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void initializeDependencies(RegisterEvent event) {
-         event.register(Skills.registry().getRegistryKey(), helper -> Skills.registry().forEach(Skill::initializeDependencies));
-    }
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void initializeDependencies(RegisterEvent event) {
+		event.register(Skills.registry().getRegistryKey(), helper -> Skills.registry().forEach(Skill::initializeDependencies));
+	}
 }

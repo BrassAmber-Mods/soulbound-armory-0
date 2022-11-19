@@ -21,69 +21,69 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 
 public class RegistryArgumentType<T> implements ArgumentType<Set<T>> {
-    protected final IForgeRegistry<T> registry;
+	protected final IForgeRegistry<T> registry;
 
-    protected RegistryArgumentType(IForgeRegistry<T> registry) {
-        this.registry = registry;
-    }
+	protected RegistryArgumentType(IForgeRegistry<T> registry) {
+		this.registry = registry;
+	}
 
-    public static <T> RegistryArgumentType<T> registry(IForgeRegistry<T> registry) {
-        return new RegistryArgumentType<>(registry);
-    }
+	public static <T> RegistryArgumentType<T> registry(IForgeRegistry<T> registry) {
+		return new RegistryArgumentType<>(registry);
+	}
 
-    public static <T> Set<T> get(CommandContext<?> context, String name) {
-        return context.getArgument(name, Set.class);
-    }
+	public static <T> Set<T> get(CommandContext<?> context, String name) {
+		return context.getArgument(name, Set.class);
+	}
 
-    @Override public Set<T> parse(StringReader reader) {
-        var input = reader.readString();
+	@Override public Set<T> parse(StringReader reader) {
+		var input = reader.readString();
 
-        if (input.equalsIgnoreCase("all")) {
-            return new ReferenceOpenHashSet<>(this.registry.getValues());
-        }
+		if (input.equalsIgnoreCase("all")) {
+			return new ReferenceOpenHashSet<>(this.registry.getValues());
+		}
 
-        for (var name : this.registry.getKeys()) {
-            if (input.equalsIgnoreCase(name.toString()) || input.equalsIgnoreCase(name.getPath())) {
-                return ReferenceSet.of(this.registry.getValue(name));
-            }
-        }
+		for (var name : this.registry.getKeys()) {
+			if (input.equalsIgnoreCase(name.toString()) || input.equalsIgnoreCase(name.getPath())) {
+				return ReferenceSet.of(this.registry.getValue(name));
+			}
+		}
 
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.literalIncorrect().createWithContext(reader, input);
-    }
+		throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.literalIncorrect().createWithContext(reader, input);
+	}
 
-    @Override public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(this.suggestions(context, builder), builder);
-    }
+	@Override public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+		return CommandSource.suggestMatching(this.suggestions(context, builder), builder);
+	}
 
-    protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return Stream.concat(Stream.of("all"), this.registry.getKeys().stream().map(Identifier::getPath));
-    }
+	protected <S> Stream<String> suggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+		return Stream.concat(Stream.of("all"), this.registry.getKeys().stream().map(Identifier::getPath));
+	}
 
-    public static class Serializer<T> implements ArgumentSerializer<RegistryArgumentType<T>, Serializer.Properties<T>> {
-        @Override public void writePacket(Serializer.Properties properties, PacketByteBuf buf) {
-            buf.writeIdentifier(properties.registry.getRegistryName());
-        }
+	public static class Serializer<T> implements ArgumentSerializer<RegistryArgumentType<T>, Serializer.Properties<T>> {
+		@Override public void writePacket(Serializer.Properties properties, PacketByteBuf buf) {
+			buf.writeIdentifier(properties.registry.getRegistryName());
+		}
 
-        @Override public Properties<T> fromPacket(PacketByteBuf buf) {
-            return new Properties<>(this, RegistryManager.ACTIVE.getRegistry(buf.readIdentifier()));
-        }
+		@Override public Properties<T> fromPacket(PacketByteBuf buf) {
+			return new Properties<>(this, RegistryManager.ACTIVE.getRegistry(buf.readIdentifier()));
+		}
 
-        @Override public void writeJson(Serializer.Properties properties, JsonObject json) {
-            json.addProperty("registry", properties.registry.getRegistryName().toString());
-        }
+		@Override public void writeJson(Serializer.Properties properties, JsonObject json) {
+			json.addProperty("registry", properties.registry.getRegistryName().toString());
+		}
 
-        @Override public Properties<T> getArgumentTypeProperties(RegistryArgumentType<T> argumentType) {
-            return new Properties<>(this, argumentType.registry);
-        }
+		@Override public Properties<T> getArgumentTypeProperties(RegistryArgumentType<T> argumentType) {
+			return new Properties<>(this, argumentType.registry);
+		}
 
-        private record Properties<T>(Serializer serializer, IForgeRegistry<T> registry) implements ArgumentTypeProperties<RegistryArgumentType<T>> {
-            @Override public RegistryArgumentType<T> createType(CommandRegistryAccess commandRegistryAccess) {
-                return RegistryArgumentType.registry(this.registry);
-            }
+		private record Properties<T>(Serializer serializer, IForgeRegistry<T> registry) implements ArgumentTypeProperties<RegistryArgumentType<T>> {
+			@Override public RegistryArgumentType<T> createType(CommandRegistryAccess commandRegistryAccess) {
+				return RegistryArgumentType.registry(this.registry);
+			}
 
-            @Override public ArgumentSerializer<RegistryArgumentType<T>, ?> getSerializer() {
-                return this.serializer;
-            }
-        }
-    }
+			@Override public ArgumentSerializer<RegistryArgumentType<T>, ?> getSerializer() {
+				return this.serializer;
+			}
+		}
+	}
 }

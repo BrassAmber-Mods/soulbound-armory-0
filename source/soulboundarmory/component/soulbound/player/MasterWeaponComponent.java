@@ -12,23 +12,23 @@ import soulboundarmory.item.SoulboundWeaponItem;
 import soulboundarmory.module.component.EntityComponentKey;
 
 public class MasterWeaponComponent extends MasterComponent<MasterWeaponComponent> {
-    public MasterWeaponComponent(PlayerEntity player) {
-        super(player);
+	public MasterWeaponComponent(PlayerEntity player) {
+		super(player);
 
-        this.store(new DaggerComponent(this));
-        this.store(new SwordComponent(this));
-        this.store(new BigswordComponent(this));
-        this.store(new GreatswordComponent(this));
-        this.store(new TridentComponent(this));
-    }
+		this.store(new DaggerComponent(this));
+		this.store(new SwordComponent(this));
+		this.store(new BigswordComponent(this));
+		this.store(new GreatswordComponent(this));
+		this.store(new TridentComponent(this));
+	}
 
-    @Override
-    public EntityComponentKey<MasterWeaponComponent> key() {
-        return Components.weapon;
-    }
+	@Override
+	public EntityComponentKey<MasterWeaponComponent> key() {
+		return Components.weapon;
+	}
 
-    @Override
-    public boolean accepts(ItemStack stack) {
-        return stack.getItem() instanceof SoulboundWeaponItem;
-    }
+	@Override
+	public boolean accepts(ItemStack stack) {
+		return stack.getItem() instanceof SoulboundWeaponItem;
+	}
 }

@@ -8,8 +8,8 @@ import soulboundarmory.entity.SoulboundDaggerEntity;
 
 @Mixin(PersistentProjectileEntity.class)
 abstract class PersistentProjectileEntityMixin {
-    @ModifyVariable(method = "tick", ordinal = 0, at = @At(value = "LOAD", ordinal = 2))
-    private boolean enableEntityCollisionForNoClipSoulboundDagger(boolean noClip) {
-        return noClip && !((Object) this instanceof SoulboundDaggerEntity);
-    }
+	@ModifyVariable(method = "tick", ordinal = 0, at = @At(value = "LOAD", ordinal = 2))
+	private boolean enableEntityCollisionForNoClipSoulboundDagger(boolean noClip) {
+		return noClip && !((Object) this instanceof SoulboundDaggerEntity);
+	}
 }

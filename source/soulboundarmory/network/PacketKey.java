@@ -12,80 +12,79 @@ import soulboundarmory.util.Util;
  A key to a registered packet type; used for sending packets.
 
  @param <T> the message type of {@link P}
- @param <P> the packet type to which this key corresponds
- */
+ @param <P> the packet type to which this key corresponds */
 public abstract sealed class PacketKey<T, P extends Packet<T>> permits PacketKey.Client, PacketKey.Server {
-    public final Class<P> type;
+	public final Class<P> type;
 
-    protected PacketKey(Class<P> type) {
-        this.type = type;
-    }
+	protected PacketKey(Class<P> type) {
+		this.type = type;
+	}
 
-    protected final P store(T message) {
-        var packet = this.instantiate();
-        packet.message = message;
+	protected final P store(T message) {
+		var packet = this.instantiate();
+		packet.message = message;
 
-        return packet;
-    }
+		return packet;
+	}
 
-    /**
-     Instantiate a packet of the registered type.
-     */
-    final P instantiate() {
-        return Constructors.instantiate(this.type);
-    }
+	/**
+	 Instantiate a packet of the registered type.
+	 */
+	final P instantiate() {
+		return Constructors.instantiate(this.type);
+	}
 
-    /**
-     A server-to-client packet key.
-     */
-    public static final class Client<T, P extends Packet<T>> extends PacketKey<T, P> {
-        Client(Class<P> type) {
-            super(type);
-        }
+	/**
+	 A server-to-client packet key.
+	 */
+	public static final class Client<T, P extends Packet<T>> extends PacketKey<T, P> {
+		Client(Class<P> type) {
+			super(type);
+		}
 
-        /**
-         Send a message from the server to a client.
-         */
-        public void send(Entity player, T message) {
-            SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
-        }
+		/**
+		 Send a message from the server to a client.
+		 */
+		public void send(Entity player, T message) {
+			SoulboundArmory.channel.sendTo(this.store(message), ((ServerPlayerEntity) player).networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+		}
 
-        public void sendIfServer(Entity player, T message) {
-            if (!player.world.isClient) {
-                this.send(player, message);
-            }
-        }
+		public void sendIfServer(Entity player, T message) {
+			if (!player.world.isClient) {
+				this.send(player, message);
+			}
+		}
 
-        public void sendNearby(Entity entity, T message) {
-            SoulboundArmory.channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), this.store(message));
-        }
+		public void sendNearby(Entity entity, T message) {
+			SoulboundArmory.channel.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), this.store(message));
+		}
 
-        public void sendNearbyIfServer(Entity entity, T message) {
-            if (!entity.world.isClient) {
-                this.sendNearby(entity, message);
-            }
-        }
-    }
+		public void sendNearbyIfServer(Entity entity, T message) {
+			if (!entity.world.isClient) {
+				this.sendNearby(entity, message);
+			}
+		}
+	}
 
-    /**
-     A client-to-server packet key.
-     */
-    public static final class Server<T, P extends Packet<T>> extends PacketKey<T, P> {
-        Server(Class<P> type) {
-            super(type);
-        }
+	/**
+	 A client-to-server packet key.
+	 */
+	public static final class Server<T, P extends Packet<T>> extends PacketKey<T, P> {
+		Server(Class<P> type) {
+			super(type);
+		}
 
-        /**
-         Send a message from the client to the server.
-         */
-        public void send(T message) {
-            SoulboundArmory.channel.sendToServer(this.store(message));
-        }
+		/**
+		 Send a message from the client to the server.
+		 */
+		public void send(T message) {
+			SoulboundArmory.channel.sendToServer(this.store(message));
+		}
 
-        public void sendIfClient(T message) {
-            if (Util.isClient()) {
-                this.send(message);
-            }
-        }
-    }
+		public void sendIfClient(T message) {
+			if (Util.isClient()) {
+				this.send(message);
+			}
+		}
+	}
 }

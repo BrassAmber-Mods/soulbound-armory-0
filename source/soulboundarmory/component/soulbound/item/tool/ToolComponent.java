@@ -24,140 +24,140 @@ import soulboundarmory.item.SoulboundItems;
 import soulboundarmory.skill.Skills;
 
 public abstract class ToolComponent<T extends ItemComponent<T>> extends ItemComponent<T> {
-    protected ToolMaterial material = ToolMaterials.WOOD;
-    protected ToolMaterial nextMaterial;
+	protected ToolMaterial material = ToolMaterials.WOOD;
+	protected ToolMaterial nextMaterial;
 
-    public ToolComponent(MasterComponent<?> component) {
-        super(component);
+	public ToolComponent(MasterComponent<?> component) {
+		super(component);
 
-        this.skills.add(Skills.absorption, Skills.circumspection);
-    }
+		this.skills.add(Skills.absorption, Skills.circumspection);
+	}
 
-    public Text materialName() {
-        return Translations.toolMaterial(this.material);
-    }
+	public Text materialName() {
+		return Translations.toolMaterial(this.material);
+	}
 
-    public void absorb() {
-        var stack = this.player.getOffHandStack();
+	public void absorb() {
+		var stack = this.player.getOffHandStack();
 
-        if (stack.getItem() instanceof ToolItem tool && this.canAbsorb(stack)) {
-            var tiers = TierSortingRegistry.getSortedTiers();
+		if (stack.getItem() instanceof ToolItem tool && this.canAbsorb(stack)) {
+			var tiers = TierSortingRegistry.getSortedTiers();
 
-            if (tiers.indexOf(this.nextMaterial == null ? this.material : this.nextMaterial) >= tiers.indexOf(tool.getMaterial())) {
-                this.player.sendMessage(Translations.cannotAbsorbWeaker, true);
-            } else {
-                if (stack.isDamaged()) {
-                    this.player.sendMessage(Translations.cannotAbsorbDamaged, true);
-                } else {
-                    stack.setCount(0);
-                    this.nextMaterial = tool.getMaterial();
-                    this.statistic(StatisticType.upgradeProgress).max(1);
-                    this.synchronize();
-                }
-            }
-        }
-    }
+			if (tiers.indexOf(this.nextMaterial == null ? this.material : this.nextMaterial) >= tiers.indexOf(tool.getMaterial())) {
+				this.player.sendMessage(Translations.cannotAbsorbWeaker, true);
+			} else {
+				if (stack.isDamaged()) {
+					this.player.sendMessage(Translations.cannotAbsorbDamaged, true);
+				} else {
+					stack.setCount(0);
+					this.nextMaterial = tool.getMaterial();
+					this.statistic(StatisticType.upgradeProgress).max(1);
+					this.synchronize();
+				}
+			}
+		}
+	}
 
-    @Override
-    public int levelXP(int level) {
-        return this.canLevelUp()
-            ? Configuration.initialToolXP + (int) Math.round(4 * Math.pow(level, 1.25))
-            : -1;
-    }
+	@Override
+	public int levelXP(int level) {
+		return this.canLevelUp()
+			? Configuration.initialToolXP + (int) Math.round(4 * Math.pow(level, 1.25))
+			: -1;
+	}
 
-    @Override
-    public void mined(BlockState state, BlockPos position) {
-        if (this.isServer() && this.itemStack.isSuitableFor(state)) {
-            var delta = Math.max(1, state.calcBlockBreakingDelta(this.player, this.player.world, position));
-            var xp = Math.round(state.getHardness(this.player.world, position)) + 4 * (1 - delta);
-            this.add(StatisticType.experience, delta == 1 ? Math.min(10, xp) : xp);
-        }
-    }
+	@Override
+	public void mined(BlockState state, BlockPos position) {
+		if (this.isServer() && this.itemStack.isSuitableFor(state)) {
+			var delta = Math.max(1, state.calcBlockBreakingDelta(this.player, this.player.world, position));
+			var xp = Math.round(state.getHardness(this.player.world, position)) + 4 * (1 - delta);
+			this.add(StatisticType.experience, delta == 1 ? Math.min(10, xp) : xp);
+		}
+	}
 
-    @Override
-    public ToolMaterial material() {
-        return SoulboundItems.material(this.material);
-    }
+	@Override
+	public ToolMaterial material() {
+		return SoulboundItems.material(this.material);
+	}
 
-    @Override
-    public void addAttribute(StatisticType type, int points) {
-        super.addAttribute(type, points);
+	@Override
+	public void addAttribute(StatisticType type, int points) {
+		super.addAttribute(type, points);
 
-        var upgrade = this.statistic(StatisticType.upgradeProgress);
+		var upgrade = this.statistic(StatisticType.upgradeProgress);
 
-        if (this.nextMaterial != null && upgrade.intValue() == 1) {
-            upgrade.setToMin();
-            upgrade.max();
-            this.material = this.nextMaterial;
-            this.nextMaterial = null;
-            this.synchronize();
-        }
+		if (this.nextMaterial != null && upgrade.intValue() == 1) {
+			upgrade.setToMin();
+			upgrade.max();
+			this.material = this.nextMaterial;
+			this.nextMaterial = null;
+			this.synchronize();
+		}
 
-        if (type == upgrade.type) {
-            this.component.refresh();
-        }
-    }
+		if (type == upgrade.type) {
+			this.component.refresh();
+		}
+	}
 
-    @Override
-    public void reset() {
-        super.reset();
+	@Override
+	public void reset() {
+		super.reset();
 
-        this.nextMaterial = null;
-        this.material = ToolMaterials.WOOD;
+		this.nextMaterial = null;
+		this.material = ToolMaterials.WOOD;
 
-        this.synchronize();
-    }
+		this.synchronize();
+	}
 
-    @Override public Text format(StatisticType statistic) {
-        if (statistic == StatisticType.upgradeProgress) {
-            return this.nextMaterial == null ? Translations.tier.text(this.materialName()) : Translations.guiUpgradeProgress.text(this.formatValue(statistic), Translations.toolMaterial(this.nextMaterial));
-        }
+	@Override public Text format(StatisticType statistic) {
+		if (statistic == StatisticType.upgradeProgress) {
+			return this.nextMaterial == null ? Translations.tier.text(this.materialName()) : Translations.guiUpgradeProgress.text(this.formatValue(statistic), Translations.toolMaterial(this.nextMaterial));
+		}
 
-        return super.format(statistic);
-    }
+		return super.format(statistic);
+	}
 
-    @Override
-    public List<StatisticType> screenAttributes() {
-        var types = ReferenceArrayList.of(StatisticType.efficiency, StatisticType.reach);
+	@Override
+	public List<StatisticType> screenAttributes() {
+		var types = ReferenceArrayList.of(StatisticType.efficiency, StatisticType.reach);
 
-        if (this.nextMaterial != null) {
-            types.add(StatisticType.upgradeProgress);
-        }
+		if (this.nextMaterial != null) {
+			types.add(StatisticType.upgradeProgress);
+		}
 
-        return types;
-    }
+		return types;
+	}
 
-    @Override
-    public List<Text> tooltip() {
-        return List.of(
-            Translations.tooltipReach.translate(this.formatValue(StatisticType.reach)),
-            Translations.tooltipEfficiency.translate(this.formatValue(StatisticType.efficiency)),
-            this.nextMaterial == null ? Translations.tier.translate(this.materialName()) : Translations.tooltipUpgradeProgress.translate(this.formatValue(StatisticType.upgradeProgress), this.materialName())
-        );
-    }
+	@Override
+	public List<Text> tooltip() {
+		return List.of(
+			Translations.tooltipReach.translate(this.formatValue(StatisticType.reach)),
+			Translations.tooltipEfficiency.translate(this.formatValue(StatisticType.efficiency)),
+			this.nextMaterial == null ? Translations.tier.translate(this.materialName()) : Translations.tooltipUpgradeProgress.translate(this.formatValue(StatisticType.upgradeProgress), this.materialName())
+		);
+	}
 
-    @Override
-    public void serialize(NbtCompound tag) {
-        super.serialize(tag);
+	@Override
+	public void serialize(NbtCompound tag) {
+		super.serialize(tag);
 
-        if (this.material != null) {
-            tag.putString("material", TierSortingRegistry.getName(this.material).toString());
-        }
+		if (this.material != null) {
+			tag.putString("material", TierSortingRegistry.getName(this.material).toString());
+		}
 
-        if (this.nextMaterial != null) {
-            tag.putString("nextMaterial", TierSortingRegistry.getName(this.nextMaterial).toString());
-        }
-    }
+		if (this.nextMaterial != null) {
+			tag.putString("nextMaterial", TierSortingRegistry.getName(this.nextMaterial).toString());
+		}
+	}
 
-    @Override
-    public void deserialize(NbtCompound tag) {
-        super.deserialize(tag);
+	@Override
+	public void deserialize(NbtCompound tag) {
+		super.deserialize(tag);
 
-        this.material = Objects.requireNonNullElse(TierSortingRegistry.byName(new Identifier(tag.getString("material"))), this.material);
-        this.nextMaterial = TierSortingRegistry.byName(new Identifier(tag.getString("nextMaterial")));
-    }
+		this.material = Objects.requireNonNullElse(TierSortingRegistry.byName(new Identifier(tag.getString("material"))), this.material);
+		this.nextMaterial = TierSortingRegistry.byName(new Identifier(tag.getString("nextMaterial")));
+	}
 
-    protected abstract TagKey<Block> tag();
+	protected abstract TagKey<Block> tag();
 
-    protected abstract boolean canAbsorb(ItemStack stack);
+	protected abstract boolean canAbsorb(ItemStack stack);
 }

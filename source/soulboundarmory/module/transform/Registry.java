@@ -9,10 +9,10 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 public @interface Registry {
-    /**
-     Return the name of the registry. Namespace may be omitted.
+	/**
+	 Return the name of the registry. Namespace may be omitted.
 
-     @return the name of the registry
-     */
-    String value();
+	 @return the name of the registry
+	 */
+	String value();
 }

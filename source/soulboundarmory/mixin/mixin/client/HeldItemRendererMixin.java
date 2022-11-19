@@ -13,13 +13,13 @@ import soulboundarmory.item.SoulboundItems;
 
 @Mixin(HeldItemRenderer.class)
 abstract class HeldItemRendererMixin {
-    @ModifyConstant(method = "renderFirstPersonItem", constant = @Constant(doubleValue = 0.7F))
-    private double lowerDaggerTranslation(double pointSeven, AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        return item.isOf(SoulboundItems.dagger) ? 0.4 : pointSeven;
-    }
+	@ModifyConstant(method = "renderFirstPersonItem", constant = @Constant(doubleValue = 0.7F))
+	private double lowerDaggerTranslation(double pointSeven, AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+		return item.isOf(SoulboundItems.dagger) ? 0.4 : pointSeven;
+	}
 
-    @ModifyConstant(method = "renderFirstPersonItem", constant = @Constant(doubleValue = 0.1F, ordinal = 0))
-    private double translateDaggerRight(double pointOne, AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        return item.isOf(SoulboundItems.dagger) ? 0.4 : pointOne;
-    }
+	@ModifyConstant(method = "renderFirstPersonItem", constant = @Constant(doubleValue = 0.1F, ordinal = 0))
+	private double translateDaggerRight(double pointOne, AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+		return item.isOf(SoulboundItems.dagger) ? 0.4 : pointOne;
+	}
 }

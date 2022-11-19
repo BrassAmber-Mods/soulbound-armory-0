@@ -1,6 +1,6 @@
 {
-    "unlock": {
-        "sounds": ["item/totem/use_totem"],
-        "subtitle": "subtitles.soulboundarmory.unlock"
-    }
+	"unlock": {
+		"sounds": ["item/totem/use_totem"],
+		"subtitle": "subtitles.soulboundarmory.unlock"
+	}
 }

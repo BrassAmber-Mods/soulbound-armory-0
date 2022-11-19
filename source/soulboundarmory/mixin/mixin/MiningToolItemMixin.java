@@ -10,8 +10,8 @@ import soulboundarmory.component.Components;
 
 @Mixin(MiningToolItem.class)
 abstract class MiningToolItemMixin {
-    @Redirect(method = "isCorrectToolForDrops", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/MiningToolItem;getMaterial()Lnet/minecraft/item/ToolMaterial;"))
-    private ToolMaterial checkSoulboundItemHasSuitableMiningLevel(MiningToolItem item, ItemStack stack) {
-        return Components.marker.optional(stack).map(marker -> marker.item().material()).orElse(item.getMaterial());
-    }
+	@Redirect(method = "isCorrectToolForDrops", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/MiningToolItem;getMaterial()Lnet/minecraft/item/ToolMaterial;"))
+	private ToolMaterial checkSoulboundItemHasSuitableMiningLevel(MiningToolItem item, ItemStack stack) {
+		return Components.marker.optional(stack).map(marker -> marker.item().material()).orElse(item.getMaterial());
+	}
 }

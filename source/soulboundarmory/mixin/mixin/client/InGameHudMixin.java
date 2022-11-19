@@ -17,15 +17,15 @@ import soulboundarmory.module.gui.screen.ScreenWidget;
 
 @Mixin(InGameHud.class)
 abstract class InGameHudMixin {
-    @Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
-    private void renderSoulboundItemExperienceBar(MatrixStack matrixes, int x, CallbackInfo info) {
-        if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen && screen.xpBar.isVisible() || Configuration.Client.overlayExperienceBar && ExperienceBar.renderOverlay(matrixes)) {
-            info.cancel();
-        }
-    }
+	@Inject(method = "renderExperienceBar", at = @At("HEAD"), cancellable = true)
+	private void renderSoulboundItemExperienceBar(MatrixStack matrixes, int x, CallbackInfo info) {
+		if (ScreenWidget.cellScreen() instanceof SoulboundScreen screen && screen.xpBar.isVisible() || Configuration.Client.overlayExperienceBar && ExperienceBar.renderOverlay(matrixes)) {
+			info.cancel();
+		}
+	}
 
-    @Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
-    private void hideSoulboundItemWhileTransforming(int x, int y, float tickDelta, PlayerEntity player, ItemStack stack, int seed, CallbackInfo info) {
-        Components.marker.optional(stack).filter(ItemMarkerComponent::animating).ifPresent(__ -> info.cancel());
-    }
+	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
+	private void hideSoulboundItemWhileTransforming(int x, int y, float tickDelta, PlayerEntity player, ItemStack stack, int seed, CallbackInfo info) {
+		Components.marker.optional(stack).filter(ItemMarkerComponent::animating).ifPresent(__ -> info.cancel());
+	}
 }

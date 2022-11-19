@@ -19,19 +19,19 @@ import soulboundarmory.skill.weapon.sword.SummonLightningSkill;
 
 @RegisterAll(type = Skill.class, registry = "skill")
 public class Skills {
-    // public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
-    @Register("absorption") public static final Skill absorption = new AbsorptionSkill();
-    @Register("circumspection") public static final Skill circumspection = new CircumspectionSkill();
-    @Register("ender_pull") public static final Skill enderPull = new EnderPullSkill();
-    @Register("freezing") public static final Skill freezing = new FreezingSkill();
-    @Register("leaping") public static final Skill leaping = new LeapingSkill();
-    @Register("nourishment") public static final Skill nourishment = new NourishmentSkill();
-    @Register("precision") public static final Skill precision = new PrecisionSkill();
-    @Register("returning") public static final Skill returning = new ReturnSkill();
-    @Register("shadow_clone") public static final Skill shadowClone = new ShadowCloneSkill();
-    @Register("sneak_return") public static final Skill sneakReturn = new SneakReturnSkill();
-    @Register("summon_lightning") public static final Skill summonLightning = new SummonLightningSkill();
-    @Register("throwing") public static final Skill throwing = new ThrowingSkill();
+	// public static final Skill ambidexterity = new AmbidexteritySkill(SoulboundArmory.id("ambidexterity"));
+	@Register("absorption") public static final Skill absorption = new AbsorptionSkill();
+	@Register("circumspection") public static final Skill circumspection = new CircumspectionSkill();
+	@Register("ender_pull") public static final Skill enderPull = new EnderPullSkill();
+	@Register("freezing") public static final Skill freezing = new FreezingSkill();
+	@Register("leaping") public static final Skill leaping = new LeapingSkill();
+	@Register("nourishment") public static final Skill nourishment = new NourishmentSkill();
+	@Register("precision") public static final Skill precision = new PrecisionSkill();
+	@Register("returning") public static final Skill returning = new ReturnSkill();
+	@Register("shadow_clone") public static final Skill shadowClone = new ShadowCloneSkill();
+	@Register("sneak_return") public static final Skill sneakReturn = new SneakReturnSkill();
+	@Register("summon_lightning") public static final Skill summonLightning = new SummonLightningSkill();
+	@Register("throwing") public static final Skill throwing = new ThrowingSkill();
 
-    @Registry("skill") public static native IForgeRegistry<Skill> registry();
+	@Registry("skill") public static native IForgeRegistry<Skill> registry();
 }

@@ -12,18 +12,18 @@ import soulboundarmory.component.soulbound.item.ItemComponent;
 
 @EventBusSubscriber(value = Dist.CLIENT, modid = SoulboundArmory.ID)
 public final class ClientEvents {
-    @SubscribeEvent public static void tooltip(ItemTooltipEvent event) {
-        ItemComponent.of(event.getEntity(), event.getItemStack()).ifPresent(component -> {
-            var tooltip = event.getToolTip();
-            var startIndex = 1 + IntStream.range(0, tooltip.size())
-                .filter(index -> tooltip.get(index).getContent() instanceof TranslatableTextContent translation && translation.getKey().equals("item.modifiers.mainhand"))
-                .sum();
+	@SubscribeEvent public static void tooltip(ItemTooltipEvent event) {
+		ItemComponent.of(event.getEntity(), event.getItemStack()).ifPresent(component -> {
+			var tooltip = event.getToolTip();
+			var startIndex = 1 + IntStream.range(0, tooltip.size())
+				.filter(index -> tooltip.get(index).getContent() instanceof TranslatableTextContent translation && translation.getKey().equals("item.modifiers.mainhand"))
+				.sum();
 
-            var prior = new ReferenceArrayList<>(tooltip).subList(0, startIndex);
+			var prior = new ReferenceArrayList<>(tooltip).subList(0, startIndex);
 
-            tooltip.clear();
-            tooltip.addAll(prior);
-            tooltip.addAll(component.tooltip());
-        });
-    }
+			tooltip.clear();
+			tooltip.addAll(prior);
+			tooltip.addAll(component.tooltip());
+		});
+	}
 }

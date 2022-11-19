@@ -43,116 +43,116 @@ import soulboundarmory.util.Util;
 
 @EventBusSubscriber(modid = SoulboundArmory.ID, bus = EventBusSubscriber.Bus.MOD)
 public class Registrar {
-    private static final Map<Identifier, List<Consumer<RegisterEvent>>> registrations = new Object2ReferenceOpenHashMap<>();
-    private static final Set<ModFileScanData.AnnotationData> fields = ReferenceOpenHashSet.of();
+	private static final Map<Identifier, List<Consumer<RegisterEvent>>> registrations = new Object2ReferenceOpenHashMap<>();
+	private static final Set<ModFileScanData.AnnotationData> fields = ReferenceOpenHashSet.of();
 
-    @SubscribeEvent
-    public static void register(FMLConstructModEvent construct) {
-        Invoker.invoke(
-            Invoker.bind(FMLJavaModLoadingContext.get().getModEventBus(), "addListener", void.class, EventPriority.class, Predicate.class, Class.class, Consumer.class),
-            EventPriority.NORMAL, Predicates.alwaysTrue(), RegisterEvent.class, (Consumer<RegisterEvent>) Registrar::register
-        );
+	@SubscribeEvent
+	public static void register(FMLConstructModEvent construct) {
+		Invoker.invoke(
+			Invoker.bind(FMLJavaModLoadingContext.get().getModEventBus(), "addListener", void.class, EventPriority.class, Predicate.class, Class.class, Consumer.class),
+			EventPriority.NORMAL, Predicates.alwaysTrue(), RegisterEvent.class, (Consumer<RegisterEvent>) Registrar::register
+		);
 
-        ModList.get().getMods().forEach(mod -> {
-            var annotationMap = mod.getOwningFile().getFile().getScanResult().getAnnotations().stream().collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType));
-            Optional.ofNullable(annotationMap.get(Type.getType(Registry.class))).ifPresent(annotations -> annotations.forEach(annotation -> processMethod(annotation, mod)));
+		ModList.get().getMods().forEach(mod -> {
+			var annotationMap = mod.getOwningFile().getFile().getScanResult().getAnnotations().stream().collect(Collectors.groupingBy(ModFileScanData.AnnotationData::annotationType));
+			Optional.ofNullable(annotationMap.get(Type.getType(Registry.class))).ifPresent(annotations -> annotations.forEach(annotation -> processMethod(annotation, mod)));
 
-            var registerAlls = new HashMap<Type, RegistrationInfo>();
+			var registerAlls = new HashMap<Type, RegistrationInfo>();
 
-            Optional.ofNullable(annotationMap.get(Type.getType(RegisterAll.class))).ifPresent(annotations -> annotations.forEach(annotation -> {
-                var elements = annotation.annotationData();
-                registerAlls.put(annotation.clazz(), new RegistrationInfo((String) elements.get("registry"), (Type) elements.get("type")));
-            }));
+			Optional.ofNullable(annotationMap.get(Type.getType(RegisterAll.class))).ifPresent(annotations -> annotations.forEach(annotation -> {
+				var elements = annotation.annotationData();
+				registerAlls.put(annotation.clazz(), new RegistrationInfo((String) elements.get("registry"), (Type) elements.get("type")));
+			}));
 
-            var idPointer = Pointer.of(Identifiable.class, "id");
+			var idPointer = Pointer.of(Identifiable.class, "id");
 
-            Optional.ofNullable(annotationMap.get(Type.getType(Register.class))).ifPresent(annotations -> annotations.forEach(annotation -> {
-                var value = (String) annotation.annotationData().get("value");
-                var registry = (String) annotation.annotationData().get("registry");
-                var checkType = registry == null;
-                var ownerName = annotation.clazz();
-                var registerAll = registerAlls.get(ownerName);
+			Optional.ofNullable(annotationMap.get(Type.getType(Register.class))).ifPresent(annotations -> annotations.forEach(annotation -> {
+				var value = (String) annotation.annotationData().get("value");
+				var registry = (String) annotation.annotationData().get("registry");
+				var checkType = registry == null;
+				var ownerName = annotation.clazz();
+				var registerAll = registerAlls.get(ownerName);
 
-                if (checkType) {
-                    if (registerAll == null) {
-                        throw new IllegalArgumentException("registry not specified for @Register %s.%s".formatted(ownerName.getInternalName(), annotation.memberName()));
-                    }
+				if (checkType) {
+					if (registerAll == null) {
+						throw new IllegalArgumentException("registry not specified for @Register %s.%s".formatted(ownerName.getInternalName(), annotation.memberName()));
+					}
 
-                    registry = registerAll.registry;
-                }
+					registry = registerAll.registry;
+				}
 
-                Consumer<RegisterEvent> register = event -> {
-                    var owner = Class.forName(ownerName.getClassName());
-                    var field = Fields.of(owner, annotation.memberName());
+				Consumer<RegisterEvent> register = event -> {
+					var owner = Class.forName(ownerName.getClassName());
+					var field = Fields.of(owner, annotation.memberName());
 
-                    if (Flags.not(field, Flags.STATIC | Flags.FINAL)) {
-                        throw new IllegalArgumentException("bad modifiers \"%s\" (%d) on %s.%s; must be static final".formatted(Flags.string(field.getModifiers()), field.getModifiers(), ownerName.getInternalName(), field.getName()));
-                    }
+					if (Flags.not(field, Flags.STATIC | Flags.FINAL)) {
+						throw new IllegalArgumentException("bad modifiers \"%s\" (%d) on %s.%s; must be static final".formatted(Flags.string(field.getModifiers()), field.getModifiers(), ownerName.getInternalName(), field.getName()));
+					}
 
-                    if (!checkType || Class.forName(registerAll.type.getClassName()).isAssignableFrom(field.getType())) {
-                        var identifier = Util.id(mod.getModId(), value);
-                        SoulboundArmory.logger.info("Registering {}.{} to \"{}\" as \"{}\".", ownerName.getInternalName(), field.getName(), event.getRegistryKey().getValue(), identifier);
-                        var object = Accessor.getReference(owner, field.getName());
-                        event.register(Util.cast(event.getRegistryKey()), helper -> helper.register(identifier, object));
+					if (!checkType || Class.forName(registerAll.type.getClassName()).isAssignableFrom(field.getType())) {
+						var identifier = Util.id(mod.getModId(), value);
+						SoulboundArmory.logger.info("Registering {}.{} to \"{}\" as \"{}\".", ownerName.getInternalName(), field.getName(), event.getRegistryKey().getValue(), identifier);
+						var object = Accessor.getReference(owner, field.getName());
+						event.register(Util.cast(event.getRegistryKey()), helper -> helper.register(identifier, object));
 
-                        if (object instanceof Identifiable) {
-                            idPointer.put(object, identifier);
-                        }
-                    }
-                };
+						if (object instanceof Identifiable) {
+							idPointer.put(object, identifier);
+						}
+					}
+				};
 
-                registrations.computeIfAbsent(new Identifier(registry), id -> ReferenceArrayList.of()).add(register);
-                registrations.computeIfAbsent(Util.id(mod.getModId(), registry), id -> ReferenceArrayList.of()).add(register);
-            }));
-        });
-    }
+				registrations.computeIfAbsent(new Identifier(registry), id -> ReferenceArrayList.of()).add(register);
+				registrations.computeIfAbsent(Util.id(mod.getModId(), registry), id -> ReferenceArrayList.of()).add(register);
+			}));
+		});
+	}
 
-    private static void processMethod(ModFileScanData.AnnotationData annotation, IModInfo mod) {
-        var id = Util.id(mod.getModId(), (String) annotation.annotationData().get("value"));
-        var type = annotation.clazz().getInternalName();
+	private static void processMethod(ModFileScanData.AnnotationData annotation, IModInfo mod) {
+		var id = Util.id(mod.getModId(), (String) annotation.annotationData().get("value"));
+		var type = annotation.clazz().getInternalName();
 
-        FMLJavaModLoadingContext.get().getModEventBus().<NewRegistryEvent>addListener(event -> {
-            var signature = annotation.memberName();
-            var name = signature.substring(0, signature.indexOf('('));
-            var fieldName = name + UUID.randomUUID();
-            var fieldDescriptor = Type.getDescriptor(IForgeRegistry.class);
+		FMLJavaModLoadingContext.get().getModEventBus().<NewRegistryEvent>addListener(event -> {
+			var signature = annotation.memberName();
+			var name = signature.substring(0, signature.indexOf('('));
+			var fieldName = name + UUID.randomUUID();
+			var fieldDescriptor = Type.getDescriptor(IForgeRegistry.class);
 
-            ClassNodeTransformer.addSingleUseTransformer(type, node -> {
-                var field = (FieldNode) node.visitField(Flags.PRIVATE | Flags.STATIC | Flags.FINAL, fieldName, fieldDescriptor, null, null);
-                var method = node.methods.stream()
-                    .filter(m -> m.name.equals(name) && m.desc.equals(signature.substring(signature.indexOf('('))))
-                    .findFirst()
-                    .get();
+			ClassNodeTransformer.addSingleUseTransformer(type, node -> {
+				var field = (FieldNode) node.visitField(Flags.PRIVATE | Flags.STATIC | Flags.FINAL, fieldName, fieldDescriptor, null, null);
+				var method = node.methods.stream()
+					.filter(m -> m.name.equals(name) && m.desc.equals(signature.substring(signature.indexOf('('))))
+					.findFirst()
+					.get();
 
-                method.access &= ~Flags.NATIVE;
-                method.visitFieldInsn(Opcodes.GETSTATIC, node.name, field.name, field.desc);
-                method.visitInsn(Opcodes.ARETURN);
-            });
+				method.access &= ~Flags.NATIVE;
+				method.visitFieldInsn(Opcodes.GETSTATIC, node.name, field.name, field.desc);
+				method.visitInsn(Opcodes.ARETURN);
+			});
 
-            var declaringType = Classes.load(false, annotation.clazz().getClassName());
-            var method = Methods.of(declaringType, name);
+			var declaringType = Classes.load(false, annotation.clazz().getClassName());
+			var method = Methods.of(declaringType, name);
 
-            if (!Flags.isStatic(method)) {
-                throw new WrongMethodTypeException("@Register %s::%s is not static".formatted(type, name));
-            }
+			if (!Flags.isStatic(method)) {
+				throw new WrongMethodTypeException("@Register %s::%s is not static".formatted(type, name));
+			}
 
-            if (IForgeRegistry.class.isAssignableFrom(method.getReturnType())) {
-                event.create(new RegistryBuilder<>().setName(id), registry -> Accessor.putReference(declaringType, fieldName, registry));
-            } else {
-                throw new WrongMethodTypeException("@Register %s::%s return type is not assignable from IForgeRegistry".formatted(type, name));
-            }
-        });
-    }
+			if (IForgeRegistry.class.isAssignableFrom(method.getReturnType())) {
+				event.create(new RegistryBuilder<>().setName(id), registry -> Accessor.putReference(declaringType, fieldName, registry));
+			} else {
+				throw new WrongMethodTypeException("@Register %s::%s return type is not assignable from IForgeRegistry".formatted(type, name));
+			}
+		});
+	}
 
-    private static synchronized void register(RegisterEvent event) {
-        var registrations = Registrar.registrations.get(event.getRegistryKey().getValue());
+	private static synchronized void register(RegisterEvent event) {
+		var registrations = Registrar.registrations.get(event.getRegistryKey().getValue());
 
-        if (registrations != null) {
-            for (var iterator = registrations.iterator(); iterator.hasNext(); iterator.remove()) {
-                iterator.next().accept(event);
-            }
-        }
-    }
+		if (registrations != null) {
+			for (var iterator = registrations.iterator(); iterator.hasNext(); iterator.remove()) {
+				iterator.next().accept(event);
+			}
+		}
+	}
 
-    private record RegistrationInfo(String registry, Type type) {}
+	private record RegistrationInfo(String registry, Type type) {}
 }

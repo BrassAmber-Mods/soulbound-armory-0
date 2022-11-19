@@ -6,15 +6,15 @@ import soulboundarmory.network.ExtendedPacketBuffer;
 import soulboundarmory.network.Packets;
 
 public final class C2SBindSlot extends ComponentPacket {
-    @Override
-    public void execute(MasterComponent<?> component) {
-        var slot = this.message.readInt();
+	@Override
+	public void execute(MasterComponent<?> component) {
+		var slot = this.message.readInt();
 
-        if (component.boundSlot() == slot) {
-            slot = -1;
-        }
+		if (component.boundSlot() == slot) {
+			slot = -1;
+		}
 
-        component.bindSlot(slot);
-        Packets.clientBindSlot.send(component.player, new ExtendedPacketBuffer(component).writeInt(slot));
-    }
+		component.bindSlot(slot);
+		Packets.clientBindSlot.send(component.player, new ExtendedPacketBuffer(component).writeInt(slot));
+	}
 }

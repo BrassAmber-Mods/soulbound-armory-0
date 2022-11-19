@@ -22,28 +22,28 @@ import soulboundarmory.util.Util;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
-    @Inject(method = "hasGlint", at = @At("HEAD"), cancellable = true)
-    private void disableGlint(CallbackInfoReturnable<Boolean> info) {
-        Components.marker.optional((ItemStack) (Object) this)
-            .map(ItemMarkerComponent::item)
-            .map(component -> Components.config.of(component.player))
-            .filter(component -> !component.glint)
-            .ifPresent(component -> info.setReturnValue(false));
-    }
+	@Inject(method = "hasGlint", at = @At("HEAD"), cancellable = true)
+	private void disableGlint(CallbackInfoReturnable<Boolean> info) {
+		Components.marker.optional((ItemStack) (Object) this)
+			.map(ItemMarkerComponent::item)
+			.map(component -> Components.config.of(component.player))
+			.filter(component -> !component.glint)
+			.ifPresent(component -> info.setReturnValue(false));
+	}
 
-    @Inject(method = "postMine", at = @At("RETURN"))
-    private void addXPByEnderPull(World world, BlockState state, BlockPos pos, PlayerEntity miner, CallbackInfo info) {
-        ItemComponent.of(miner, Util.cast(this)).ifPresent(component -> component.mined(state, pos));
-    }
+	@Inject(method = "postMine", at = @At("RETURN"))
+	private void addXPByEnderPull(World world, BlockState state, BlockPos pos, PlayerEntity miner, CallbackInfo info) {
+		ItemComponent.of(miner, Util.cast(this)).ifPresent(component -> component.mined(state, pos));
+	}
 
-    @Inject(method = "use", at = @At("RETURN"))
-    private void absorbTool(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> info) {
-        if (hand == Hand.MAIN_HAND && info.getReturnValue().getResult() == ActionResult.PASS) {
-            ItemComponent.of(user, Util.cast(this)).ifPresent(component -> {
-                if (component instanceof ToolComponent tool && tool.hasSkill(Skills.absorption)) {
-                    tool.absorb();
-                }
-            });
-        }
-    }
+	@Inject(method = "use", at = @At("RETURN"))
+	private void absorbTool(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> info) {
+		if (hand == Hand.MAIN_HAND && info.getReturnValue().getResult() == ActionResult.PASS) {
+			ItemComponent.of(user, Util.cast(this)).ifPresent(component -> {
+				if (component instanceof ToolComponent tool && tool.hasSkill(Skills.absorption)) {
+					tool.absorb();
+				}
+			});
+		}
+	}
 }

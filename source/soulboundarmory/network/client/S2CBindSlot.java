@@ -13,9 +13,9 @@ import soulboundarmory.network.ComponentPacket;
  - int (slot) <br>
  */
 public final class S2CBindSlot extends ComponentPacket {
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    protected void execute(MasterComponent<?> component) {
-        component.bindSlot(this.message.readInt());
-    }
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	protected void execute(MasterComponent<?> component) {
+		component.bindSlot(this.message.readInt());
+	}
 }

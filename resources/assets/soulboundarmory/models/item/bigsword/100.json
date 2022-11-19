@@ -1,6 +1,6 @@
 {
-    "parent": "item/handheld",
-    "textures": {
-        "layer0": "soulboundarmory:item/bigsword/100"
-    }
+	"parent": "item/handheld",
+	"textures": {
+		"layer0": "soulboundarmory:item/bigsword/100"
+	}
 }

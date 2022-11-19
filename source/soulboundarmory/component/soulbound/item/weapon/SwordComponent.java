@@ -20,90 +20,90 @@ import soulboundarmory.util.AttributeModifierIdentifiers;
 import soulboundarmory.util.Util;
 
 public class SwordComponent extends WeaponComponent<SwordComponent> {
-    protected int lightningCooldown;
+	protected int lightningCooldown;
 
-    public SwordComponent(MasterComponent<?> component) {
-        super(component);
+	public SwordComponent(MasterComponent<?> component) {
+		super(component);
 
-        this.statistics
-            .statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
-            .statistics(StatisticType.efficiency)
-            .constant(3, StatisticType.reach)
-            .min(1.6, StatisticType.attackSpeed)
-            .min(3, StatisticType.attackDamage);
+		this.statistics
+			.statistics(StatisticType.experience, StatisticType.level, StatisticType.skillPoints, StatisticType.attributePoints, StatisticType.enchantmentPoints)
+			.statistics(StatisticType.efficiency)
+			.constant(3, StatisticType.reach)
+			.min(1.6, StatisticType.attackSpeed)
+			.min(3, StatisticType.attackDamage);
 
-        this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
-        this.skills.add(Skills.circumspection, Skills.precision, Skills.nourishment, Skills.summonLightning);
-    }
+		this.enchantments.initialize(enchantment -> Stream.of("soulbound", "holding", "smelt").noneMatch(enchantment.getTranslationKey().toLowerCase()::contains));
+		this.skills.add(Skills.circumspection, Skills.precision, Skills.nourishment, Skills.summonLightning);
+	}
 
-    @Override
-    public Text name() {
-        return Translations.guiSword;
-    }
+	@Override
+	public Text name() {
+		return Translations.guiSword;
+	}
 
-    @Override
-    public Item item() {
-        return SoulboundItems.sword;
-    }
+	@Override
+	public Item item() {
+		return SoulboundItems.sword;
+	}
 
-    @Override
-    public ItemComponentType<SwordComponent> type() {
-        return ItemComponentType.sword;
-    }
+	@Override
+	public ItemComponentType<SwordComponent> type() {
+		return ItemComponentType.sword;
+	}
 
-    public int lightningCooldown() {
-        return this.lightningCooldown;
-    }
+	public int lightningCooldown() {
+		return this.lightningCooldown;
+	}
 
-    public void resetLightningCooldown() {
-        if (!this.player.isCreative()) {
-            this.lightningCooldown = (int) Math.round(96 / this.attackSpeed());
-        }
-    }
+	public void resetLightningCooldown() {
+		if (!this.player.isCreative()) {
+			this.lightningCooldown = (int) Math.round(96 / this.attackSpeed());
+		}
+	}
 
-    @Override
-    public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
-        if (slot == EquipmentSlot.MAINHAND) {
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
-            modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
-        }
-    }
+	@Override
+	public void attributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> modifiers, EquipmentSlot slot) {
+		if (slot == EquipmentSlot.MAINHAND) {
+			modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackDamageModifier, StatisticType.attackDamage));
+			modifiers.put(EntityAttributes.GENERIC_ATTACK_SPEED, this.weaponModifier(AttributeModifierIdentifiers.ItemAccess.attackSpeedModifier, StatisticType.attackSpeed));
+		}
+	}
 
-    @Override
-    public List<StatisticType> screenAttributes() {
-        return Util.add(super.screenAttributes(), StatisticType.efficiency);
-    }
+	@Override
+	public List<StatisticType> screenAttributes() {
+		return Util.add(super.screenAttributes(), StatisticType.efficiency);
+	}
 
-    @Override
-    public double increase(StatisticType type) {
-        if (type == StatisticType.attackSpeed) return 0.03;
-        if (type == StatisticType.attackDamage) return 0.07;
-        if (type == StatisticType.criticalHitRate) return 0.015;
-        if (type == StatisticType.efficiency) return 0.04;
+	@Override
+	public double increase(StatisticType type) {
+		if (type == StatisticType.attackSpeed) return 0.03;
+		if (type == StatisticType.attackDamage) return 0.07;
+		if (type == StatisticType.criticalHitRate) return 0.015;
+		if (type == StatisticType.efficiency) return 0.04;
 
-        return 0;
-    }
+		return 0;
+	}
 
-    @Override
-    public void tick() {
-        if (this.isServer()) {
-            if (this.lightningCooldown > 0) {
-                this.lightningCooldown--;
-            }
-        }
-    }
+	@Override
+	public void tick() {
+		if (this.isServer()) {
+			if (this.lightningCooldown > 0) {
+				this.lightningCooldown--;
+			}
+		}
+	}
 
-    @Override
-    public void serialize(NbtCompound tag) {
-        super.serialize(tag);
+	@Override
+	public void serialize(NbtCompound tag) {
+		super.serialize(tag);
 
-        tag.putInt("lightningCooldown", this.lightningCooldown());
-    }
+		tag.putInt("lightningCooldown", this.lightningCooldown());
+	}
 
-    @Override
-    public void deserialize(NbtCompound tag) {
-        super.deserialize(tag);
+	@Override
+	public void deserialize(NbtCompound tag) {
+		super.deserialize(tag);
 
-        this.lightningCooldown = tag.getInt("lightningCooldown");
-    }
+		this.lightningCooldown = tag.getInt("lightningCooldown");
+	}
 }

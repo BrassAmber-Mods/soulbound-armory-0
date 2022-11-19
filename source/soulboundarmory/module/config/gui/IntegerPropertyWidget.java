@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import soulboundarmory.module.config.Property;
 
 public class IntegerPropertyWidget extends TextPropertyWidget<Integer> {
-    public IntegerPropertyWidget(Property<Integer> property) {
-        super(property);
-    }
+	public IntegerPropertyWidget(Property<Integer> property) {
+		super(property);
+	}
 
-    @Override protected void validate() {
-        this.property.set(new BigDecimal(this.text()).intValueExact());
-    }
+	@Override protected void validate() {
+		this.property.set(new BigDecimal(this.text()).intValueExact());
+	}
 }

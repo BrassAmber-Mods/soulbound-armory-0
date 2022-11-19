@@ -4,8 +4,7 @@ import net.minecraft.util.Language;
 import org.spongepowered.asm.mixin.Mixin;
 
 /**
- * @see Language
- */
+ @see Language */
 @SuppressWarnings("unused")
 @Mixin(targets = "net.minecraft.util.Language$1")
 abstract class LanguageDummyMixin {}

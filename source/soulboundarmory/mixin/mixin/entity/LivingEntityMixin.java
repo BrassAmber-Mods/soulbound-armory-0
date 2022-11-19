@@ -19,39 +19,39 @@ import soulboundarmory.util.EntityUtil;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityMixin {
-    @Shadow protected abstract void dropXp();
+	@Shadow protected abstract void dropXp();
 
-    @Shadow protected abstract int getXpToDrop();
+	@Shadow protected abstract int getXpToDrop();
 
-    @Inject(method = "tickCramming",
-            at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;)Ljava/util/List;"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void freeze(CallbackInfo info, List<Entity> entities) {
-        if ((Object) this instanceof ServerPlayerEntity player) {
-            var greatsword = ItemComponentType.greatsword.of(player);
-            var leapForce = greatsword.leapForce();
+	@Inject(method = "tickCramming",
+	        at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;)Ljava/util/List;"),
+	        locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+	private void freeze(CallbackInfo info, List<Entity> entities) {
+		if ((Object) this instanceof ServerPlayerEntity player) {
+			var greatsword = ItemComponentType.greatsword.of(player);
+			var leapForce = greatsword.leapForce();
 
-            if (leapForce > 0) {
-                if (greatsword.hasSkill(Skills.freezing)) {
-                    entities.stream().filter(greatsword::canFreeze).forEach(entity -> greatsword.freeze(entity, (int) (20 * leapForce), (float) EntityUtil.speed(player) * leapForce));
-                }
+			if (leapForce > 0) {
+				if (greatsword.hasSkill(Skills.freezing)) {
+					entities.stream().filter(greatsword::canFreeze).forEach(entity -> greatsword.freeze(entity, (int) (20 * leapForce), (float) EntityUtil.speed(player) * leapForce));
+				}
 
-                if (greatsword.leapDuration <= 0 && player.isOnGround() && (player.getVelocity().y <= 0.01 || player.isCreative())) {
-                    greatsword.leapDuration = 7;
-                }
+				if (greatsword.leapDuration <= 0 && player.isOnGround() && (player.getVelocity().y <= 0.01 || player.isCreative())) {
+					greatsword.leapDuration = 7;
+				}
 
-                if (player.isInLava()) {
-                    greatsword.resetLeapForce();
-                }
-            }
-        }
-    }
+				if (player.isInLava()) {
+					greatsword.resetLeapForce();
+				}
+			}
+		}
+	}
 
-    @Redirect(method = "drop", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;dropXp()V"))
-    private void givePlayerXPFromEnderPull(LivingEntity entity, DamageSource source) {
-        var mixin = (LivingEntityMixin) (Object) entity;
-        ItemComponent.fromAttacker(entity, source)
-            .filter(component -> component.hasSkill(Skills.enderPull))
-            .ifPresentOrElse(component -> component.player.addExperience(mixin.getXpToDrop()), mixin::dropXp);
-    }
+	@Redirect(method = "drop", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;dropXp()V"))
+	private void givePlayerXPFromEnderPull(LivingEntity entity, DamageSource source) {
+		var mixin = (LivingEntityMixin) (Object) entity;
+		ItemComponent.fromAttacker(entity, source)
+			.filter(component -> component.hasSkill(Skills.enderPull))
+			.ifPresentOrElse(component -> component.player.addExperience(mixin.getXpToDrop()), mixin::dropXp);
+	}
 }

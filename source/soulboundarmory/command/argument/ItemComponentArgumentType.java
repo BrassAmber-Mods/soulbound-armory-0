@@ -11,27 +11,27 @@ import soulboundarmory.component.soulbound.item.ItemComponentType;
 import soulboundarmory.util.Util;
 
 public class ItemComponentArgumentType<C extends ItemComponent<C>> extends RegistryArgumentType<ItemComponentType<C>> {
-    protected ItemComponentArgumentType() {
-        super(ItemComponentType.registry());
-    }
+	protected ItemComponentArgumentType() {
+		super(ItemComponentType.registry());
+	}
 
-    public static <C extends ItemComponent<C>> RegistryArgumentType<ItemComponentType<C>> itemComponents() {
-        return new ItemComponentArgumentType();
-    }
+	public static <C extends ItemComponent<C>> RegistryArgumentType<ItemComponentType<C>> itemComponents() {
+		return new ItemComponentArgumentType();
+	}
 
-    @Override public Set<ItemComponentType<C>> parse(StringReader reader) {
-        var cursor = reader.getCursor();
+	@Override public Set<ItemComponentType<C>> parse(StringReader reader) {
+		var cursor = reader.getCursor();
 
-        if (Util.containsIgnoreCase(reader.readString(), "current")) {
-            return ReferenceOpenHashSet.of();
-        }
+		if (Util.containsIgnoreCase(reader.readString(), "current")) {
+			return ReferenceOpenHashSet.of();
+		}
 
-        reader.setCursor(cursor);
+		reader.setCursor(cursor);
 
-        return super.parse(reader);
-    }
+		return super.parse(reader);
+	}
 
-    @Override protected Stream<String> suggestions(CommandContext context, SuggestionsBuilder builder) {
-        return Stream.concat(Stream.of("current"), super.suggestions(context,builder));
-    }
+	@Override protected Stream<String> suggestions(CommandContext context, SuggestionsBuilder builder) {
+		return Stream.concat(Stream.of("current"), super.suggestions(context, builder));
+	}
 }

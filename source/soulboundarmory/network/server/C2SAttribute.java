@@ -13,8 +13,8 @@ import soulboundarmory.network.ItemComponentPacket;
  - int (points) <br>
  */
 public final class C2SAttribute extends ItemComponentPacket {
-    @Override
-    public void execute(ItemComponent<?> component) {
-        component.addAttribute(this.message.readRegistryEntry(StatisticType.registry()), this.message.readInt());
-    }
+	@Override
+	public void execute(ItemComponent<?> component) {
+		component.addAttribute(this.message.readRegistryEntry(StatisticType.registry()), this.message.readInt());
+	}
 }

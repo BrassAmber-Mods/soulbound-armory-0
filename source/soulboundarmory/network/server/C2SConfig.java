@@ -11,10 +11,10 @@ import soulboundarmory.network.BufferPacket;
  - boolean (enchantment glint) <br>
  */
 public final class C2SConfig extends BufferPacket {
-    @Override
-    public void execute() {
-        var component = Components.config.of(this.player());
-        component.levelupNotifications = this.message.readBoolean();
-        component.glint = this.message.readBoolean();
-    }
+	@Override
+	public void execute() {
+		var component = Components.config.of(this.player());
+		component.levelupNotifications = this.message.readBoolean();
+		component.glint = this.message.readBoolean();
+	}
 }

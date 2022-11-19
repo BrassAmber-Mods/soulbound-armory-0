@@ -9,18 +9,18 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 public @interface RegisterAll {
-    /**
-     @return the base type of the fields to register
-     */
-    Class<?> type();
+	/**
+	 @return the base type of the fields to register
+	 */
+	Class<?> type();
 
-    /**
-     @return the identifier of the registry
-     */
-    String registry();
+	/**
+	 @return the identifier of the registry
+	 */
+	String registry();
 
-    /**
-     @return whether fields must have {@link Register} annotations in order to be registered
-    boolean explicit() default false;
-     */
+	/**
+	 @return whether fields must have {@link Register} annotations in order to be registered
+	 boolean explicit() default false;
+	 */
 }

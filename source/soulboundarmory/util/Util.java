@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.serialization.Lifecycle;
 import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
@@ -35,7 +34,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
@@ -45,250 +43,248 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.mclanguageprovider.MinecraftModContainer;
 import org.apache.logging.log4j.util.TriConsumer;
 import soulboundarmory.SoulboundArmory;
-import soulboundarmory.registry.Identifiable;
-import soulboundarmory.registry.SimplerRegistry;
 
 public class Util extends net.minecraft.util.Util {
-    public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
-    public static final String formattingValueField = map("field_1072", "$VALUES");
-    public static final IntSupplier zeroSupplier = () -> 0;
+	public static final boolean isPhysicalClient = FMLEnvironment.dist == Dist.CLIENT;
+	public static final String formattingValueField = map("field_1072", "$VALUES");
+	public static final IntSupplier zeroSupplier = () -> 0;
 
-    private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
-    private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
-    private static BiFunction<INameMappingService.Domain, String, String> mapper;
+	private static final ThreadLocal<Boolean> isClient = ThreadLocal.withInitial(() -> isPhysicalClient && (RenderSystem.isOnRenderThread() || Thread.currentThread().getName().equals("Game thread")));
+	private static final Map<Class<?>, Registry<?>> registries = new Reference2ReferenceOpenHashMap<>();
+	private static BiFunction<INameMappingService.Domain, String, String> mapper;
 
-    public static IllegalArgumentException illegalArgument(String message, Object... arguments) {
-        throw new IllegalArgumentException(message.formatted(arguments));
-    }
+	public static IllegalArgumentException illegalArgument(String message, Object... arguments) {
+		throw new IllegalArgumentException(message.formatted(arguments));
+	}
 
-    public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, T fallback) {
-        var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
-        return annotation == null ? fallback : getter.apply(annotation);
-    }
+	public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, T fallback) {
+		var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
+		return annotation == null ? fallback : getter.apply(annotation);
+	}
 
-    public static <A extends Annotation, T> T value(AnnotatedElement element, Function<A, T> getter) {
-        return value(element, getter, (T) null);
-    }
+	public static <A extends Annotation, T> T value(AnnotatedElement element, Function<A, T> getter) {
+		return value(element, getter, (T) null);
+	}
 
-    public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, Supplier<? extends T> fallback) {
-        var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
-        return annotation == null ? fallback.get() : getter.apply(annotation);
-    }
+	public static <A extends Annotation, T> T value(AnnotatedElement element, Function<? super A, ? extends T> getter, Supplier<? extends T> fallback) {
+		var annotation = element.getAnnotation((Class<A>) TypeResolver.resolveRawArguments(Function.class, getter.getClass())[0]);
+		return annotation == null ? fallback.get() : getter.apply(annotation);
+	}
 
-    public static <T, C extends Collection<? super T>> C add(C collection, T... things) {
-        Collections.addAll(collection, things);
-        return collection;
-    }
+	public static <T, C extends Collection<? super T>> C add(C collection, T... things) {
+		Collections.addAll(collection, things);
+		return collection;
+	}
 
-    public static void rotate(MatrixStack matrixes, Vec3f axis, float degrees) {
-        matrixes.multiply(axis.getDegreesQuaternion(degrees));
-    }
+	public static void rotate(MatrixStack matrixes, Vec3f axis, float degrees) {
+		matrixes.multiply(axis.getDegreesQuaternion(degrees));
+	}
 
-    public static <T> Optional<T> or(Optional<T> optional, Supplier<? extends T> alternative) {
-        return optional.or(() -> Optional.ofNullable(alternative.get()));
-    }
+	public static <T> Optional<T> or(Optional<T> optional, Supplier<? extends T> alternative) {
+		return optional.or(() -> Optional.ofNullable(alternative.get()));
+	}
 
-    public static <T> T or(T t, Supplier<? extends T> alternative) {
-        return t == null ? alternative.get() : t;
-    }
+	public static <T> T or(T t, Supplier<? extends T> alternative) {
+		return t == null ? alternative.get() : t;
+	}
 
-    public static <T> boolean ifPresent(Optional<T> optional, Consumer<? super T> action) {
-        if (optional.isPresent()) {
-            action.accept(optional.get());
+	public static <T> boolean ifPresent(Optional<T> optional, Consumer<? super T> action) {
+		if (optional.isPresent()) {
+			action.accept(optional.get());
 
-            return true;
-        }
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    public static <T> Iterable<T> iterate(Stream<T> stream) {
-        return stream::iterator;
-    }
+	public static <T> Iterable<T> iterate(Stream<T> stream) {
+		return stream::iterator;
+	}
 
-    public static <T> Iterable<T> iterate(Iterator<T> iterator) {
-        return () -> iterator;
-    }
+	public static <T> Iterable<T> iterate(Iterator<T> iterator) {
+		return () -> iterator;
+	}
 
-    public static <T> T[] fill(T[] array, Supplier<T> element) {
-        for (var index = 0; index < array.length; ++index) {
-            array[index] = element.get();
-        }
+	public static <T> T[] fill(T[] array, Supplier<T> element) {
+		for (var index = 0; index < array.length; ++index) {
+			array[index] = element.get();
+		}
 
-        return array;
-    }
+		return array;
+	}
 
-    public static <T> T[][] fill2(T[][] array, Supplier<T> element) {
-        for (var subarray : array) {
-            fill(subarray, element);
-        }
-        
-        return array;
-    }
-    
-    public static <B> B nul(Object... vacuum) {
-        return null;
-    }
+	public static <T> T[][] fill2(T[][] array, Supplier<T> element) {
+		for (var subarray : array) {
+			fill(subarray, element);
+		}
 
-    public static <T> T cast(Object object) {
-        return (T) object;
-    }
+		return array;
+	}
 
-    public static String capitalize(String string) {
-        return Character.toUpperCase(string.charAt(0)) + string.substring(1);
-    }
+	public static <B> B nul(Object... vacuum) {
+		return null;
+	}
 
-    public static <T> T[] array(T... elements) {
-        return elements;
-    }
+	public static <T> T cast(Object object) {
+		return (T) object;
+	}
 
-    public static <T> List<T> list(T... elements) {
-        return ReferenceArrayList.wrap(elements);
-    }
+	public static String capitalize(String string) {
+		return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+	}
 
-    public static <K, V> Map<K, V> map(Map.Entry<K, V>... entries) {
-        var map = new Reference2ReferenceLinkedOpenHashMap<K, V>();
-        Stream.of(entries).forEach(entry -> map.put(entry.getKey(), entry.getValue()));
+	public static <T> T[] array(T... elements) {
+		return elements;
+	}
 
-        return map;
-    }
+	public static <T> List<T> list(T... elements) {
+		return ReferenceArrayList.wrap(elements);
+	}
 
-    public static <K, V, T extends Map<K, V>> T add(T map, Map.Entry<K, V> entry) {
-        map.put(entry.getKey(), entry.getValue());
-        return map;
-    }
+	public static <K, V> Map<K, V> map(Map.Entry<K, V>... entries) {
+		var map = new Reference2ReferenceLinkedOpenHashMap<K, V>();
+		Stream.of(entries).forEach(entry -> map.put(entry.getKey(), entry.getValue()));
 
-    public static boolean isClient() {
-        return isClient.get();
-    }
+		return map;
+	}
 
-    public static boolean isServer() {
-        return !isClient();
-    }
+	public static <K, V, T extends Map<K, V>> T add(T map, Map.Entry<K, V> entry) {
+		map.put(entry.getKey(), entry.getValue());
+		return map;
+	}
 
-    public static MinecraftServer server() {
-        return (MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER);
-    }
+	public static boolean isClient() {
+		return isClient.get();
+	}
 
-    public static boolean containsIgnoreCase(String string, String substring) {
-        return Pattern.compile(substring, Pattern.CASE_INSENSITIVE | Pattern.LITERAL | Pattern.UNICODE_CASE).matcher(string).find();
-    }
+	public static boolean isServer() {
+		return !isClient();
+	}
 
-    public static boolean contains(Object target, Object... items) {
-        return Arrays.asList(items).contains(target);
-    }
+	public static MinecraftServer server() {
+		return (MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER);
+	}
 
-    public static <T> Stream<T> stream(Iterable<T> iterable) {
-        return StreamSupport.stream(iterable.spliterator(), false);
-    }
+	public static boolean containsIgnoreCase(String string, String substring) {
+		return Pattern.compile(substring, Pattern.CASE_INSENSITIVE | Pattern.LITERAL | Pattern.UNICODE_CASE).matcher(string).find();
+	}
 
-    public static <T> Set<T> hashSet(T... elements) {
-        return new ObjectOpenHashSet<>(elements);
-    }
+	public static boolean contains(Object target, Object... items) {
+		return Arrays.asList(items).contains(target);
+	}
 
-    public static <T> Class<T> componentType(T... array) {
-        return (Class<T>) array.getClass().getComponentType();
-    }
+	public static <T> Stream<T> stream(Iterable<T> iterable) {
+		return StreamSupport.stream(iterable.spliterator(), false);
+	}
 
-    public static <A> A[] add(A[] array, A element) {
-        var union = Arrays.copyOf(array, array.length + 1);
-        union[array.length] = element;
+	public static <T> Set<T> hashSet(T... elements) {
+		return new ObjectOpenHashSet<>(elements);
+	}
 
-        return union;
-    }
+	public static <T> Class<T> componentType(T... array) {
+		return (Class<T>) array.getClass().getComponentType();
+	}
 
-    public static <A> A[] add(A element, A[] array) {
-        var union = (A[]) Array.newInstance(Util.componentType(array), array.length + 1);
-        System.arraycopy(array, 0, union, 1, array.length);
-        union[0] = element;
+	public static <A> A[] add(A[] array, A element) {
+		var union = Arrays.copyOf(array, array.length + 1);
+		union[array.length] = element;
 
-        return union;
-    }
+		return union;
+	}
 
-    public static String namespace() {
-        var mod = ModLoadingContext.get().getActiveContainer();
-        return mod instanceof MinecraftModContainer ? SoulboundArmory.ID : mod.getNamespace();
-    }
+	public static <A> A[] add(A element, A[] array) {
+		var union = (A[]) Array.newInstance(Util.componentType(array), array.length + 1);
+		System.arraycopy(array, 0, union, 1, array.length);
+		union[0] = element;
 
-    public static Identifier id(String namespace, String path) {
-        return path.contains(":") ? new Identifier(path) : new Identifier(namespace, path);
-    }
+		return union;
+	}
 
-    public static Identifier id(String path) {
-        return id(namespace(), path);
-    }
+	public static String namespace() {
+		var mod = ModLoadingContext.get().getActiveContainer();
+		return mod instanceof MinecraftModContainer ? SoulboundArmory.ID : mod.getNamespace();
+	}
 
-    public static void ifPresent(NbtCompound tag, String key, Consumer<NbtCompound> action) {
-        var child = (NbtCompound) tag.get(key);
+	public static Identifier id(String namespace, String path) {
+		return path.contains(":") ? new Identifier(path) : new Identifier(namespace, path);
+	}
 
-        if (child != null) {
-            action.accept(child);
-        }
-    }
+	public static Identifier id(String path) {
+		return id(namespace(), path);
+	}
 
-    public static <K, V> void enumerate(Map<K, V> map, TriConsumer<K, V, Integer> action) {
-        var count = 0;
+	public static void ifPresent(NbtCompound tag, String key, Consumer<NbtCompound> action) {
+		var child = (NbtCompound) tag.get(key);
 
-        for (var entry : map.entrySet()) {
-            action.accept(entry.getKey(), entry.getValue(), count++);
-        }
-    }
+		if (child != null) {
+			action.accept(child);
+		}
+	}
 
-    public static <T> void enumerate(Iterable<T> iterable, ObjIntConsumer<T> action) {
-        var count = 0;
+	public static <K, V> void enumerate(Map<K, V> map, TriConsumer<K, V, Integer> action) {
+		var count = 0;
 
-        for (var element : iterable) {
-            action.accept(element, count++);
-        }
-    }
+		for (var entry : map.entrySet()) {
+			action.accept(entry.getKey(), entry.getValue(), count++);
+		}
+	}
 
-    public static <T> void each(Iterable<? extends Reference<? extends T>> iterable, Consumer<? super T> action) {
-        var iterator = iterable.iterator();
+	public static <T> void enumerate(Iterable<T> iterable, ObjIntConsumer<T> action) {
+		var count = 0;
 
-        while (iterator.hasNext()) {
-            var reference = iterator.next();
+		for (var element : iterable) {
+			action.accept(element, count++);
+		}
+	}
 
-            if (reference == null) {
-                SoulboundArmory.logger.error("🤨 Something's fishy.");
-            } else if (!reference.refersTo(null)) {
-                action.accept(reference.get());
+	public static <T> void each(Iterable<? extends Reference<? extends T>> iterable, Consumer<? super T> action) {
+		var iterator = iterable.iterator();
 
-                continue;
-            }
+		while (iterator.hasNext()) {
+			var reference = iterator.next();
 
-            try {
-                iterator.remove();
-            } catch (IndexOutOfBoundsException __)  {
-                SoulboundArmory.logger.error("Something is very fishy.");
-            }
-        }
-    }
+			if (reference == null) {
+				SoulboundArmory.logger.error("🤨 Something's fishy.");
+			} else if (!reference.refersTo(null)) {
+				action.accept(reference.get());
 
-    public static String map(String development, String production) {
-        return FMLEnvironment.production ? production : development;
-    }
+				continue;
+			}
 
-    public static String mapClass(String production) {
-        return map(INameMappingService.Domain.CLASS, production);
-    }
+			try {
+				iterator.remove();
+			} catch (IndexOutOfBoundsException __) {
+				SoulboundArmory.logger.error("Something is very fishy.");
+			}
+		}
+	}
 
-    public static String mapMethod(int production) {
-        return map(INameMappingService.Domain.METHOD, "m_%d_".formatted(production));
-    }
+	public static String map(String development, String production) {
+		return FMLEnvironment.production ? production : development;
+	}
 
-    public static String mapField(int production) {
-        return map(INameMappingService.Domain.FIELD, "f_%d_".formatted(production));
-    }
+	public static String mapClass(String production) {
+		return map(INameMappingService.Domain.CLASS, production);
+	}
 
-    private static String map(INameMappingService.Domain domain, String production) {
-        if (FMLEnvironment.production) {
-            return production;
-        }
+	public static String mapMethod(int production) {
+		return map(INameMappingService.Domain.METHOD, "m_%d_".formatted(production));
+	}
 
-        if (mapper == null) {
-            mapper = FMLLoader.getNameFunction("srg").get();
-        }
+	public static String mapField(int production) {
+		return map(INameMappingService.Domain.FIELD, "f_%d_".formatted(production));
+	}
 
-        return mapper.apply(domain, production);
-    }
+	private static String map(INameMappingService.Domain domain, String production) {
+		if (FMLEnvironment.production) {
+			return production;
+		}
+
+		if (mapper == null) {
+			mapper = FMLLoader.getNameFunction("srg").get();
+		}
+
+		return mapper.apply(domain, production);
+	}
 }

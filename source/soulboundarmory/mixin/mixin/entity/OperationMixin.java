@@ -10,16 +10,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityAttributeModifier.Operation.class)
 abstract class OperationMixin {
-    @Shadow
-    @Final
-    private int id;
+	@Shadow
+	@Final
+	private int id;
 
-    @Inject(method = "fromId", at = @At("HEAD"), cancellable = true)
-    private static void getIdModSupport(int id, CallbackInfoReturnable<EntityAttributeModifier.Operation> info) {
-        for (var operation : EntityAttributeModifier.Operation.values()) {
-            if (((OperationMixin) (Object) operation).id == id) {
-                info.setReturnValue(operation);
-            }
-        }
-    }
+	@Inject(method = "fromId", at = @At("HEAD"), cancellable = true)
+	private static void getIdModSupport(int id, CallbackInfoReturnable<EntityAttributeModifier.Operation> info) {
+		for (var operation : EntityAttributeModifier.Operation.values()) {
+			if (((OperationMixin) (Object) operation).id == id) {
+				info.setReturnValue(operation);
+			}
+		}
+	}
 }

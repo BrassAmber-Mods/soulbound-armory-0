@@ -13,10 +13,10 @@ import soulboundarmory.skill.Skills;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
 abstract class AbstractBlockStateMixin {
-    @Inject(method = "calcBlockBreakingDelta", at = @At("RETURN"), cancellable = true)
-    private void circumspectionPreventInstantBreaking(PlayerEntity player, BlockView world, BlockPos pos, CallbackInfoReturnable<Float> info) {
-        ItemComponent.fromMainHand(player)
-            .filter(component -> info.getReturnValueF() >= 1 && ((AbstractBlock.AbstractBlockState) (Object) this).getHardness(world, pos) != 0 && component.hasSkill(Skills.circumspection))
-            .ifPresent(component -> info.setReturnValue(Math.nextDown(1)));
-    }
+	@Inject(method = "calcBlockBreakingDelta", at = @At("RETURN"), cancellable = true)
+	private void circumspectionPreventInstantBreaking(PlayerEntity player, BlockView world, BlockPos pos, CallbackInfoReturnable<Float> info) {
+		ItemComponent.fromMainHand(player)
+			.filter(component -> info.getReturnValueF() >= 1 && ((AbstractBlock.AbstractBlockState) (Object) this).getHardness(world, pos) != 0 && component.hasSkill(Skills.circumspection))
+			.ifPresent(component -> info.setReturnValue(Math.nextDown(1)));
+	}
 }

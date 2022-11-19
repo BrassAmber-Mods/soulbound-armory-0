@@ -21,48 +21,48 @@ import soulboundarmory.skill.Skills;
 
 @Mixin(Block.class)
 abstract class BlockMixin {
-    @Unique
-    private static PlayerEntity miner;
+	@Unique
+	private static PlayerEntity miner;
 
-    /**
-     Store the miner in {@link #miner} for use in {@link #dropStackAtMiner} if it mined with a tool that has {@link Skills#enderPull}.
-     */
-    @Inject(method = "dropStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;"))
-    private static void storeMinerForEnderPull(BlockState state, World world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack tool, CallbackInfo info) {
-        ItemComponent.of(entity, tool).ifPresent(component -> {
-            if (component.hasSkill(Skills.enderPull)) {
-                miner = (PlayerEntity) entity;
-            }
-        });
-    }
+	/**
+	 Store the miner in {@link #miner} for use in {@link #dropStackAtMiner} if it mined with a tool that has {@link Skills#enderPull}.
+	 */
+	@Inject(method = "dropStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
+	        at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Ljava/util/List;"))
+	private static void storeMinerForEnderPull(BlockState state, World world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack tool, CallbackInfo info) {
+		ItemComponent.of(entity, tool).ifPresent(component -> {
+			if (component.hasSkill(Skills.enderPull)) {
+				miner = (PlayerEntity) entity;
+			}
+		});
+	}
 
-    /**
-     Clear {@link #miner} after the drops' locations have been changed.
-     */
-    @Inject(method = "dropStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
-            at = @At(value = "RETURN"))
-    private static void removeMinerForEnderPull(BlockState state, World world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack stack, CallbackInfo info) {
-        miner = null;
-    }
+	/**
+	 Clear {@link #miner} after the drops' locations have been changed.
+	 */
+	@Inject(method = "dropStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
+	        at = @At(value = "RETURN"))
+	private static void removeMinerForEnderPull(BlockState state, World world, BlockPos pos, BlockEntity blockEntity, Entity entity, ItemStack stack, CallbackInfo info) {
+		miner = null;
+	}
 
-    @Inject(method = "dropStack(Lnet/minecraft/world/World;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemStack;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z"))
-    private static void insertEnderPullStackIntoInventory(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack, CallbackInfo info) {
-        if (miner != null) {
-            miner.getInventory().insertStack(stack);
-        }
-    }
+	@Inject(method = "dropStack(Lnet/minecraft/world/World;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemStack;)V",
+	        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z"))
+	private static void insertEnderPullStackIntoInventory(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack, CallbackInfo info) {
+		if (miner != null) {
+			miner.getInventory().insertStack(stack);
+		}
+	}
 
-    /**
-     This callback will be invoked if the item stack is still not empty from the previous callback.
-     */
-    @Inject(method = "dropStack(Lnet/minecraft/world/World;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemStack;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private static void dropRemainingEnderPullStackAtMiner(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack, CallbackInfo info, ItemEntity drop) {
-        if (miner != null) {
-            drop.setPosition(miner.getX(), miner.getY(), miner.getZ());
-        }
-    }
+	/**
+	 This callback will be invoked if the item stack is still not empty from the previous callback.
+	 */
+	@Inject(method = "dropStack(Lnet/minecraft/world/World;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemStack;)V",
+	        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+	        locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+	private static void dropRemainingEnderPullStackAtMiner(World world, Supplier<ItemEntity> itemEntitySupplier, ItemStack stack, CallbackInfo info, ItemEntity drop) {
+		if (miner != null) {
+			drop.setPosition(miner.getX(), miner.getY(), miner.getZ());
+		}
+	}
 }

@@ -1,24 +1,20 @@
 {
-    "required": true,
-    "package": "soulboundarmory.module.text.mixin",
-    "plugin": "soulboundarmory.module.text.Transformer",
-    "compatibilityLevel": "JAVA_17",
-    "minVersion": "0.8",
-    "mixins": [
-        "TextColorMixin",
-        "StyleMixin",
-        "StyleMixin$SerializerMixin",
-        "FormattingMixin",
-        "dummy.ExtendedFormattingDummyMixin",
-        "dummy.LanguageDummyMixin"
-    ],
-    "injectors": {
-        "defaultRequire": 1,
-        "maxShiftBy": 5
-    },
-    "client": [
-        "I18nMixin",
-        "FontRenderer$DrawerMixin",
-        "TranslationStorageMixin"
-    ]
+	"required": true,
+	"package": "soulboundarmory.module.text.mixin",
+	"plugin": "soulboundarmory.module.text.Transformer",
+	"compatibilityLevel": "JAVA_17",
+	"minVersion": "0.8",
+	"mixins": [
+		"FormattingMixin",
+		"StyleMixin",
+		"StyleMixin$SerializerMixin",
+		"TextColorMixin",
+		"dummy.ExtendedFormattingDummyMixin",
+		"dummy.LanguageDummyMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1,
+		"maxShiftBy": 5
+	},
+	"client": ["FontRenderer$DrawerMixin", "I18nMixin", "TranslationStorageMixin"]
 }

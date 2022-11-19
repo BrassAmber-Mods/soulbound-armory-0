@@ -17,62 +17,62 @@ import soulboundarmory.entity.SoulboundDaggerEntity;
 import soulboundarmory.skill.Skills;
 
 public class SoulboundDaggerItem extends SoulboundMeleeWeapon {
-    private static final int USE_TIME = 1200;
+	private static final int USE_TIME = 1200;
 
-    public SoulboundDaggerItem() {
-        super(1, -2, -1);
-    }
+	public SoulboundDaggerItem() {
+		super(1, -2, -1);
+	}
 
-    private static double damageRatio(double attackSpeed, int timeLeft) {
-        return Math.min(1, attackSpeed * (USE_TIME - timeLeft) / 40F);
-    }
+	private static double damageRatio(double attackSpeed, int timeLeft) {
+		return Math.min(1, attackSpeed * (USE_TIME - timeLeft) / 40F);
+	}
 
-    @Override
-    public int getMaxUseTime(ItemStack stack) {
-        return USE_TIME;
-    }
+	@Override
+	public int getMaxUseTime(ItemStack stack) {
+		return USE_TIME;
+	}
 
-    @Override
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.SPEAR;
-    }
+	@Override
+	public UseAction getUseAction(ItemStack stack) {
+		return UseAction.SPEAR;
+	}
 
-    @Override public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
-        if (ItemComponentType.dagger.of(user).hasSkill(Skills.throwing)) {
-            user.setCurrentHand(hand);
+	@Override public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
+		if (ItemComponentType.dagger.of(user).hasSkill(Skills.throwing)) {
+			user.setCurrentHand(hand);
 
-            return ActionResult.CONSUME;
-        }
+			return ActionResult.CONSUME;
+		}
 
-        return ActionResult.PASS;
-    }
+		return ActionResult.PASS;
+	}
 
-    @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        if (ItemComponentType.dagger.of(player).hasSkill(Skills.throwing)) {
-            player.setCurrentHand(hand);
+	@Override
+	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+		if (ItemComponentType.dagger.of(player).hasSkill(Skills.throwing)) {
+			player.setCurrentHand(hand);
 
-            return TypedActionResult.consume(player.getStackInHand(hand));
-        }
+			return TypedActionResult.consume(player.getStackInHand(hand));
+		}
 
-        return TypedActionResult.fail(player.getStackInHand(hand));
-    }
+		return TypedActionResult.fail(player.getStackInHand(hand));
+	}
 
-    @Override
-    public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
-        if (entity instanceof ServerPlayerEntity player) {
-            var attackSpeed = ItemComponentType.dagger.of(player).attributeTotal(StatisticType.attackSpeed);
-            var damageRatio = damageRatio(attackSpeed, timeLeft);
-            world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed, damageRatio));
+	@Override
+	public void onStoppedUsing(ItemStack itemStack, World world, LivingEntity entity, int timeLeft) {
+		if (entity instanceof ServerPlayerEntity player) {
+			var attackSpeed = ItemComponentType.dagger.of(player).attributeTotal(StatisticType.attackSpeed);
+			var damageRatio = damageRatio(attackSpeed, timeLeft);
+			world.spawnEntity(new SoulboundDaggerEntity(player, false, damageRatio * attackSpeed, damageRatio));
 
-            if (!player.isCreative()) {
-                player.getInventory().removeOne(itemStack);
-            }
-        }
-    }
+			if (!player.isCreative()) {
+				player.getInventory().removeOne(itemStack);
+			}
+		}
+	}
 
-    @Override
-    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
-        return Components.dagger.of(stack) == null && super.canPerformAction(stack, toolAction);
-    }
+	@Override
+	public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
+		return Components.dagger.of(stack) == null && super.canPerformAction(stack, toolAction);
+	}
 }

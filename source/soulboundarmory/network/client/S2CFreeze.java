@@ -14,17 +14,17 @@ import soulboundarmory.network.BufferPacket;
  - boolean (frozen) <br>
  */
 public class S2CFreeze extends BufferPacket {
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    protected void execute() {
-        this.message.readEntity().map(Components.entityData::of).ifPresent(component -> {
-            var frozen = this.message.readBoolean();
-            component.freeze(this.player(), 0, frozen ? 1 : 0, 0);
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	protected void execute() {
+		this.message.readEntity().map(Components.entityData::of).ifPresent(component -> {
+			var frozen = this.message.readBoolean();
+			component.freeze(this.player(), 0, frozen ? 1 : 0, 0);
 
-            if (frozen) {
-                component.tickDelta = Widget.tickDelta();
-                component.animationProgress = -1;
-            }
-        });
-    }
+			if (frozen) {
+				component.tickDelta = Widget.tickDelta();
+				component.animationProgress = -1;
+			}
+		});
+	}
 }

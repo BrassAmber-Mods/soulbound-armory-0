@@ -6,14 +6,14 @@ import soulboundarmory.skill.Skills;
 
 /**
  A client-to-server packet for learning or upgrading a skill.
-<br><br>
+ <br><br>
  buffer: <br>
  - Identifier (item component type) <br>
  - Identifier (skill's registry name) <br>
  */
 public final class C2SSkill extends ItemComponentPacket {
-    @Override
-    public void execute(ItemComponent<?> component) {
-        component.upgrade(component.skill(Skills.registry().getValue(this.message.readIdentifier())));
-    }
+	@Override
+	public void execute(ItemComponent<?> component) {
+		component.upgrade(component.skill(Skills.registry().getValue(this.message.readIdentifier())));
+	}
 }

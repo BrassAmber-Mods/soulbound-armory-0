@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ServerPlayNetworkHandler.class)
 abstract class ServerPlayNetworkHandlerMixin {
-    @Shadow public ServerPlayerEntity player;
+	@Shadow public ServerPlayerEntity player;
 
 /*
     @ModifyConstant(method = "onPlayerInteractEntity", constant = @Constant(doubleValue = 36))
