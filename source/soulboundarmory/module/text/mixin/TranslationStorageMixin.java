@@ -14,8 +14,10 @@ import soulboundarmory.module.text.RomanNumerals;
 abstract class TranslationStorageMixin {
 	@Inject(method = "get", at = @At("HEAD"), cancellable = true)
 	public void get(String key, CallbackInfoReturnable<String> info) {
-		if (key.matches("enchantment\\.level\\.\\d+")) {
-			info.setReturnValue(RomanNumerals.fromDecimal(Integer.parseInt(key.replaceAll("\\D", ""))));
+		var roman = RomanNumerals.fromDecimal(key);
+
+		if (roman != null) {
+			info.setReturnValue(roman);
 		}
 	}
 }

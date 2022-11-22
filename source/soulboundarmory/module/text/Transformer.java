@@ -2,22 +2,17 @@ package soulboundarmory.module.text;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
+import net.minecraftforge.coremod.api.ASMAPI;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.asm.mixin.transformer.MixinTargetContext;
-import soulboundarmory.SoulboundArmory;
 import soulboundarmory.mixin.EmptyMixinPlugin;
 import soulboundarmory.mixin.MixinUtil;
 
@@ -48,24 +43,17 @@ public class Transformer implements EmptyMixinPlugin {
 			case "soulboundarmory.module.text.mixin.dummy.LanguageDummyMixin" -> {
 				var get = MixinUtil.mapMethod(6834);
 				var method = target.methods.stream().filter(m -> m.name.equals(get)).findAny().get();
-				var instructions = new InsnList();
 				var end = new LabelNode();
 
-				instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-				instructions.add(new LdcInsnNode("enchantment\\.level\\.\\d+"));
-				instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "matches", "(Ljava/lang/String;)Z", false));
-				instructions.add(new JumpInsnNode(Opcodes.IFEQ, end));
-				instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-				instructions.add(new LdcInsnNode("\\D"));
-				instructions.add(new LdcInsnNode(""));
-				instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/String", "replaceAll", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", false));
-				instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Integer", "parseInt", "(Ljava/lang/String;)I"));
-				instructions.add(new InsnNode(Opcodes.I2L));
-				instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "soulboundarmory/module/text/RomanNumerals", "fromDecimal", "(J)Ljava/lang/String;"));
-				instructions.add(new InsnNode(Opcodes.ARETURN));
-				instructions.add(end);
-
-				method.instructions.insertBefore(method.instructions.getFirst(), instructions);
+				method.instructions.insertBefore(method.instructions.getFirst(), ASMAPI.listOf(
+					new VarInsnNode(Opcodes.ALOAD, 1),
+					new MethodInsnNode(Opcodes.INVOKESTATIC, "soulboundarmory/module/text/RomanNumerals", "fromDecimal", "(Ljava/lang/String;)Ljava/lang/String;"),
+					new InsnNode(Opcodes.DUP),
+					new JumpInsnNode(Opcodes.IFNULL, end),
+					new InsnNode(Opcodes.ARETURN),
+					end,
+					new InsnNode(Opcodes.POP)
+				));
 			}
 			case "soulboundarmory.module.text.mixin.dummy.ExtendedFormattingDummyMixin" -> {
 				target.superName = MixinUtil.mapClass("net/minecraft/ChatFormatting");
