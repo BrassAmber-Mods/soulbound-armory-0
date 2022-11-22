@@ -49,7 +49,8 @@ public class Transformer implements EmptyMixinPlugin {
 					new VarInsnNode(Opcodes.ALOAD, 1),
 					new MethodInsnNode(Opcodes.INVOKESTATIC, "soulboundarmory/module/text/RomanNumerals", "fromDecimal", "(Ljava/lang/String;)Ljava/lang/String;"),
 					new InsnNode(Opcodes.DUP),
-					new JumpInsnNode(Opcodes.IFNULL, end),
+					new MethodInsnNode(Opcodes.INVOKEVIRTUAL, Type.getInternalName(String.class), "isEmpty", "()Z"),
+					new JumpInsnNode(Opcodes.IFNE, end),
 					new InsnNode(Opcodes.ARETURN),
 					end,
 					new InsnNode(Opcodes.POP)

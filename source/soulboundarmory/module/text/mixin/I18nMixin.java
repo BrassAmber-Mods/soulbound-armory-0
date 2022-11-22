@@ -16,7 +16,7 @@ abstract class I18nMixin {
 	private static void translate(String key, Object[] args, CallbackInfoReturnable<String> info) {
 		var roman = RomanNumerals.fromDecimal(key);
 
-		if (roman != null) {
+		if (!roman.isEmpty()) {
 			info.setReturnValue(roman);
 		}
 	}

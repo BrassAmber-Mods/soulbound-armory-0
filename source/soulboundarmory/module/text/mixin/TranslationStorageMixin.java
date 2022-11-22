@@ -16,7 +16,7 @@ abstract class TranslationStorageMixin {
 	public void get(String key, CallbackInfoReturnable<String> info) {
 		var roman = RomanNumerals.fromDecimal(key);
 
-		if (roman != null) {
+		if (!roman.isEmpty()) {
 			info.setReturnValue(roman);
 		}
 	}
