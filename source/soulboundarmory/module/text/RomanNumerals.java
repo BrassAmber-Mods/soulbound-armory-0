@@ -24,18 +24,18 @@ public final class RomanNumerals {
 	);
 
 	/**
-	 Converts a decimal number into an extended Roman number with
+	 Translates an enchantment level key into an extended Roman number with
 	 {@link FormattingExtensions#overlineCodes custom formatting codes} for up to 2 rows of overlines.
-	 The decimal number must fit in a {@code long} and be greater than {@link Long#MIN_VALUE}.
+	 The level must fit in a {@code long} and be greater than {@link Long#MIN_VALUE}.
 
-	 @param decimal a string representing a decimal number
-	 @return {@code decimal}'s representation in Roman numerals
-	 @throws NumberFormatException if the decimal number does not fit in a {@code long}
-	 @throws StackOverflowError if the decimal number is {@link Long#MIN_VALUE}
+	 @param key an echantment level key
+	 @return the level's representation in Roman numerals
+	 @throws NumberFormatException if the level does not fit in a {@code long}
+	 @throws StackOverflowError if the level is {@link Long#MIN_VALUE}
 	 */
-	public static String fromDecimal(String decimal) {
-		return cache.computeIfAbsent(decimal, (String d) -> {
-			var matcher = Pattern.compile("(?<=enchantment\\.level\\.)\\d+").matcher(decimal);
+	public static String fromDecimal(String key) {
+		return cache.computeIfAbsent(key, (String k) -> {
+			var matcher = Pattern.compile("(?<=enchantment\\.level\\.)\\d+").matcher(k);
 			return matcher.find() ? system.toRoman(Long.parseLong(matcher.group())) : "";
 		});
 	}
