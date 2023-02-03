@@ -16,7 +16,7 @@ defaultTasks("genSources")
 
 final versions = [
 	minecraft: "1.19.2",
-	yarn: "17"
+	yarn: "28"
 ]
 
 gronk {
