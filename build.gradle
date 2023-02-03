@@ -1,7 +1,7 @@
 plugins {
 	id("java")
 	id("maven-publish")
-	id("net.auoeke.gronk").version("3.+")
+	id("net.auoeke.gronk").version("4.+")
 	id("com.github.johnrengelman.shadow").version("latest.release")
 	id("dev.architectury.loom").version("latest.release")
 }
@@ -47,10 +47,6 @@ shadowJar {
 	assemble.dependsOn(it)
 	destinationDirectory.set(file("build/devlibs"))
 	configurations = [project.configurations.lib]
-
-	mergeManifests {
-		include {hasAttribute("MixinConfigs") || hasAttribute("Specification-Title", "reflect")}
-	}
 }
 
 remapJar {
